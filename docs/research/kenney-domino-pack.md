@@ -24,7 +24,7 @@ Each theme folder under `PNG/` contains the full double-six set plus an empty ti
 - Light
 - Stars
 
-Recommended Phase 1 default theme: **Light** or **Dark** (calm, readable on tablet). Pick in Classic games visual language / Dominoes layout grilling.
+Recommended Phase 1 default theme: **Light** or **Dark** (calm, readable on tablet). Board uses `Vector/<theme>/tile_<a>_<b>.svg` (PNG kept in tree as fallback).
 
 ## Filename -> pip mapping
 
