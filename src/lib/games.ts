@@ -1,0 +1,96 @@
+export type GameMeta = {
+  id: string;
+  name: string;
+  blurb: string;
+  minPlayers: number;
+  maxPlayers: number;
+  hasBot: boolean;
+  /** Offline local Client at `/play/:id` (solo). */
+  hasSolo?: boolean;
+  /** Offline pass-and-play at `/play/:id` (2+ seats). */
+  hasLocal?: boolean;
+  /** Solo leaderboard via shared scores API. */
+  hasLeaderboard?: boolean;
+};
+
+export const GAMES: GameMeta[] = [
+  {
+    id: 'tic-tac-toe',
+    name: 'Tic-tac-toe',
+    blurb: 'Three in a row.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
+  {
+    id: 'connect-four',
+    name: 'Connect Four',
+    blurb: 'Drop discs. Four in a line.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
+  {
+    id: 'checkers',
+    name: 'Checkers',
+    blurb: 'Capture to the crown.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
+  {
+    id: 'dominoes',
+    name: 'Dominoes',
+    blurb: 'Double-six draw.',
+    minPlayers: 2,
+    maxPlayers: 4,
+    hasBot: true,
+    hasLocal: true,
+  },
+  {
+    id: '2048',
+    name: '2048',
+    blurb: 'Slide tiles. Reach 2048.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+    hasLeaderboard: true,
+  },
+  {
+    id: 'yatzy',
+    name: 'Yatzy',
+    blurb: 'Five dice. Fifteen boxes.',
+    minPlayers: 1,
+    maxPlayers: 4,
+    hasBot: true,
+    hasSolo: true,
+    hasLocal: true,
+    hasLeaderboard: true,
+  },
+  {
+    id: 'letter-walker',
+    name: 'Letter Walker',
+    blurb: 'Slide letters. Find a word. Concept by Luke Walker.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+    hasLeaderboard: true,
+  },
+];
+
+export function getGameMeta(id: string): GameMeta | undefined {
+  return GAMES.find((g) => g.id === id);
+}
+
+export function supportsLocalPlay(meta: GameMeta): boolean {
+  return Boolean(meta.hasSolo || meta.hasLocal);
+}
+
+export function supportsBotPlay(meta: GameMeta): boolean {
+  return Boolean(meta.hasBot);
+}
