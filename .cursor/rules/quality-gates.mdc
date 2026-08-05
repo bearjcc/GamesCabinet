@@ -1,0 +1,30 @@
+---
+description: Quality gates for vibe-coded slices (tests, lint, typecheck, e2e)
+alwaysApply: true
+---
+
+# Quality gates
+
+Before claiming a slice done, `npm run check` must pass (typecheck + Biome + Vitest).
+
+## Rules changes
+
+- Game rules live in `src/games/*/game.ts`.
+- Add or update a failing Vitest first, then implement until green.
+- Prefer driving moves through boardgame.io `Client` (or exported pure helpers) — do not reimplement rules in tests.
+
+## UI / flow changes
+
+- Host, join, or vs-bot path changes need a Playwright smoke update or addition under `e2e/` when the path is user-facing.
+- Prefer stable `data-testid` hooks over CSS class selectors.
+
+## Do not
+
+- Skip git hooks (`--no-verify`) to land green.
+- Weaken `check` / CI to hide failures.
+- Claim done on typecheck alone when rules or flows changed.
+
+## Commands
+
+- Fast loop: `npm run check`
+- Full CI locally: `npm run ci` (requires build + Playwright browsers)

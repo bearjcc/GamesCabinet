@@ -1,0 +1,38 @@
+---
+description: Before new mechanics/UI, reuse or abstract shared cabinet seams
+alwaysApply: true
+---
+
+# Shared mechanics (DRY gate)
+
+Before coding a feature, mechanic, or UI, run this gate. Fuller intent: `ARCHITECTURE.md` → Shared mechanics.
+
+## Ask
+
+1. Does boardgame.io or our shell already own this?
+2. Has another game in the cabinet already done it?
+3. Will future games reuse it (known pipeline counts)?
+4. If reuse is real or imminent: lift into a shared helper, shell slot, catalogue flag, or genre kit first — then plug the game in.
+
+## Where shared things live
+
+| Kind | Prefer |
+|---|---|
+| Pure rules helpers | `src/games/shared/` or genre folder (e.g. deckbuilder) |
+| Shell UI (scores, status, leaderboard) | `src/components/` + optional `GameMeta` / board props |
+| Solo leaderboards | `server/scores/`, `src/lib/scores.ts` — any `gameId` |
+| Catalogue capability flags | `src/lib/games.ts` |
+
+## Do
+
+- Second use (or a clear second use coming) creates the seam.
+- Genre kits (deckbuilder zones, shop, draw/discard/exhaust, turn resources) before cloning Unmuted / Hogwarts / Agency.
+- Shared UI that games configure or feed — not copy-paste status/score chrome.
+- Keep bots in mind: shared enumerate-friendly helpers make genre bots adaptable.
+
+## Do not
+
+- Invent a parallel rules engine (see `ARCHITECTURE.md`).
+- Hard-code one game's assumptions into the shell (Dominoes is not the architecture).
+- Abstract every one-off quirk on first sight — one-off rules stay in `src/games/<id>/`.
+- Reimplement leaderboard or score submission per solo game when the shared API fits.

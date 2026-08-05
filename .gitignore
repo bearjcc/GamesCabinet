@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+.scratch
+coverage
+playwright-report
+test-results
+blob-report
+output
+.biome
+data/scores.json
