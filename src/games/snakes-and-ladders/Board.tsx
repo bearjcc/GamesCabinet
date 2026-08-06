@@ -4,7 +4,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { Roll } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { DieFace } from '../../components/tabletop';
+import { DieFace, Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { asDieFaceValue } from '../shared/dice';
 import { getSnakesAndLaddersActions } from './actions';
@@ -125,13 +125,14 @@ export function SnakesAndLaddersBoard({
                   {occupants.length > 0 ? (
                     <span className="sal-pawns">
                       {occupants.map((p) => (
-                        <span
+                        <Token
                           key={p}
-                          className={`sal-pawn sal-pawn-${p}`}
-                          data-testid={`sal-pawn-${p}`}
-                        >
-                          {Number(p) + 1}
-                        </span>
+                          player={p}
+                          variant="pawn"
+                          size="sm"
+                          testId={`sal-pawn-${p}`}
+                          label={`Player ${Number(p) + 1}`}
+                        />
                       ))}
                     </span>
                   ) : null}
