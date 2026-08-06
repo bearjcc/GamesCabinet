@@ -1,7 +1,20 @@
 import type { Game } from 'boardgame.io';
 import { INVALID_MOVE } from '../invalidMove';
 
-/** English draughts on dark squares. Player 0 starts at top (rows 0-2); player 1 at bottom (5-7). */
+/**
+ * English draughts on dark squares. Player 0 starts at top (rows 0-2); player 1 at bottom (5-7).
+ *
+ * Draw rules enforced:
+ * - 40-ply rule: after 40 consecutive completed plies with no capture and no promotion,
+ *   the game ends in `{ draw: true }`. Multi-jump steps that do not end the turn do not
+ *   increment the counter; the completed ply resets if it included a capture (any jump
+ *   in the chain) or a promotion.
+ *
+ * Draw rules not enforced:
+ * - Threefold (or other) repetition of position
+ * - Material-based or "kings only" shortened draw clocks
+ * - Agreement / offer-draw protocol
+ */
 export type Piece = {
   player: '0' | '1';
   king: boolean;
@@ -10,7 +23,12 @@ export type Piece = {
 export type CheckersState = {
   board: (Piece | null)[];
   mustContinueFrom: number | null;
+  /** Completed plies since the last capture or promotion. */
+  pliesWithoutCaptureOrPromotion: number;
 };
+
+/** Consecutive quiet (no capture, no promotion) plies before a draw. */
+export const QUIET_PLIES_TO_DRAW = 40;
 
 const SIZE = 8;
 
@@ -48,6 +66,7 @@ function cloneState(G: CheckersState): CheckersState {
   return {
     board: G.board.map((p) => (p ? { ...p } : null)),
     mustContinueFrom: G.mustContinueFrom,
+    pliesWithoutCaptureOrPromotion: G.pliesWithoutCaptureOrPromotion,
   };
 }
 
@@ -145,14 +164,32 @@ function countPieces(board: (Piece | null)[], player: string): number {
 
 export const Checkers: Game<CheckersState> = {
   name: 'checkers',
-  setup: () => ({ board: setupBoard(), mustContinueFrom: null }),
+  setup: () => ({
+    board: setupBoard(),
+    mustContinueFrom: null,
+    pliesWithoutCaptureOrPromotion: 0,
+  }),
   moves: {
     movePiece: ({ G, ctx, events }, from: number, to: number) => {
       const legal = legalMoves(G, ctx.currentPlayer);
       const match = legal.find((m) => m.from === from && m.to === to);
       if (!match) return INVALID_MOVE;
+      const piece = G.board[from];
+      /* v8 ignore start -- matched legal move always has a piece on from */
+      if (!piece) return INVALID_MOVE;
+      /* v8 ignore stop */
+      const wasKing = piece.king;
+      const captured = match.capture !== null;
       const finished = applyMove(G, match);
-      if (finished) events.endTurn();
+      if (finished) {
+        const promoted = !wasKing && piece.king;
+        if (captured || promoted) {
+          G.pliesWithoutCaptureOrPromotion = 0;
+        } else {
+          G.pliesWithoutCaptureOrPromotion += 1;
+        }
+        events.endTurn();
+      }
     },
   },
   turn: { minMoves: 1, maxMoves: 12 },
@@ -161,6 +198,9 @@ export const Checkers: Game<CheckersState> = {
     if (countPieces(G.board, '1') === 0) return { winner: '0' };
     if (legalMoves(G, ctx.currentPlayer).length === 0) {
       return { winner: ctx.currentPlayer === '0' ? '1' : '0' };
+    }
+    if (G.pliesWithoutCaptureOrPromotion >= QUIET_PLIES_TO_DRAW) {
+      return { draw: true };
     }
   },
   ai: {
