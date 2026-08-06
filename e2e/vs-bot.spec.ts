@@ -161,6 +161,14 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-backgammon').click();
     await page.getByTestId('play-bot').click();
     await expect(page.getByTestId('backgammon-board')).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: /turn/i })).toBeVisible();
+  });
+
+  test('dots and boxes play vs bot reaches a playable board', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-dots-and-boxes').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('dab-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
 });
