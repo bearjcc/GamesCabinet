@@ -82,3 +82,8 @@ keeps the library swappable.
 Component APIs, the diffing strategy, the primitive signatures, which games adopt
 which mode first, and how much of the vision ships. Those are implementation
 choices, revisable per slice.
+
+Player verbs, personas, experience levels, copy layers, variants / knowledge-graph
+goals, and the evaluation lens (flow, agency, shared understanding) live in
+`PRODUCT.md`, `DESIGN.md`, and the deferred section of `ARCHITECTURE.md` - they
+motivate this ADR but are not decided here.

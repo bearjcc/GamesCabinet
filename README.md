@@ -5,7 +5,7 @@ A digital games cabinet: open it, pick a game, play. Rules-enforced digital boar
 **Domain:** [GamesCabi.net](https://GamesCabi.net)  
 **Seed crystal:** [boardgame.io](https://boardgame.io/)
 
-Product: [`PRODUCT.md`](./PRODUCT.md) · Design: [`DESIGN.md`](./DESIGN.md) · Architecture: [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+Product (players, principles, long-term goals): [`PRODUCT.md`](./PRODUCT.md) · Design (interaction, motion, copy): [`DESIGN.md`](./DESIGN.md) · Architecture (seams + deferred platform): [`ARCHITECTURE.md`](./ARCHITECTURE.md) · UI OS ADR: [`docs/adr/0001-ui-operating-system-layer.md`](./docs/adr/0001-ui-operating-system-layer.md)
 
 ## Play locally
 
