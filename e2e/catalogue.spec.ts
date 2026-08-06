@@ -11,6 +11,7 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('home-game-yatzy')).toBeVisible();
     await expect(page.getByTestId('home-game-letter-walker')).toBeVisible();
     await expect(page.getByTestId('home-game-crazy-eights')).toBeVisible();
+    await expect(page.getByTestId('home-game-reversi')).toBeVisible();
   });
 
   test('motion preference cycles from the shell', async ({ page }) => {
