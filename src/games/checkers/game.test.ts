@@ -18,7 +18,11 @@ describe('checkers helpers', () => {
     board[sq(2, 5)] = { player: '0', king: false };
     board[sq(5, 4)] = { player: '1', king: false };
     board[sq(7, 6)] = { player: '1', king: false };
-    const G: CheckersState = { board, mustContinueFrom: sq(4, 3) };
+    const G: CheckersState = {
+      board,
+      mustContinueFrom: sq(4, 3),
+      pliesWithoutCaptureOrPromotion: 0,
+    };
     const moves = legalMoves(G, '0');
     expect(moves.length).toBeGreaterThan(0);
     expect(moves.every((m) => m.from === sq(4, 3))).toBe(true);
@@ -32,7 +36,11 @@ describe('checkers helpers', () => {
     // Quiet alternative also open from another piece
     board[sq(2, 5)] = { player: '0', king: false };
 
-    const G: CheckersState = { board, mustContinueFrom: null };
+    const G: CheckersState = {
+      board,
+      mustContinueFrom: null,
+      pliesWithoutCaptureOrPromotion: 0,
+    };
     const moves = legalMoves(G, '0');
     expect(moves.length).toBeGreaterThan(0);
     expect(moves.every((m) => m.capture !== null)).toBe(true);
@@ -54,7 +62,11 @@ describe('checkers helpers', () => {
     board[sq(1, 2)] = { player: '1', king: false };
     board[sq(3, 4)] = { player: '1', king: false };
 
-    const G: CheckersState = { board, mustContinueFrom: null };
+    const G: CheckersState = {
+      board,
+      mustContinueFrom: null,
+      pliesWithoutCaptureOrPromotion: 0,
+    };
     const moves = legalMoves(G, '0');
     expect(moves.every((m) => m.capture !== null)).toBe(true);
     // Only the first jump of the length-2 chain is legal; the length-1 capture is not.
@@ -73,7 +85,7 @@ describe('Checkers game', () => {
           board[sq(6, 1)] = { player: '0', king: false };
           // Keep an opposing piece so endIf does not fire on empty side
           board[sq(0, 1)] = { player: '1', king: false };
-          return { board, mustContinueFrom: null };
+          return { board, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 };
         },
       },
     });
@@ -90,7 +102,7 @@ describe('Checkers game', () => {
         setup: () => {
           const board = emptyBoard();
           board[sq(2, 1)] = { player: '0', king: false };
-          return { board, mustContinueFrom: null };
+          return { board, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 };
         },
       },
     });
@@ -108,7 +120,11 @@ describe('Checkers game', () => {
     const client = Client({
       game: {
         ...Checkers,
-        setup: () => ({ board, mustContinueFrom: null }),
+        setup: () => ({
+          board,
+          mustContinueFrom: null,
+          pliesWithoutCaptureOrPromotion: 0,
+        }),
       },
     });
     client.start();
@@ -125,7 +141,7 @@ describe('Checkers game', () => {
           board[sq(3, 2)] = { player: '1', king: false };
           board[sq(5, 4)] = { player: '1', king: false };
           board[sq(7, 6)] = { player: '1', king: false };
-          return { board, mustContinueFrom: null };
+          return { board, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 };
         },
       },
     });
@@ -147,7 +163,7 @@ describe('Checkers game', () => {
           board[sq(2, 1)] = { player: '0', king: false };
           board[sq(1, 2)] = { player: '1', king: false };
           board[sq(6, 5)] = { player: '0', king: false };
-          return { board, mustContinueFrom: null };
+          return { board, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 };
         },
       },
     });
@@ -162,7 +178,7 @@ describe('Checkers game', () => {
     board[sq(2, 1)] = { player: '1', king: false };
     expect(
       (Checkers.endIf as (ctx: any) => any)({
-        G: { board, mustContinueFrom: null },
+        G: { board, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 },
         ctx: { currentPlayer: '0' } as never,
       }),
     ).toEqual({ winner: '1' });
@@ -172,7 +188,7 @@ describe('Checkers game', () => {
     blocked[sq(7, 6)] = { player: '0', king: false };
     expect(
       (Checkers.endIf as (ctx: any) => any)({
-        G: { board: blocked, mustContinueFrom: null },
+        G: { board: blocked, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 },
         ctx: { currentPlayer: '1' } as never,
       }),
     ).toEqual({ winner: '0' });
@@ -184,7 +200,7 @@ describe('Checkers game', () => {
           const b = emptyBoard();
           b[sq(2, 1)] = { player: '0', king: false };
           b[sq(5, 4)] = { player: '1', king: false };
-          return { board: b, mustContinueFrom: null };
+          return { board: b, mustContinueFrom: null, pliesWithoutCaptureOrPromotion: 0 };
         },
       },
     });
@@ -199,6 +215,98 @@ describe('Checkers game', () => {
     client.start();
     const g = client.getState()?.G as CheckersState;
     expect(g.board.filter(Boolean)).toHaveLength(24);
+    expect(g.pliesWithoutCaptureOrPromotion).toBe(0);
+  });
+
+  it('draws after 40 consecutive plies with no capture or promotion', () => {
+    const client = Client({
+      game: {
+        ...Checkers,
+        setup: () => {
+          const board = emptyBoard();
+          // Kings far apart: only quiet moves, no captures available.
+          board[sq(0, 1)] = { player: '0', king: true };
+          board[sq(7, 6)] = { player: '1', king: true };
+          return {
+            board,
+            mustContinueFrom: null,
+            pliesWithoutCaptureOrPromotion: 39,
+          };
+        },
+      },
+    });
+    client.start();
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    client.moves.movePiece(sq(0, 1), sq(1, 2));
+    expect(client.getState()?.ctx.gameover).toEqual({ draw: true });
+  });
+
+  it('resets the 40-ply counter on capture', () => {
+    const client = Client({
+      game: {
+        ...Checkers,
+        setup: () => {
+          const board = emptyBoard();
+          board[sq(2, 1)] = { player: '0', king: false };
+          board[sq(3, 2)] = { player: '1', king: false };
+          board[sq(7, 6)] = { player: '1', king: false };
+          return {
+            board,
+            mustContinueFrom: null,
+            pliesWithoutCaptureOrPromotion: 12,
+          };
+        },
+      },
+    });
+    client.start();
+    client.moves.movePiece(sq(2, 1), sq(4, 3));
+    expect(stateOf(client).pliesWithoutCaptureOrPromotion).toBe(0);
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+  });
+
+  it('resets the 40-ply counter on promotion', () => {
+    const client = Client({
+      game: {
+        ...Checkers,
+        setup: () => {
+          const board = emptyBoard();
+          board[sq(6, 1)] = { player: '0', king: false };
+          // Opponent mid-board so the game does not end by immobilisation after the ply.
+          board[sq(2, 1)] = { player: '1', king: false };
+          return {
+            board,
+            mustContinueFrom: null,
+            pliesWithoutCaptureOrPromotion: 12,
+          };
+        },
+      },
+    });
+    client.start();
+    client.moves.movePiece(sq(6, 1), sq(7, 0));
+    expect(stateOf(client).board[sq(7, 0)]).toEqual({ player: '0', king: true });
+    expect(stateOf(client).pliesWithoutCaptureOrPromotion).toBe(0);
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+  });
+
+  it('still wins by immobilising the opponent before a draw', () => {
+    const board = emptyBoard();
+    board[sq(0, 1)] = { player: '0', king: false };
+    board[sq(1, 0)] = { player: '1', king: false };
+    board[sq(1, 2)] = { player: '1', king: false };
+    board[sq(2, 3)] = { player: '1', king: false };
+    board[sq(7, 6)] = { player: '1', king: false };
+    const client = Client({
+      game: {
+        ...Checkers,
+        setup: () => ({
+          board,
+          mustContinueFrom: null,
+          pliesWithoutCaptureOrPromotion: 39,
+        }),
+      },
+    });
+    client.start();
+    expect(client.getState()?.ctx.gameover).toEqual({ winner: '1' });
   });
 });
 
@@ -212,7 +320,11 @@ describe('Checkers ai', () => {
   it('enumerates legal moves for the current player', () => {
     const board = emptyBoard();
     board[sq(2, 1)] = { player: '0', king: false };
-    const G: CheckersState = { board, mustContinueFrom: null };
+    const G: CheckersState = {
+      board,
+      mustContinueFrom: null,
+      pliesWithoutCaptureOrPromotion: 0,
+    };
     const moves = (Checkers.ai!.enumerate as (G: any, ctx: any) => any[])(G, {
       currentPlayer: '0',
     } as never);
