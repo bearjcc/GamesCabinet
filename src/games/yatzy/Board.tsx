@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useMemo, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
@@ -64,6 +65,8 @@ export function YatzyBoard({
     const name = matchData?.[i]?.name;
     return name?.trim() || `P${i + 1}`;
   };
+
+  const showPlayChrome = !solo || tab === 'play';
 
   return (
     <>
@@ -171,39 +174,45 @@ export function YatzyBoard({
           )
         }
         pew={
-          !solo || tab === 'play' ? (
-            <>
-              <div className="yatzy-dice" data-testid="yatzy-dice">
-                {G.dice.map((face, i) => {
-                  const held = G.held[i];
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className={`yatzy-die${held ? ' is-held' : ''}`}
-                      disabled={!canHold}
-                      data-testid={`yatzy-die-${i}`}
-                      onClick={() => moves.toggleDie(i)}
-                      aria-pressed={held}
-                      aria-label={`Die ${i + 1}: ${face}${held ? ', held' : ''}`}
-                    >
-                      {face}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="yatzy-roll-row">
-                <button
-                  type="button"
-                  className="btn primary"
-                  disabled={!canRoll}
-                  data-testid="yatzy-roll"
-                  onClick={() => moves.rollDice()}
-                >
-                  Roll ({G.rolls}/3)
-                </button>
-              </div>
-            </>
+          showPlayChrome ? (
+            <div className="yatzy-dice" data-testid="yatzy-dice">
+              {G.dice.map((face, i) => {
+                const held = G.held[i];
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`yatzy-die${held ? ' is-held' : ''}`}
+                    disabled={!canHold}
+                    data-testid={`yatzy-die-${i}`}
+                    onClick={() => moves.toggleDie(i)}
+                    aria-pressed={held}
+                    aria-label={`Die ${i + 1}: ${face}${held ? ', held' : ''}`}
+                  >
+                    {face}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null
+        }
+        actions={
+          showPlayChrome ? (
+            <ActionSurface
+              label="Yatzy actions"
+              actions={[
+                {
+                  id: 'roll',
+                  kind: 'roll',
+                  label: `Roll (${G.rolls}/3)`,
+                  variant: 'primary',
+                  disabled: !canRoll,
+                  disabledReason: yourTurn ? 'No rolls left this turn' : 'Wait for your turn',
+                  testId: 'yatzy-roll',
+                  onAction: () => moves.rollDice(),
+                },
+              ]}
+            />
           ) : null
         }
       />

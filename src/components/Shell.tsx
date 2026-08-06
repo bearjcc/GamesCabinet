@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { MotionCycle } from './MotionCycle';
 import { ThemeCycle } from './ThemeCycle';
 
 const APP_TITLE = 'GamesCabinet';
@@ -37,6 +38,7 @@ export function Shell({
         </div>
         <div className="topbar-right">
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
+          <MotionCycle />
           <ThemeCycle />
         </div>
       </header>
