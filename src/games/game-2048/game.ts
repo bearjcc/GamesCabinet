@@ -3,11 +3,22 @@ import { INVALID_MOVE } from '../invalidMove';
 
 export type SwipeDir = 'up' | 'down' | 'left' | 'right';
 
-export type Game2048State = {
+/** Snapshot restored by undo (board + score + win flag). */
+export type Game2048Snapshot = {
   cells: (number | null)[];
   score: number;
   won: boolean;
 };
+
+export type Game2048State = {
+  cells: (number | null)[];
+  score: number;
+  won: boolean;
+  /** Previous successful swipe states; oldest first. */
+  history: Game2048Snapshot[];
+};
+
+export const HISTORY_LIMIT = 10;
 
 const SIZE = 4;
 const LEN = SIZE * SIZE;
@@ -97,13 +108,28 @@ export function spawn(
   cells[empties[0]] = random.Number() < 0.9 ? 2 : 4;
 }
 
+export function pushUndoSnapshot(G: Game2048State): void {
+  G.history.push({
+    cells: G.cells.slice(),
+    score: G.score,
+    won: G.won,
+  });
+  while (G.history.length > HISTORY_LIMIT) {
+    G.history.shift();
+  }
+}
+
+export function canUndo(G: Game2048State, gameover: unknown): boolean {
+  return !gameover && G.history.length > 0;
+}
+
 export const Game2048: Game<Game2048State> = {
   name: '2048',
   setup: ({ random }) => {
     const cells: (number | null)[] = Array(LEN).fill(null);
     spawn(cells, random);
     spawn(cells, random);
-    return { cells, score: 0, won: false };
+    return { cells, score: 0, won: false, history: [] };
   },
   turn: { minMoves: 1, maxMoves: 1 },
   moves: {
@@ -113,10 +139,18 @@ export const Game2048: Game<Game2048State> = {
       }
       const { cells, gained, changed } = applySwipe(G.cells, dir);
       if (!changed) return INVALID_MOVE;
+      pushUndoSnapshot(G);
       G.cells = cells;
       G.score += gained;
       if (cells.some((c) => c === 2048)) G.won = true;
       spawn(G.cells, random);
+    },
+    undo: ({ G, ctx }) => {
+      if (ctx.gameover || G.history.length === 0) return INVALID_MOVE;
+      const prev = G.history.pop()!;
+      G.cells = prev.cells;
+      G.score = prev.score;
+      G.won = prev.won;
     },
   },
   endIf: ({ G }) => {
