@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { AnimatedCounter } from '../../components/cinematic';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
@@ -8,7 +9,8 @@ import { SoloPlayTabs } from '../../components/SoloPlayTabs';
 import { StatusBar } from '../../components/StatusBar';
 import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
-import { canUndo, type Game2048State, type SwipeDir } from './game';
+import { get2048Actions } from './actions';
+import type { Game2048State, SwipeDir } from './game';
 
 const DIRS: Record<string, SwipeDir> = {
   ArrowUp: 'up',
@@ -20,8 +22,8 @@ const DIRS: Record<string, SwipeDir> = {
 export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048State>) {
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const playable = Boolean(isActive && !ctx.gameover);
-  const undoEnabled = canUndo(G, ctx.gameover);
   const [tab, setTab] = useState<'play' | 'scores'>('play');
+  const showPlayChrome = tab === 'play';
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
     if (!ctx.gameover) return null;
@@ -52,6 +54,19 @@ export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048St
   } else if (G.won) {
     status = '2048 reached - keep going';
   }
+
+  const pewActions = get2048Actions({ G, playable, gameover: ctx.gameover });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'undo') {
+        moves.undo();
+        return;
+      }
+      const match = /^swipe-(up|down|left|right)$/.exec(action.id);
+      if (match) moves.swipe(match[1] as SwipeDir);
+    },
+  }));
 
   return (
     <>
@@ -111,34 +126,8 @@ export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048St
             </div>
           )
         }
-        pew={
-          tab === 'play' ? (
-            <div className="g2048-controls">
-              <button
-                type="button"
-                className="btn g2048-undo"
-                disabled={!undoEnabled}
-                data-testid="g2048-undo"
-                onClick={() => moves.undo()}
-              >
-                Undo
-              </button>
-              <div className="g2048-pad" role="group" aria-label="Swipe controls">
-                {(['up', 'left', 'down', 'right'] as const).map((dir) => (
-                  <button
-                    key={dir}
-                    type="button"
-                    className={`btn g2048-pad-${dir}`}
-                    disabled={!playable}
-                    data-testid={`g2048-${dir}`}
-                    onClick={() => moves.swipe(dir)}
-                  >
-                    {dir}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null
+        actions={
+          showPlayChrome ? <ActionSurface label="2048 actions" actions={surfaceActions} /> : null
         }
       />
     </>
