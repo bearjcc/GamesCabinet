@@ -1,11 +1,14 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
+import { Roll } from '../../components/cinematic';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
 import { StatusBar } from '../../components/StatusBar';
+import { DiceTray } from '../../components/tabletop';
 import type { SubmitScoreInput } from '../../lib/scores';
+import { composeDieFaceArt, dieFaceArtMap, kenneyDieFaceAsset } from '../shared/dice';
 import { getYatzyActions } from './actions';
 import type { YatzyState } from './game';
 import {
@@ -16,6 +19,23 @@ import {
   upperBonus,
   upperTotal,
 } from './scoring';
+
+/** Kenney d6 faces via shared dice slots (ADR Decision 5). */
+const YATZY_FACE_ART = composeDieFaceArt(
+  dieFaceArtMap({
+    1: kenneyDieFaceAsset(1),
+    2: kenneyDieFaceAsset(2),
+    3: kenneyDieFaceAsset(3),
+    4: kenneyDieFaceAsset(4),
+    5: kenneyDieFaceAsset(5),
+    6: kenneyDieFaceAsset(6),
+  }),
+);
+
+function diceValuesChanged(prev: readonly number[], next: readonly number[]): boolean {
+  if (prev.length !== next.length) return true;
+  return prev.some((face, i) => face !== next[i]);
+}
 
 export function YatzyBoard({
   G,
@@ -32,6 +52,20 @@ export function YatzyBoard({
   const canScore = yourTurn && G.rolls > 0;
   const solo = ctx.numPlayers === 1;
   const [tab, setTab] = useState<'play' | 'scores'>('play');
+  /** Client-only roll pulse; remounts Roll so motion never gates G. */
+  const [rollPulse, setRollPulse] = useState(0);
+  const prevRollsRef = useRef(G.rolls);
+  const prevDiceRef = useRef<readonly number[]>(G.dice.slice());
+
+  useEffect(() => {
+    const rolled = G.rolls > prevRollsRef.current;
+    const changed = diceValuesChanged(prevDiceRef.current, G.dice);
+    if (rolled && changed) {
+      setRollPulse((n) => n + 1);
+    }
+    prevRollsRef.current = G.rolls;
+    prevDiceRef.current = G.dice.slice();
+  }, [G.rolls, G.dice]);
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
     if (!solo || !ctx.gameover) return null;
@@ -182,24 +216,19 @@ export function YatzyBoard({
         }
         pew={
           showPlayChrome ? (
-            <div className="yatzy-dice" data-testid="yatzy-dice">
-              {G.dice.map((face, i) => {
-                const held = G.held[i];
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    className={`yatzy-die${held ? ' is-held' : ''}`}
-                    disabled={!canHold}
-                    data-testid={`yatzy-die-${i}`}
-                    onClick={() => moves.toggleDie(i)}
-                    aria-pressed={held}
-                    aria-label={`Die ${i + 1}: ${face}${held ? ', held' : ''}`}
-                  >
-                    {face}
-                  </button>
-                );
-              })}
+            <div className="yatzy-dice">
+              <Roll key={rollPulse} active={rollPulse > 0} className="yatzy-dice__cinematic">
+                <DiceTray
+                  dice={G.dice}
+                  held={G.held}
+                  disabled={!canHold}
+                  onToggle={(i) => moves.toggleDie(i)}
+                  faceArt={YATZY_FACE_ART}
+                  testId="yatzy-dice"
+                  testIdPrefix="yatzy-die"
+                  label="Dice"
+                />
+              </Roll>
             </div>
           ) : null
         }

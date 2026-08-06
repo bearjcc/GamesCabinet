@@ -7,35 +7,28 @@
   margin: 0 auto;
 }
 
+/* Pew host for shared DiceTray (.tt-dice / .tt-die from tabletop.css). */
 .yatzy-dice {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
   justify-content: center;
+  width: 100%;
 }
 
-.yatzy-die {
+.yatzy-dice__cinematic {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.yatzy-dice .tt-die {
   width: var(--tap-min);
   height: var(--tap-min);
   min-width: var(--tap-min);
   min-height: var(--tap-min);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--tile);
-  color: var(--tile-ink);
-  font-size: 1.35rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.yatzy-die:disabled {
-  cursor: default;
-  opacity: 0.85;
-}
-
-.yatzy-die.is-held {
-  border-color: var(--you);
-  box-shadow: inset 0 0 0 2px var(--you);
 }
 
 .yatzy-card {
