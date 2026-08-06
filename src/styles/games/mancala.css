@@ -64,14 +64,16 @@
   gap: 0.25rem;
 }
 
-.mancala-store-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  opacity: 0.75;
-  text-transform: uppercase;
+/* Pit chrome owns the circle; hide Counter label (aria is on the button). */
+.mancala-pit .tt-counter__label {
+  display: none;
 }
 
-.mancala-store-count {
-  font-size: 1.35rem;
+.mancala-pit .tt-counter__value {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.mancala-store .tt-counter__label {
+  color: inherit;
 }
