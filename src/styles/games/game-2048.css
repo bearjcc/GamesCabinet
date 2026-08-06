@@ -1,0 +1,81 @@
+.g2048-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(3.4rem, 4.5rem));
+  grid-template-rows: repeat(4, minmax(3.4rem, 4.5rem));
+  gap: 0.4rem;
+  width: max-content;
+  margin: 0 auto;
+  padding: 0.45rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--brand-umber) 35%, var(--surface-2));
+}
+
+.g2048-cell {
+  display: grid;
+  place-items: center;
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in srgb, var(--tile) 55%, transparent);
+  color: var(--tile-ink);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.g2048-cell.v2 {
+  background: #eee4da;
+}
+.g2048-cell.v4 {
+  background: #ede0c8;
+}
+.g2048-cell.v8 {
+  background: #f2b179;
+  color: #f9f6f2;
+}
+.g2048-cell.v16 {
+  background: #f59563;
+  color: #f9f6f2;
+}
+.g2048-cell.v32 {
+  background: #f67c5f;
+  color: #f9f6f2;
+}
+.g2048-cell.v64 {
+  background: #f65e3b;
+  color: #f9f6f2;
+}
+.g2048-cell.v128,
+.g2048-cell.v256,
+.g2048-cell.v512 {
+  background: #edcf72;
+  color: #f9f6f2;
+  font-size: 1.1rem;
+}
+.g2048-cell.v1024,
+.g2048-cell.v2048 {
+  background: #edc22e;
+  color: #f9f6f2;
+  font-size: 1rem;
+}
+
+.g2048-pad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(4.5rem, 1fr));
+  grid-template-areas:
+    ". up ."
+    "left down right";
+  gap: 0.35rem;
+  max-width: 16rem;
+  margin: 0 auto;
+}
+
+.g2048-pad-up {
+  grid-area: up;
+}
+.g2048-pad-left {
+  grid-area: left;
+}
+.g2048-pad-down {
+  grid-area: down;
+}
+.g2048-pad-right {
+  grid-area: right;
+}

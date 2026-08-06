@@ -1,0 +1,39 @@
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration: 0ms;
+  }
+
+  .btn {
+    transition: none;
+  }
+
+  .dom-end.snap {
+    transform: none;
+  }
+
+  .tt-card.is-selected {
+    transform: none;
+  }
+
+  .dom-hand-slot .dom-tile {
+    transition: none;
+  }
+
+  .game-tile {
+    transition: none;
+  }
+}
+
+[data-motion="reduced"] .btn {
+  transition: none;
+}
+
+[data-motion="reduced"] .dom-end.snap,
+[data-motion="reduced"] .tt-card.is-selected {
+  transform: none;
+}
+
+[data-motion="reduced"] .dom-hand-slot .dom-tile,
+[data-motion="reduced"] .game-tile {
+  transition: none;
+}

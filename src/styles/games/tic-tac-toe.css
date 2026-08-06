@@ -1,0 +1,33 @@
+.ttt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 5.25rem);
+  grid-template-rows: repeat(3, 5.25rem);
+  gap: 0.4rem;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.ttt-cell {
+  width: 5.25rem;
+  height: 5.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 2.1rem;
+  font-weight: 700;
+}
+
+.ttt-cell.is-open {
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.ttt-cell.is-open:hover {
+  border-color: var(--accent);
+}
+
+.ttt-cell:disabled:not(.is-open) {
+  cursor: default;
+}

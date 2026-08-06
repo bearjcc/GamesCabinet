@@ -1,0 +1,279 @@
+/* Dominoes are a dense tabletop, so the board gets the flexible height. */
+.play-table:has(.dom-scroll) {
+  gap: 0.3rem;
+}
+
+.play-table:has(.dom-scroll) .play-table__info {
+  gap: 0.2rem;
+}
+
+.play-table:has(.dom-scroll) .status {
+  padding: 0.38rem 0.55rem;
+  font-size: 0.88rem;
+}
+
+.play-table:has(.dom-scroll) .play-table__meta {
+  gap: 0.45rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.play-table:has(.dom-scroll) .play-table__pew {
+  gap: 0.25rem;
+  padding: 0.3rem 0.2rem calc(0.3rem + env(safe-area-inset-bottom, 0px));
+}
+
+.dom-scroll {
+  position: relative;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 20% 10%, rgb(89 164 213 / 12%), transparent 34%),
+    linear-gradient(135deg, #123b68, #0d2d52);
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+}
+
+.dom-stage {
+  position: relative;
+  margin: 0 auto;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.dom-placed {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.dom-tile-orient {
+  width: var(--dom-width);
+  height: var(--dom-length);
+  flex-shrink: 0;
+}
+
+.dom-starter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 10rem;
+  min-height: var(--tap-min);
+  padding: 0.65rem 1rem;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-weight: 600;
+  cursor: default;
+}
+
+.dom-starter.lit {
+  border-color: var(--you);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dom-tile {
+  --dom-width: 2rem;
+  --dom-length: 4rem;
+  width: var(--dom-width);
+  height: var(--dom-length);
+  display: grid;
+  grid-template-columns: 1fr 2px 1fr;
+  align-items: center;
+  gap: 0;
+  padding: 0.15rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--tile);
+  color: var(--tile-ink);
+  box-shadow: 0 1px 0 #cbbba4;
+  touch-action: none;
+}
+
+.dom-tile.kenney {
+  display: block;
+  width: var(--dom-width);
+  height: var(--dom-length);
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dom-tile.kenney img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.dom-tile.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dom-hand-slot.is-dragging .dom-tile {
+  opacity: 0.35;
+}
+
+.dom-drag-ghost {
+  --dom-width: 2rem;
+  --dom-length: 4rem;
+  position: fixed;
+  z-index: 4;
+  width: var(--dom-width);
+  height: var(--dom-length);
+  pointer-events: none;
+  opacity: 0.92;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 25%));
+}
+
+.dom-placement-preview {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.78;
+  filter: drop-shadow(0 0 0.35rem color-mix(in srgb, var(--you) 80%, transparent));
+}
+
+.dom-divider {
+  width: 2px;
+  height: 80%;
+  background: #cbbba4;
+}
+
+.pip-face {
+  width: 100%;
+  height: 1.7rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 70%;
+}
+
+.pip-0 {
+  background-image: none;
+}
+.pip-1 {
+  background-image: radial-gradient(circle, #2a2420 18%, transparent 19%);
+}
+.pip-2 {
+  background-image:
+    radial-gradient(circle at 30% 30%, #2a2420 14%, transparent 15%),
+    radial-gradient(circle at 70% 70%, #2a2420 14%, transparent 15%);
+}
+.pip-3 {
+  background-image:
+    radial-gradient(circle at 30% 30%, #2a2420 12%, transparent 13%),
+    radial-gradient(circle at 50% 50%, #2a2420 12%, transparent 13%),
+    radial-gradient(circle at 70% 70%, #2a2420 12%, transparent 13%);
+}
+.pip-4 {
+  background-image:
+    radial-gradient(circle at 28% 28%, #2a2420 12%, transparent 13%),
+    radial-gradient(circle at 72% 28%, #2a2420 12%, transparent 13%),
+    radial-gradient(circle at 28% 72%, #2a2420 12%, transparent 13%),
+    radial-gradient(circle at 72% 72%, #2a2420 12%, transparent 13%);
+}
+.pip-5 {
+  background-image:
+    radial-gradient(circle at 28% 28%, #2a2420 11%, transparent 12%),
+    radial-gradient(circle at 72% 28%, #2a2420 11%, transparent 12%),
+    radial-gradient(circle at 50% 50%, #2a2420 11%, transparent 12%),
+    radial-gradient(circle at 30% 72%, #2a2420 11%, transparent 12%),
+    radial-gradient(circle at 72% 72%, #2a2420 11%, transparent 12%);
+}
+.pip-6 {
+  background-image:
+    radial-gradient(circle at 30% 22%, #2a2420 10%, transparent 11%),
+    radial-gradient(circle at 70% 22%, #2a2420 10%, transparent 11%),
+    radial-gradient(circle at 30% 50%, #2a2420 10%, transparent 11%),
+    radial-gradient(circle at 70% 50%, #2a2420 10%, transparent 11%),
+    radial-gradient(circle at 30% 78%, #2a2420 10%, transparent 11%),
+    radial-gradient(circle at 70% 78%, #2a2420 10%, transparent 11%);
+}
+
+.dom-end {
+  position: absolute;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+
+.dom-end.lit {
+  background: var(--you);
+  color: var(--ink-contrast);
+  cursor: pointer;
+}
+
+.dom-end.snap {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--you) 55%, transparent);
+}
+
+.dom-hand {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.05rem;
+  justify-content: center;
+  min-height: 2.75rem;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.dom-hand-slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 1 auto;
+  width: clamp(2.8rem, 14vw, 3.65rem);
+  min-width: 2.7rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.05rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.dom-hand-slot:active {
+  cursor: grabbing;
+}
+
+.dom-hand-slot .dom-tile {
+  --dom-width: clamp(1.5rem, 8vw, 1.85rem);
+  --dom-length: clamp(2.8rem, 14vw, 3.65rem);
+  transition:
+    transform 140ms ease-out,
+    filter 140ms ease-out;
+}
+
+.dom-hand-slot.selected .dom-tile {
+  transform: translateY(-0.3rem);
+  filter: drop-shadow(0 0 0.35rem color-mix(in srgb, var(--accent) 80%, transparent));
+}
+
+.dom-hand-slot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

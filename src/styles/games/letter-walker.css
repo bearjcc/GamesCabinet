@@ -1,0 +1,183 @@
+.lw-panel {
+  gap: 0.75rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.lw-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lw-modes,
+.lw-tabs,
+.lw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.lw-mode.is-active,
+.lw-tabs .btn.is-active {
+  outline: 2px solid var(--you);
+  outline-offset: 1px;
+}
+
+.lw-selected {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  min-height: 1.6em;
+  color: var(--tile-ink);
+}
+
+.lw-board-wrap {
+  --lw-gap: 0.2rem;
+  --lw-pad: 0.25rem;
+  --lw-arrow: var(--tap-min);
+  --lw-cell: min(
+    2.8rem,
+    calc((100cqw - 2 * var(--lw-arrow) - 9 * var(--lw-gap) - 2 * var(--lw-pad)) / 8)
+  );
+  display: grid;
+  gap: var(--lw-gap);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.lw-col-arrows {
+  display: grid;
+  grid-template-columns: repeat(8, var(--lw-cell));
+  gap: var(--lw-gap);
+  margin-inline: calc(var(--lw-arrow) + var(--lw-gap));
+}
+
+.lw-mid {
+  display: grid;
+  grid-template-columns: var(--lw-arrow) minmax(0, 1fr) var(--lw-arrow);
+  gap: var(--lw-gap);
+  align-items: center;
+  min-width: 0;
+}
+
+.lw-row-arrows {
+  display: grid;
+  grid-template-rows: repeat(8, var(--lw-cell));
+  gap: var(--lw-gap);
+}
+
+.lw-board {
+  display: grid;
+  grid-template-columns: repeat(8, var(--lw-cell));
+  grid-template-rows: repeat(8, var(--lw-cell));
+  gap: var(--lw-gap);
+  touch-action: none;
+  user-select: none;
+  padding: var(--lw-pad);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--brand-umber) 30%, var(--surface-2));
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.lw-cell {
+  display: grid;
+  place-items: center;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--tile);
+  color: var(--tile-ink);
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.lw-cell.is-selected {
+  background: color-mix(in srgb, var(--you) 70%, var(--tile));
+  color: var(--ink-contrast);
+}
+
+.lw-arrow {
+  width: var(--lw-arrow);
+  height: var(--lw-arrow);
+  min-width: var(--lw-arrow);
+  min-height: var(--lw-arrow);
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.lw-actions {
+  justify-content: center;
+}
+
+.lw-message {
+  text-align: center;
+  color: var(--muted);
+  margin: 0;
+}
+
+.lw-scores h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.lw-score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lw-score-list li {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.lw-score-rank {
+  color: var(--muted);
+}
+
+.lw-score-value {
+  font-weight: 700;
+}
+
+.lw-scores-empty {
+  color: var(--muted);
+  margin: 0;
+}
+
+.lw-help {
+  border: 1px solid color-mix(in srgb, var(--tile-ink) 20%, transparent);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  background: var(--surface-2);
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.lw-help h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.lw-help ul {
+  margin: 0.5rem 0 0.75rem;
+  padding-left: 1.1rem;
+}
+
+@media (max-width: 28rem) {
+  .lw-board-wrap {
+    --lw-gap: 0.15rem;
+    --lw-pad: 0.15rem;
+  }
+}

@@ -1,0 +1,20 @@
+/*
+  Cascade order matters. Vite inlines these @imports at build time, so the
+  emitted stylesheet is these files concatenated in the order below.
+  motion.css must stay last: its rules win by appearing last.
+*/
+@import "./tokens.css";
+@import "./base.css";
+@import "./catalogue.css";
+@import "./play-table.css";
+@import "./leaderboard.css";
+@import "./tabletop.css";
+@import "./games/tic-tac-toe.css";
+@import "./games/connect-four.css";
+@import "./games/checkers.css";
+@import "./games/dominoes.css";
+@import "./games/game-2048.css";
+@import "./games/yatzy.css";
+@import "./games/letter-walker.css";
+@import "./games/crazy-eights.css";
+@import "./motion.css";

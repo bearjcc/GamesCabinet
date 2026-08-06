@@ -1,0 +1,203 @@
+/* --- Tabletop cards (shared card kit) --- */
+.tt-hand {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  overflow-x: auto;
+  padding: 0.35rem 0.25rem 0.15rem;
+  min-height: 6.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tt-hand__slot {
+  flex: 0 0 auto;
+  margin-left: -1.1rem;
+}
+
+.tt-hand__slot:first-child {
+  margin-left: 0;
+}
+
+.tt-card {
+  position: relative;
+  width: 3.6rem;
+  height: 5.1rem;
+  border-radius: 0.45rem;
+  border: 1px solid #222;
+  background: #fffef8;
+  color: #1a1a1a;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 18%);
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-family: Georgia, "Times New Roman", serif;
+  touch-action: manipulation;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tt-card--art {
+  border: none;
+  background: transparent;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 28%);
+}
+
+button.tt-card {
+  cursor: pointer;
+}
+
+button.tt-card:disabled,
+.tt-card.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tt-card--red {
+  color: #c0392b;
+}
+
+.tt-card--black {
+  color: #1a1a1a;
+}
+
+.tt-card.is-selected {
+  outline: 2px solid var(--accent, #3d7ea6);
+  outline-offset: 2px;
+  transform: translateY(-0.35rem);
+  z-index: 2;
+}
+
+.tt-card.is-playable:not(.is-disabled) {
+  box-shadow: 0 0 0 2px rgb(61 126 166 / 45%);
+}
+
+.tt-card__corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 0.75rem;
+}
+
+.tt-card__corner--tl {
+  top: 0.25rem;
+  left: 0.3rem;
+}
+
+.tt-card__corner--br {
+  bottom: 0.25rem;
+  right: 0.3rem;
+  transform: rotate(180deg);
+}
+
+.tt-card__pip {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.tt-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.tt-card--back {
+  color: #e8f1ff;
+}
+
+.tt-card__count {
+  position: absolute;
+  bottom: 0.2rem;
+  right: 0.25rem;
+  font-size: 0.7rem;
+  font-family: system-ui, sans-serif;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.05rem 0.35rem;
+  line-height: 1.2;
+}
+
+.tt-card__wild {
+  position: absolute;
+  left: 50%;
+  bottom: 0.35rem;
+  transform: translateX(-50%);
+  font-family: system-ui, sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #6c3483;
+  border-radius: 999px;
+  padding: 0.12rem 0.35rem;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+}
+
+.tt-card--empty {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+  border-style: dashed;
+  background: transparent;
+}
+
+.tt-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tt-pile__suit {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.tt-suit-picker {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+}
+
+.tt-suit-picker__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.tt-suit-picker__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.tt-suit-picker__btn {
+  min-height: var(--tap-min);
+}
+
+@media (max-width: 28rem) {
+  .tt-card {
+    width: 3.15rem;
+    height: 4.5rem;
+  }
+
+  .tt-hand__slot {
+    margin-left: -1.25rem;
+  }
+
+  .tt-hand {
+    min-height: 5.6rem;
+  }
+}

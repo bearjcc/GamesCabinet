@@ -1,0 +1,167 @@
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.game-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  aspect-ratio: 1;
+  min-height: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 140ms ease-out,
+    background 140ms ease-out;
+}
+
+.game-tile:hover {
+  border-color: var(--hover-line);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--hover-line);
+}
+
+.game-tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.game-tile h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.game-tile p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.launch-blurb {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+}
+
+.launch-actions,
+.action-row,
+.join-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--motion-duration) var(--motion-ease),
+    border-color var(--motion-duration) var(--motion-ease),
+    transform var(--motion-duration) var(--motion-ease);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--hover);
+  border-color: var(--hover-line);
+}
+
+.btn:active:not(:disabled) {
+  background: var(--hover-line);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ink-contrast);
+  font-weight: 600;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--hover-strong);
+  border-color: var(--hover-strong);
+}
+
+.btn.ghost {
+  background: transparent;
+}
+
+.btn.secondary {
+  background: var(--surface-2);
+  border-color: var(--hover-line);
+}
+
+.join-panel {
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.join-panel h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.join-row input,
+.join-row select {
+  min-height: var(--tap-min);
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.join-row input {
+  flex: 1;
+  min-width: 7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.error {
+  margin: 0.5rem 0 0;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.party-size {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.party-size select {
+  min-width: 3.5rem;
+}
+
+@media (max-width: 28rem) {
+  .game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

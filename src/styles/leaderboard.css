@@ -1,0 +1,13 @@
+/* Shared solo-score chrome. Letter Walker still uses the .lw- prefix here. */
+.lw-scores,
+.lb-scores {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 22rem);
+  margin: 0 auto;
+}
+
+.lb-message {
+  color: var(--muted);
+  margin: 0;
+}
