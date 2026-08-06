@@ -5,6 +5,7 @@ import { CrazyEightsBoard } from './crazy-eights/Board';
 import { DominoesBoard } from './dominoes/Board';
 import { Game2048Board } from './game-2048/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
+import { ReversiBoard } from './reversi/Board';
 import { TicTacToeBoard } from './tic-tac-toe/Board';
 import { YatzyBoard } from './yatzy/Board';
 
@@ -18,4 +19,5 @@ export const boards = {
   yatzy: withMatchChrome(YatzyBoard),
   'letter-walker': withMatchChrome(LetterWalkerBoard),
   'crazy-eights': withMatchChrome(CrazyEightsBoard),
+  reversi: withMatchChrome(ReversiBoard),
 } as const;

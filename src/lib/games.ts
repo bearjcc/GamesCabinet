@@ -90,6 +90,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'reversi',
+    name: 'Reversi',
+    blurb: 'Outflank discs. Majority wins.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

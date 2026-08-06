@@ -5,6 +5,7 @@ import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
 import { Game2048 } from './game-2048/game';
 import { LetterWalker } from './letter-walker/game';
+import { Reversi } from './reversi/game';
 import { TicTacToe } from './tic-tac-toe/game';
 import { Yatzy } from './yatzy/game';
 
@@ -18,6 +19,7 @@ export const gameList: Game<any>[] = [
   Yatzy,
   LetterWalker,
   CrazyEights,
+  Reversi,
 ];
 
 export const gamesById = {
@@ -29,6 +31,7 @@ export const gamesById = {
   yatzy: Yatzy,
   'letter-walker': LetterWalker,
   'crazy-eights': CrazyEights,
+  reversi: Reversi,
 } as const;
 
 export type GameId = keyof typeof gamesById;
