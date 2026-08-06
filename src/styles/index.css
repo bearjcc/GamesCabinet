@@ -25,4 +25,5 @@
 @import "./games/go.css";
 @import "./games/chinese-checkers.css";
 @import "./games/battleship.css";
+@import "./games/chess.css";
 @import "./motion.css";

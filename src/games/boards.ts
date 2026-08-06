@@ -1,6 +1,7 @@
 import { withMatchChrome } from '../components/MatchChrome';
 import { BattleshipBoard } from './battleship/Board';
 import { CheckersBoard } from './checkers/Board';
+import { ChessBoard } from './chess/Board';
 import { ChineseCheckersBoard } from './chinese-checkers/Board';
 import { ConnectFourBoard } from './connect-four/Board';
 import { CrazyEightsBoard } from './crazy-eights/Board';
@@ -34,4 +35,5 @@ export const boards = {
   go: withMatchChrome(GoBoard),
   'chinese-checkers': withMatchChrome(ChineseCheckersBoard),
   battleship: withMatchChrome(BattleshipBoard),
+  chess: withMatchChrome(ChessBoard),
 } as const;
