@@ -8,9 +8,16 @@ import {
   effectiveMotionIntensity,
   getMotion,
   isMotionIntensity,
+  MOTION_CSS_EASE,
+  MOTION_DURATION_MS,
   MOTION_KEY,
+  MOTION_LIB_EASE,
+  motionCssEase,
+  motionDurationMs,
+  motionEase,
   motionLabel,
   nextMotion,
+  readEffectiveMotion,
   setMotion,
 } from './motion';
 
@@ -114,5 +121,27 @@ describe('motion preferences', () => {
     expect(applyEffectiveMotion()).toBe('playful');
     expect(document.documentElement.dataset.motion).toBe('playful');
     expect(cycleMotion()).toBe('reduced');
+  });
+
+  it('exposes duration and ease tokens for cinematic consumers', () => {
+    expect(motionDurationMs('reduced')).toBe(0);
+    expect(motionDurationMs('normal')).toBe(MOTION_DURATION_MS.normal);
+    expect(motionDurationMs('playful')).toBe(MOTION_DURATION_MS.playful);
+    expect(motionEase('normal')).toBe(MOTION_LIB_EASE.normal);
+    expect(motionEase('playful')).toEqual(MOTION_LIB_EASE.playful);
+    expect(motionCssEase('normal')).toBe(MOTION_CSS_EASE.normal);
+    expect(motionCssEase('playful')).toBe(MOTION_CSS_EASE.playful);
+  });
+
+  it('reads effective motion from storage and system preference', () => {
+    stubMotionDom();
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn((query: string) => ({
+        matches: query === '(prefers-reduced-motion: reduce)',
+      })),
+    );
+    store.set(MOTION_KEY, 'playful');
+    expect(readEffectiveMotion()).toBe('reduced');
   });
 });
