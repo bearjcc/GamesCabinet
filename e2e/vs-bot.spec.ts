@@ -91,4 +91,28 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
+
+  test('reversi play vs bot reaches a playable board', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-reversi').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('reversi-board')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+  });
+
+  test('memory play vs bot reaches a playable board', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-memory').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('memory-board')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+  });
+
+  test('mancala play vs bot reaches a playable board', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-mancala').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('mancala-board')).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: /turn/i })).toBeVisible();
+  });
 });
