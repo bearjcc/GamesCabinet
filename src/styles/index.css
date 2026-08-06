@@ -24,4 +24,5 @@
 @import "./games/freecell.css";
 @import "./games/go.css";
 @import "./games/chinese-checkers.css";
+@import "./games/battleship.css";
 @import "./motion.css";

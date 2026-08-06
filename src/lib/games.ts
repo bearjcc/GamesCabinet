@@ -155,6 +155,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'battleship',
+    name: 'Battleship',
+    blurb: 'Place ships. Fire. Fog of war.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

@@ -1,4 +1,5 @@
 import { withMatchChrome } from '../components/MatchChrome';
+import { BattleshipBoard } from './battleship/Board';
 import { CheckersBoard } from './checkers/Board';
 import { ChineseCheckersBoard } from './chinese-checkers/Board';
 import { ConnectFourBoard } from './connect-four/Board';
@@ -32,4 +33,5 @@ export const boards = {
   freecell: withMatchChrome(FreeCellBoard),
   go: withMatchChrome(GoBoard),
   'chinese-checkers': withMatchChrome(ChineseCheckersBoard),
+  battleship: withMatchChrome(BattleshipBoard),
 } as const;
