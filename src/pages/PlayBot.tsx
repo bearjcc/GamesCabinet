@@ -1,45 +1,45 @@
-import { MCTSBot } from 'boardgame.io/ai';
 import { Local } from 'boardgame.io/multiplayer';
 import { useMemo, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
+import {
+  botDifficultyLabel,
+  botSeatCount,
+  createMctsBotClass,
+  cycleBotDifficulty,
+  parseBotDifficulty,
+} from '../lib/bots';
 import { getGameMeta, supportsBotPlay } from '../lib/games';
 import { localRematchMatchID } from '../lib/localRematch';
 import { makeClient } from '../lib/makeClient';
 
-/** Medium handheld-era difficulty: modest MCTS iterations. */
-class MediumBot extends MCTSBot {
-  constructor(opts: ConstructorParameters<typeof MCTSBot>[0]) {
-    super({
-      ...opts,
-      iterations: 200,
-      playoutDepth: 8,
-    });
-  }
-}
-
 export function PlayBot() {
   const { gameId = '' } = useParams();
+  const [params, setParams] = useSearchParams();
   const meta = getGameMeta(gameId);
   const game = gamesById[gameId as GameId];
+  const difficulty = parseBotDifficulty(params.get('difficulty'));
   /** Client.reset() nulls multiplayer state; bump match id for a fresh Local+bots match. */
   const [rematchGen, setRematchGen] = useState(0);
   const matchID = localRematchMatchID(`bot-${gameId}`, rematchGen);
 
   const BotClient = useMemo(() => {
-    if (!game) return null;
+    if (!game || !meta) return null;
+    const Bot = createMctsBotClass(difficulty);
+    // Seat count via helper (always 2 today); 3-4p bot parties deferred - see botSeatCount.
+    const numPlayers = botSeatCount(meta);
     return makeClient({
       game,
       board: boards[gameId as GameId],
-      numPlayers: 2,
+      numPlayers,
       multiplayer: Local({
-        bots: { '1': MediumBot },
+        bots: { '1': Bot },
       }),
     });
-  }, [game, gameId]);
+  }, [difficulty, game, gameId, meta]);
 
   if (!meta || !game) {
     return (
@@ -57,7 +57,26 @@ export function PlayBot() {
   }
 
   return (
-    <Shell title={`${meta.name} vs bot`} backTo={`/game/${meta.id}`}>
+    <Shell
+      title={`${meta.name} vs bot`}
+      backTo={`/game/${meta.id}`}
+      trailing={
+        <button
+          type="button"
+          className="btn ghost"
+          data-testid="bot-difficulty"
+          onClick={() => {
+            const next = cycleBotDifficulty(difficulty);
+            setParams({ difficulty: next }, { replace: true });
+            setRematchGen((n) => n + 1);
+          }}
+          aria-label={`Bot difficulty ${botDifficultyLabel(difficulty)}. Click to cycle.`}
+          title="Cycle bot difficulty"
+        >
+          {botDifficultyLabel(difficulty)}
+        </button>
+      }
+    >
       <MatchLifecycleProvider
         value={{
           onPlayAgain: () => setRematchGen((n) => n + 1),
@@ -66,7 +85,7 @@ export function PlayBot() {
           homeTo: '/',
         }}
       >
-        <BotClient key={matchID} playerID="0" matchID={matchID} />
+        <BotClient key={`${matchID}-${difficulty}`} playerID="0" matchID={matchID} />
       </MatchLifecycleProvider>
     </Shell>
   );
