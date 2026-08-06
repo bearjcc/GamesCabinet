@@ -1,6 +1,7 @@
 import type { Game } from 'boardgame.io';
 import { Checkers } from './checkers/game';
 import { ConnectFour } from './connect-four/game';
+import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
 import { Game2048 } from './game-2048/game';
 import { LetterWalker } from './letter-walker/game';
@@ -16,6 +17,7 @@ export const gameList: Game<any>[] = [
   Game2048,
   Yatzy,
   LetterWalker,
+  CrazyEights,
 ];
 
 export const gamesById = {
@@ -26,6 +28,7 @@ export const gamesById = {
   '2048': Game2048,
   yatzy: Yatzy,
   'letter-walker': LetterWalker,
+  'crazy-eights': CrazyEights,
 } as const;
 
 export type GameId = keyof typeof gamesById;

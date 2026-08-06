@@ -10,6 +10,17 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('home-game-2048')).toBeVisible();
     await expect(page.getByTestId('home-game-yatzy')).toBeVisible();
     await expect(page.getByTestId('home-game-letter-walker')).toBeVisible();
+    await expect(page.getByTestId('home-game-crazy-eights')).toBeVisible();
+  });
+
+  test('crazy-eights play vs bot reaches board and hand', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-crazy-eights').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('ce-board')).toBeVisible();
+    await expect(page.getByTestId('ce-hand')).toBeVisible();
+    await expect(page.getByTestId('ce-discard-top')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
   });
 
   test('letter-walker solo play reaches a playable board and scores tab', async ({ page }) => {
@@ -39,11 +50,22 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-yatzy').click();
     await page.getByTestId('play-solo').click();
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
+    await expect(page.getByTestId('action-surface')).toBeVisible();
+    await expect(page.getByTestId('play-table-actions')).toBeVisible();
     await page.getByTestId('yatzy-roll').click();
     await page.getByTestId('yatzy-score-chance').click();
     await expect(page.getByRole('status')).toBeVisible();
     await page.getByTestId('yatzy-tab-scores').click();
     await expect(page.getByTestId('yatzy-scores')).toBeVisible();
+  });
+
+  test('motion preference cycles from the shell', async ({ page }) => {
+    await page.goto('/');
+    const motion = page.getByTestId('motion-cycle');
+    await expect(motion).toBeVisible();
+    const before = await motion.innerText();
+    await motion.click();
+    await expect(motion).not.toHaveText(before);
   });
 
   test('tic-tac-toe play vs bot reaches a playable board', async ({ page }) => {
@@ -108,6 +130,15 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('dom-board')).toBeVisible();
     await expect(page.getByTestId('dom-hand')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
+  });
+
+  test('dominoes exposes a selected starter and places a physical tile', async ({ page }) => {
+    await page.goto('/vs-bot/dominoes');
+    await expect(page.getByTestId('dom-starter')).toBeDisabled();
+    await page.getByTestId('dom-hand-0').click();
+    await expect(page.getByTestId('dom-starter')).toBeEnabled();
+    await page.getByTestId('dom-starter').click();
+    await expect(page.locator('.dom-placed')).toHaveCount(1);
   });
 
   test('yatzy play vs bot reaches a playable board', async ({ page }) => {

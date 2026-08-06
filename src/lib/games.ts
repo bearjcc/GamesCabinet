@@ -81,6 +81,15 @@ export const GAMES: GameMeta[] = [
     hasSolo: true,
     hasLeaderboard: true,
   },
+  {
+    id: 'crazy-eights',
+    name: 'Crazy Eights',
+    blurb: 'Match suit or rank. Eights are wild.',
+    minPlayers: 2,
+    maxPlayers: 4,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

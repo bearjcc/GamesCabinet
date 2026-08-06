@@ -1,6 +1,7 @@
 import { withMatchChrome } from '../components/MatchChrome';
 import { CheckersBoard } from './checkers/Board';
 import { ConnectFourBoard } from './connect-four/Board';
+import { CrazyEightsBoard } from './crazy-eights/Board';
 import { DominoesBoard } from './dominoes/Board';
 import { Game2048Board } from './game-2048/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
@@ -16,4 +17,5 @@ export const boards = {
   '2048': withMatchChrome(Game2048Board),
   yatzy: withMatchChrome(YatzyBoard),
   'letter-walker': withMatchChrome(LetterWalkerBoard),
+  'crazy-eights': withMatchChrome(CrazyEightsBoard),
 } as const;
