@@ -4,12 +4,14 @@ import { Home } from './pages/Home';
 import { PlayBot } from './pages/PlayBot';
 import { PlayLocal } from './pages/PlayLocal';
 import { PlayOnline } from './pages/PlayOnline';
+import { Settings } from './pages/Settings';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/game/:gameId" element={<GameLaunch />} />
         <Route path="/play/:gameId" element={<PlayLocal />} />
         <Route path="/vs-bot/:gameId" element={<PlayBot />} />

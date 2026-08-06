@@ -38,6 +38,9 @@ export function Shell({
         </div>
         <div className="topbar-right">
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
+          <Link to="/settings" className="btn ghost" data-testid="shell-settings">
+            Settings
+          </Link>
           <MotionCycle />
           <ThemeCycle />
         </div>
