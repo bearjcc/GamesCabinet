@@ -17,7 +17,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-2048').click();
     await page.getByTestId('play-solo').click();
     await expect(page.getByTestId('g2048-board')).toBeVisible();
-    await page.getByTestId('g2048-left').click();
+    await page.getByTestId('g2048-action-left').click();
     await expect(page.getByRole('status')).toBeVisible();
     await page.getByTestId('g2048-tab-scores').click();
     await expect(page.getByTestId('g2048-scores')).toBeVisible();
