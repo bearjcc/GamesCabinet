@@ -1,32 +1,16 @@
 import type { Game } from 'boardgame.io';
 import { INVALID_MOVE } from '../invalidMove';
+import { nInARowWinner } from '../shared/grid';
 
 export type TTTState = {
   cells: (string | null)[];
 };
 
-function lineWinner(cells: (string | null)[]): string | null {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (const [a, b, c] of lines) {
-    if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
-      return cells[a];
-    }
-  }
-  return null;
-}
+const SIZE = 3;
 
 export const TicTacToe: Game<TTTState> = {
   name: 'tic-tac-toe',
-  setup: () => ({ cells: Array(9).fill(null) }),
+  setup: () => ({ cells: Array(SIZE * SIZE).fill(null) }),
   turn: { minMoves: 1, maxMoves: 1 },
   moves: {
     clickCell: ({ G, ctx }, id: number) => {
@@ -35,7 +19,7 @@ export const TicTacToe: Game<TTTState> = {
     },
   },
   endIf: ({ G }) => {
-    const winner = lineWinner(G.cells);
+    const winner = nInARowWinner(G.cells, { rows: SIZE, cols: SIZE, n: SIZE });
     if (winner !== null) return { winner };
     if (G.cells.every((c) => c !== null)) return { draw: true };
   },
