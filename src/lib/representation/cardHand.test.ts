@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  CARD_HAND_COMPACT_MAX,
-  CARD_HAND_PHYSICAL_MAX,
-  chooseCardHandMode,
-} from './representation';
+import { CARD_HAND_COMPACT_MAX, CARD_HAND_PHYSICAL_MAX, chooseCardHandMode } from './cardHand';
 
 describe('chooseCardHandMode', () => {
   it('documents Mum-simple thresholds', () => {
