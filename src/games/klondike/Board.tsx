@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useMemo, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
@@ -9,12 +10,8 @@ import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { StockPile } from '../../components/tabletop/CardPile';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { kenneyPlayingCardAsset } from '../shared/cards';
+import { getKlondikeActions, type KlondikeSelection } from './actions';
 import type { KlondikeState, TableCard } from './game';
-
-type Selection =
-  | null
-  | { source: 'waste' }
-  | { source: 'tableau'; col: number; startIndex: number; count: number };
 
 function topCard(pile: readonly TableCard[]): TableCard | undefined {
   return pile[pile.length - 1];
@@ -22,7 +19,7 @@ function topCard(pile: readonly TableCard[]): TableCard | undefined {
 
 export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeState>) {
   const playable = Boolean(isActive && !ctx.gameover);
-  const [selection, setSelection] = useState<Selection>(null);
+  const [selection, setSelection] = useState<KlondikeSelection>(null);
   const [tab, setTab] = useState<'play' | 'scores'>('play');
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
@@ -118,6 +115,32 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
 
   const wasteSelected = selection?.source === 'waste';
   const wasteTop = topCard(G.waste);
+
+  const pewActions = getKlondikeActions({ G, playable, selection });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'draw') {
+        clear();
+        moves.draw();
+        return;
+      }
+      if (action.id === 'waste-to-foundation') {
+        moves.wasteToFoundation();
+        clear();
+        return;
+      }
+      const tableauMatch = /^tableau-to-foundation-(\d+)$/.exec(action.id);
+      if (tableauMatch) {
+        moves.tableauToFoundation(Number(tableauMatch[1]));
+        clear();
+        return;
+      }
+      if (action.id === 'clear') {
+        clear();
+      }
+    },
+  }));
 
   return (
     <>
@@ -252,6 +275,7 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
             </div>
           )
         }
+        actions={<ActionSurface label="Klondike actions" actions={surfaceActions} />}
       />
     </>
   );
