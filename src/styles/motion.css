@@ -37,3 +37,16 @@
 [data-motion="reduced"] .game-tile {
   transition: none;
 }
+
+/* Cinematic primitives: CSS fallbacks that honour the shared duration token. */
+[data-cinematic] {
+  transition-property: transform, opacity;
+  transition-duration: var(--motion-duration);
+  transition-timing-function: var(--motion-ease);
+}
+
+[data-motion="reduced"] [data-cinematic],
+[data-cinematic][data-motion="reduced"] {
+  transition: none;
+  transform: none;
+}

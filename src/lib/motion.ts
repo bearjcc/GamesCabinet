@@ -68,3 +68,46 @@ export function applyEffectiveMotion(preferred: MotionIntensity = getMotion()): 
   applyMotion(effective);
   return effective;
 }
+
+/**
+ * Duration in ms matching CSS `--motion-duration` tokens in `tokens.css`.
+ * Reduced is always 0 (correctness path: no visible motion).
+ */
+export const MOTION_DURATION_MS: Record<MotionIntensity, number> = {
+  reduced: 0,
+  normal: 140,
+  playful: 220,
+};
+
+/** CSS `--motion-ease` token values (stylesheets only). */
+export const MOTION_CSS_EASE: Record<MotionIntensity, string> = {
+  reduced: 'linear',
+  normal: 'ease-out',
+  playful: 'cubic-bezier(0.34, 1.4, 0.64, 1)',
+};
+
+/** Motion library easing: named curve or cubic-bezier tuple. */
+export type MotionLibEase = 'linear' | 'easeOut' | readonly [number, number, number, number];
+
+export const MOTION_LIB_EASE: Record<MotionIntensity, MotionLibEase> = {
+  reduced: 'linear',
+  normal: 'easeOut',
+  playful: [0.34, 1.4, 0.64, 1],
+};
+
+export function motionDurationMs(intensity: MotionIntensity): number {
+  return MOTION_DURATION_MS[intensity];
+}
+
+export function motionCssEase(intensity: MotionIntensity): string {
+  return MOTION_CSS_EASE[intensity];
+}
+
+export function motionEase(intensity: MotionIntensity): MotionLibEase {
+  return MOTION_LIB_EASE[intensity];
+}
+
+/** Read effective intensity for cinematic consumers (storage + system preference). */
+export function readEffectiveMotion(): MotionIntensity {
+  return effectiveMotionIntensity(getMotion(), readPrefersReducedMotion());
+}
