@@ -126,6 +126,15 @@ export const GAMES: GameMeta[] = [
     hasBot: false,
     hasSolo: true,
   },
+  {
+    id: 'freecell',
+    name: 'FreeCell',
+    blurb: 'Solitaire with freecells. Build foundations Ace to King.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

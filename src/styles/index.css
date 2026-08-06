@@ -21,4 +21,5 @@
 @import "./games/memory.css";
 @import "./games/mancala.css";
 @import "./games/klondike.css";
+@import "./games/freecell.css";
 @import "./motion.css";

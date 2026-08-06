@@ -3,6 +3,7 @@ import { Checkers } from './checkers/game';
 import { ConnectFour } from './connect-four/game';
 import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
+import { FreeCell } from './freecell/game';
 import { Game2048 } from './game-2048/game';
 import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
@@ -26,6 +27,7 @@ export const gameList: Game<any>[] = [
   Memory,
   Mancala,
   Klondike,
+  FreeCell,
 ];
 
 export const gamesById = {
@@ -41,6 +43,7 @@ export const gamesById = {
   memory: Memory,
   mancala: Mancala,
   klondike: Klondike,
+  freecell: FreeCell,
 } as const;
 
 export type GameId = keyof typeof gamesById;

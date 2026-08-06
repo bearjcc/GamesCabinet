@@ -3,6 +3,7 @@ import { CheckersBoard } from './checkers/Board';
 import { ConnectFourBoard } from './connect-four/Board';
 import { CrazyEightsBoard } from './crazy-eights/Board';
 import { DominoesBoard } from './dominoes/Board';
+import { FreeCellBoard } from './freecell/Board';
 import { Game2048Board } from './game-2048/Board';
 import { KlondikeBoard } from './klondike/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
@@ -26,4 +27,5 @@ export const boards = {
   memory: withMatchChrome(MemoryBoard),
   mancala: withMatchChrome(MancalaBoard),
   klondike: withMatchChrome(KlondikeBoard),
+  freecell: withMatchChrome(FreeCellBoard),
 } as const;
