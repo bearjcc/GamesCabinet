@@ -3,7 +3,7 @@ import { gameList, gamesById } from './registry';
 
 describe('game registry', () => {
   it('lists every catalogue game once', () => {
-    expect(gameList).toHaveLength(13);
+    expect(gameList).toHaveLength(14);
     expect(gamesById['tic-tac-toe'].name).toBe('tic-tac-toe');
     expect(gamesById['2048'].name).toBe('2048');
     expect(gamesById['letter-walker'].name).toBe('letter-walker');
@@ -13,5 +13,6 @@ describe('game registry', () => {
     expect(gamesById.mancala.name).toBe('mancala');
     expect(gamesById.klondike.name).toBe('klondike');
     expect(gamesById.freecell.name).toBe('freecell');
+    expect(gamesById.go.name).toBe('go');
   });
 });

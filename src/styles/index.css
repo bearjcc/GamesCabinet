@@ -22,4 +22,5 @@
 @import "./games/mancala.css";
 @import "./games/klondike.css";
 @import "./games/freecell.css";
+@import "./games/go.css";
 @import "./motion.css";

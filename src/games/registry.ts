@@ -5,6 +5,7 @@ import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
 import { FreeCell } from './freecell/game';
 import { Game2048 } from './game-2048/game';
+import { Go } from './go/game';
 import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
 import { Mancala } from './mancala/game';
@@ -28,6 +29,7 @@ export const gameList: Game<any>[] = [
   Mancala,
   Klondike,
   FreeCell,
+  Go,
 ];
 
 export const gamesById = {
@@ -44,6 +46,7 @@ export const gamesById = {
   mancala: Mancala,
   klondike: Klondike,
   freecell: FreeCell,
+  go: Go,
 } as const;
 
 export type GameId = keyof typeof gamesById;

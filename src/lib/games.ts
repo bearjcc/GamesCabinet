@@ -135,6 +135,15 @@ export const GAMES: GameMeta[] = [
     hasBot: false,
     hasSolo: true,
   },
+  {
+    id: 'go',
+    name: 'Go',
+    blurb: '9x9. Capture groups. Two passes end the game.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {
