@@ -1,9 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { type Card, kenneyPlayingCardAsset, makeCard, type Rank } from '../shared/cards';
+import { getMemoryActions } from './actions';
 import { GRID, type MemoryState, PAIR_COUNT } from './game';
 
 const PAIR_RANKS: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8'];
@@ -20,6 +22,15 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
     labels: { yourTurn: 'Your turn - flip a card' },
   });
   const scoreLine = `P1 ${G.scores[0]} - P2 ${G.scores[1]}`;
+
+  const pewActions = getMemoryActions({ G, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      const match = /^flip-(\d+)$/.exec(action.id);
+      if (match) moves.flip(Number(match[1]));
+    },
+  }));
 
   return (
     <PlayTable
@@ -61,6 +72,7 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
           })}
         </div>
       }
+      actions={<ActionSurface label="Memory actions" actions={surfaceActions} />}
     />
   );
 }
