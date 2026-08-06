@@ -7,6 +7,7 @@ import {
   Dominoes,
   type DominoesState,
   type OpenEnd,
+  placementForEnd,
   playableEndIndexes,
   type Tile,
 } from './game';
@@ -52,6 +53,22 @@ describe('playableEndIndexes', () => {
     };
     const tile: Tile = { a: 6, b: 4, id: '4-6' };
     expect(playableEndIndexes(G, tile)).toEqual([0]);
+  });
+});
+
+describe('placementForEnd', () => {
+  it('returns the end anchor and the orientation the rules will play', () => {
+    const end: OpenEnd = { id: 'north', value: 4, x: 2, y: -1, dir: 'N' };
+    expect(placementForEnd(end, { a: 4, b: 6, id: '4-6' })).toEqual({
+      x: 2,
+      y: -1,
+      rot: 270,
+    });
+    expect(placementForEnd(end, { a: 6, b: 4, id: '6-4' })).toEqual({
+      x: 2,
+      y: -1,
+      rot: 90,
+    });
   });
 });
 

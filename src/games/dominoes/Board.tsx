@@ -3,7 +3,7 @@ import { type PointerEvent as ReactPointerEvent, useMemo, useRef, useState } fro
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import type { DominoesState, Tile } from './game';
-import { canDraw, canPass, playableEndIndexes } from './game';
+import { canDraw, canPass, placementForEnd, playableEndIndexes } from './game';
 import {
   boardBoundsRem,
   endBoxRem,
@@ -153,6 +153,10 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
   };
 
   const dragTile = drag ? hand[drag.handIndex] : null;
+  const preview =
+    drag && hoverEnd !== null && G.ends[hoverEnd] && dragTile
+      ? placementForEnd(G.ends[hoverEnd], dragTile)
+      : null;
 
   return (
     <PlayTable
@@ -219,7 +223,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
               </button>
             ) : null}
             {G.ends.map((e, i) => {
-              const box = endBoxRem(e.x, e.y);
+              const box = endBoxRem(e.x, e.y, e.dir);
               const lit = litEnds.includes(i);
               const hot = hoverEnd === i;
               return (
@@ -246,7 +250,22 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
               );
             })}
           </div>
-          {dragTile && drag ? (
+          {dragTile && drag && preview ? (
+            <div
+              className="dom-placement-preview"
+              style={{
+                left: `${tileBoxRem(preview.x, preview.y, preview.rot).left - bounds.minX}rem`,
+                top: `${tileBoxRem(preview.x, preview.y, preview.rot).top - bounds.minY}rem`,
+                width: `${tileBoxRem(preview.x, preview.y, preview.rot).width}rem`,
+                height: `${tileBoxRem(preview.x, preview.y, preview.rot).height}rem`,
+              }}
+              data-testid="dom-placement-preview"
+            >
+              <div className="dom-tile kenney" style={{ transform: `rotate(${preview.rot}deg)` }}>
+                <img src={kenneySrc(dragTile)} alt="" draggable={false} />
+              </div>
+            </div>
+          ) : dragTile && drag ? (
             <div
               className="dom-drag-ghost"
               style={{
@@ -268,13 +287,15 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
               <button
                 key={`${tile.id}-${i}`}
                 type="button"
-                className={`dom-tile kenney${handIndex === i ? ' selected' : ''}${drag?.handIndex === i ? ' is-dragging' : ''}`}
+                className={`dom-hand-slot${handIndex === i ? ' selected' : ''}${drag?.handIndex === i ? ' is-dragging' : ''}`}
                 disabled={!yourTurn}
                 aria-label={`${tile.a}-${tile.b}`}
                 data-testid={`dom-hand-${i}`}
                 onPointerDown={(e) => startDrag(i, e)}
               >
-                <img src={kenneySrc(tile)} alt="" draggable={false} />
+                <span className="dom-tile kenney">
+                  <img src={kenneySrc(tile)} alt="" draggable={false} />
+                </span>
               </button>
             ))}
           </div>

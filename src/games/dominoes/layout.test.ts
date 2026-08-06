@@ -47,13 +47,26 @@ describe('nearestEndIndex', () => {
   });
 });
 
+describe('endBoxRem', () => {
+  it('places the target on the physical seam for every direction', () => {
+    const centre = (box: ReturnType<typeof endBoxRem>) => ({
+      x: box.left + box.width / 2,
+      y: box.top + box.height / 2,
+    });
+    expect(centre(endBoxRem(0, 0, 'E'))).toEqual({ x: -TILE_LONG_REM / 2, y: 0 });
+    expect(centre(endBoxRem(0, 0, 'W'))).toEqual({ x: TILE_LONG_REM / 2, y: 0 });
+    expect(centre(endBoxRem(0, 0, 'N'))).toEqual({ x: 0, y: TILE_LONG_REM / 2 });
+    expect(centre(endBoxRem(0, 0, 'S'))).toEqual({ x: 0, y: -TILE_LONG_REM / 2 });
+  });
+});
+
 describe('boardBoundsRem empty board', () => {
   it('returns padded bounds when no tiles or ends exist', () => {
     expect(boardBoundsRem([], [])).toEqual({
-      minX: -TILE_LONG_REM,
-      minY: -TILE_LONG_REM,
-      width: TILE_LONG_REM * 2,
-      height: TILE_LONG_REM * 2,
+      minX: -TILE_SHORT_REM,
+      minY: -TILE_SHORT_REM,
+      width: TILE_SHORT_REM * 2,
+      height: TILE_SHORT_REM * 2,
     });
   });
 });

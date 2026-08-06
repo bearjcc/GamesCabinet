@@ -6,6 +6,7 @@ export const TILE_SHORT_REM = TILE_LONG_REM / 2;
 export const SNAP_RADIUS_REM = TILE_LONG_REM * 0.65;
 
 export type BoxRem = { left: number; top: number; width: number; height: number };
+type EndDirection = 'N' | 'E' | 'S' | 'W';
 
 export function isVerticalRot(rot: number): boolean {
   return rot === 90 || rot === 270;
@@ -21,17 +22,18 @@ export function tileBoxRem(x: number, y: number, rot: number): BoxRem {
   return { left: cx - width / 2, top: cy - height / 2, width, height };
 }
 
-export function endBoxRem(x: number, y: number): BoxRem {
+/** Centre the visual target on the seam, not on the next tile's centre anchor. */
+export function endBoxRem(x: number, y: number, dir?: EndDirection): BoxRem {
   const size = Math.max(TILE_SHORT_REM, 2.75);
-  const cx = x * TILE_LONG_REM;
-  const cy = y * TILE_LONG_REM;
+  const cx = (x + (dir === 'W' ? 0.5 : dir === 'E' ? -0.5 : 0)) * TILE_LONG_REM;
+  const cy = (y + (dir === 'N' ? 0.5 : dir === 'S' ? -0.5 : 0)) * TILE_LONG_REM;
   return { left: cx - size / 2, top: cy - size / 2, width: size, height: size };
 }
 
 export function boardBoundsRem(
   tiles: { x: number; y: number; rot: number }[],
   ends: { x: number; y: number }[],
-  pad = TILE_LONG_REM,
+  pad = TILE_SHORT_REM,
 ): { minX: number; minY: number; width: number; height: number } {
   const boxes = [
     ...tiles.map((t) => tileBoxRem(t.x, t.y, t.rot)),

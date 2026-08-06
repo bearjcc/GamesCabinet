@@ -54,12 +54,21 @@ function step(x: number, y: number, d: Dir): { x: number; y: number } {
   return { x: x - 1, y };
 }
 
-function rotFor(dir: Dir, tile: Tile, attachValue: number): 0 | 90 | 180 | 270 {
+export function rotationForEnd(dir: Dir, tile: Tile, attachValue: number): 0 | 90 | 180 | 270 {
   const attachIsA = tile.a === attachValue;
   if (dir === 'E') return attachIsA ? 0 : 180;
   if (dir === 'W') return attachIsA ? 180 : 0;
   if (dir === 'S') return attachIsA ? 90 : 270;
   return attachIsA ? 270 : 90;
+}
+
+/** The exact board transform used by the move and by the placement preview. */
+export function placementForEnd(end: OpenEnd, tile: Tile): Pick<PlacedTile, 'x' | 'y' | 'rot'> {
+  return {
+    x: end.x,
+    y: end.y,
+    rot: rotationForEnd(end.dir, tile, end.value),
+  };
 }
 
 function freeValue(tile: Tile, attachValue: number): number {
@@ -141,7 +150,7 @@ export const Dominoes: Game<DominoesState> = {
 
       hand.splice(handIndex, 1);
       const pos = { x: end.x, y: end.y };
-      G.board.push({ tile, x: pos.x, y: pos.y, rot: rotFor(end.dir, tile, end.value) });
+      G.board.push({ tile, ...placementForEnd(end, tile) });
       G.ends.splice(endIndex, 1);
       const free = freeValue(tile, end.value);
       const becomeSpinner = isDouble(tile) && G.spinnerId === null;
