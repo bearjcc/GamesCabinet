@@ -432,9 +432,24 @@ button.tt-die:disabled,
     inset 0 0 0 2px rgba(255, 255, 255, 0.22);
 }
 
+/* Pawn: taller meeple-ish silhouette, distinct from flat disc/chip. */
+.tt-token--pawn {
+  border-radius: 48% 48% 32% 32% / 55% 55% 38% 38%;
+  aspect-ratio: 3 / 4;
+  box-shadow:
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
 .tt-token--sm {
   width: 1.35rem;
   height: 1.35rem;
+}
+
+.tt-token--pawn.tt-token--sm {
+  width: 1.05rem;
+  height: 1.4rem;
+  aspect-ratio: auto;
 }
 
 .tt-token--md {
@@ -445,9 +460,22 @@ button.tt-die:disabled,
   aspect-ratio: 1;
 }
 
+.tt-token--pawn.tt-token--md {
+  width: auto;
+  height: 100%;
+  max-width: 85%;
+  aspect-ratio: 3 / 4;
+}
+
 .tt-token--lg {
   width: calc(var(--tap-min, 2.75rem) * 1.15);
   height: calc(var(--tap-min, 2.75rem) * 1.15);
+}
+
+.tt-token--pawn.tt-token--lg {
+  width: calc(var(--tap-min, 2.75rem) * 0.95);
+  height: calc(var(--tap-min, 2.75rem) * 1.25);
+  aspect-ratio: auto;
 }
 
 /* Player fills: --you / muted opponent, then brand pops. */

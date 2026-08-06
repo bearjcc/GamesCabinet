@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getNineMensMorrisActions } from './actions';
 import {
@@ -177,7 +178,7 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
                   }
                 }}
               >
-                {cell ? <span className={`nmm-piece p${cell}`} aria-hidden /> : null}
+                {cell ? <Token player={cell} variant="pawn" size="md" /> : null}
               </button>
             );
           })}

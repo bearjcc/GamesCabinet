@@ -114,24 +114,19 @@
   display: flex;
   gap: 1px;
   justify-content: center;
+  align-items: flex-end;
 }
 
-.sal-pawn {
-  width: clamp(0.55rem, 2.8vw, 0.9rem);
-  height: clamp(0.55rem, 2.8vw, 0.9rem);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: clamp(0.4rem, 1.8vw, 0.55rem);
-  font-weight: 700;
-  color: #fff;
-  line-height: 1;
+/* Pawns render shared .tt-token--pawn (see tabletop.css). */
+.sal-pawns .tt-token {
+  width: clamp(0.45rem, 2.2vw, 0.72rem);
+  height: clamp(0.65rem, 3vw, 1.05rem);
 }
 
-.sal-pawn-0 {
+.sal-pawns .tt-token--p0 {
   background: #2a6f97;
 }
 
-.sal-pawn-1 {
+.sal-pawns .tt-token--p1 {
   background: #b85c38;
 }

@@ -1,5 +1,5 @@
 export type TokenPlayer = '0' | '1' | string;
-export type TokenVariant = 'disc' | 'chip';
+export type TokenVariant = 'disc' | 'chip' | 'pawn';
 export type TokenSize = 'sm' | 'md' | 'lg';
 
 export type TokenProps = {
@@ -9,7 +9,7 @@ export type TokenProps = {
   selected?: boolean;
   label?: string;
   testId?: string;
-  /** Optional art override (slot). CSS disc is the default; Kenney chip SVG is never required. */
+  /** Optional art override (slot). CSS shape is the default; Kenney art is never required. */
   assetSrc?: string | null;
 };
 
@@ -18,8 +18,8 @@ function playerClass(player: string): string {
 }
 
 /**
- * Presentation slot for board discs / chips.
- * Default look is a CSS disc; pass `assetSrc` to override art without forking.
+ * Presentation slot for board discs / chips / pawns.
+ * Default look is a CSS shape; pass `assetSrc` to override art without forking.
  * Cinematic seam: `data-primitive="drop"` - boards must not import Motion.
  */
 export function Token({
