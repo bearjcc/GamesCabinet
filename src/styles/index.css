@@ -26,4 +26,5 @@
 @import "./games/chinese-checkers.css";
 @import "./games/battleship.css";
 @import "./games/chess.css";
+@import "./games/nine-mens-morris.css";
 @import "./motion.css";

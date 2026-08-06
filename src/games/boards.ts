@@ -13,6 +13,7 @@ import { KlondikeBoard } from './klondike/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
 import { MancalaBoard } from './mancala/Board';
 import { MemoryBoard } from './memory/Board';
+import { NineMensMorrisBoard } from './nine-mens-morris/Board';
 import { ReversiBoard } from './reversi/Board';
 import { TicTacToeBoard } from './tic-tac-toe/Board';
 import { YatzyBoard } from './yatzy/Board';
@@ -36,4 +37,5 @@ export const boards = {
   'chinese-checkers': withMatchChrome(ChineseCheckersBoard),
   battleship: withMatchChrome(BattleshipBoard),
   chess: withMatchChrome(ChessBoard),
+  'nine-mens-morris': withMatchChrome(NineMensMorrisBoard),
 } as const;

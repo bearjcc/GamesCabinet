@@ -173,6 +173,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'nine-mens-morris',
+    name: "Nine Men's Morris",
+    blurb: 'Place, mill, and reduce the opponent to two.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

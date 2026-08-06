@@ -13,6 +13,7 @@ import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
 import { Mancala } from './mancala/game';
 import { Memory } from './memory/game';
+import { NineMensMorris } from './nine-mens-morris/game';
 import { Reversi } from './reversi/game';
 import { TicTacToe } from './tic-tac-toe/game';
 import { Yatzy } from './yatzy/game';
@@ -36,6 +37,7 @@ export const gameList: Game<any>[] = [
   ChineseCheckers,
   Battleship,
   Chess,
+  NineMensMorris,
 ];
 
 export const gamesById = {
@@ -56,6 +58,7 @@ export const gamesById = {
   'chinese-checkers': ChineseCheckers,
   battleship: Battleship,
   chess: Chess,
+  'nine-mens-morris': NineMensMorris,
 } as const;
 
 export type GameId = keyof typeof gamesById;
