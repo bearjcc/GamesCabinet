@@ -191,6 +191,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'dots-and-boxes',
+    name: 'Dots and Boxes',
+    blurb: 'Claim lines. Close boxes. Extra turn when you score.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

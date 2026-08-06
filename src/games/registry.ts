@@ -7,6 +7,7 @@ import { ChineseCheckers } from './chinese-checkers/game';
 import { ConnectFour } from './connect-four/game';
 import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
+import { DotsAndBoxes } from './dots-and-boxes/game';
 import { FreeCell } from './freecell/game';
 import { Game2048 } from './game-2048/game';
 import { Go } from './go/game';
@@ -40,6 +41,7 @@ export const gameList: Game<any>[] = [
   Chess,
   NineMensMorris,
   Backgammon,
+  DotsAndBoxes,
 ];
 
 export const gamesById = {
@@ -62,6 +64,7 @@ export const gamesById = {
   chess: Chess,
   'nine-mens-morris': NineMensMorris,
   backgammon: Backgammon,
+  'dots-and-boxes': DotsAndBoxes,
 } as const;
 
 export type GameId = keyof typeof gamesById;

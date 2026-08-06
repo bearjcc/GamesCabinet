@@ -7,6 +7,7 @@ import { ChineseCheckersBoard } from './chinese-checkers/Board';
 import { ConnectFourBoard } from './connect-four/Board';
 import { CrazyEightsBoard } from './crazy-eights/Board';
 import { DominoesBoard } from './dominoes/Board';
+import { DotsAndBoxesBoard } from './dots-and-boxes/Board';
 import { FreeCellBoard } from './freecell/Board';
 import { Game2048Board } from './game-2048/Board';
 import { GoBoard } from './go/Board';
@@ -40,4 +41,5 @@ export const boards = {
   chess: withMatchChrome(ChessBoard),
   'nine-mens-morris': withMatchChrome(NineMensMorrisBoard),
   backgammon: withMatchChrome(BackgammonBoard),
+  'dots-and-boxes': withMatchChrome(DotsAndBoxesBoard),
 } as const;
