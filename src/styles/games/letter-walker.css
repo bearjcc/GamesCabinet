@@ -13,6 +13,13 @@
   gap: 0.35rem;
 }
 
+.lw-mode {
+  transition:
+    outline-color var(--motion-duration) var(--motion-ease),
+    background var(--motion-duration) var(--motion-ease),
+    border-color var(--motion-duration) var(--motion-ease);
+}
+
 .lw-mode.is-active {
   outline: 2px solid var(--you);
   outline-offset: 1px;
@@ -98,6 +105,9 @@
   font-size: 1.05rem;
   cursor: pointer;
   touch-action: none;
+  transition:
+    background var(--motion-duration) var(--motion-ease),
+    color var(--motion-duration) var(--motion-ease);
 }
 
 .lw-cell.is-selected {
