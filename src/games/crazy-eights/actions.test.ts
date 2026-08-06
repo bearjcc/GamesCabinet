@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeCard } from '../shared/cards';
-import { canDrawCard, getCrazyEightsActions } from './actions';
+import { getCrazyEightsActions } from './actions';
 import type { CrazyEightsState } from './game';
 
 function baseG(partial: Partial<CrazyEightsState> = {}): CrazyEightsState {
@@ -13,28 +13,6 @@ function baseG(partial: Partial<CrazyEightsState> = {}): CrazyEightsState {
     ...partial,
   };
 }
-
-describe('canDrawCard', () => {
-  it('allows draw when stock has cards', () => {
-    expect(canDrawCard(baseG({ stock: [makeCard('clubs', '9')] }), 0)).toBe(true);
-  });
-
-  it('allows draw when discard can reshuffle', () => {
-    expect(
-      canDrawCard(
-        baseG({
-          stock: [],
-          discard: [makeCard('hearts', '5'), makeCard('hearts', '6')],
-        }),
-        0,
-      ),
-    ).toBe(true);
-  });
-
-  it('blocks draw when stock is empty and discard cannot reshuffle', () => {
-    expect(canDrawCard(baseG({ stock: [], discard: [makeCard('hearts', '5')] }), 0)).toBe(false);
-  });
-});
 
 describe('getCrazyEightsActions', () => {
   it('exposes pass as a dismiss action with ce-pass test id', () => {

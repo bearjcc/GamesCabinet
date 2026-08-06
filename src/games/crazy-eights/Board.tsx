@@ -6,9 +6,9 @@ import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
 import type { Suit } from '../shared/cards';
 import { canPlayMatching, topOf } from '../shared/cards';
-import { canDrawCard, getCrazyEightsActions } from './actions';
+import { getCrazyEightsActions } from './actions';
 import { crazyEightsAssetResolver, isWildEightId } from './assets';
-import { type CrazyEightsState, matchContext, WILD_RANK } from './game';
+import { type CrazyEightsState, canDraw, matchContext, WILD_RANK } from './game';
 
 const resolveAsset = crazyEightsAssetResolver();
 
@@ -28,7 +28,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
   const hand = pid >= 0 ? G.hands[pid] : [];
   const top = topOf(G.discard);
   const match = matchContext(G);
-  const canDraw = yourTurn && pid >= 0 && canDrawCard(G, pid);
+  const mayDraw = yourTurn && pid >= 0 && canDraw(G, pid);
 
   const playableIndexes = useMemo(() => {
     if (!yourTurn || !match) return new Set<number>();
@@ -109,7 +109,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
           <StockPile
             count={G.stock.length}
             onDraw={yourTurn ? () => moves.drawCard() : undefined}
-            disabled={!canDraw}
+            disabled={!mayDraw}
             testId="ce-stock"
           />
           <DiscardPile

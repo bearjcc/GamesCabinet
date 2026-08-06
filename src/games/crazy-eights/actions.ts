@@ -1,21 +1,12 @@
 import type { SemanticAction } from '../../lib/actions';
 import type { CrazyEightsState } from './game';
 
-/**
- * Stock/discard draw availability (current board legality).
- * Conflict note: rules agent may export `canDraw` from game.ts that also
- * forbids drawing when the hand already holds a legal card. Reconcile then.
- */
-export function canDrawCard(G: CrazyEightsState, _player: number): boolean {
-  return G.stock.length > 0 || G.discard.length > 1;
-}
-
 export type CrazyEightsActionInput = {
   G: CrazyEightsState;
   yourTurn: boolean;
 };
 
-/** Pure pew intents for Crazy Eights (Pass). Draw stays on StockPile. */
+/** Pure pew intents for Crazy Eights (Pass). Draw stays on StockPile via game.canDraw. */
 export function getCrazyEightsActions({ G, yourTurn }: CrazyEightsActionInput): SemanticAction[] {
   const passOk = yourTurn && G.drewThisTurn;
   let disabledReason: string | undefined;
