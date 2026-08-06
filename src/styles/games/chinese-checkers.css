@@ -1,0 +1,69 @@
+.chinese-checkers-board {
+  position: relative;
+  width: min(100%, var(--board-max));
+  max-width: min(100%, calc(100dvh - 12rem));
+  aspect-ratio: 1;
+  margin: 0 auto;
+  touch-action: manipulation;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in oklab, var(--panel) 88%, #7a9bb8) 0%,
+      transparent 62%
+    ),
+    color-mix(in oklab, var(--panel) 92%, #2f4a3c);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.cc-hole {
+  position: absolute;
+  width: 7.2%;
+  height: 7.2%;
+  transform: translate(-50%, -50%);
+  border: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+  border-radius: 999px;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--bg) 55%, #c9d6c3);
+  touch-action: manipulation;
+  transition:
+    outline-color var(--motion-duration) var(--motion-ease),
+    box-shadow var(--motion-duration) var(--motion-ease),
+    background var(--motion-duration) var(--motion-ease);
+}
+
+.cc-hole.home-0 {
+  background: color-mix(in oklab, #c44949 22%, #d7c4b0);
+}
+
+.cc-hole.home-1 {
+  background: color-mix(in oklab, #3b6ea5 22%, #d7c4b0);
+}
+
+.cc-hole.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.cc-hole.target {
+  box-shadow: inset 0 0 0 3px var(--you);
+}
+
+.cc-peg {
+  width: 72%;
+  height: 72%;
+  border-radius: 999px;
+  display: block;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 28%);
+}
+
+.cc-peg.p0 {
+  background: #c44949;
+}
+
+.cc-peg.p1 {
+  background: #3b6ea5;
+}
