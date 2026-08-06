@@ -18,4 +18,6 @@
 @import "./games/letter-walker.css";
 @import "./games/crazy-eights.css";
 @import "./games/reversi.css";
+@import "./games/memory.css";
+@import "./games/mancala.css";
 @import "./motion.css";

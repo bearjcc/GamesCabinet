@@ -99,6 +99,24 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'memory',
+    name: 'Memory',
+    blurb: 'Flip pairs. Most matches wins.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
+  {
+    id: 'mancala',
+    name: 'Mancala',
+    blurb: 'Kalaha. Sow stones. Capture. Fill your store.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {
