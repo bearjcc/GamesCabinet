@@ -1,13 +1,16 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { getReversiActions } from './actions';
 import type { ReversiState } from './game';
 import { legalPlaces, SIZE } from './game';
 
 export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<ReversiState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
+  const player = playerID ?? ctx.currentPlayer;
   const places = yourTurn ? legalPlaces(G, ctx.currentPlayer) : [];
   const placeSet = new Set(places);
 
@@ -25,6 +28,19 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
         places.length === 0 ? 'No moves - passing' : `Your turn - place a disc (${dark}-${light})`,
     },
   });
+
+  const pewActions = getReversiActions({ G, player, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'pass') {
+        moves.pass();
+        return;
+      }
+      const match = /^place-(\d+)$/.exec(action.id);
+      if (match) moves.place(Number(match[1]));
+    },
+  }));
 
   return (
     <PlayTable
@@ -64,6 +80,7 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
           })}
         </div>
       }
+      actions={<ActionSurface label="Reversi actions" actions={surfaceActions} />}
     />
   );
 }
