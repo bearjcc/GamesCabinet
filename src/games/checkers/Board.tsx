@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useState } from 'react';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { deriveMatchStatus } from '../../lib/matchStatus';
 import type { CheckersState, Piece } from './game';
 import { legalMoves, rc } from './game';
 
@@ -36,17 +37,12 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
     selected === null ? [] : legal.filter((m) => m.from === selected).map((m) => m.to);
   const selectable = new Set(legal.map((m) => m.from));
 
-  let status = 'Waiting…';
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
-  if (ctx.gameover) {
-    tone = 'done';
-    status = ctx.gameover.winner === playerID ? 'You win' : 'Opponent wins';
-  } else if (yourTurn) {
-    tone = 'you';
-    status = selected === null ? 'Your turn — tap a piece' : 'Tap a square to move';
-  } else {
-    status = 'Their turn';
-  }
+  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    labels: {
+      yourTurn: selected === null ? 'Your turn — tap a piece' : 'Tap a square to move',
+    },
+  });
 
   return (
     <PlayTable

@@ -3,7 +3,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
+import { SoloPlayTabs } from '../../components/SoloPlayTabs';
 import { StatusBar } from '../../components/StatusBar';
+import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
 import type { Game2048State, SwipeDir } from './game';
 
@@ -37,8 +39,9 @@ export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048St
     return () => window.removeEventListener('keydown', onKey);
   }, [moves, playable]);
 
+  // Solo score chrome — not the multiplayer turn/win shape of deriveMatchStatus.
   let status = `Score ${G.score}`;
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'you';
+  let tone: StatusTone = 'you';
   if (ctx.gameover) {
     tone = 'done';
     const over = ctx.gameover as { score: number; won: boolean };
@@ -58,24 +61,7 @@ export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048St
         info={
           <>
             <StatusBar text={status} tone={tone} />
-            <div className="lw-tabs">
-              <button
-                type="button"
-                className={`btn${tab === 'play' ? ' is-active' : ''}`}
-                data-testid="g2048-tab-play"
-                onClick={() => setTab('play')}
-              >
-                Play
-              </button>
-              <button
-                type="button"
-                className={`btn${tab === 'scores' ? ' is-active' : ''}`}
-                data-testid="g2048-tab-scores"
-                onClick={() => setTab('scores')}
-              >
-                Scores
-              </button>
-            </div>
+            <SoloPlayTabs value={tab} onChange={setTab} testIdPrefix="g2048" />
           </>
         }
         board={
