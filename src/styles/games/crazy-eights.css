@@ -7,3 +7,16 @@
   padding: 0.75rem 0.5rem;
   min-height: 9rem;
 }
+
+.ce-stock__cinematic,
+.ce-discard__cinematic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  transition: opacity var(--motion-duration) var(--motion-ease, ease);
+}
+
+.ce-discard__cinematic {
+  perspective: 48rem;
+}

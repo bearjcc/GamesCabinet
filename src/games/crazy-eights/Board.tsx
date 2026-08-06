@@ -1,9 +1,12 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
+import { Deal, Flip } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
+import { primitiveProfile } from '../../lib/cinematic';
+import { readEffectiveMotion } from '../../lib/motion';
 import type { Suit } from '../shared/cards';
 import { canPlayMatching, topOf } from '../shared/cards';
 import { getCrazyEightsActions } from './actions';
@@ -19,9 +22,25 @@ const SUIT_LABEL: Record<Suit, string> = {
   spades: 'Spades',
 };
 
+function handLengths(hands: readonly (readonly unknown[])[]): number[] {
+  return hands.map((h) => h.length);
+}
+
+function anyHandGrew(prev: readonly number[], next: readonly number[]): boolean {
+  return next.some((len, i) => len > (prev[i] ?? 0));
+}
+
 export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEightsState>) {
   const [selected, setSelected] = useState<number | null>(null);
   const [pickingSuit, setPickingSuit] = useState(false);
+  /** Client-only deal/flip pulses; remount wrappers so motion never gates G. */
+  const [dealPulse, setDealPulse] = useState(0);
+  const [flipPulse, setFlipPulse] = useState(0);
+  const [dealActive, setDealActive] = useState(false);
+  const [flipActive, setFlipActive] = useState(false);
+  const prevHandLensRef = useRef(handLengths(G.hands));
+  const prevDiscardTopIdRef = useRef(topOf(G.discard)?.id);
+  const prevStockLenRef = useRef(G.stock.length);
 
   const pid = playerID === null || playerID === undefined ? -1 : Number(playerID);
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
@@ -29,6 +48,38 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
   const top = topOf(G.discard);
   const match = matchContext(G);
   const mayDraw = yourTurn && pid >= 0 && canDraw(G, pid);
+
+  useEffect(() => {
+    const nextLens = handLengths(G.hands);
+    const nextTopId = topOf(G.discard)?.id;
+    const drew =
+      anyHandGrew(prevHandLensRef.current, nextLens) || G.stock.length < prevStockLenRef.current;
+    const played = nextTopId !== undefined && nextTopId !== prevDiscardTopIdRef.current;
+
+    if (drew) setDealPulse((n) => n + 1);
+    if (played) setFlipPulse((n) => n + 1);
+
+    prevHandLensRef.current = nextLens;
+    prevDiscardTopIdRef.current = nextTopId;
+    prevStockLenRef.current = G.stock.length;
+  }, [G.stock.length, G.discard, G.hands]);
+
+  // Settle end poses back to rest (primitives animate to a held transform).
+  useEffect(() => {
+    if (dealPulse === 0) return;
+    setDealActive(true);
+    const ms = primitiveProfile('deal', readEffectiveMotion()).durationMs;
+    const t = window.setTimeout(() => setDealActive(false), ms);
+    return () => window.clearTimeout(t);
+  }, [dealPulse]);
+
+  useEffect(() => {
+    if (flipPulse === 0) return;
+    setFlipActive(true);
+    const ms = primitiveProfile('flip', readEffectiveMotion()).durationMs;
+    const t = window.setTimeout(() => setFlipActive(false), ms);
+    return () => window.clearTimeout(t);
+  }, [flipPulse]);
 
   const playableIndexes = useMemo(() => {
     if (!yourTurn || !match) return new Set<number>();
@@ -106,19 +157,23 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
       }
       board={
         <div className="ce-table" data-testid="ce-board">
-          <StockPile
-            count={G.stock.length}
-            onDraw={yourTurn ? () => moves.drawCard() : undefined}
-            disabled={!mayDraw}
-            testId="ce-stock"
-          />
-          <DiscardPile
-            top={top}
-            assetSrc={top ? resolveAsset(top) : null}
-            wild={top ? isWildEightId(top.id) : false}
-            suitLabel={SUIT_LABEL[G.currentSuit]}
-            testId="ce-discard"
-          />
+          <Deal key={dealPulse} active={dealActive} className="ce-stock__cinematic">
+            <StockPile
+              count={G.stock.length}
+              onDraw={yourTurn ? () => moves.drawCard() : undefined}
+              disabled={!mayDraw}
+              testId="ce-stock"
+            />
+          </Deal>
+          <Flip key={flipPulse} active={flipActive} className="ce-discard__cinematic">
+            <DiscardPile
+              top={top}
+              assetSrc={top ? resolveAsset(top) : null}
+              wild={top ? isWildEightId(top.id) : false}
+              suitLabel={SUIT_LABEL[G.currentSuit]}
+              testId="ce-discard"
+            />
+          </Flip>
           {pickingSuit ? (
             <SuitPicker
               testIdPrefix="ce-suit"
