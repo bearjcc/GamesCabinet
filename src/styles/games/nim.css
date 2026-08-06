@@ -1,0 +1,18 @@
+.nim-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: min(100%, 22rem);
+  margin: 0 auto;
+  padding: 0.5rem 0 1rem;
+}
+
+.nim-pile {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: 16rem;
+  min-height: 2.5rem;
+}
