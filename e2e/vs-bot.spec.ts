@@ -171,4 +171,13 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('dab-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
+
+  test('go-fish play vs bot reaches board and hand', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-go-fish').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('go-fish-board')).toBeVisible();
+    await expect(page.getByTestId('go-fish-hand')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+  });
 });
