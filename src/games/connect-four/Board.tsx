@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getConnectFourActions } from './actions';
 import type { C4State } from './game';
@@ -52,10 +53,12 @@ export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State
                   return (
                     <span
                       key={row}
-                      className={`c4-cell p${cell ?? 'e'}`}
+                      className={`c4-cell${cell === null ? ' pe' : ''}`}
                       role="gridcell"
                       aria-hidden
-                    />
+                    >
+                      {cell !== null ? <Token player={cell} variant="disc" size="md" /> : null}
+                    </span>
                   );
                 })}
               </button>
