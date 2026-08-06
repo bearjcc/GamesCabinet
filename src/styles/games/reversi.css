@@ -1,0 +1,56 @@
+.reversi-board {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  width: min(100%, var(--board-max));
+  max-width: min(100%, calc(100dvh - 12rem));
+  aspect-ratio: 1;
+  margin: 0 auto;
+  gap: 1px;
+  padding: 0.45rem;
+  border-radius: var(--radius-lg);
+  background: #1f6b3a;
+  border: 1px solid var(--line);
+  touch-action: manipulation;
+}
+
+.reversi-cell {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 10%;
+  display: grid;
+  place-items: center;
+  background: #2f8a4e;
+  border-radius: 2px;
+  cursor: default;
+  touch-action: manipulation;
+}
+
+.reversi-cell.is-open {
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.reversi-cell.is-open:hover,
+.reversi-cell.is-open:focus-visible {
+  background: #3a9b5a;
+}
+
+.reversi-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  display: block;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.reversi-cell.p0 .reversi-disc {
+  background: #1a1a1a;
+}
+
+.reversi-cell.p1 .reversi-disc {
+  background: #f2f0ea;
+}
