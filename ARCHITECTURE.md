@@ -42,6 +42,12 @@ Examples of the gate in practice: scoring and per-player score display should no
 
 Agent checklist: `.cursor/rules/shared-mechanics.mdc`.
 
+## Presentation layer
+
+boardgame.io decides what happened; GamesCabinet decides how players experience it. Games declare intent (`SemanticAction` in `src/lib/actions.ts`, tabletop components in `src/components/tabletop/`) and the shell chooses the touch pattern, so the interaction language stays the same across the cabinet.
+
+Load-bearing boundaries — animation state never enters `G`, animation never gates input, representation modes belong to the shell, overrides are slots not forks: `docs/adr/0001-ui-operating-system-layer.md`.
+
 ## Repo layout (Phase 1)
 
 Single package (not a packages monorepo yet):

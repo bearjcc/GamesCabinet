@@ -76,7 +76,21 @@ Surface + 1px line. No floating shadows, glass, or page gradients.
 
 ## Motion
 
-140ms ease-out on button backgrounds. No entrance motion. Honour `prefers-reduced-motion`.
+Chrome stays still: 140ms ease-out on button backgrounds, no entrance motion on shell surfaces.
+
+Game objects may move, because motion is how a state change reads as physical. Boards use the shared primitives (lift, drop, deal, flip, fan, stack, roll, snap, count) rather than bespoke animation, so a card behaves the same in every game. Motion decorates and never gates — input is honoured immediately and animation is always interruptible.
+
+**Intensity** (`MotionCycle`, persisted as `gamescabinet.motion`, applied via `data-motion`):
+
+| Level | Character |
+|---|---|
+| **Reduced** | No transitions or transforms. Fully playable and legible. |
+| **Normal** | Default. Enough weight to read a state change. |
+| **Playful** | Longer, bouncier. For people who like it. |
+
+`prefers-reduced-motion` always wins over the stored preference.
+
+Rationale for the object/chrome split: `docs/adr/0001-ui-operating-system-layer.md`.
 
 ## Do / Don't
 
