@@ -4,6 +4,7 @@ export const SCORE_CEILINGS: Record<string, number> = {
   yatzy: 2_000,
   'letter-walker': 5_000,
   klondike: 52,
+  freecell: 52,
 };
 
 /** Fallback when a catalogue game has hasLeaderboard but no explicit ceiling. */

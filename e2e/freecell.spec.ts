@@ -9,5 +9,7 @@ test.describe('FreeCell', () => {
     await expect(page.getByTestId('freecell-cascades')).toBeVisible();
     await expect(page.getByTestId('freecell-freecells')).toBeVisible();
     await expect(page.getByTestId('freecell-foundations')).toBeVisible();
+    await page.getByTestId('freecell-tab-scores').click();
+    await expect(page.getByTestId('freecell-scores')).toBeVisible();
   });
 });
