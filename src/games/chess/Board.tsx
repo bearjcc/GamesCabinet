@@ -1,9 +1,12 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
+import { Lift, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { readEffectiveMotion } from '../../lib/motion';
 import { getChessActions } from './actions';
 import type { ChessState, Piece, PieceType } from './game';
 import { legalMoves, rc } from './game';
@@ -49,14 +52,105 @@ function squareAriaLabel(
   return parts.join(', ');
 }
 
+function cloneBoard(board: readonly (Piece | null)[]): (Piece | null)[] {
+  return board.map((p) => (p ? { ...p } : null));
+}
+
+/** First square that gained a piece (move landing). */
+function findLandingIndex(
+  prev: readonly (Piece | null)[],
+  next: readonly (Piece | null)[],
+): number | null {
+  for (let i = 0; i < next.length; i++) {
+    if (next[i] && !prev[i]) return i;
+  }
+  return null;
+}
+
+type PieceChromeProps = {
+  piece: Piece;
+  liftPulse: number;
+  liftActive: boolean;
+  snapPulse: number;
+  snapActive: boolean;
+};
+
+/** Client-only Lift/Snap pulse; remounts so motion never gates G or taps. */
+function PieceChrome({ piece, liftPulse, liftActive, snapPulse, snapActive }: PieceChromeProps) {
+  const inner = (
+    <img
+      className={`chess-piece p${piece.player}`}
+      src={PIECE_SRC[piece.type]}
+      alt=""
+      draggable={false}
+    />
+  );
+  if (snapActive) {
+    return (
+      <Snap key={snapPulse} active={snapActive} className="chess-piece__cinematic">
+        {inner}
+      </Snap>
+    );
+  }
+  if (liftActive) {
+    return (
+      <Lift key={liftPulse} active={liftActive} className="chess-piece__cinematic">
+        {inner}
+      </Lift>
+    );
+  }
+  return inner;
+}
+
 export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) {
   const [selected, setSelected] = useState<number | null>(null);
+  /** Client-only selection / landing pulses; remount wrappers so motion never gates G. */
+  const [selectPulse, setSelectPulse] = useState(0);
+  const [selectActive, setSelectActive] = useState(false);
+  const [landPulse, setLandPulse] = useState(0);
+  const [landActive, setLandActive] = useState(false);
+  const [landIndex, setLandIndex] = useState<number | null>(null);
+  const prevSelectedRef = useRef(selected);
+  const prevBoardRef = useRef(cloneBoard(G.board));
+
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
   const player = playerID ?? ctx.currentPlayer;
   const legal = yourTurn ? legalMoves(G, ctx.currentPlayer) : [];
   const targets =
     selected === null ? [] : legal.filter((m) => m.from === selected).map((m) => m.to);
   const selectable = new Set(legal.map((m) => m.from));
+
+  useEffect(() => {
+    if (selected !== null && selected !== prevSelectedRef.current) {
+      setSelectPulse((n) => n + 1);
+    }
+    prevSelectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    if (selectPulse === 0) return;
+    setSelectActive(true);
+    const ms = primitiveProfile('lift', readEffectiveMotion()).durationMs;
+    const t = window.setTimeout(() => setSelectActive(false), ms);
+    return () => window.clearTimeout(t);
+  }, [selectPulse]);
+
+  useEffect(() => {
+    const landed = findLandingIndex(prevBoardRef.current, G.board);
+    if (landed !== null) {
+      setLandIndex(landed);
+      setLandPulse((n) => n + 1);
+    }
+    prevBoardRef.current = cloneBoard(G.board);
+  }, [G.board]);
+
+  useEffect(() => {
+    if (landPulse === 0) return;
+    setLandActive(true);
+    const ms = primitiveProfile('snap', readEffectiveMotion()).durationMs;
+    const t = window.setTimeout(() => setLandActive(false), ms);
+    return () => window.clearTimeout(t);
+  }, [landPulse]);
 
   const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
@@ -87,6 +181,7 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
             const piece = G.board[i];
             const isTarget = targets.includes(i);
             const isSel = selected === i;
+            const isLanding = landIndex === i;
             return (
               <button
                 key={i}
@@ -114,11 +209,12 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
                 }}
               >
                 {piece ? (
-                  <img
-                    className={`chess-piece p${piece.player}`}
-                    src={PIECE_SRC[piece.type]}
-                    alt=""
-                    draggable={false}
+                  <PieceChrome
+                    piece={piece}
+                    liftPulse={selectPulse}
+                    liftActive={isSel && selectActive}
+                    snapPulse={landPulse}
+                    snapActive={isLanding && landActive}
                   />
                 ) : null}
               </button>
