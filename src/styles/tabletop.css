@@ -409,3 +409,102 @@ button.tt-die:disabled,
 .tt-counter--emphasize .tt-counter__value {
   font-size: 1.35rem;
 }
+
+/* --- Tabletop token (shared disc / chip) --- */
+.tt-token {
+  display: block;
+  box-sizing: border-box;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.28);
+  background: var(--you, #7d9b5a);
+  color: var(--ink-contrast, #fbf6ec);
+  overflow: hidden;
+  transition:
+    box-shadow var(--motion-duration, 160ms) ease,
+    transform var(--motion-duration, 160ms) ease;
+}
+
+/* .tt-token--disc is the default CSS disc; no asset required. */
+.tt-token--chip {
+  box-shadow:
+    inset 0 -2px 4px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.22);
+}
+
+.tt-token--sm {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.tt-token--md {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+}
+
+.tt-token--lg {
+  width: calc(var(--tap-min, 2.75rem) * 1.15);
+  height: calc(var(--tap-min, 2.75rem) * 1.15);
+}
+
+/* Player fills: --you / muted opponent, then brand pops. */
+.tt-token--p0 {
+  background: var(--you, #7d9b5a);
+  color: var(--ink-contrast, #fbf6ec);
+}
+
+.tt-token--p1 {
+  background: var(--muted, #7a6f5f);
+  color: var(--surface-2, #fbf6ec);
+}
+
+.tt-token--p2 {
+  background: var(--brand-blue, #3a6fad);
+  color: var(--ink-contrast, #fbf6ec);
+}
+
+.tt-token--p3 {
+  background: var(--brand-yellow, #ed9f18);
+  color: var(--brand-umber, #5c3a22);
+}
+
+.tt-token.is-selected {
+  box-shadow:
+    inset 0 -2px 4px rgba(0, 0, 0, 0.28),
+    0 0 0 2px var(--you, #7d9b5a);
+  transform: translateY(-0.06rem);
+}
+
+.tt-token--art {
+  background: transparent;
+  box-shadow: none;
+}
+
+.tt-token__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-token {
+    transition: none;
+  }
+
+  .tt-token.is-selected {
+    transform: none;
+  }
+}
+
+[data-motion="reduced"] .tt-token {
+  transition: none;
+}
+
+[data-motion="reduced"] .tt-token.is-selected {
+  transform: none;
+}

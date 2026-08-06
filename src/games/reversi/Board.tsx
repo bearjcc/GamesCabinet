@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getReversiActions } from './actions';
 import type { ReversiState } from './game';
@@ -62,7 +63,7 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
               <button
                 key={i}
                 type="button"
-                className={`reversi-cell${can ? ' is-open' : ''}${cell ? ` p${cell}` : ''}`}
+                className={`reversi-cell${can ? ' is-open' : ''}`}
                 disabled={!can}
                 data-testid={`reversi-cell-${i}`}
                 onClick={() => moves.place(i)}
@@ -74,7 +75,7 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
                     : `${cell === '0' ? 'Dark' : 'Light'} disc at ${file}${rank}`
                 }
               >
-                {cell !== null ? <span className="reversi-disc" aria-hidden /> : null}
+                {cell !== null ? <Token player={cell} variant="disc" size="md" /> : null}
               </button>
             );
           })}
