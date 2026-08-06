@@ -202,6 +202,98 @@ button.tt-card:disabled,
   }
 }
 
+/* Hand representation modes (ADR 0001 §4) — after base card rules. */
+.tt-hand--compact .tt-hand__slot {
+  margin-left: -1.55rem;
+}
+
+.tt-hand--compact .tt-card {
+  width: 3.15rem;
+  height: 4.5rem;
+}
+
+.tt-hand--list {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  min-height: 0;
+  max-height: 18rem;
+  padding: 0.25rem;
+}
+
+.tt-hand__search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+}
+
+.tt-hand__search-label {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.tt-hand__search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #444;
+  border-radius: 0.3rem;
+  background: #fffef8;
+  color: #1a1a1a;
+  font: inherit;
+}
+
+.tt-hand__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 0.1rem 0;
+}
+
+.tt-hand--list .tt-hand__slot {
+  margin-left: 0;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.tt-hand--list .tt-card {
+  width: 100%;
+  max-width: 12rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0.45rem;
+}
+
+.tt-hand--list .tt-card__pip,
+.tt-hand--list .tt-card__corner--br {
+  display: none;
+}
+
+.tt-hand--list .tt-card__corner--tl {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  align-items: baseline;
+}
+
+.tt-hand--list .tt-card__img {
+  width: auto;
+  height: 2.35rem;
+  object-fit: contain;
+}
 /* --- Tabletop dice (shared die kit) --- */
 .tt-dice {
   display: flex;
