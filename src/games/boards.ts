@@ -11,6 +11,7 @@ import { DotsAndBoxesBoard } from './dots-and-boxes/Board';
 import { FreeCellBoard } from './freecell/Board';
 import { Game2048Board } from './game-2048/Board';
 import { GoBoard } from './go/Board';
+import { GoFishBoard } from './go-fish/Board';
 import { KlondikeBoard } from './klondike/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
 import { MancalaBoard } from './mancala/Board';
@@ -44,4 +45,5 @@ export const boards = {
   backgammon: withMatchChrome(BackgammonBoard),
   'dots-and-boxes': withMatchChrome(DotsAndBoxesBoard),
   'snakes-and-ladders': withMatchChrome(SnakesAndLaddersBoard),
+  'go-fish': withMatchChrome(GoFishBoard),
 } as const;

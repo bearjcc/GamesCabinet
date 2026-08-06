@@ -11,6 +11,7 @@ import { DotsAndBoxes } from './dots-and-boxes/game';
 import { FreeCell } from './freecell/game';
 import { Game2048 } from './game-2048/game';
 import { Go } from './go/game';
+import { GoFish } from './go-fish/game';
 import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
 import { Mancala } from './mancala/game';
@@ -44,6 +45,7 @@ export const gameList: Game<any>[] = [
   Backgammon,
   DotsAndBoxes,
   SnakesAndLadders,
+  GoFish,
 ];
 
 export const gamesById = {
@@ -68,6 +70,7 @@ export const gamesById = {
   backgammon: Backgammon,
   'dots-and-boxes': DotsAndBoxes,
   'snakes-and-ladders': SnakesAndLadders,
+  'go-fish': GoFish,
 } as const;
 
 export type GameId = keyof typeof gamesById;
