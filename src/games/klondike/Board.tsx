@@ -6,7 +6,6 @@ import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { StockPile } from '../../components/tabletop/CardPile';
 import { kenneyPlayingCardAsset } from '../shared/cards';
 import type { KlondikeState, TableCard } from './game';
-import '../../styles/games/klondike.css';
 
 type Selection =
   | null

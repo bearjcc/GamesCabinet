@@ -20,4 +20,5 @@
 @import "./games/reversi.css";
 @import "./games/memory.css";
 @import "./games/mancala.css";
+@import "./games/klondike.css";
 @import "./motion.css";

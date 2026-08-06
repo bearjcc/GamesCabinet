@@ -4,6 +4,7 @@ import { ConnectFour } from './connect-four/game';
 import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
 import { Game2048 } from './game-2048/game';
+import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
 import { Mancala } from './mancala/game';
 import { Memory } from './memory/game';
@@ -24,6 +25,7 @@ export const gameList: Game<any>[] = [
   Reversi,
   Memory,
   Mancala,
+  Klondike,
 ];
 
 export const gamesById = {
@@ -38,6 +40,7 @@ export const gamesById = {
   reversi: Reversi,
   memory: Memory,
   mancala: Mancala,
+  klondike: Klondike,
 } as const;
 
 export type GameId = keyof typeof gamesById;

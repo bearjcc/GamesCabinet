@@ -4,6 +4,7 @@ import { ConnectFourBoard } from './connect-four/Board';
 import { CrazyEightsBoard } from './crazy-eights/Board';
 import { DominoesBoard } from './dominoes/Board';
 import { Game2048Board } from './game-2048/Board';
+import { KlondikeBoard } from './klondike/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
 import { MancalaBoard } from './mancala/Board';
 import { MemoryBoard } from './memory/Board';
@@ -24,4 +25,5 @@ export const boards = {
   reversi: withMatchChrome(ReversiBoard),
   memory: withMatchChrome(MemoryBoard),
   mancala: withMatchChrome(MancalaBoard),
+  klondike: withMatchChrome(KlondikeBoard),
 } as const;

@@ -117,6 +117,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'klondike',
+    name: 'Klondike',
+    blurb: 'Classic solitaire. Build foundations Ace to King.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {
