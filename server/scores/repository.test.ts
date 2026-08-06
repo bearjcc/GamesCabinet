@@ -114,4 +114,33 @@ describe('ScoresRepository', () => {
     expect(fresh.top('letter-walker', 0)).toEqual([]);
     expect(fresh.topDaily('letter-walker', 0)).toEqual([]);
   });
+
+  it('rejects scores above the per-game ceiling', () => {
+    const repo = createMemoryScoresRepository();
+    expect(() => repo.add('2048', { score: 200_001 })).toThrow(/exceeds maximum/);
+    expect(() => repo.add('yatzy', { score: 2_001 })).toThrow(/exceeds maximum/);
+  });
+
+  it('sanitizes meta and prunes per gameId on persist', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gc-scores-prune-'));
+    tempDirs.push(dir);
+    const file = path.join(dir, 'scores.json');
+    const repo = createJsonScoresRepository(file, {
+      prune: { topAllTime: 1, recentDays: 0, maxPerGame: 2 },
+    });
+
+    const first = repo.add('2048', {
+      score: 10,
+      meta: { mode: 'a', nested: { x: 1, deep: { y: 2 } }, arr: [1] },
+    });
+    expect(first.meta).toEqual({ mode: 'a', nested: { x: 1 } });
+
+    repo.add('2048', { score: 20 });
+    repo.add('2048', { score: 30 });
+    repo.add('yatzy', { score: 50 });
+
+    const again = createJsonScoresRepository(file);
+    expect(again.top('2048').map((s) => s.score)).toEqual([30, 20]);
+    expect(again.top('yatzy')).toHaveLength(1);
+  });
 });
