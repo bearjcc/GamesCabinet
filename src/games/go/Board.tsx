@@ -1,11 +1,14 @@
 import type { BoardProps } from 'boardgame.io/react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { getGoActions } from './actions';
 import { type GoState, legalPlaces, SIZE } from './game';
 
 export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
+  const player = playerID ?? ctx.currentPlayer;
   const places = yourTurn ? legalPlaces(G, ctx.currentPlayer) : [];
   const placeSet = new Set(places);
 
@@ -17,6 +20,19 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
       yourTurn: `Your turn (${black}-${white})`,
     },
   });
+
+  const pewActions = getGoActions({ G, player, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'pass') {
+        moves.pass();
+        return;
+      }
+      const match = /^place-(\d+)$/.exec(action.id);
+      if (match) moves.place(Number(match[1]));
+    },
+  }));
 
   return (
     <PlayTable
@@ -51,17 +67,7 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
           })}
         </div>
       }
-      actions={
-        <button
-          type="button"
-          className="btn"
-          data-testid="go-pass"
-          disabled={!yourTurn}
-          onClick={() => moves.pass()}
-        >
-          Pass
-        </button>
-      }
+      actions={<ActionSurface label="Go actions" actions={surfaceActions} />}
     />
   );
 }
