@@ -17,6 +17,9 @@
   font-family: var(--font);
   font-size: 2.1rem;
   font-weight: 700;
+  transition:
+    border-color var(--motion-duration) var(--motion-ease),
+    background var(--motion-duration) var(--motion-ease);
 }
 
 .ttt-cell.is-open {

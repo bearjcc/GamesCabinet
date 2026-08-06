@@ -22,6 +22,9 @@
   display: grid;
   place-items: center;
   touch-action: manipulation;
+  transition:
+    outline-color var(--motion-duration) var(--motion-ease),
+    box-shadow var(--motion-duration) var(--motion-ease);
 }
 
 .ck-sq.light {
@@ -46,6 +49,7 @@
   height: 72%;
   border-radius: 999px;
   display: block;
+  transition: background var(--motion-duration) var(--motion-ease);
 }
 
 .ck-piece.p0 {

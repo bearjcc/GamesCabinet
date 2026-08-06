@@ -18,6 +18,10 @@
   color: var(--tile-ink);
   font-weight: 700;
   font-size: 1.25rem;
+  transition:
+    background var(--motion-duration) var(--motion-ease),
+    color var(--motion-duration) var(--motion-ease),
+    font-size var(--motion-duration) var(--motion-ease);
 }
 
 .g2048-cell.v2 {

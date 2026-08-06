@@ -19,7 +19,16 @@
     transition: none;
   }
 
-  .game-tile {
+  .game-tile,
+  .ttt-cell,
+  .c4-col,
+  .c4-cell,
+  .ck-sq,
+  .ck-piece,
+  .g2048-cell,
+  .yatzy-score-btn,
+  .lw-mode,
+  .lw-cell {
     transition: none;
   }
 }
@@ -34,7 +43,16 @@
 }
 
 [data-motion="reduced"] .dom-hand-slot .dom-tile,
-[data-motion="reduced"] .game-tile {
+[data-motion="reduced"] .game-tile,
+[data-motion="reduced"] .ttt-cell,
+[data-motion="reduced"] .c4-col,
+[data-motion="reduced"] .c4-cell,
+[data-motion="reduced"] .ck-sq,
+[data-motion="reduced"] .ck-piece,
+[data-motion="reduced"] .g2048-cell,
+[data-motion="reduced"] .yatzy-score-btn,
+[data-motion="reduced"] .lw-mode,
+[data-motion="reduced"] .lw-cell {
   transition: none;
 }
 
