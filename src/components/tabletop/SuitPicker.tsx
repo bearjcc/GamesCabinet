@@ -1,5 +1,6 @@
 import type { Suit } from '../../games/shared/cards';
 import { SUITS } from '../../games/shared/cards';
+import { FocusTrap } from '../FocusTrap';
 
 const LABELS: Record<Suit, string> = {
   clubs: 'Clubs',
@@ -18,11 +19,13 @@ export function SuitPicker({
   testIdPrefix?: string;
 }) {
   return (
-    <div
+    <FocusTrap
       className="tt-suit-picker"
       role="dialog"
+      aria-modal="true"
       aria-label="Choose suit"
       data-testid={testIdPrefix}
+      onEscape={onCancel}
     >
       <p className="tt-suit-picker__title">Choose a suit</p>
       <div className="tt-suit-picker__row">
@@ -48,6 +51,6 @@ export function SuitPicker({
           Cancel
         </button>
       ) : null}
-    </div>
+    </FocusTrap>
   );
 }
