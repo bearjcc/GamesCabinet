@@ -6,6 +6,7 @@ describe('isLeaderboardGame', () => {
     expect(isLeaderboardGame('2048')).toBe(true);
     expect(isLeaderboardGame('yatzy')).toBe(true);
     expect(isLeaderboardGame('letter-walker')).toBe(true);
+    expect(isLeaderboardGame('klondike')).toBe(true);
   });
 
   it('rejects unknown and non-leaderboard catalogue games', () => {

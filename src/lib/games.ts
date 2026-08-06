@@ -125,6 +125,7 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 1,
     hasBot: false,
     hasSolo: true,
+    hasLeaderboard: true,
   },
   {
     id: 'freecell',
