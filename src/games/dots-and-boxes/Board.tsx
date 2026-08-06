@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Counter } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getDotsAndBoxesActions } from './actions';
 import {
@@ -51,8 +52,6 @@ export function DotsAndBoxesBoard({
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - claim a line' },
   });
-  const scoreLine = `P1 ${G.scores[0]} - P2 ${G.scores[1]}`;
-
   const pewActions = getDotsAndBoxesActions({ G, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
     ...action,
@@ -71,7 +70,11 @@ export function DotsAndBoxesBoard({
         <>
           <StatusBar text={status} tone={tone} />
           <div className="dab-scores" data-testid="dab-scores">
-            {scoreLine}
+            <Counter value={G.scores[0]} label="P1" emphasize testId="dab-score-0" />
+            <span className="dab-scores__sep" aria-hidden="true">
+              -
+            </span>
+            <Counter value={G.scores[1]} label="P2" emphasize testId="dab-score-1" />
           </div>
         </>
       }

@@ -378,3 +378,34 @@ button.tt-die:disabled,
 [data-motion="reduced"] .tt-die.is-held {
   transform: none;
 }
+
+/* --- Tabletop counter (labelled numeric readout) --- */
+.tt-counter {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-width: 0;
+  line-height: 1.1;
+  font-family: var(--font);
+  color: inherit;
+}
+
+.tt-counter__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.tt-counter__value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tt-counter--emphasize .tt-counter__value {
+  font-size: 1.35rem;
+}

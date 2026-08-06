@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Counter } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getMancalaActions } from './actions';
 import type { MancalaState } from './game';
@@ -38,7 +39,7 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
         onClick={() => moves.sow(i)}
         aria-label={`Pit ${i}, ${G.pits[i]} stones`}
       >
-        {G.pits[i]}
+        <Counter value={G.pits[i]} label={`Pit ${i}`} />
       </button>
     );
   };
@@ -50,8 +51,7 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
       role="status"
       aria-label={`${label} store, ${G.pits[i]} stones`}
     >
-      <span className="mancala-store-label">{label}</span>
-      <span className="mancala-store-count">{G.pits[i]}</span>
+      <Counter value={G.pits[i]} label={label} emphasize />
     </div>
   );
 
