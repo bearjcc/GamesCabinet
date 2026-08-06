@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { FocusTrap } from '../../components/FocusTrap';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
@@ -9,6 +10,7 @@ import { StatusBar } from '../../components/StatusBar';
 import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { getNickname } from '../../lib/storage';
+import { getLetterWalkerActions } from './actions';
 import { dictionarySize, parseDictionaryText, setLetterWalkerDictionary } from './dictionary';
 import type { LetterWalkerState, ShiftDir } from './game';
 import { GRID_SIZE } from './game';
@@ -205,6 +207,31 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
     status = 'Dictionary failed to load';
   }
 
+  const pewActions = getLetterWalkerActions({
+    playable,
+    boardTab,
+    selectedCount: selected.length,
+    wordLength: selectedWord.length,
+    dictReady,
+  });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'clear') {
+        clearSelection();
+        return;
+      }
+      if (action.id === 'submit') {
+        handleSubmit();
+        return;
+      }
+      if (action.id === 'new-puzzle') {
+        moves.newPuzzle();
+        clearSelection();
+      }
+    },
+  }));
+
   return (
     <>
       <ScoreSubmitter
@@ -370,35 +397,6 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
         pew={
           boardTab === 'play' ? (
             <div className="lw-actions">
-              <button
-                type="button"
-                className="btn"
-                data-testid="lw-clear"
-                disabled={selected.length === 0}
-                onClick={clearSelection}
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                className="btn"
-                data-testid="lw-submit"
-                disabled={!playable || selectedWord.length < 3 || !dictReady}
-                onClick={handleSubmit}
-              >
-                Submit
-              </button>
-              <button
-                type="button"
-                className="btn"
-                data-testid="lw-new-puzzle"
-                onClick={() => {
-                  moves.newPuzzle();
-                  clearSelection();
-                }}
-              >
-                New puzzle
-              </button>
               <button type="button" className="btn" data-testid="lw-share" onClick={handleShare}>
                 Share
               </button>
@@ -413,6 +411,7 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
             </div>
           ) : null
         }
+        actions={<ActionSurface label="Letter Walker actions" actions={surfaceActions} />}
       />
 
       {helpOpen ? (
