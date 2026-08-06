@@ -1,10 +1,12 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useMemo, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
 import type { Suit } from '../shared/cards';
 import { canPlayMatching, topOf } from '../shared/cards';
+import { canDrawCard, getCrazyEightsActions } from './actions';
 import { crazyEightsAssetResolver, isWildEightId } from './assets';
 import { type CrazyEightsState, matchContext, WILD_RANK } from './game';
 
@@ -26,7 +28,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
   const hand = pid >= 0 ? G.hands[pid] : [];
   const top = topOf(G.discard);
   const match = matchContext(G);
-  const canDraw = yourTurn && (G.stock.length > 0 || G.discard.length > 1);
+  const canDraw = yourTurn && pid >= 0 && canDrawCard(G, pid);
 
   const playableIndexes = useMemo(() => {
     if (!yourTurn || !match) return new Set<number>();
@@ -36,6 +38,14 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     });
     return set;
   }, [hand, match, yourTurn]);
+
+  const pewActions = getCrazyEightsActions({ G, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'pass') moves.pass();
+    },
+  }));
 
   let status = 'Waiting…';
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
@@ -122,31 +132,18 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
         </div>
       }
       pew={
-        <>
-          <CardHand
-            cards={hand}
-            selectedIndex={selected}
-            disabled={!yourTurn}
-            isPlayable={(_, i) => playableIndexes.has(i)}
-            isWild={(card) => isWildEightId(card.id)}
-            assetFor={resolveAsset}
-            onSelect={tryPlay}
-            testIdPrefix="ce-hand"
-          />
-          <div className="action-row">
-            {yourTurn && G.drewThisTurn ? (
-              <button
-                type="button"
-                className="btn"
-                data-testid="ce-pass"
-                onClick={() => moves.pass()}
-              >
-                Pass
-              </button>
-            ) : null}
-          </div>
-        </>
+        <CardHand
+          cards={hand}
+          selectedIndex={selected}
+          disabled={!yourTurn}
+          isPlayable={(_, i) => playableIndexes.has(i)}
+          isWild={(card) => isWildEightId(card.id)}
+          assetFor={resolveAsset}
+          onSelect={tryPlay}
+          testIdPrefix="ce-hand"
+        />
       }
+      actions={<ActionSurface label="Crazy Eights actions" actions={surfaceActions} />}
     />
   );
 }

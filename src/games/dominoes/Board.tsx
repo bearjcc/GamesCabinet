@@ -1,9 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type PointerEvent as ReactPointerEvent, useMemo, useRef, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
-import { canDraw, canPass, placementForEnd, playableEndIndexes } from './game';
+import { placementForEnd, playableEndIndexes } from './game';
 import {
   boardBoundsRem,
   endBoxRem,
@@ -158,6 +160,15 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       ? placementForEnd(G.ends[hoverEnd], dragTile)
       : null;
 
+  const pewActions = getDominoesActions({ G, player: pid, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'draw') moves.drawTile();
+      else if (action.id === 'pass') moves.pass();
+    },
+  }));
+
   return (
     <PlayTable
       info={
@@ -281,48 +292,25 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
         </div>
       }
       pew={
-        <>
-          <div className="dom-hand" data-testid="dom-hand">
-            {hand.map((tile, i) => (
-              <button
-                key={`${tile.id}-${i}`}
-                type="button"
-                className={`dom-hand-slot${handIndex === i ? ' selected' : ''}${drag?.handIndex === i ? ' is-dragging' : ''}`}
-                disabled={!yourTurn}
-                aria-label={`${tile.a}-${tile.b}`}
-                data-testid={`dom-hand-${i}`}
-                onPointerDown={(e) => startDrag(i, e)}
-              >
-                <span className="dom-tile kenney">
-                  <img src={kenneySrc(tile)} alt="" draggable={false} />
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="action-row">
-            {yourTurn ? (
-              <button
-                type="button"
-                className="btn"
-                onClick={() => moves.drawTile()}
-                disabled={!canDraw(G, pid)}
-              >
-                Draw
-              </button>
-            ) : null}
-            {yourTurn ? (
-              <button
-                type="button"
-                className="btn"
-                onClick={() => moves.pass()}
-                disabled={!canPass(G, pid)}
-              >
-                Pass
-              </button>
-            ) : null}
-          </div>
-        </>
+        <div className="dom-hand" data-testid="dom-hand">
+          {hand.map((tile, i) => (
+            <button
+              key={`${tile.id}-${i}`}
+              type="button"
+              className={`dom-hand-slot${handIndex === i ? ' selected' : ''}${drag?.handIndex === i ? ' is-dragging' : ''}`}
+              disabled={!yourTurn}
+              aria-label={`${tile.a}-${tile.b}`}
+              data-testid={`dom-hand-${i}`}
+              onPointerDown={(e) => startDrag(i, e)}
+            >
+              <span className="dom-tile kenney">
+                <img src={kenneySrc(tile)} alt="" draggable={false} />
+              </span>
+            </button>
+          ))}
+        </div>
       }
+      actions={<ActionSurface label="Dominoes actions" actions={surfaceActions} />}
     />
   );
 }
