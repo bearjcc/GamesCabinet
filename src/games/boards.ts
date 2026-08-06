@@ -17,6 +17,7 @@ import { MancalaBoard } from './mancala/Board';
 import { MemoryBoard } from './memory/Board';
 import { NineMensMorrisBoard } from './nine-mens-morris/Board';
 import { ReversiBoard } from './reversi/Board';
+import { SnakesAndLaddersBoard } from './snakes-and-ladders/Board';
 import { TicTacToeBoard } from './tic-tac-toe/Board';
 import { YatzyBoard } from './yatzy/Board';
 
@@ -42,4 +43,5 @@ export const boards = {
   'nine-mens-morris': withMatchChrome(NineMensMorrisBoard),
   backgammon: withMatchChrome(BackgammonBoard),
   'dots-and-boxes': withMatchChrome(DotsAndBoxesBoard),
+  'snakes-and-ladders': withMatchChrome(SnakesAndLaddersBoard),
 } as const;

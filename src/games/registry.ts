@@ -17,6 +17,7 @@ import { Mancala } from './mancala/game';
 import { Memory } from './memory/game';
 import { NineMensMorris } from './nine-mens-morris/game';
 import { Reversi } from './reversi/game';
+import { SnakesAndLadders } from './snakes-and-ladders/game';
 import { TicTacToe } from './tic-tac-toe/game';
 import { Yatzy } from './yatzy/game';
 
@@ -42,6 +43,7 @@ export const gameList: Game<any>[] = [
   NineMensMorris,
   Backgammon,
   DotsAndBoxes,
+  SnakesAndLadders,
 ];
 
 export const gamesById = {
@@ -65,6 +67,7 @@ export const gamesById = {
   'nine-mens-morris': NineMensMorris,
   backgammon: Backgammon,
   'dots-and-boxes': DotsAndBoxes,
+  'snakes-and-ladders': SnakesAndLadders,
 } as const;
 
 export type GameId = keyof typeof gamesById;

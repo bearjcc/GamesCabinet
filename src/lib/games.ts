@@ -200,6 +200,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'snakes-and-ladders',
+    name: 'Snakes and Ladders',
+    blurb: 'Roll, climb ladders, slide snakes. Race to the end.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {
