@@ -260,12 +260,20 @@
   cursor: grabbing;
 }
 
+.dom-snap {
+  display: block;
+  width: fit-content;
+  min-width: 100%;
+  min-height: 100%;
+  margin: 0 auto;
+}
+
 .dom-hand-slot .dom-tile {
   --dom-width: clamp(1.5rem, 8vw, 1.85rem);
   --dom-length: clamp(2.8rem, 14vw, 3.65rem);
   transition:
-    transform 140ms ease-out,
-    filter 140ms ease-out;
+    transform var(--motion-duration) var(--motion-ease),
+    filter var(--motion-duration) var(--motion-ease);
 }
 
 .dom-hand-slot.selected .dom-tile {

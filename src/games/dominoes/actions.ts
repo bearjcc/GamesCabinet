@@ -1,14 +1,50 @@
 import type { SemanticAction } from '../../lib/actions';
-import { canDraw, canPass, type DominoesState } from './game';
+import { canDraw, canPass, type DominoesState, playableEndIndexes } from './game';
 
 export type DominoesActionInput = {
   G: DominoesState;
   player: number;
   yourTurn: boolean;
+  /** Selected hand index for Mum play intents; omit when none. */
+  handIndex?: number | null;
 };
 
-/** Pure pew intents for Dominoes draw / pass. */
-export function getDominoesActions({ G, player, yourTurn }: DominoesActionInput): SemanticAction[] {
+/** Pure pew intents for Dominoes play ends / starter, draw, and pass. */
+export function getDominoesActions({
+  G,
+  player,
+  yourTurn,
+  handIndex = null,
+}: DominoesActionInput): SemanticAction[] {
+  const actions: SemanticAction[] = [];
+
+  if (yourTurn && player >= 0 && handIndex !== null && handIndex !== undefined) {
+    const tile = G.hands[player]?.[handIndex];
+    if (tile) {
+      if (G.board.length === 0) {
+        actions.push({
+          id: 'play-starter',
+          kind: 'move',
+          label: 'Play starter',
+          variant: 'primary',
+          disabled: false,
+          testId: 'dom-play-starter',
+        });
+      } else {
+        for (const endIndex of playableEndIndexes(G, tile)) {
+          actions.push({
+            id: `play-end-${endIndex}`,
+            kind: 'move',
+            label: `Play on end ${endIndex}`,
+            variant: 'primary',
+            disabled: false,
+            testId: `dom-play-end-${endIndex}`,
+          });
+        }
+      }
+    }
+  }
+
   const drawOk = yourTurn && player >= 0 && canDraw(G, player);
   const passOk = yourTurn && player >= 0 && canPass(G, player);
 
@@ -26,7 +62,7 @@ export function getDominoesActions({ G, player, yourTurn }: DominoesActionInput)
     passReason = 'You can play a tile';
   }
 
-  return [
+  actions.push(
     {
       id: 'draw',
       kind: 'draw',
@@ -45,5 +81,7 @@ export function getDominoesActions({ G, player, yourTurn }: DominoesActionInput)
       disabledReason: passReason,
       testId: 'dom-pass',
     },
-  ];
+  );
+
+  return actions;
 }
