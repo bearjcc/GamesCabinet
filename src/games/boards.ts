@@ -21,6 +21,7 @@ import { NineMensMorrisBoard } from './nine-mens-morris/Board';
 import { ReversiBoard } from './reversi/Board';
 import { SnakesAndLaddersBoard } from './snakes-and-ladders/Board';
 import { TicTacToeBoard } from './tic-tac-toe/Board';
+import { WarBoard } from './war/Board';
 import { YatzyBoard } from './yatzy/Board';
 
 /** Boards wrapped once with shared post-game / waiting chrome. */
@@ -48,4 +49,5 @@ export const boards = {
   'snakes-and-ladders': withMatchChrome(SnakesAndLaddersBoard),
   'go-fish': withMatchChrome(GoFishBoard),
   nim: withMatchChrome(NimBoard),
+  war: withMatchChrome(WarBoard),
 } as const;

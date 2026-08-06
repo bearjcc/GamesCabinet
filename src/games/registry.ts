@@ -21,6 +21,7 @@ import { NineMensMorris } from './nine-mens-morris/game';
 import { Reversi } from './reversi/game';
 import { SnakesAndLadders } from './snakes-and-ladders/game';
 import { TicTacToe } from './tic-tac-toe/game';
+import { War } from './war/game';
 import { Yatzy } from './yatzy/game';
 
 // Registry mixes game state types; boardgame.io Game generics cannot unify them.
@@ -48,6 +49,7 @@ export const gameList: Game<any>[] = [
   SnakesAndLadders,
   GoFish,
   Nim,
+  War,
 ];
 
 export const gamesById = {
@@ -74,6 +76,7 @@ export const gamesById = {
   'snakes-and-ladders': SnakesAndLadders,
   'go-fish': GoFish,
   nim: Nim,
+  war: War,
 } as const;
 
 export type GameId = keyof typeof gamesById;
