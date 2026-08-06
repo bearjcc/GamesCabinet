@@ -172,6 +172,16 @@ button.tt-card:disabled,
   background: var(--surface-2);
 }
 
+/* Programmatic focus on the dialog root should not steal visual weight */
+.tt-suit-picker:focus {
+  outline: none;
+}
+
+.tt-suit-picker:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .tt-suit-picker__title {
   margin: 0;
   font-weight: 600;
