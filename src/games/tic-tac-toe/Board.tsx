@@ -1,27 +1,17 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { deriveMatchStatus } from '../../lib/matchStatus';
 import type { TTTState } from './game';
 
 const marks = ['X', 'O'] as const;
 
 export function TicTacToeBoard({ G, ctx, moves, playerID, isActive }: BoardProps<TTTState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const pid = playerID === null || playerID === undefined ? ctx.currentPlayer : playerID;
-  let status = 'Waiting…';
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
-  if (ctx.gameover) {
-    tone = 'done';
-    if ('draw' in ctx.gameover) status = 'Draw';
-    else if (ctx.gameover.winner === pid) status = 'You win';
-    else status = 'Opponent wins';
-  } else if (yourTurn) {
-    status = 'Your turn — tap a square';
-    tone = 'you';
-  } else {
-    status = 'Their turn';
-    tone = 'wait';
-  }
+  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    labels: { yourTurn: 'Your turn — tap a square' },
+  });
 
   return (
     <PlayTable

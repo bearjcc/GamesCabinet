@@ -1,24 +1,16 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { deriveMatchStatus } from '../../lib/matchStatus';
 import type { C4State } from './game';
 import { COLS, ROWS } from './game';
 
 export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State>) {
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
-  let status = 'Waiting…';
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
-  if (ctx.gameover) {
-    tone = 'done';
-    if ('draw' in ctx.gameover) status = 'Draw';
-    else if (ctx.gameover.winner === playerID) status = 'You win';
-    else status = 'Opponent wins';
-  } else if (yourTurn) {
-    status = 'Your turn — tap a column';
-    tone = 'you';
-  } else {
-    status = 'Their turn';
-  }
+  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    labels: { yourTurn: 'Your turn — tap a column' },
+  });
 
   return (
     <PlayTable

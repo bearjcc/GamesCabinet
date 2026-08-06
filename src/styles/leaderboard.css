@@ -11,3 +11,17 @@
   color: var(--muted);
   margin: 0;
 }
+
+/* Play / Scores tabs — SoloPlayTabs uses .solo-tabs; .lw-tabs kept for unmigrated boards. */
+.solo-tabs,
+.lw-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.solo-tabs .btn.is-active,
+.lw-tabs .btn.is-active {
+  outline: 2px solid var(--you);
+  outline-offset: 1px;
+}
