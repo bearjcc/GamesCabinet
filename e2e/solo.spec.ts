@@ -36,4 +36,14 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('yatzy-tab-scores').click();
     await expect(page.getByTestId('yatzy-scores')).toBeVisible();
   });
+
+  test('klondike solo play reaches a playable board and scores tab', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-klondike').click();
+    await page.getByTestId('play-solo').click();
+    await expect(page.getByTestId('klondike-board')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+    await page.getByTestId('klondike-tab-scores').click();
+    await expect(page.getByTestId('klondike-scores')).toBeVisible();
+  });
 });
