@@ -1,4 +1,5 @@
 import type { Game } from 'boardgame.io';
+import { Backgammon } from './backgammon/game';
 import { Battleship } from './battleship/game';
 import { Checkers } from './checkers/game';
 import { Chess } from './chess/game';
@@ -38,6 +39,7 @@ export const gameList: Game<any>[] = [
   Battleship,
   Chess,
   NineMensMorris,
+  Backgammon,
 ];
 
 export const gamesById = {
@@ -59,6 +61,7 @@ export const gamesById = {
   battleship: Battleship,
   chess: Chess,
   'nine-mens-morris': NineMensMorris,
+  backgammon: Backgammon,
 } as const;
 
 export type GameId = keyof typeof gamesById;

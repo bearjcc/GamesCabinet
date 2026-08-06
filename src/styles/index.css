@@ -27,4 +27,5 @@
 @import "./games/battleship.css";
 @import "./games/chess.css";
 @import "./games/nine-mens-morris.css";
+@import "./games/backgammon.css";
 @import "./motion.css";

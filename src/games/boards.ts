@@ -1,4 +1,5 @@
 import { withMatchChrome } from '../components/MatchChrome';
+import { BackgammonBoard } from './backgammon/Board';
 import { BattleshipBoard } from './battleship/Board';
 import { CheckersBoard } from './checkers/Board';
 import { ChessBoard } from './chess/Board';
@@ -38,4 +39,5 @@ export const boards = {
   battleship: withMatchChrome(BattleshipBoard),
   chess: withMatchChrome(ChessBoard),
   'nine-mens-morris': withMatchChrome(NineMensMorrisBoard),
+  backgammon: withMatchChrome(BackgammonBoard),
 } as const;
