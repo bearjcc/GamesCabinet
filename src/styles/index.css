@@ -31,4 +31,5 @@
 @import "./games/dots-and-boxes.css";
 @import "./games/snakes-and-ladders.css";
 @import "./games/go-fish.css";
+@import "./games/nim.css";
 @import "./motion.css";

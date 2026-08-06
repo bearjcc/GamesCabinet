@@ -16,6 +16,7 @@ import { KlondikeBoard } from './klondike/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
 import { MancalaBoard } from './mancala/Board';
 import { MemoryBoard } from './memory/Board';
+import { NimBoard } from './nim/Board';
 import { NineMensMorrisBoard } from './nine-mens-morris/Board';
 import { ReversiBoard } from './reversi/Board';
 import { SnakesAndLaddersBoard } from './snakes-and-ladders/Board';
@@ -46,4 +47,5 @@ export const boards = {
   'dots-and-boxes': withMatchChrome(DotsAndBoxesBoard),
   'snakes-and-ladders': withMatchChrome(SnakesAndLaddersBoard),
   'go-fish': withMatchChrome(GoFishBoard),
+  nim: withMatchChrome(NimBoard),
 } as const;

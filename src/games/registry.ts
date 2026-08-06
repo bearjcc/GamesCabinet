@@ -16,6 +16,7 @@ import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
 import { Mancala } from './mancala/game';
 import { Memory } from './memory/game';
+import { Nim } from './nim/game';
 import { NineMensMorris } from './nine-mens-morris/game';
 import { Reversi } from './reversi/game';
 import { SnakesAndLadders } from './snakes-and-ladders/game';
@@ -46,6 +47,7 @@ export const gameList: Game<any>[] = [
   DotsAndBoxes,
   SnakesAndLadders,
   GoFish,
+  Nim,
 ];
 
 export const gamesById = {
@@ -71,6 +73,7 @@ export const gamesById = {
   'dots-and-boxes': DotsAndBoxes,
   'snakes-and-ladders': SnakesAndLadders,
   'go-fish': GoFish,
+  nim: Nim,
 } as const;
 
 export type GameId = keyof typeof gamesById;
