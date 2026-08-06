@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { FocusTrap } from '../../components/FocusTrap';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
@@ -415,11 +416,13 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
       />
 
       {helpOpen ? (
-        <div
+        <FocusTrap
           className="lw-help"
           role="dialog"
+          aria-modal="true"
           aria-labelledby="lw-help-title"
           data-testid="lw-help-dialog"
+          onEscape={() => setHelpOpen(false)}
         >
           <h2 id="lw-help-title">Letter Walker</h2>
           <p>Slide rows and columns to line up a word, then submit it.</p>
@@ -446,7 +449,7 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
           >
             Close
           </button>
-        </div>
+        </FocusTrap>
       ) : null}
     </>
   );
