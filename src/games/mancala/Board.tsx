@@ -1,18 +1,30 @@
 import type { BoardProps } from 'boardgame.io/react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { getMancalaActions } from './actions';
 import type { MancalaState } from './game';
 import { ownPits, P0_STORE, P1_STORE } from './game';
 
 export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaState>) {
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
+  const player = playerID ?? ctx.currentPlayer;
   const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - tap a pit' },
   });
 
   const playable = new Set(yourTurn ? ownPits(ctx.currentPlayer) : []);
+
+  const pewActions = getMancalaActions({ G, player, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      const match = /^sow-(\d+)$/.exec(action.id);
+      if (match) moves.sow(Number(match[1]));
+    },
+  }));
 
   const pitButton = (i: number) => {
     const canSow = playable.has(i) && G.pits[i] > 0;
@@ -62,6 +74,7 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
           {store(P0_STORE, 'P0')}
         </div>
       }
+      actions={<ActionSurface label="Mancala actions" actions={surfaceActions} />}
     />
   );
 }
