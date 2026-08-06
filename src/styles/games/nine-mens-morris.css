@@ -1,0 +1,86 @@
+.nmm-board {
+  position: relative;
+  width: min(100%, var(--board-max));
+  max-width: min(100%, calc(100dvh - 12rem));
+  aspect-ratio: 1;
+  margin: 0 auto;
+  touch-action: manipulation;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in oklab, #c4a574 35%, transparent) 0%,
+      transparent 55%
+    ),
+    color-mix(in oklab, var(--panel) 90%, #5c4030);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.nmm-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.nmm-lines line {
+  stroke: color-mix(in oklab, var(--ink) 55%, #5c4030);
+  stroke-width: 1.2;
+  stroke-linecap: square;
+}
+
+.nmm-point {
+  position: absolute;
+  width: 9%;
+  height: 9%;
+  transform: translate(-50%, -50%);
+  border: 2px solid color-mix(in oklab, var(--line) 80%, #5c4030);
+  border-radius: 999px;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--bg) 40%, #d8c4a0);
+  touch-action: manipulation;
+  cursor: default;
+  transition:
+    outline-color var(--motion-duration) var(--motion-ease),
+    box-shadow var(--motion-duration) var(--motion-ease),
+    background var(--motion-duration) var(--motion-ease);
+}
+
+.nmm-point:not(:disabled) {
+  cursor: pointer;
+}
+
+.nmm-point.placeable,
+.nmm-point.target {
+  box-shadow: inset 0 0 0 3px var(--you);
+}
+
+.nmm-point.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.nmm-point.removable {
+  box-shadow: inset 0 0 0 3px #b33;
+}
+
+.nmm-piece {
+  width: 72%;
+  height: 72%;
+  border-radius: 999px;
+  display: block;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 28%);
+}
+
+.nmm-piece.p0 {
+  background: #2a2a2a;
+}
+
+.nmm-piece.p1 {
+  background: #f0ebe3;
+  border: 1px solid #8a8070;
+}
