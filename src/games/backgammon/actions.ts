@@ -52,7 +52,7 @@ export function getBackgammonActions({
     label:
       p.to === 0
         ? `Bear off ${fromLabel(p.from)} (${G.dice[p.dieIndex]})`
-        : `${fromLabel(p.from)} → ${p.to} (${G.dice[p.dieIndex]})`,
+        : `${fromLabel(p.from)} -> ${p.to} (${G.dice[p.dieIndex]})`,
     variant: 'primary' as const,
     disabled: !yourTurn,
     disabledReason: yourTurn ? undefined : 'Wait for your turn',

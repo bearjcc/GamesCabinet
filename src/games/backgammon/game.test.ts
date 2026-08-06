@@ -195,7 +195,7 @@ describe('Backgammon play', () => {
     expect(client.getState()?.ctx.currentPlayer).toBe('1');
     client.moves.roll();
     // Force a known die by playing from a crafted mid-turn as P1 via pass-then-setup:
-    // After pass, onBegin cleared dice — roll then find a legal play for P1.
+    // After pass, onBegin cleared dice - roll then find a legal play for P1.
     const g = G(client);
     expect(g.hasRolled).toBe(true);
     const plays = legalPlays(g, '1');

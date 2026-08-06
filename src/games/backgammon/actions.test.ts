@@ -52,7 +52,7 @@ describe('getBackgammonActions', () => {
     expect(actions.map((a) => a.id)).toEqual(['play-8-0']);
     expect(actions[0]).toMatchObject({
       kind: 'move',
-      label: 'point 8 → 6 (2)',
+      label: 'point 8 -> 6 (2)',
       testId: 'backgammon-play-8-0',
       disabled: false,
     });
@@ -115,7 +115,7 @@ describe('getBackgammonActions', () => {
     });
     expect(barActions[0]).toMatchObject({
       id: 'play-0-0',
-      label: 'bar → 21 (4)',
+      label: 'bar -> 21 (4)',
     });
 
     const home = emptyPoints();

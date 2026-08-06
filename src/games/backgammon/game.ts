@@ -3,15 +3,15 @@
  *
  * Points 1-24; each player has a bar and a bear-off tray.
  * Standard starting setup (15 checkers each):
- *   Player 0 (moves high→low, 24→1): 2 on 24, 5 on 13, 3 on 8, 5 on 6
- *   Player 1 (moves low→high, 1→24): 2 on 1, 5 on 12, 3 on 17, 5 on 19
+ *   Player 0 (moves high->low, 24->1): 2 on 24, 5 on 13, 3 on 8, 5 on 6
+ *   Player 1 (moves low->high, 1->24): 2 on 1, 5 on 12, 3 on 17, 5 on 19
  *
  * Player 0 home board: points 1-6. Player 1 home board: points 19-24.
  *
  * Turn: roll 2d6 (doubles = four moves of that value); then play remaining
  * dice sequentially via play(from, dieIndex). from=0 (BAR) means the bar.
- * Hit: land on a blot (exactly one opponent) → opponent checker to their bar.
- * Enter from bar: must use a die to an open point in the entry board —
+ * Hit: land on a blot (exactly one opponent) -> opponent checker to their bar.
+ * Enter from bar: must use a die to an open point in the entry board -
  *   P0 enters on 25-die (19-24); P1 enters on die (1-6).
  * Bear off only when all own checkers are in the home board (none on bar).
  * Open point: empty, own checkers, or exactly one opponent.
