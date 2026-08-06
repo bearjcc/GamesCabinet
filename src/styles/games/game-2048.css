@@ -56,6 +56,34 @@
   font-size: 1rem;
 }
 
+.g2048-scoreline {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.g2048-score-label {
+  color: var(--muted, color-mix(in srgb, var(--ink) 65%, transparent));
+  font-weight: 600;
+}
+
+.g2048-score-value {
+  font-size: 1.35rem;
+}
+
+.g2048-controls {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: center;
+}
+
+.g2048-undo {
+  min-width: 6.5rem;
+}
+
 .g2048-pad {
   display: grid;
   grid-template-columns: repeat(3, minmax(4.5rem, 1fr));
