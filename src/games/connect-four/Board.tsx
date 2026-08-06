@@ -1,7 +1,9 @@
 import type { BoardProps } from 'boardgame.io/react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { getConnectFourActions } from './actions';
 import type { C4State } from './game';
 import { COLS, ROWS } from './game';
 
@@ -11,6 +13,15 @@ export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn — tap a column' },
   });
+
+  const pewActions = getConnectFourActions({ G, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      const match = /^drop-(\d+)$/.exec(action.id);
+      if (match) moves.drop(Number(match[1]));
+    },
+  }));
 
   return (
     <PlayTable
@@ -52,6 +63,7 @@ export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State
           })}
         </div>
       }
+      actions={<ActionSurface label="Connect Four actions" actions={surfaceActions} />}
     />
   );
 }

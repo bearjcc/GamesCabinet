@@ -1,8 +1,10 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { getCheckersActions } from './actions';
 import type { CheckersState, Piece } from './game';
 import { legalMoves, rc } from './game';
 
@@ -32,6 +34,7 @@ function squareAriaLabel(
 export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersState>) {
   const [selected, setSelected] = useState<number | null>(null);
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
+  const player = playerID ?? ctx.currentPlayer;
   const legal = yourTurn ? legalMoves(G, ctx.currentPlayer) : [];
   const targets =
     selected === null ? [] : legal.filter((m) => m.from === selected).map((m) => m.to);
@@ -43,6 +46,17 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
       yourTurn: selected === null ? 'Your turn — tap a piece' : 'Tap a square to move',
     },
   });
+
+  const pewActions = getCheckersActions({ G, player, yourTurn, selected });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      const match = /^move-to-(\d+)$/.exec(action.id);
+      if (!match || selected === null) return;
+      moves.movePiece(selected, Number(match[1]));
+      setSelected(null);
+    },
+  }));
 
   return (
     <PlayTable
@@ -93,6 +107,7 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
           })}
         </div>
       }
+      actions={<ActionSurface label="Checkers actions" actions={surfaceActions} />}
     />
   );
 }
