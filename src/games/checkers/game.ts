@@ -44,7 +44,21 @@ function forwardDir(player: '0' | '1'): number[] {
   return player === '0' ? [1] : [-1];
 }
 
-export function legalMoves(G: CheckersState, player: string): CheckersMove[] {
+function cloneState(G: CheckersState): CheckersState {
+  return {
+    board: G.board.map((p) => (p ? { ...p } : null)),
+    mustContinueFrom: G.mustContinueFrom,
+  };
+}
+
+/** Unfiltered moves - captures are not yet reduced to the longest sequence. */
+function rawLegalMoves(
+  G: CheckersState,
+  player: string,
+): {
+  captures: CheckersMove[];
+  quiet: CheckersMove[];
+} {
   const p = player as '0' | '1';
   const captures: CheckersMove[] = [];
   const quiet: CheckersMove[] = [];
@@ -81,7 +95,25 @@ export function legalMoves(G: CheckersState, player: string): CheckersMove[] {
       }
     }
   }
-  return captures.length ? captures : quiet;
+  return { captures, quiet };
+}
+
+function captureChainLength(G: CheckersState, move: CheckersMove, player: string): number {
+  const next = cloneState(G);
+  applyMove(next, move);
+  if (next.mustContinueFrom === null) return 1;
+  const cont = rawLegalMoves(next, player).captures;
+  // mustContinueFrom is only left set when a further capture exists.
+  return 1 + Math.max(...cont.map((m) => captureChainLength(next, m, player)));
+}
+
+/** English draughts: captures are forced, and the longest sequence must be taken. */
+export function legalMoves(G: CheckersState, player: string): CheckersMove[] {
+  const { captures, quiet } = rawLegalMoves(G, player);
+  if (!captures.length) return quiet;
+  const lengths = captures.map((m) => captureChainLength(G, m, player));
+  const longest = Math.max(...lengths);
+  return captures.filter((_, i) => lengths[i] === longest);
 }
 
 function applyMove(G: CheckersState, move: CheckersMove): boolean {
@@ -100,7 +132,7 @@ function applyMove(G: CheckersState, move: CheckersMove): boolean {
 
   if (move.capture !== null) {
     G.mustContinueFrom = move.to;
-    const more = legalMoves(G, piece.player).filter((m) => m.capture !== null);
+    const more = rawLegalMoves(G, piece.player).captures;
     if (more.length) return false;
   }
   G.mustContinueFrom = null;

@@ -4,6 +4,7 @@ import { makeCard } from '../shared/cards';
 import {
   CrazyEights,
   type CrazyEightsState,
+  canDraw,
   canPlayCard,
   handSizeFor,
   matchContext,
@@ -137,6 +138,24 @@ describe('CrazyEights moves', () => {
     expect(client.getState()?.ctx.currentPlayer).toBe('1');
   });
 
+  it('rejects draw when the hand already holds a legal play', () => {
+    const client = ceClient(() =>
+      baseState({
+        hands: [[makeCard('hearts', '9'), makeCard('spades', '2')], [makeCard('clubs', '3')]],
+        stock: [makeCard('diamonds', '4')],
+      }),
+    );
+    expect(canDraw(G(client), 0)).toBe(false);
+    const before = structuredClone(G(client));
+    client.moves.drawCard();
+    expect(G(client)).toEqual(before);
+  });
+
+  it('reports canDraw false without a discard top or a missing hand', () => {
+    expect(canDraw(baseState({ discard: [] }), 0)).toBe(false);
+    expect(canDraw(baseState({ hands: [] }), 0)).toBe(false);
+  });
+
   it('reshuffles the discard into stock when drawing from an empty stock', () => {
     const client = ceClient(() =>
       baseState({
@@ -191,7 +210,20 @@ describe('CrazyEights ai', () => {
     )(playG, { currentPlayer: '0' });
     expect(listed).toContainEqual({ move: 'playCard', args: [0] });
     expect(listed.filter((m) => m.move === 'playCard' && m.args?.[0] === 1)).toHaveLength(4);
-    expect(listed).toContainEqual({ move: 'drawCard' });
+    // Must play if able - draw is not offered while a legal card is held.
+    expect(listed.some((m) => m.move === 'drawCard')).toBe(false);
+
+    const drawG = baseState({
+      hands: [[makeCard('spades', '2')], []],
+      stock: [makeCard('diamonds', '4')],
+    });
+    const drawListed = (
+      CrazyEights.ai!.enumerate as (
+        g: CrazyEightsState,
+        ctx: { currentPlayer: string },
+      ) => { move: string; args?: unknown[] }[]
+    )(drawG, { currentPlayer: '0' });
+    expect(drawListed).toContainEqual({ move: 'drawCard' });
 
     const passG = baseState({
       hands: [[makeCard('spades', '2')], []],

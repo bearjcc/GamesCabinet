@@ -35,7 +35,7 @@ export const GAMES: GameMeta[] = [
   {
     id: 'checkers',
     name: 'Checkers',
-    blurb: 'Capture to the crown.',
+    blurb: 'English draughts. Capture to the crown.',
     minPlayers: 2,
     maxPlayers: 2,
     hasBot: true,
@@ -44,7 +44,7 @@ export const GAMES: GameMeta[] = [
   {
     id: 'dominoes',
     name: 'Dominoes',
-    blurb: 'Double-six draw.',
+    blurb: 'Double-six draw with spinners.',
     minPlayers: 2,
     maxPlayers: 4,
     hasBot: true,

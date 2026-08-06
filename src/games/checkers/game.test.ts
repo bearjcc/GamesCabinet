@@ -42,6 +42,24 @@ describe('checkers helpers', () => {
       capture: sq(3, 2),
     });
   });
+
+  it('requires the longest available capture sequence', () => {
+    const board = emptyBoard();
+    // Short capture: (2,1) takes (3,2) lands (4,3) - chain length 1
+    board[sq(2, 1)] = { player: '0', king: false };
+    board[sq(3, 2)] = { player: '1', king: false };
+    // Long capture: (1,0) takes (2,1) is wrong - use separate pieces
+    // (0,1) takes (1,2)->(2,3), then (3,4)->(4,5) - need clear path
+    board[sq(0, 1)] = { player: '0', king: false };
+    board[sq(1, 2)] = { player: '1', king: false };
+    board[sq(3, 4)] = { player: '1', king: false };
+
+    const G: CheckersState = { board, mustContinueFrom: null };
+    const moves = legalMoves(G, '0');
+    expect(moves.every((m) => m.capture !== null)).toBe(true);
+    // Only the first jump of the length-2 chain is legal; the length-1 capture is not.
+    expect(moves).toEqual([{ from: sq(0, 1), to: sq(2, 3), capture: sq(1, 2) }]);
+  });
 });
 
 describe('Checkers game', () => {
