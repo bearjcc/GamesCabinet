@@ -238,6 +238,17 @@ describe('Dominoes game', () => {
     expect(client.getState()?.ctx.gameover).toEqual({ winner: '0', blocked: true });
   });
 
+  it('ends blocked as a draw when pip totals tie', () => {
+    const client = dominoClient(() => ({
+      hands: [[{ a: 0, b: 3, id: '0-3' }], [{ a: 1, b: 2, id: '1-2' }]],
+      boneyard: [],
+      ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
+      board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
+      spinnerId: null,
+    }));
+    expect(client.getState()?.ctx.gameover).toEqual({ draw: true, blocked: true });
+  });
+
   it('rejects draw and pass while a legal play exists', () => {
     const client = dominoClient(() => ({
       hands: [[{ a: 5, b: 1, id: '5-1' }], [{ a: 2, b: 4, id: '2-4' }]],

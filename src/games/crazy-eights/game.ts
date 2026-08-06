@@ -5,6 +5,7 @@ import {
   canPlayMatching,
   createStandardDeck,
   drawOne,
+  handHasPlay,
   type MatchingTable,
   playFromHand,
   SUITS,
@@ -36,6 +37,16 @@ export function canPlayCard(G: CrazyEightsState, card: Card, declaredSuit?: Suit
     return declaredSuit != null && (SUITS as readonly string[]).includes(declaredSuit);
   }
   return declaredSuit === undefined;
+}
+
+/** Draw is illegal when the hand already holds a playable card (must play if able). */
+export function canDraw(G: CrazyEightsState, player: number): boolean {
+  const ctx = matchContext(G);
+  if (!ctx) return false;
+  const hand = G.hands[player];
+  if (!hand) return false;
+  if (handHasPlay(hand, ctx, { wildRanks: [WILD_RANK] })) return false;
+  return G.stock.length > 0 || G.discard.length > 1;
 }
 
 export const CrazyEights: Game<CrazyEightsState> = {
@@ -70,8 +81,8 @@ export const CrazyEights: Game<CrazyEightsState> = {
     },
     drawCard: ({ G, ctx, random }) => {
       const pid = Number(ctx.currentPlayer);
-      const drawn = drawOne(G, pid, (cards) => random.Shuffle(cards));
-      if (!drawn) return INVALID_MOVE;
+      if (!canDraw(G, pid)) return INVALID_MOVE;
+      drawOne(G, pid, (cards) => random.Shuffle(cards));
       G.drewThisTurn = true;
     },
     pass: ({ G, events }) => {
@@ -103,7 +114,7 @@ export const CrazyEights: Game<CrazyEightsState> = {
         }
       });
 
-      if (G.stock.length > 0 || G.discard.length > 1) {
+      if (canDraw(G, pid)) {
         moves.push({ move: 'drawCard' });
       }
       if (G.drewThisTurn) {

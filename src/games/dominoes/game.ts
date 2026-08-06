@@ -197,16 +197,20 @@ export const Dominoes: Game<DominoesState> = {
     }
     const anyoneCan = G.boneyard.length > 0 || G.hands.some((_, i) => canPlayAny(G, i));
     if (!anyoneCan) {
-      let best = 0;
       let bestScore = Infinity;
+      const tied: number[] = [];
       for (let i = 0; i < ctx.numPlayers; i++) {
         const s = pipSum(G.hands[i]);
         if (s < bestScore) {
           bestScore = s;
-          best = i;
+          tied.length = 0;
+          tied.push(i);
+        } else if (s === bestScore) {
+          tied.push(i);
         }
       }
-      return { winner: String(best), blocked: true };
+      if (tied.length !== 1) return { draw: true, blocked: true };
+      return { winner: String(tied[0]), blocked: true };
     }
   },
   ai: {
