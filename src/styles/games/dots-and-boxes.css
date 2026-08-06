@@ -1,0 +1,71 @@
+.dab-scores {
+  text-align: center;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink, #1c1917);
+  margin-top: 0.25rem;
+}
+
+.dab-board {
+  width: min(100%, 22rem);
+  margin: 0 auto;
+  padding: 0.5rem;
+}
+
+.dab-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #e8e0d4;
+  border-radius: var(--radius-lg, 0.75rem);
+}
+
+.dab-dot {
+  fill: #1c1917;
+}
+
+.dab-line {
+  stroke-width: 4;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.dab-line.open {
+  stroke: rgba(28, 25, 23, 0.18);
+}
+
+.dab-line.claimed.p0 {
+  stroke: #b45309;
+}
+
+.dab-line.claimed.p1 {
+  stroke: #1d4ed8;
+}
+
+.dab-line-hit {
+  fill: transparent;
+  cursor: default;
+}
+
+.dab-line-hit.is-open {
+  cursor: pointer;
+}
+
+.dab-line-hit.is-open:hover,
+.dab-line-hit.is-open:focus-visible {
+  fill: rgba(180, 83, 9, 0.12);
+}
+
+.dab-box {
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.dab-box.p0 {
+  fill: #b45309;
+}
+
+.dab-box.p1 {
+  fill: #1d4ed8;
+}
