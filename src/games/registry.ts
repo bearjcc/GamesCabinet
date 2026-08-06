@@ -1,5 +1,6 @@
 import type { Game } from 'boardgame.io';
 import { Checkers } from './checkers/game';
+import { ChineseCheckers } from './chinese-checkers/game';
 import { ConnectFour } from './connect-four/game';
 import { CrazyEights } from './crazy-eights/game';
 import { Dominoes } from './dominoes/game';
@@ -30,6 +31,7 @@ export const gameList: Game<any>[] = [
   Klondike,
   FreeCell,
   Go,
+  ChineseCheckers,
 ];
 
 export const gamesById = {
@@ -47,6 +49,7 @@ export const gamesById = {
   klondike: Klondike,
   freecell: FreeCell,
   go: Go,
+  'chinese-checkers': ChineseCheckers,
 } as const;
 
 export type GameId = keyof typeof gamesById;

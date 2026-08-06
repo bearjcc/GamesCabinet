@@ -123,4 +123,12 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('go-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
+
+  test('chinese checkers play vs bot reaches a playable board', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-chinese-checkers').click();
+    await page.getByTestId('play-bot').click();
+    await expect(page.getByTestId('chinese-checkers-board')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+  });
 });

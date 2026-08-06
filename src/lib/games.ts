@@ -146,6 +146,15 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'chinese-checkers',
+    name: 'Chinese Checkers',
+    blurb: 'Hop pegs across the star. Fill the opposite home.',
+    minPlayers: 2,
+    maxPlayers: 2,
+    hasBot: true,
+    hasLocal: true,
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {

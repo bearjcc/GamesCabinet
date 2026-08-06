@@ -1,5 +1,6 @@
 import { withMatchChrome } from '../components/MatchChrome';
 import { CheckersBoard } from './checkers/Board';
+import { ChineseCheckersBoard } from './chinese-checkers/Board';
 import { ConnectFourBoard } from './connect-four/Board';
 import { CrazyEightsBoard } from './crazy-eights/Board';
 import { DominoesBoard } from './dominoes/Board';
@@ -30,4 +31,5 @@ export const boards = {
   klondike: withMatchChrome(KlondikeBoard),
   freecell: withMatchChrome(FreeCellBoard),
   go: withMatchChrome(GoBoard),
+  'chinese-checkers': withMatchChrome(ChineseCheckersBoard),
 } as const;
