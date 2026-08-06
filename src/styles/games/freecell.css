@@ -1,0 +1,82 @@
+.freecell-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0.5rem 0.25rem 1rem;
+}
+
+.freecell-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.freecell-freecells,
+.freecell-foundations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.freecell-foundations {
+  justify-content: flex-end;
+}
+
+.freecell-slot,
+.freecell-foundation {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.freecell-slot:disabled,
+.freecell-foundation:disabled {
+  cursor: default;
+}
+
+.freecell-cascades {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.35rem;
+  align-items: start;
+  min-height: 14rem;
+}
+
+.freecell-column {
+  position: relative;
+  min-height: 6.5rem;
+}
+
+.freecell-column__empty {
+  width: 100%;
+}
+
+.freecell-slot-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.freecell-slot-card .tt-card {
+  width: 100%;
+}
+
+@media (max-width: 40rem) {
+  .freecell-top {
+    grid-template-columns: 1fr;
+  }
+
+  .freecell-foundations {
+    justify-content: space-between;
+  }
+
+  .freecell-cascades {
+    gap: 0.2rem;
+  }
+}
