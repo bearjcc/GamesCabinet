@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useMemo, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
@@ -8,12 +9,10 @@ import { StatusBar } from '../../components/StatusBar';
 import { CardFace } from '../../components/tabletop/CardFace';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { type Card, kenneyPlayingCardAsset } from '../shared/cards';
+import { type FreeCellSelection, getFreeCellActions } from './actions';
 import type { FreeCellState } from './game';
 
-type Selection =
-  | null
-  | { source: 'cascade'; col: number; startIndex: number; count: number }
-  | { source: 'freecell'; index: number };
+type Selection = FreeCellSelection | null;
 
 function topCard(pile: readonly Card[]): Card | undefined {
   return pile[pile.length - 1];
@@ -41,6 +40,35 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
   }
 
   const clear = () => setSelection(null);
+
+  const pewActions = getFreeCellActions({ G, playable, selection });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'clear') {
+        clear();
+        return;
+      }
+      if (!selection) return;
+      if (action.id === 'to-foundation') {
+        if (selection.source === 'cascade' && selection.count === 1) {
+          moves.cascadeToFoundation(selection.col);
+          clear();
+          return;
+        }
+        if (selection.source === 'freecell') {
+          moves.freecellToFoundation(selection.index);
+          clear();
+        }
+        return;
+      }
+      const freecellMatch = /^to-freecell-(\d+)$/.exec(action.id);
+      if (freecellMatch && selection.source === 'cascade' && selection.count === 1) {
+        moves.cascadeToFreecell(selection.col, Number(freecellMatch[1]));
+        clear();
+      }
+    },
+  }));
 
   const onFreecell = (index: number) => {
     if (!playable) return;
@@ -241,6 +269,11 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
               </div>
             </div>
           )
+        }
+        actions={
+          tab === 'play' ? (
+            <ActionSurface label="FreeCell actions" actions={surfaceActions} />
+          ) : null
         }
       />
     </>
