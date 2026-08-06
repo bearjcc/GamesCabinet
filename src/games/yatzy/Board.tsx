@@ -6,6 +6,7 @@ import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
 import { StatusBar } from '../../components/StatusBar';
 import type { SubmitScoreInput } from '../../lib/scores';
+import { getYatzyActions } from './actions';
 import type { YatzyState } from './game';
 import {
   CATEGORIES,
@@ -27,7 +28,6 @@ export function YatzyBoard({
   const yourTurn = Boolean(isActive && !ctx.gameover);
   const pid =
     playerID === null || playerID === undefined ? Number(ctx.currentPlayer) : Number(playerID);
-  const canRoll = yourTurn && G.rolls < 3;
   const canHold = yourTurn && G.rolls > 0 && G.rolls < 3;
   const canScore = yourTurn && G.rolls > 0;
   const solo = ctx.numPlayers === 1;
@@ -67,6 +67,13 @@ export function YatzyBoard({
   };
 
   const showPlayChrome = !solo || tab === 'play';
+  const pewActions = getYatzyActions({ rolls: G.rolls, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'roll') moves.rollDice();
+    },
+  }));
 
   return (
     <>
@@ -197,23 +204,7 @@ export function YatzyBoard({
           ) : null
         }
         actions={
-          showPlayChrome ? (
-            <ActionSurface
-              label="Yatzy actions"
-              actions={[
-                {
-                  id: 'roll',
-                  kind: 'roll',
-                  label: `Roll (${G.rolls}/3)`,
-                  variant: 'primary',
-                  disabled: !canRoll,
-                  disabledReason: yourTurn ? 'No rolls left this turn' : 'Wait for your turn',
-                  testId: 'yatzy-roll',
-                  onAction: () => moves.rollDice(),
-                },
-              ]}
-            />
-          ) : null
+          showPlayChrome ? <ActionSurface label="Yatzy actions" actions={surfaceActions} /> : null
         }
       />
     </>
