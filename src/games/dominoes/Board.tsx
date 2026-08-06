@@ -1,6 +1,13 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { type PointerEvent as ReactPointerEvent, useMemo, useRef, useState } from 'react';
+import {
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
+import { Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { getDominoesActions } from './actions';
@@ -27,6 +34,12 @@ function remToPx(rem: number): number {
   return rem * Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
 }
 
+function endIndexFromPlayActionId(id: string): number | null {
+  if (id === 'play-starter') return -1;
+  const match = /^play-end-(\d+)$/.exec(id);
+  return match ? Number(match[1]) : null;
+}
+
 export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesState>) {
   const [handIndex, setHandIndex] = useState<number | null>(null);
   const [drag, setDrag] = useState<{
@@ -35,6 +48,9 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
     y: number;
   } | null>(null);
   const [hoverEnd, setHoverEnd] = useState<number | null>(null);
+  /** Client-only play pulse; remounts Snap so motion never gates G. */
+  const [playPulse, setPlayPulse] = useState(0);
+  const prevBoardLenRef = useRef(G.board.length);
   const tableRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const latestRef = useRef({ G, hand: [] as Tile[], boundsMin: { x: 0, y: 0 } });
@@ -42,6 +58,13 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
   const pid = playerID === null ? -1 : Number(playerID);
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
   const hand = pid >= 0 ? G.hands[pid] : [];
+
+  useEffect(() => {
+    if (G.board.length > prevBoardLenRef.current) {
+      setPlayPulse((n) => n + 1);
+    }
+    prevBoardLenRef.current = G.board.length;
+  }, [G.board.length]);
 
   const bounds = useMemo(() => boardBoundsRem(G.board, G.ends, TILE_LONG_REM), [G.board, G.ends]);
   latestRef.current = { G, hand, boundsMin: { x: bounds.minX, y: bounds.minY } };
@@ -67,8 +90,8 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
     tone = 'you';
     if (drag) status = 'Drop on a glowing end';
     else if (handIndex === null) status = 'Your turn — drag or tap a tile';
-    else if (G.board.length === 0) status = 'Drop on the table (or tap starter)';
-    else status = 'Drop or tap a glowing end';
+    else if (G.board.length === 0) status = 'Play starter below, or drop on the table';
+    else status = 'Tap a glowing end or Play on end below';
   } else {
     status = 'Their turn';
   }
@@ -160,12 +183,22 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       ? placementForEnd(G.ends[hoverEnd], dragTile)
       : null;
 
-  const pewActions = getDominoesActions({ G, player: pid, yourTurn });
+  const pewActions = getDominoesActions({ G, player: pid, yourTurn, handIndex });
   const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
-      if (action.id === 'draw') moves.drawTile();
-      else if (action.id === 'pass') moves.pass();
+      if (action.id === 'draw') {
+        moves.drawTile();
+        return;
+      }
+      if (action.id === 'pass') {
+        moves.pass();
+        return;
+      }
+      const endIndex = endIndexFromPlayActionId(action.id);
+      if (endIndex === null || handIndex === null) return;
+      moves.playTile(handIndex, endIndex);
+      setHandIndex(null);
     },
   }));
 
@@ -188,79 +221,81 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       }
       board={
         <div className="dom-scroll" data-testid="dom-board" ref={tableRef}>
-          <div
-            className="dom-stage"
-            ref={stageRef}
-            style={{
-              width: `${bounds.width}rem`,
-              height: `${bounds.height}rem`,
-            }}
-          >
-            {G.board.map((p) => {
-              const box = tileBoxRem(p.x, p.y, p.rot);
-              return (
-                <div
-                  key={`${p.tile.id}:${p.x},${p.y}`}
-                  className="dom-placed"
-                  style={{
-                    left: `${box.left - bounds.minX}rem`,
-                    top: `${box.top - bounds.minY}rem`,
-                    width: `${box.width}rem`,
-                    height: `${box.height}rem`,
-                  }}
-                >
+          <Snap key={playPulse} active={playPulse > 0} className="dom-snap">
+            <div
+              className="dom-stage"
+              ref={stageRef}
+              style={{
+                width: `${bounds.width}rem`,
+                height: `${bounds.height}rem`,
+              }}
+            >
+              {G.board.map((p) => {
+                const box = tileBoxRem(p.x, p.y, p.rot);
+                return (
                   <div
-                    className="dom-tile kenney dom-tile-orient"
-                    style={{ transform: `rotate(${p.rot}deg)` }}
+                    key={`${p.tile.id}:${p.x},${p.y}`}
+                    className="dom-placed"
+                    style={{
+                      left: `${box.left - bounds.minX}rem`,
+                      top: `${box.top - bounds.minY}rem`,
+                      width: `${box.width}rem`,
+                      height: `${box.height}rem`,
+                    }}
                   >
-                    <img src={kenneySrc(p.tile)} alt="" draggable={false} />
+                    <div
+                      className="dom-tile kenney dom-tile-orient"
+                      style={{ transform: `rotate(${p.rot}deg)` }}
+                    >
+                      <img src={kenneySrc(p.tile)} alt="" draggable={false} />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-            {G.board.length === 0 ? (
-              <button
-                type="button"
-                className={`dom-starter${handIndex !== null && yourTurn ? ' lit' : ''}`}
-                disabled={handIndex === null || !yourTurn}
-                data-testid="dom-starter"
-                onClick={() => {
-                  if (handIndex === null) return;
-                  moves.playTile(handIndex, -1);
-                  setHandIndex(null);
-                }}
-              >
-                Drop starter here
-              </button>
-            ) : null}
-            {G.ends.map((e, i) => {
-              const box = endBoxRem(e.x, e.y, e.dir);
-              const lit = litEnds.includes(i);
-              const hot = hoverEnd === i;
-              return (
+                );
+              })}
+              {G.board.length === 0 ? (
                 <button
-                  key={e.id}
                   type="button"
-                  className={`dom-end${lit ? ' lit' : ''}${hot ? ' snap' : ''}`}
-                  style={{
-                    left: `${box.left - bounds.minX}rem`,
-                    top: `${box.top - bounds.minY}rem`,
-                    width: `${box.width}rem`,
-                    height: `${box.height}rem`,
-                  }}
-                  disabled={!lit}
-                  data-testid={`dom-end-${i}`}
+                  className={`dom-starter${handIndex !== null && yourTurn ? ' lit' : ''}`}
+                  disabled={handIndex === null || !yourTurn}
+                  data-testid="dom-starter"
                   onClick={() => {
                     if (handIndex === null) return;
-                    moves.playTile(handIndex, i);
+                    moves.playTile(handIndex, -1);
                     setHandIndex(null);
                   }}
                 >
-                  {e.value}
+                  Drop starter here
                 </button>
-              );
-            })}
-          </div>
+              ) : null}
+              {G.ends.map((e, i) => {
+                const box = endBoxRem(e.x, e.y, e.dir);
+                const lit = litEnds.includes(i);
+                const hot = hoverEnd === i;
+                return (
+                  <button
+                    key={e.id}
+                    type="button"
+                    className={`dom-end${lit ? ' lit' : ''}${hot ? ' snap' : ''}`}
+                    style={{
+                      left: `${box.left - bounds.minX}rem`,
+                      top: `${box.top - bounds.minY}rem`,
+                      width: `${box.width}rem`,
+                      height: `${box.height}rem`,
+                    }}
+                    disabled={!lit}
+                    data-testid={`dom-end-${i}`}
+                    onClick={() => {
+                      if (handIndex === null) return;
+                      moves.playTile(handIndex, i);
+                      setHandIndex(null);
+                    }}
+                  >
+                    {e.value}
+                  </button>
+                );
+              })}
+            </div>
+          </Snap>
           {dragTile && drag && preview ? (
             <div
               className="dom-placement-preview"
