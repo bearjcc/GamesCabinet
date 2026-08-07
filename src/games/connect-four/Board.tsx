@@ -3,8 +3,9 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
+import { controlA11y } from '../../lib/actions';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getConnectFourActions } from './actions';
+import { columnDropState, getConnectFourActions } from './actions';
 import type { C4State } from './game';
 import { COLS, ROWS } from './game';
 
@@ -35,18 +36,24 @@ export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State
           data-testid="c4-board"
         >
           {Array.from({ length: COLS }, (_, col) => {
-            const canDrop =
-              yourTurn &&
-              Array.from({ length: ROWS }).some((_, r) => G.cells[r * COLS + col] === null);
+            const { enabled, disabledReason } = columnDropState(G.cells, col, yourTurn);
+            const label = `Drop in column ${col + 1}`;
+            const a11y = controlA11y({
+              label,
+              disabled: !enabled,
+              disabledReason,
+            });
             return (
               <button
                 key={col}
                 type="button"
-                className={`c4-col${canDrop ? ' is-open' : ''}`}
-                disabled={!canDrop}
+                className={`c4-col${enabled ? ' is-open' : ''}`}
+                disabled={!enabled}
                 data-testid={`c4-col-${col}`}
+                data-disabled-reason={a11y.title}
+                title={a11y.title}
+                aria-label={a11y.ariaLabel}
                 onClick={() => moves.drop(col)}
-                aria-label={`Drop in column ${col + 1}`}
               >
                 {Array.from({ length: ROWS }, (_, row) => {
                   const cell = G.cells[row * COLS + col];

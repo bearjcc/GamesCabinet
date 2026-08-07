@@ -10,6 +10,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
 import { placementForEnd, playableEndIndexes } from './game';
@@ -81,19 +82,15 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
 
   const litEnds = drag ? dragChoices : endChoices;
 
-  let status = 'Waiting…';
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
-  if (ctx.gameover) {
-    tone = 'done';
-    status = ctx.gameover.winner === playerID ? 'You win' : 'Opponent wins';
-  } else if (yourTurn) {
-    tone = 'you';
+  const { text: baseStatus, tone } = deriveMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+  });
+  let status = baseStatus;
+  if (yourTurn && !ctx.gameover) {
     if (drag) status = 'Drop on a glowing end';
     else if (handIndex === null) status = 'Your turn — drag or tap a tile';
     else if (G.board.length === 0) status = 'Play starter below, or drop on the table';
     else status = 'Tap a glowing end or Play on end below';
-  } else {
-    status = 'Their turn';
   }
 
   const clientToStageRem = (clientX: number, clientY: number) => {

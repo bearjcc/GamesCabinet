@@ -5,6 +5,7 @@ import { Roll } from '../../components/cinematic';
 import { LeaderboardPanel } from '../../components/LeaderboardPanel';
 import { PlayTable } from '../../components/PlayTable';
 import { ScoreSubmitter } from '../../components/ScoreSubmitter';
+import { SoloPlayTabs } from '../../components/SoloPlayTabs';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
 import type { SubmitScoreInput } from '../../lib/scores';
@@ -119,26 +120,7 @@ export function YatzyBoard({
             <div className="play-table__meta" data-testid="yatzy-meta">
               <span>Roll {G.rolls}/3</span>
             </div>
-            {solo ? (
-              <div className="lw-tabs">
-                <button
-                  type="button"
-                  className={`btn${tab === 'play' ? ' is-active' : ''}`}
-                  data-testid="yatzy-tab-play"
-                  onClick={() => setTab('play')}
-                >
-                  Play
-                </button>
-                <button
-                  type="button"
-                  className={`btn${tab === 'scores' ? ' is-active' : ''}`}
-                  data-testid="yatzy-tab-scores"
-                  onClick={() => setTab('scores')}
-                >
-                  Scores
-                </button>
-              </div>
-            ) : null}
+            {solo ? <SoloPlayTabs value={tab} onChange={setTab} testIdPrefix="yatzy" /> : null}
           </>
         }
         board={

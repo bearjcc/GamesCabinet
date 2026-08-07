@@ -83,6 +83,24 @@
 .action-surface__btn {
   flex: 1 1 8rem;
   max-width: 20rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  line-height: 1.2;
+}
+
+.action-surface__label {
+  display: block;
+}
+
+.action-surface__reason {
+  display: block;
+  font-size: 0.8em;
+  font-weight: 400;
+  color: var(--muted);
+  max-width: 100%;
 }
 
 .play-table .btn {

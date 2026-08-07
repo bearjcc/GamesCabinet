@@ -1,28 +1,22 @@
 import { describe, expect, it } from 'vitest';
+import { GAMES } from '../lib/games';
+import { boards } from './boards';
 import { gameList, gamesById } from './registry';
 
 describe('game registry', () => {
-  it('lists every catalogue game once', () => {
-    expect(gameList).toHaveLength(24);
-    expect(gamesById['tic-tac-toe'].name).toBe('tic-tac-toe');
-    expect(gamesById['2048'].name).toBe('2048');
-    expect(gamesById['letter-walker'].name).toBe('letter-walker');
-    expect(gamesById['crazy-eights'].name).toBe('crazy-eights');
-    expect(gamesById.reversi.name).toBe('reversi');
-    expect(gamesById.memory.name).toBe('memory');
-    expect(gamesById.mancala.name).toBe('mancala');
-    expect(gamesById.klondike.name).toBe('klondike');
-    expect(gamesById.freecell.name).toBe('freecell');
-    expect(gamesById.go.name).toBe('go');
-    expect(gamesById['chinese-checkers'].name).toBe('chinese-checkers');
-    expect(gamesById.battleship.name).toBe('battleship');
-    expect(gamesById.chess.name).toBe('chess');
-    expect(gamesById['nine-mens-morris'].name).toBe('nine-mens-morris');
-    expect(gamesById.backgammon.name).toBe('backgammon');
-    expect(gamesById['dots-and-boxes'].name).toBe('dots-and-boxes');
-    expect(gamesById['snakes-and-ladders'].name).toBe('snakes-and-ladders');
-    expect(gamesById['go-fish'].name).toBe('go-fish');
-    expect(gamesById.nim.name).toBe('nim');
-    expect(gamesById.war.name).toBe('war');
+  it('keeps catalogue, engine registry, and boards in sync', () => {
+    const catalogueIds = GAMES.map((g) => g.id).sort();
+    const registryIds = Object.keys(gamesById).sort();
+    const boardIds = Object.keys(boards).sort();
+    const listNames = gameList.map((g) => g.name).sort();
+
+    expect(registryIds).toEqual(catalogueIds);
+    expect(boardIds).toEqual(catalogueIds);
+    expect(listNames).toEqual(catalogueIds);
+    expect(gameList).toHaveLength(GAMES.length);
+
+    for (const meta of GAMES) {
+      expect(gamesById[meta.id as keyof typeof gamesById].name).toBe(meta.id);
+    }
   });
 });

@@ -6,6 +6,7 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
+import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
 import type { Suit } from '../shared/cards';
 import { canPlayMatching, topOf } from '../shared/cards';
@@ -98,19 +99,18 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     },
   }));
 
-  let status = 'Waiting…';
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
-  if (ctx.gameover) {
-    tone = 'done';
-    status = ctx.gameover.winner === playerID ? 'You win' : 'Opponent wins';
-  } else if (yourTurn) {
-    tone = 'you';
+  const { text: baseStatus, tone } = deriveMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    labels: {
+      theirTurn: `Player ${Number(ctx.currentPlayer) + 1}'s turn`,
+    },
+  });
+  let status = baseStatus;
+  if (yourTurn && !ctx.gameover) {
     if (pickingSuit) status = 'Choose a suit for your eight';
     else if (selected != null) status = 'Play the selected card, or pick another';
     else if (G.drewThisTurn) status = 'Play a card or pass';
     else status = 'Your turn — play or draw';
-  } else {
-    status = `Player ${Number(ctx.currentPlayer) + 1}'s turn`;
   }
 
   function tryPlay(index: number) {

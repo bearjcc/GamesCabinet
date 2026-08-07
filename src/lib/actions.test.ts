@@ -3,6 +3,7 @@ import {
   ACTION_KINDS,
   actionAriaLabel,
   actionTitle,
+  controlA11y,
   isActionInteractive,
   isActionKind,
   resolveActionState,
@@ -57,5 +58,26 @@ describe('semantic actions', () => {
     expect(actionAriaLabel(action)).toBe('Roll. No rolls left');
     expect(actionTitle({ id: 'ok', kind: 'confirm', label: 'OK' })).toBeUndefined();
     expect(actionAriaLabel({ id: 'ok', kind: 'confirm', label: 'OK' })).toBe('OK');
+  });
+
+  it('builds control a11y for board taps and pew buttons alike', () => {
+    expect(controlA11y({ label: 'Drop column 1' })).toEqual({
+      title: undefined,
+      ariaLabel: 'Drop column 1',
+    });
+    expect(
+      controlA11y({
+        label: 'Drop column 1',
+        disabled: true,
+        disabledReason: 'Column full',
+      }),
+    ).toEqual({
+      title: 'Column full',
+      ariaLabel: 'Drop column 1. Column full',
+    });
+    expect(controlA11y({ label: 'Drop', disabled: true })).toEqual({
+      title: undefined,
+      ariaLabel: 'Drop',
+    });
   });
 });

@@ -6,6 +6,11 @@ export type ConnectFourActionInput = {
   yourTurn: boolean;
 };
 
+export type ColumnDropState = {
+  enabled: boolean;
+  disabledReason?: string;
+};
+
 function columnOpen(cells: (string | null)[], col: number): boolean {
   for (let row = 0; row < ROWS; row++) {
     if (cells[row * COLS + col] === null) return true;
@@ -13,16 +18,25 @@ function columnOpen(cells: (string | null)[], col: number): boolean {
   return false;
 }
 
+/** Shared legality + reason for pew Drop intents and board column taps. */
+export function columnDropState(
+  cells: (string | null)[],
+  col: number,
+  yourTurn: boolean,
+): ColumnDropState {
+  const open = columnOpen(cells, col);
+  const enabled = yourTurn && open;
+  let disabledReason: string | undefined;
+  if (!yourTurn) disabledReason = 'Wait for your turn';
+  else if (!open) disabledReason = 'Column full';
+  return { enabled, disabledReason };
+}
+
 /** Pure pew intents for Connect Four columns. */
 export function getConnectFourActions({ G, yourTurn }: ConnectFourActionInput): SemanticAction[] {
   const actions: SemanticAction[] = [];
   for (let col = 0; col < COLS; col++) {
-    const open = columnOpen(G.cells, col);
-    const enabled = yourTurn && open;
-    let disabledReason: string | undefined;
-    if (!yourTurn) disabledReason = 'Wait for your turn';
-    else if (!open) disabledReason = 'Column full';
-
+    const { enabled, disabledReason } = columnDropState(G.cells, col, yourTurn);
     actions.push({
       id: `drop-${col}`,
       kind: 'move',

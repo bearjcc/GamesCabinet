@@ -1,10 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { getTicTacToeActions } from './actions';
+import { getTicTacToeActions, squareMarkState } from './actions';
 import type { TTTState } from './game';
 
 function baseG(cells?: (string | null)[]): TTTState {
   return { cells: cells ?? Array(9).fill(null) };
 }
+
+describe('squareMarkState', () => {
+  it('enables an empty square during the player turn', () => {
+    expect(squareMarkState(null, true)).toEqual({ enabled: true });
+  });
+
+  it('explains why an empty square is disabled off-turn', () => {
+    expect(squareMarkState(null, false)).toEqual({
+      enabled: false,
+      disabledReason: 'Wait for your turn',
+    });
+  });
+
+  it('explains why an occupied square is disabled', () => {
+    expect(squareMarkState('0', true)).toEqual({
+      enabled: false,
+      disabledReason: 'Square already marked',
+    });
+  });
+});
 
 describe('getTicTacToeActions', () => {
   it('lists enabled Mark square intents for every empty cell on turn', () => {

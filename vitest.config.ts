@@ -13,7 +13,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['server/**/*.ts', 'src/games/**/*.ts', 'src/lib/**/*.ts'],
-      exclude: ['server/index.ts', '**/*.test.ts', 'src/games/boards.ts', 'src/lib/makeClient.ts'],
+      exclude: [
+        'server/index.ts',
+        '**/*.test.ts',
+        '**/*.tsx',
+        'src/games/boards.ts',
+        'src/lib/makeClient.ts',
+      ],
       thresholds: {
         lines: 100,
         branches: 100,

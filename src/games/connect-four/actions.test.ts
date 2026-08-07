@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getConnectFourActions } from './actions';
+import { columnDropState, getConnectFourActions } from './actions';
 import { type C4State, COLS, ROWS } from './game';
 
 function emptyG(): C4State {
@@ -51,5 +51,19 @@ describe('getConnectFourActions', () => {
       disabledReason: 'Column full',
     });
     expect(actions.find((a) => a.id === 'drop-0')).toMatchObject({ disabled: false });
+  });
+
+  it('shares columnDropState with board taps', () => {
+    const G = emptyG();
+    fillColumn(G, 0);
+    expect(columnDropState(G.cells, 0, true)).toEqual({
+      enabled: false,
+      disabledReason: 'Column full',
+    });
+    expect(columnDropState(G.cells, 1, false)).toEqual({
+      enabled: false,
+      disabledReason: 'Wait for your turn',
+    });
+    expect(columnDropState(G.cells, 1, true)).toEqual({ enabled: true });
   });
 });

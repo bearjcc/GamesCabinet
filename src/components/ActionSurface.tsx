@@ -25,6 +25,7 @@ export function ActionSurface({
       {actions.map((action) => {
         const state = resolveActionState(action);
         const interactive = isActionInteractive(action);
+        const reason = actionTitle(action);
         const variantClass =
           action.variant === 'primary'
             ? ' primary'
@@ -40,15 +41,17 @@ export function ActionSurface({
             className={`btn action-surface__btn${variantClass}`}
             data-action-kind={action.kind}
             data-action-state={state}
+            data-disabled-reason={reason}
             data-testid={action.testId ?? `action-${action.id}`}
             disabled={!interactive}
-            title={actionTitle(action)}
+            title={reason}
             aria-label={actionAriaLabel(action)}
             onClick={() => {
               if (interactive) action.onAction();
             }}
           >
-            {action.label}
+            <span className="action-surface__label">{action.label}</span>
+            {reason ? <span className="action-surface__reason">{reason}</span> : null}
           </button>
         );
       })}

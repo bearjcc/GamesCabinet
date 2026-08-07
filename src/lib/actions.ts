@@ -42,14 +42,36 @@ export function isActionInteractive(action: SemanticAction): boolean {
   return state !== 'pending' && state !== 'disabled';
 }
 
+/** Shared title / aria for disabled controls (ActionSurface and board taps). */
+export function controlA11y({
+  label,
+  disabled = false,
+  disabledReason,
+}: {
+  label: string;
+  disabled?: boolean;
+  disabledReason?: string;
+}): { title?: string; ariaLabel: string } {
+  const title = disabled && disabledReason ? disabledReason : undefined;
+  return {
+    title,
+    ariaLabel: title ? `${label}. ${title}` : label,
+  };
+}
+
 export function actionTitle(action: SemanticAction): string | undefined {
-  if (resolveActionState(action) === 'disabled' && action.disabledReason) {
-    return action.disabledReason;
-  }
-  return undefined;
+  if (resolveActionState(action) !== 'disabled') return undefined;
+  return controlA11y({
+    label: action.label,
+    disabled: true,
+    disabledReason: action.disabledReason,
+  }).title;
 }
 
 export function actionAriaLabel(action: SemanticAction): string {
-  const reason = actionTitle(action);
-  return reason ? `${action.label}. ${reason}` : action.label;
+  return controlA11y({
+    label: action.label,
+    disabled: resolveActionState(action) === 'disabled',
+    disabledReason: action.disabledReason,
+  }).ariaLabel;
 }
