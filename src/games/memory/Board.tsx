@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Flip } from '../../components/cinematic';
+import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
@@ -75,8 +76,6 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - flip a card' },
   });
-  const scoreLine = `P1 ${G.scores[0]} - P2 ${G.scores[1]}`;
-
   const pewActions = getMemoryActions({ G, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
     ...action,
@@ -91,7 +90,13 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
       info={
         <>
           <StatusBar text={status} tone={tone} />
-          <div className="memory-scores">{scoreLine}</div>
+          <MatchScoreboard
+            scores={[
+              { label: 'P1', value: G.scores[0] },
+              { label: 'P2', value: G.scores[1] },
+            ]}
+            testId="memory-scores"
+          />
         </>
       }
       board={

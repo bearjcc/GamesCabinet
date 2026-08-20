@@ -2,10 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { AnimatedCounter } from '../../components/cinematic';
-import { LeaderboardPanel } from '../../components/LeaderboardPanel';
-import { PlayTable } from '../../components/PlayTable';
-import { ScoreSubmitter } from '../../components/ScoreSubmitter';
-import { SoloPlayTabs } from '../../components/SoloPlayTabs';
+import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
@@ -23,7 +20,6 @@ export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048St
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const playable = Boolean(isActive && !ctx.gameover);
   const [tab, setTab] = useState<'play' | 'scores'>('play');
-  const showPlayChrome = tab === 'play';
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
     if (!ctx.gameover) return null;
@@ -69,67 +65,56 @@ export function Game2048Board({ G, ctx, moves, isActive }: BoardProps<Game2048St
   }));
 
   return (
-    <>
-      <ScoreSubmitter gameId="2048" pendingSubmit={pendingSubmit} />
-      <PlayTable
-        info={
-          <>
-            <div className="g2048-scoreline" data-testid="g2048-score">
-              <span className="g2048-score-label">Score</span>
-              <AnimatedCounter value={scoreValue} className="g2048-score-value" />
-            </div>
-            <StatusBar text={status} tone={tone} />
-            <SoloPlayTabs value={tab} onChange={setTab} testIdPrefix="g2048" />
-          </>
-        }
-        board={
-          tab === 'scores' ? (
-            <LeaderboardPanel gameId="2048" testIdPrefix="g2048" />
-          ) : (
+    <SoloLeaderboardShell
+      gameId="2048"
+      pendingSubmit={pendingSubmit}
+      tab={tab}
+      onTabChange={setTab}
+      testIdPrefix="g2048"
+      info={
+        <>
+          <div className="g2048-scoreline" data-testid="g2048-score">
+            <span className="g2048-score-label">Score</span>
+            <AnimatedCounter value={scoreValue} className="g2048-score-value" />
+          </div>
+          <StatusBar text={status} tone={tone} />
+        </>
+      }
+      board={
+        <div
+          className="g2048-board"
+          role="grid"
+          aria-label="2048 board"
+          data-testid="g2048-board"
+          onTouchStart={(e) => {
+            const t = e.changedTouches[0];
+            touchStart.current = { x: t.clientX, y: t.clientY };
+          }}
+          onTouchEnd={(e) => {
+            if (!playable || !touchStart.current) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - touchStart.current.x;
+            const dy = t.clientY - touchStart.current.y;
+            touchStart.current = null;
+            if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
+            const dir: SwipeDir =
+              Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
+            moves.swipe(dir);
+          }}
+        >
+          {G.cells.map((cell, i) => (
             <div
-              className="g2048-board"
-              role="grid"
-              aria-label="2048 board"
-              data-testid="g2048-board"
-              onTouchStart={(e) => {
-                const t = e.changedTouches[0];
-                touchStart.current = { x: t.clientX, y: t.clientY };
-              }}
-              onTouchEnd={(e) => {
-                if (!playable || !touchStart.current) return;
-                const t = e.changedTouches[0];
-                const dx = t.clientX - touchStart.current.x;
-                const dy = t.clientY - touchStart.current.y;
-                touchStart.current = null;
-                if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
-                const dir: SwipeDir =
-                  Math.abs(dx) > Math.abs(dy)
-                    ? dx > 0
-                      ? 'right'
-                      : 'left'
-                    : dy > 0
-                      ? 'down'
-                      : 'up';
-                moves.swipe(dir);
-              }}
+              key={i}
+              className={`g2048-cell${cell ? ` v${Math.min(cell, 2048)}` : ''}`}
+              role="gridcell"
+              aria-label={cell ? String(cell) : 'empty'}
             >
-              {G.cells.map((cell, i) => (
-                <div
-                  key={i}
-                  className={`g2048-cell${cell ? ` v${Math.min(cell, 2048)}` : ''}`}
-                  role="gridcell"
-                  aria-label={cell ? String(cell) : 'empty'}
-                >
-                  {cell ?? ''}
-                </div>
-              ))}
+              {cell ?? ''}
             </div>
-          )
-        }
-        actions={
-          showPlayChrome ? <ActionSurface label="2048 actions" actions={surfaceActions} /> : null
-        }
-      />
-    </>
+          ))}
+        </div>
+      }
+      actions={<ActionSurface label="2048 actions" actions={surfaceActions} />}
+    />
   );
 }

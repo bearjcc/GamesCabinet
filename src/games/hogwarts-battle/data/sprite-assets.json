@@ -1,0 +1,726 @@
+{
+  "language": "en",
+  "cards": {
+    "detention": {
+      "sheet": "sheet_076",
+      "index": 12,
+      "cols": 10,
+      "rows": 7
+    },
+    "lunalovegood": {
+      "sheet": "sheet_078",
+      "index": 2,
+      "cols": 10,
+      "rows": 7
+    },
+    "fang": {
+      "sheet": "sheet_082",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "oldsock": {
+      "sheet": "sheet_082",
+      "index": 3,
+      "cols": 10,
+      "rows": 7
+    },
+    "harp": {
+      "sheet": "sheet_082",
+      "index": 4,
+      "cols": 10,
+      "rows": 7
+    },
+    "tergeo": {
+      "sheet": "sheet_082",
+      "index": 5,
+      "cols": 10,
+      "rows": 7
+    },
+    "finite": {
+      "sheet": "sheet_082",
+      "index": 6,
+      "cols": 10,
+      "rows": 7
+    },
+    "finiteincantatem": {
+      "sheet": "sheet_082",
+      "index": 6,
+      "cols": 10,
+      "rows": 7
+    },
+    "hogwartsahistory": {
+      "sheet": "sheet_104",
+      "index": 0,
+      "cols": 7,
+      "rows": 2
+    },
+    "fleurdelacour": {
+      "sheet": "sheet_104",
+      "index": 7,
+      "cols": 7,
+      "rows": 2
+    },
+    "protego": {
+      "sheet": "sheet_104",
+      "index": 8,
+      "cols": 7,
+      "rows": 2
+    },
+    "severussnape": {
+      "sheet": "sheet_104",
+      "index": 9,
+      "cols": 7,
+      "rows": 2
+    },
+    "nimbustwothousandandone": {
+      "sheet": "sheet_108",
+      "index": 0,
+      "cols": 6,
+      "rows": 2
+    },
+    "expelliarmus": {
+      "sheet": "sheet_108",
+      "index": 1,
+      "cols": 6,
+      "rows": 2
+    },
+    "polyjuicepotion": {
+      "sheet": "sheet_108",
+      "index": 4,
+      "cols": 6,
+      "rows": 2
+    },
+    "ginnyweasley": {
+      "sheet": "sheet_108",
+      "index": 5,
+      "cols": 6,
+      "rows": 2
+    },
+    "gilderoylockhart": {
+      "sheet": "sheet_108",
+      "index": 8,
+      "cols": 6,
+      "rows": 2
+    },
+    "arthurweasley": {
+      "sheet": "sheet_108",
+      "index": 9,
+      "cols": 6,
+      "rows": 2
+    },
+    "alohomora": {
+      "sheet": "sheet_111",
+      "index": 0,
+      "cols": 10,
+      "rows": 3
+    },
+    "firebolt": {
+      "sheet": "sheet_111",
+      "index": 1,
+      "cols": 10,
+      "rows": 3
+    },
+    "invisibilitycloak": {
+      "sheet": "sheet_111",
+      "index": 2,
+      "cols": 10,
+      "rows": 3
+    },
+    "crookshanks": {
+      "sheet": "sheet_111",
+      "index": 5,
+      "cols": 10,
+      "rows": 3
+    },
+    "timeturner": {
+      "sheet": "sheet_111",
+      "index": 6,
+      "cols": 10,
+      "rows": 3
+    },
+    "talesofbeedlethebard": {
+      "sheet": "sheet_111",
+      "index": 7,
+      "cols": 10,
+      "rows": 3
+    },
+    "mandrake": {
+      "sheet": "sheet_111",
+      "index": 9,
+      "cols": 10,
+      "rows": 3
+    },
+    "cleansweep": {
+      "sheet": "sheet_111",
+      "index": 13,
+      "cols": 10,
+      "rows": 3
+    },
+    "bertiebottseveryflavourbeans": {
+      "sheet": "sheet_111",
+      "index": 14,
+      "cols": 10,
+      "rows": 3
+    },
+    "goldensnitch": {
+      "sheet": "sheet_111",
+      "index": 17,
+      "cols": 10,
+      "rows": 3
+    },
+    "quidditchgear": {
+      "sheet": "sheet_111",
+      "index": 18,
+      "cols": 10,
+      "rows": 3
+    },
+    "essenceofdittany": {
+      "sheet": "sheet_111",
+      "index": 19,
+      "cols": 10,
+      "rows": 3
+    },
+    "reparo": {
+      "sheet": "sheet_111",
+      "index": 20,
+      "cols": 10,
+      "rows": 3
+    },
+    "descendo": {
+      "sheet": "sheet_111",
+      "index": 21,
+      "cols": 10,
+      "rows": 3
+    },
+    "wingardiumleviosa": {
+      "sheet": "sheet_111",
+      "index": 22,
+      "cols": 10,
+      "rows": 3
+    },
+    "lumos": {
+      "sheet": "sheet_111",
+      "index": 23,
+      "cols": 10,
+      "rows": 3
+    },
+    "incendio": {
+      "sheet": "sheet_111",
+      "index": 25,
+      "cols": 10,
+      "rows": 3
+    },
+    "rubeushagrid": {
+      "sheet": "sheet_111",
+      "index": 26,
+      "cols": 10,
+      "rows": 3
+    },
+    "albusdumbledore": {
+      "sheet": "sheet_111",
+      "index": 27,
+      "cols": 10,
+      "rows": 3
+    },
+    "horaceslughorn": {
+      "sheet": "sheet_113",
+      "index": 0,
+      "cols": 4,
+      "rows": 2
+    },
+    "confundus": {
+      "sheet": "sheet_113",
+      "index": 1,
+      "cols": 4,
+      "rows": 2
+    },
+    "elderwand": {
+      "sheet": "sheet_113",
+      "index": 2,
+      "cols": 4,
+      "rows": 2
+    },
+    "felixfelicis": {
+      "sheet": "sheet_113",
+      "index": 3,
+      "cols": 4,
+      "rows": 2
+    },
+    "deluminator": {
+      "sheet": "sheet_113",
+      "index": 5,
+      "cols": 4,
+      "rows": 2
+    },
+    "bezoar": {
+      "sheet": "sheet_113",
+      "index": 6,
+      "cols": 4,
+      "rows": 2
+    },
+    "siriusblack": {
+      "sheet": "sheet_117",
+      "index": 0,
+      "cols": 5,
+      "rows": 2
+    },
+    "chocolatefrog": {
+      "sheet": "sheet_117",
+      "index": 1,
+      "cols": 5,
+      "rows": 2
+    },
+    "crystalball": {
+      "sheet": "sheet_117",
+      "index": 2,
+      "cols": 5,
+      "rows": 2
+    },
+    "remuslupin": {
+      "sheet": "sheet_117",
+      "index": 5,
+      "cols": 5,
+      "rows": 2
+    },
+    "sybilltrelawney": {
+      "sheet": "sheet_117",
+      "index": 6,
+      "cols": 5,
+      "rows": 2
+    },
+    "butterbeer": {
+      "sheet": "sheet_117",
+      "index": 8,
+      "cols": 5,
+      "rows": 2
+    },
+    "stupefy": {
+      "sheet": "sheet_118",
+      "index": 0,
+      "cols": 3,
+      "rows": 3
+    },
+    "owls": {
+      "sheet": "sheet_118",
+      "index": 3,
+      "cols": 3,
+      "rows": 3
+    },
+    "georgeweasley": {
+      "sheet": "sheet_118",
+      "index": 4,
+      "cols": 3,
+      "rows": 3
+    },
+    "nymphadoratonks": {
+      "sheet": "sheet_118",
+      "index": 6,
+      "cols": 3,
+      "rows": 3
+    },
+    "kingsleyshacklebolt": {
+      "sheet": "sheet_118",
+      "index": 7,
+      "cols": 3,
+      "rows": 3
+    },
+    "remembrall": {
+      "sheet": "sheet_151",
+      "index": 3,
+      "cols": 10,
+      "rows": 7
+    },
+    "pigwidgeon": {
+      "sheet": "sheet_152",
+      "index": 0,
+      "cols": 10,
+      "rows": 7
+    },
+    "sortinghat": {
+      "sheet": "sheet_155",
+      "index": 2,
+      "cols": 10,
+      "rows": 7
+    },
+    "maraudersmap": {
+      "sheet": "sheet_164",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "petrificustotalus": {
+      "sheet": "sheet_164",
+      "index": 2,
+      "cols": 10,
+      "rows": 7
+    },
+    "expectopatronum": {
+      "sheet": "sheet_164",
+      "index": 3,
+      "cols": 10,
+      "rows": 7
+    },
+    "pomonasprout": {
+      "sheet": "sheet_168",
+      "index": 0,
+      "cols": 10,
+      "rows": 7
+    },
+    "viktorkrum": {
+      "sheet": "sheet_168",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "triwizardcup": {
+      "sheet": "sheet_168",
+      "index": 5,
+      "cols": 10,
+      "rows": 7
+    },
+    "alastormadeyemoody": {
+      "sheet": "sheet_168",
+      "index": 6,
+      "cols": 10,
+      "rows": 7
+    },
+    "cedricdiggory": {
+      "sheet": "sheet_168",
+      "index": 9,
+      "cols": 10,
+      "rows": 7
+    },
+    "advancedpotionmaking": {
+      "sheet": "sheet_177",
+      "index": 6,
+      "cols": 10,
+      "rows": 7
+    },
+    "lionhat": {
+      "sheet": "sheet_191",
+      "index": 0,
+      "cols": 10,
+      "rows": 7
+    },
+    "spectrespecs": {
+      "sheet": "sheet_191",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "hedwig": {
+      "sheet": "sheet_111",
+      "index": 3,
+      "cols": 10,
+      "rows": 3
+    },
+    "trevor": {
+      "sheet": "sheet_111",
+      "index": 10,
+      "cols": 10,
+      "rows": 3
+    },
+    "oliverwood": {
+      "sheet": "sheet_111",
+      "index": 24,
+      "cols": 10,
+      "rows": 3
+    }
+  },
+  "villains": {
+    "voldemort": {
+      "sheet": "sheet_040",
+      "index": 3,
+      "cols": 10,
+      "rows": 7
+    },
+    "voldemort7": {
+      "sheet": "sheet_040",
+      "index": 3,
+      "cols": 10,
+      "rows": 7
+    },
+    "basilisk": {
+      "sheet": "sheet_076",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "cornishpixies": {
+      "sheet": "sheet_076",
+      "index": 5,
+      "cols": 10,
+      "rows": 7
+    },
+    "fluffy": {
+      "sheet": "sheet_076",
+      "index": 7,
+      "cols": 10,
+      "rows": 7
+    },
+    "norbert": {
+      "sheet": "sheet_076",
+      "index": 12,
+      "cols": 10,
+      "rows": 7
+    },
+    "deatheater": {
+      "sheet": "sheet_095",
+      "index": 0,
+      "cols": 2,
+      "rows": 2
+    },
+    "bartycrouchjr": {
+      "sheet": "sheet_095",
+      "index": 1,
+      "cols": 2,
+      "rows": 2
+    },
+    "bellatrixlestrange": {
+      "sheet": "sheet_099",
+      "index": 0,
+      "cols": 2,
+      "rows": 2
+    },
+    "fenrirgreyback": {
+      "sheet": "sheet_099",
+      "index": 1,
+      "cols": 2,
+      "rows": 2
+    },
+    "dracomalfoy": {
+      "sheet": "sheet_105",
+      "index": 0,
+      "cols": 2,
+      "rows": 2
+    },
+    "crabbeandgoyle": {
+      "sheet": "sheet_105",
+      "index": 1,
+      "cols": 2,
+      "rows": 2
+    },
+    "quirrell": {
+      "sheet": "sheet_105",
+      "index": 2,
+      "cols": 2,
+      "rows": 2
+    },
+    "dementor": {
+      "sheet": "sheet_109",
+      "index": 1,
+      "cols": 2,
+      "rows": 2
+    },
+    "peterpettigrew": {
+      "sheet": "sheet_115",
+      "index": 0,
+      "cols": 2,
+      "rows": 2
+    },
+    "doloresumbridge": {
+      "sheet": "sheet_116",
+      "index": 1,
+      "cols": 2,
+      "rows": 2
+    },
+    "luciusmalfoy": {
+      "sheet": "sheet_160",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "tomriddle": {
+      "sheet": "sheet_160",
+      "index": 2,
+      "cols": 10,
+      "rows": 7
+    }
+  },
+  "darkArts": {
+    "morsmordre": {
+      "sheet": "sheet_025",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "inquisitorialsquad": {
+      "sheet": "sheet_079",
+      "index": 0,
+      "cols": 10,
+      "rows": 7
+    },
+    "menacinggrowl": {
+      "sheet": "sheet_079",
+      "index": 2,
+      "cols": 10,
+      "rows": 7
+    },
+    "sluguluseructo": {
+      "sheet": "sheet_079",
+      "index": 4,
+      "cols": 10,
+      "rows": 7
+    },
+    "regeneration": {
+      "sheet": "sheet_093",
+      "index": 1,
+      "cols": 4,
+      "rows": 2
+    },
+    "heirofslytherin": {
+      "sheet": "sheet_093",
+      "index": 2,
+      "cols": 4,
+      "rows": 2
+    },
+    "imperio": {
+      "sheet": "sheet_093",
+      "index": 3,
+      "cols": 4,
+      "rows": 2
+    },
+    "avadakedavra": {
+      "sheet": "sheet_093",
+      "index": 4,
+      "cols": 4,
+      "rows": 2
+    },
+    "crucio": {
+      "sheet": "sheet_093",
+      "index": 5,
+      "cols": 4,
+      "rows": 2
+    },
+    "legilimency": {
+      "sheet": "sheet_096",
+      "index": 0,
+      "cols": 4,
+      "rows": 2
+    },
+    "educationaldecree": {
+      "sheet": "sheet_096",
+      "index": 1,
+      "cols": 4,
+      "rows": 2
+    },
+    "fiendfyre": {
+      "sheet": "sheet_101",
+      "index": 0,
+      "cols": 3,
+      "rows": 2
+    },
+    "sectumsempra": {
+      "sheet": "sheet_107",
+      "index": 0,
+      "cols": 2,
+      "rows": 2
+    },
+    "oppugno": {
+      "sheet": "sheet_109",
+      "index": 0,
+      "cols": 2,
+      "rows": 2
+    },
+    "dementorskiss": {
+      "sheet": "sheet_109",
+      "index": 1,
+      "cols": 2,
+      "rows": 2
+    },
+    "tarantallegra": {
+      "sheet": "sheet_109",
+      "index": 2,
+      "cols": 2,
+      "rows": 2
+    },
+    "petrification": {
+      "sheet": "sheet_112",
+      "index": 1,
+      "cols": 3,
+      "rows": 2
+    },
+    "expulso": {
+      "sheet": "sheet_112",
+      "index": 2,
+      "cols": 3,
+      "rows": 2
+    },
+    "flipendo": {
+      "sheet": "sheet_112",
+      "index": 3,
+      "cols": 3,
+      "rows": 2
+    },
+    "obliviate": {
+      "sheet": "sheet_114",
+      "index": 2,
+      "cols": 3,
+      "rows": 2
+    },
+    "poison": {
+      "sheet": "sheet_145",
+      "index": 9,
+      "cols": 10,
+      "rows": 7
+    },
+    "hewhomustnotbenamed": {
+      "sheet": "sheet_148",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "handofglory": {
+      "sheet": "sheet_157",
+      "index": 2,
+      "cols": 10,
+      "rows": 7
+    },
+    "relashio": {
+      "sheet": "sheet_157",
+      "index": 3,
+      "cols": 10,
+      "rows": 7
+    }
+  },
+  "locations": {
+    "castlegates": {
+      "sheet": "sheet_071",
+      "index": 0,
+      "cols": 10,
+      "rows": 7
+    },
+    "hagridshut": {
+      "sheet": "sheet_071",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    },
+    "greathall": {
+      "sheet": "sheet_141",
+      "index": 1,
+      "cols": 10,
+      "rows": 7
+    }
+  },
+  "unresolved": {
+    "cards": [
+      "accio",
+      "argusfilchandmrsnorris",
+      "chochang",
+      "crumplehornedsnorkack",
+      "dobbythehouseelf",
+      "fawkesthephoenix",
+      "filiusflitwick",
+      "fredweasley",
+      "minervamcgonagall",
+      "mollyweasley",
+      "pensieve",
+      "swordofgryffindor"
+    ],
+    "villains": ["troll"],
+    "darkArts": ["blastended", "ragingtroll"],
+    "locations": []
+  }
+}

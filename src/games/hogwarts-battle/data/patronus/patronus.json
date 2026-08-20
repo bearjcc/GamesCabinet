@@ -1,0 +1,83 @@
+{
+  "harry_patronus": {
+    "id": "harry_patronus",
+    "name": "Harry's Patronus",
+    "hero_id": "harry",
+    "description": "Protect another Hero from being stunned. Once that Hero has set their Health to 2, they cannot willingly choose to lose any more Health on that turn.",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "effects": [
+      {
+        "type": "patronus_protect",
+        "params": { "target": "choose_other_player" },
+        "description": "Protect another Hero from being stunned this turn"
+      }
+    ]
+  },
+  "ron_patronus": {
+    "id": "ron_patronus",
+    "name": "Ron's Patronus",
+    "hero_id": "ron",
+    "description": "Roll a House die without the use of a Hogwarts card.",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "effects": [
+      {
+        "type": "roll_house_dice",
+        "params": { "count": 1 },
+        "description": "Roll a House die"
+      }
+    ]
+  },
+  "hermione_patronus": {
+    "id": "hermione_patronus",
+    "name": "Hermione's Patronus",
+    "hero_id": "hermione",
+    "description": "Draw 2 cards and gain 1 Influence.",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "effects": [
+      { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+      { "type": "gain_influence", "params": { "amount": 1, "target": "self" } }
+    ]
+  },
+  "neville_patronus": {
+    "id": "neville_patronus",
+    "name": "Neville's Patronus",
+    "hero_id": "neville",
+    "description": "Gain 2 Attack and heal 1 Health.",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2, "target": "self" } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } }
+    ]
+  },
+  "luna_patronus": {
+    "id": "luna_patronus",
+    "name": "Luna's Patronus",
+    "hero_id": "luna",
+    "description": "Roll a House die without the use of a Hogwarts card. If Luna is forced to discard a card to another card effect, and she chooses a Spell, it does not allow her to roll the die.",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "effects": [
+      {
+        "type": "roll_house_dice",
+        "params": { "count": 1 },
+        "description": "Roll a House die"
+      }
+    ]
+  },
+  "ginny_patronus": {
+    "id": "ginny_patronus",
+    "name": "Ginny's Patronus",
+    "hero_id": "ginny",
+    "description": "Gain 1 Attack and heal 1 Health.",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1, "target": "self" } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } }
+    ]
+  }
+}

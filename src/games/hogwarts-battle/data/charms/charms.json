@@ -1,0 +1,191 @@
+{
+  "harry_charm": {
+    "id": "harry_charm",
+    "hero_id": "harry",
+    "name": "Defensive Charm",
+    "tiers": [
+      {
+        "health_threshold": 10,
+        "description": "When you play a Spell, gain 1 Influence",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "spell" },
+        "effects": [{ "type": "gain_influence", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 7,
+        "description": "When you play a Spell, gain 1 Attack",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "spell" },
+        "effects": [{ "type": "gain_attack", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 4,
+        "description": "When you play a Spell, gain 2 Attack and 1 Influence",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "spell" },
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "self" } }
+        ]
+      }
+    ]
+  },
+  "ron_charm": {
+    "id": "ron_charm",
+    "hero_id": "ron",
+    "name": "Summoning Charm",
+    "tiers": [
+      {
+        "health_threshold": 10,
+        "description": "When you play an Item, gain 1 Influence",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "item" },
+        "effects": [{ "type": "gain_influence", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 7,
+        "description": "For each Ally you play, gain 1 Health",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "ally" },
+        "effects": [{ "type": "heal", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 4,
+        "description": "For each Ally you play, gain 1 Attack and 1 Health",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "ally" },
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 1, "target": "self" } },
+          { "type": "heal", "params": { "amount": 1, "target": "self" } }
+        ]
+      }
+    ]
+  },
+  "hermione_charm": {
+    "id": "hermione_charm",
+    "hero_id": "hermione",
+    "name": "Wand-Lighting Charm",
+    "tiers": [
+      {
+        "health_threshold": 10,
+        "description": "When you play 3 Spells this turn, draw 1 card",
+        "trigger": "on_spells_played_threshold",
+        "condition": { "type": "spells_played_gte", "threshold": 3 },
+        "effects": [{ "type": "draw_cards", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 7,
+        "description": "When you play 2 Spells this turn, draw 1 card",
+        "trigger": "on_spells_played_threshold",
+        "condition": { "type": "spells_played_gte", "threshold": 2 },
+        "effects": [{ "type": "draw_cards", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 4,
+        "description": "When you play 2 Spells this turn, draw 2 cards",
+        "trigger": "on_spells_played_threshold",
+        "condition": { "type": "spells_played_gte", "threshold": 2 },
+        "effects": [{ "type": "draw_cards", "params": { "amount": 2, "target": "self" } }]
+      }
+    ]
+  },
+  "neville_charm": {
+    "id": "neville_charm",
+    "hero_id": "neville",
+    "name": "Herbology Charm",
+    "tiers": [
+      {
+        "health_threshold": 10,
+        "description": "When you play an Item, gain 1 Health",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "item" },
+        "effects": [{ "type": "heal", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 7,
+        "description": "When you play an Item, gain 2 Health",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "item" },
+        "effects": [{ "type": "heal", "params": { "amount": 2, "target": "self" } }]
+      },
+      {
+        "health_threshold": 4,
+        "description": "When you play an Item, gain 2 Health and 1 Attack",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "item" },
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_attack", "params": { "amount": 1, "target": "self" } }
+        ]
+      }
+    ]
+  },
+  "luna_charm": {
+    "id": "luna_charm",
+    "hero_id": "luna",
+    "name": "Protective Charm",
+    "tiers": [
+      {
+        "health_threshold": 10,
+        "description": "When you play an Ally, gain 1 Influence",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "ally" },
+        "effects": [{ "type": "gain_influence", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 7,
+        "description": "When you play an Ally, gain 1 Influence and 1 Health",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "ally" },
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 1, "target": "self" } },
+          { "type": "heal", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      {
+        "health_threshold": 4,
+        "description": "When you play an Ally, gain 2 Influence and 1 Health",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "ally" },
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } },
+          { "type": "heal", "params": { "amount": 1, "target": "self" } }
+        ]
+      }
+    ]
+  },
+  "ginny_charm": {
+    "id": "ginny_charm",
+    "hero_id": "ginny",
+    "name": "Hex Charm",
+    "tiers": [
+      {
+        "health_threshold": 10,
+        "description": "When you play a Spell, gain 1 Attack",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "spell" },
+        "effects": [{ "type": "gain_attack", "params": { "amount": 1, "target": "self" } }]
+      },
+      {
+        "health_threshold": 7,
+        "description": "When you play a Spell, gain 1 Attack and 1 Influence",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "spell" },
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 1, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      {
+        "health_threshold": 4,
+        "description": "When you play a Spell, gain 2 Attack and 1 Influence",
+        "trigger": "on_card_played",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "spell" },
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "self" } }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,528 @@
+{
+  "calming_draught": {
+    "id": "calming_draught",
+    "name": "Calming Draught",
+    "set": ["potions_box2"],
+    "ingredients": ["bicorn_horn", "mandrake_leaf"],
+    "effect": {
+      "type": "choose_one",
+      "params": {
+        "prompt": "Choose one:",
+        "options": [
+          {
+            "label": "All Heroes gain 1 Health",
+            "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+          },
+          {
+            "label": "All Heroes gain 1 Influence",
+            "effect": {
+              "type": "gain_influence",
+              "params": { "amount": 1, "target": "all_players" }
+            }
+          }
+        ]
+      },
+      "description": "Choose one: All Heroes gain 1 Health OR All Heroes gain 1 Influence"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 1 Health and 1 Influence"
+    }
+  },
+  "amortentia": {
+    "id": "amortentia",
+    "name": "Amortentia",
+    "set": ["potions_box2"],
+    "ingredients": ["lacewing", "hellebore", "flobber_worm"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Draw 2 cards and gain 2 Influence"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 3, "target": "self" } }
+        ]
+      },
+      "description": "Draw 3 cards and gain 3 Influence"
+    }
+  },
+  "draught_of_peace": {
+    "id": "draught_of_peace",
+    "name": "Draught of Peace",
+    "set": ["potions_box2"],
+    "ingredients": ["hellebore", "mandrake_leaf"],
+    "effect": {
+      "type": "heal",
+      "params": { "amount": 3, "target": "choose" },
+      "description": "Heal any Hero 3 Health"
+    },
+    "banish_effect": {
+      "type": "heal",
+      "params": { "amount": 3, "target": "all_players" },
+      "description": "All Heroes gain 3 Health"
+    }
+  },
+  "felix_felicis": {
+    "id": "felix_felicis",
+    "name": "Felix Felicis",
+    "set": ["potions_box2"],
+    "ingredients": ["bicorn_horn", "lacewing", "wild"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 2 Attack and draw 2 cards"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 3 Attack, draw 3 cards, and gain 2 Influence"
+    }
+  },
+  "polyjuice_potion": {
+    "id": "polyjuice_potion",
+    "name": "Polyjuice Potion",
+    "set": ["potions_box2"],
+    "ingredients": ["lacewing", "bicorn_horn", "flobber_worm"],
+    "effect": {
+      "type": "choose_one",
+      "params": {
+        "prompt": "Choose one:",
+        "options": [
+          {
+            "label": "Gain 3 Attack",
+            "effect": { "type": "gain_attack", "params": { "amount": 3, "target": "self" } }
+          },
+          {
+            "label": "Gain 3 Influence",
+            "effect": { "type": "gain_influence", "params": { "amount": 3, "target": "self" } }
+          }
+        ]
+      },
+      "description": "Choose one: Gain 3 Attack OR Gain 3 Influence"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 2 Attack and 2 Influence"
+    }
+  },
+  "skele_gro": {
+    "id": "skele_gro",
+    "name": "Skele-Gro",
+    "set": ["potions_box2"],
+    "ingredients": ["bicorn_horn", "hellebore"],
+    "effect": {
+      "type": "heal",
+      "params": { "amount": 2, "target": "self" },
+      "description": "Gain 2 Health"
+    },
+    "banish_effect": {
+      "type": "heal",
+      "params": { "amount": 4, "target": "self" },
+      "description": "Gain 4 Health"
+    }
+  },
+  "veritaserum": {
+    "id": "veritaserum",
+    "name": "Veritaserum",
+    "set": ["potions_box2"],
+    "ingredients": ["mandrake_leaf", "lacewing"],
+    "effect": {
+      "type": "draw_cards",
+      "params": { "amount": 3, "target": "self" },
+      "description": "Draw 3 cards"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Draw 3 cards and gain 1 Influence"
+    }
+  },
+  "wit_sharpening_potion": {
+    "id": "wit_sharpening_potion",
+    "name": "Wit-Sharpening Potion",
+    "set": ["potions_box2"],
+    "ingredients": ["flobber_worm", "mandrake_leaf", "wild"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Gain 2 Influence and draw 1 card"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 3, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 3 Influence and draw 2 cards"
+    }
+  },
+  "wolfsbane_potion": {
+    "id": "wolfsbane_potion",
+    "name": "Wolfsbane Potion",
+    "set": ["potions_box2"],
+    "ingredients": ["hellebore", "lacewing", "bicorn_horn"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_attack", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Gain 2 Health and 1 Attack"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "All Heroes gain 2 Health and you gain 2 Attack"
+    }
+  },
+  "fire_protection_potion": {
+    "id": "fire_protection_potion",
+    "name": "Fire Protection Potion",
+    "set": ["potions_box2"],
+    "ingredients": ["flobber_worm", "bicorn_horn"],
+    "effect": {
+      "type": "remove_location_control",
+      "params": { "amount": 1 },
+      "description": "Remove 1 Control from the Location"
+    },
+    "banish_effect": {
+      "type": "remove_location_control",
+      "params": { "amount": 2 },
+      "description": "Remove 2 Control from the Location"
+    }
+  },
+  "shrinking_potion": {
+    "id": "shrinking_potion",
+    "name": "Shrinking Potion",
+    "set": ["potions_box2"],
+    "ingredients": ["mandrake_leaf", "hellebore", "lacewing"],
+    "effect": {
+      "type": "gain_attack",
+      "params": { "amount": 2, "target": "self" },
+      "description": "Gain 2 Attack"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Gain 3 Attack and draw 1 card"
+    }
+  },
+  "cure_for_boils": {
+    "id": "cure_for_boils",
+    "name": "Cure for Boils",
+    "set": ["potions_box2"],
+    "ingredients": ["flobber_worm", "hellebore"],
+    "effect": {
+      "type": "heal",
+      "params": { "amount": 2, "target": "self" },
+      "description": "Gain 2 Health"
+    },
+    "banish_effect": {
+      "type": "heal",
+      "params": { "amount": 2, "target": "all_players" },
+      "description": "All Heroes gain 2 Health"
+    }
+  },
+  "forgetfulness_potion": {
+    "id": "forgetfulness_potion",
+    "name": "Forgetfulness Potion",
+    "set": ["potions_box2"],
+    "ingredients": ["lacewing", "mandrake_leaf", "flobber_worm"],
+    "effect": {
+      "type": "choose_one",
+      "params": {
+        "prompt": "Choose one:",
+        "options": [
+          {
+            "label": "Draw 2 cards",
+            "effect": { "type": "draw_cards", "params": { "amount": 2, "target": "self" } }
+          },
+          {
+            "label": "Remove 1 Control",
+            "effect": { "type": "remove_location_control", "params": { "amount": 1 } }
+          }
+        ]
+      },
+      "description": "Choose one: Draw 2 cards OR Remove 1 Control from the Location"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "Draw 2 cards and remove 1 Control from the Location"
+    }
+  },
+  "draught_of_living_death": {
+    "id": "draught_of_living_death",
+    "name": "Draught of Living Death",
+    "set": ["potions_box3"],
+    "ingredients": ["hellebore", "lacewing", "wild", "bicorn_horn"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 3 Attack and draw 2 cards"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 4, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "heal", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 4 Attack, draw 3 cards, and gain 2 Health"
+    }
+  },
+  "murtlap_essence": {
+    "id": "murtlap_essence",
+    "name": "Murtlap Essence",
+    "set": ["potions_box3"],
+    "ingredients": ["mandrake_leaf", "flobber_worm"],
+    "effect": {
+      "type": "heal",
+      "params": { "amount": 2, "target": "choose" },
+      "description": "Heal any Hero 2 Health"
+    },
+    "banish_effect": {
+      "type": "heal",
+      "params": { "amount": 2, "target": "all_players" },
+      "description": "All Heroes gain 2 Health"
+    }
+  },
+  "babbling_beverage": {
+    "id": "babbling_beverage",
+    "name": "Babbling Beverage",
+    "set": ["potions_box3"],
+    "ingredients": ["bicorn_horn", "lacewing", "mandrake_leaf"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Draw 2 cards and gain 1 Influence"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Draw 3 cards and gain 2 Influence"
+    }
+  },
+  "deflating_draught": {
+    "id": "deflating_draught",
+    "name": "Deflating Draught",
+    "set": ["potions_box3"],
+    "ingredients": ["flobber_worm", "hellebore", "lacewing"],
+    "effect": {
+      "type": "remove_location_control",
+      "params": { "amount": 2 },
+      "description": "Remove 2 Control from the Location"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "remove_location_control", "params": { "amount": 2 } },
+          { "type": "gain_attack", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Remove 2 Control from the Location and gain 1 Attack"
+    }
+  },
+  "strengthening_solution": {
+    "id": "strengthening_solution",
+    "name": "Strengthening Solution",
+    "set": ["potions_box3"],
+    "ingredients": ["bicorn_horn", "wild", "mandrake_leaf"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } },
+          { "type": "heal", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "Gain 2 Attack and 1 Health"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "self" } },
+          { "type": "heal", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 3 Attack and 2 Health"
+    }
+  },
+  "doxycide": {
+    "id": "doxycide",
+    "name": "Doxycide",
+    "set": ["potions_box3"],
+    "ingredients": ["hellebore", "bicorn_horn", "flobber_worm"],
+    "effect": {
+      "type": "gain_attack",
+      "params": { "amount": 3, "target": "self" },
+      "description": "Gain 3 Attack"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "self" } },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "Gain 3 Attack and remove 1 Control from the Location"
+    }
+  },
+  "draught_of_deceiving_death": {
+    "id": "draught_of_deceiving_death",
+    "name": "Draught of Deceiving Death",
+    "set": ["potions_box4"],
+    "ingredients": ["hellebore", "lacewing", "wild", "bicorn_horn", "mandrake_leaf"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+          { "type": "heal", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Gain 3 Attack, draw 2 cards, and gain 2 Health"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 5, "target": "self" } },
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } }
+        ]
+      },
+      "description": "Gain 5 Attack, draw 3 cards, all Heroes gain 3 Health"
+    }
+  },
+  "blood_replenishing_potion": {
+    "id": "blood_replenishing_potion",
+    "name": "Blood-Replenishing Potion",
+    "set": ["potions_box4"],
+    "ingredients": ["mandrake_leaf", "bicorn_horn", "flobber_worm", "lacewing"],
+    "effect": {
+      "type": "heal",
+      "params": { "amount": 3, "target": "all_players" },
+      "description": "All Heroes gain 3 Health"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 4, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 4 Health and 1 Influence"
+    }
+  },
+  "pepperup_potion": {
+    "id": "pepperup_potion",
+    "name": "Pepperup Potion",
+    "set": ["potions_box4"],
+    "ingredients": ["bicorn_horn", "hellebore", "lacewing", "mandrake_leaf"],
+    "effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Draw 3 cards and gain 2 Influence"
+    },
+    "banish_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 4, "target": "self" } },
+          { "type": "gain_influence", "params": { "amount": 3, "target": "self" } },
+          { "type": "gain_attack", "params": { "amount": 2, "target": "self" } }
+        ]
+      },
+      "description": "Draw 4 cards, gain 3 Influence, and gain 2 Attack"
+    }
+  }
+}

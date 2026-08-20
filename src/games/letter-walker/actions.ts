@@ -2,7 +2,6 @@ import type { SemanticAction } from '../../lib/actions';
 
 export type LetterWalkerActionInput = {
   playable: boolean;
-  boardTab: 'play' | 'scores';
   selectedCount: number;
   wordLength: number;
   dictReady: boolean;
@@ -14,23 +13,17 @@ export type LetterWalkerActionInput = {
  * Row/column slides are 32 microscopic arrow intents plus per-cell selection;
  * those stay on the board (drag/tap/arrow buttons). The pew exposes the
  * high-value intents the existing toolbar already offered: submit, clear,
- * and new puzzle.
+ * and new puzzle. The shell hides this surface on the scores tab.
  */
 export function getLetterWalkerActions({
   playable,
-  boardTab,
   selectedCount,
   wordLength,
   dictReady,
 }: LetterWalkerActionInput): SemanticAction[] {
-  const onScores = boardTab === 'scores';
-
   let submitDisabled = false;
   let submitReason: string | undefined;
-  if (onScores) {
-    submitDisabled = true;
-    submitReason = 'Switch to the Play tab';
-  } else if (!playable) {
+  if (!playable) {
     submitDisabled = true;
     submitReason = 'Puzzle complete';
   } else if (!dictReady) {
@@ -43,19 +36,9 @@ export function getLetterWalkerActions({
 
   let clearDisabled = false;
   let clearReason: string | undefined;
-  if (onScores) {
-    clearDisabled = true;
-    clearReason = 'Switch to the Play tab';
-  } else if (selectedCount === 0) {
+  if (selectedCount === 0) {
     clearDisabled = true;
     clearReason = 'No selection to clear';
-  }
-
-  let newDisabled = false;
-  let newReason: string | undefined;
-  if (onScores) {
-    newDisabled = true;
-    newReason = 'Switch to the Play tab';
   }
 
   return [
@@ -82,8 +65,7 @@ export function getLetterWalkerActions({
       kind: 'choose',
       label: 'New puzzle',
       variant: 'secondary',
-      disabled: newDisabled,
-      disabledReason: newReason,
+      disabled: false,
       testId: 'lw-action-new-puzzle',
     },
   ];

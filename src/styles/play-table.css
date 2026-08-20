@@ -19,12 +19,20 @@
   flex-shrink: 0;
 }
 
-.play-table__meta {
+.match-scoreboard {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.match-scoreboard__item {
+  white-space: nowrap;
+}
+
+.match-scoreboard__value {
+  color: var(--ink);
 }
 
 .play-table__board {
@@ -230,12 +238,12 @@
   }
 
   /* Denser meta row (CSS-only; callers keep the same markup). */
-  .play-table__meta {
+  .match-scoreboard {
     gap: 0.3rem 0.5rem;
     font-size: 0.82rem;
   }
 
-  .play-table__info:has(.play-table__meta) {
+  .play-table__info:has(.match-scoreboard) {
     display: flex;
     flex-flow: row wrap;
     align-items: baseline;
@@ -243,12 +251,12 @@
     row-gap: 0.2rem;
   }
 
-  .play-table__info:has(.play-table__meta) .status {
+  .play-table__info:has(.match-scoreboard) .status {
     flex: 1 1 10rem;
     min-width: 0;
   }
 
-  .play-table__info:has(.play-table__meta) .play-table__meta {
+  .play-table__info:has(.match-scoreboard) .match-scoreboard {
     flex: 0 1 auto;
   }
 

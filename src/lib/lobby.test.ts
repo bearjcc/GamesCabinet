@@ -101,6 +101,21 @@ describe('hostRoom', () => {
       playerName: 'Player',
     });
   });
+
+  it('sends setup data when creating a hosted match', async () => {
+    lobbyMocks.createMatch.mockResolvedValue({ matchID: 'HOST3' });
+    lobbyMocks.joinMatch.mockResolvedValue({ playerID: '0', playerCredentials: 'cred' });
+    const { hostRoom } = await loadLobby();
+    const setupData = { gameNumber: 4, heroIds: ['neville', 'harry'] };
+
+    await hostRoom('hogwarts-battle', 2, 'Bear', setupData);
+
+    expect(lobbyMocks.createMatch).toHaveBeenCalledWith('hogwarts-battle', {
+      numPlayers: 2,
+      unlisted: true,
+      setupData,
+    });
+  });
 });
 
 describe('joinRoom', () => {
@@ -135,6 +150,16 @@ describe('joinRoom', () => {
       credentials: 'join-cred',
     });
     expect(saveSeat).toHaveBeenCalled();
+  });
+
+  it('keeps the room setup when joining a Hogwarts match', async () => {
+    lobbyMocks.joinMatch.mockResolvedValue({ playerID: '1', playerCredentials: 'join-cred' });
+    const { joinKnownRoom } = await loadLobby();
+    const setupData = { gameNumber: 7, heroIds: ['harry', 'ron'] };
+
+    await expect(
+      joinKnownRoom({ matchID: 'HBJOIN', gameName: 'hogwarts-battle', setupData }, 'Bear'),
+    ).resolves.toMatchObject({ matchID: 'HBJOIN', setupData });
   });
 });
 
@@ -264,6 +289,31 @@ describe('leaveRoom and rematchRoom', () => {
     expect(lobbyMocks.joinMatch).toHaveBeenCalledWith('yatzy', 'NEXT2', {
       playerID: '0',
       playerName: 'Player',
+    });
+  });
+
+  it('carries setup data into a rematch', async () => {
+    lobbyMocks.playAgain.mockResolvedValue({ nextMatchID: 'NEXT3' });
+    lobbyMocks.joinMatch.mockResolvedValue({ playerID: '0', playerCredentials: 'next-cred' });
+    const { rematchRoom } = await loadLobby();
+    const setupData = { gameNumber: 7, heroIds: ['hermione', 'ron'] };
+
+    await rematchRoom(
+      {
+        matchID: 'OLD3',
+        playerID: '0',
+        credentials: 'cred',
+        gameName: 'hogwarts-battle',
+        setupData,
+      },
+      'Bear',
+    );
+
+    expect(lobbyMocks.playAgain).toHaveBeenCalledWith('hogwarts-battle', 'OLD3', {
+      playerID: '0',
+      credentials: 'cred',
+      unlisted: true,
+      setupData,
     });
   });
 });

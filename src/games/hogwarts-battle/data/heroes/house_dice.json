@@ -1,0 +1,170 @@
+{
+  "ravenclaw": {
+    "id": "ravenclaw",
+    "name": "Ravenclaw",
+    "faces": [
+      {
+        "face": 0,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      },
+      {
+        "face": 1,
+        "weight": 1,
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Health"
+      },
+      {
+        "face": 2,
+        "weight": 1,
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Damage"
+      },
+      {
+        "face": 3,
+        "weight": 1,
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players Draw 1"
+      },
+      {
+        "face": 4,
+        "weight": 1,
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players Draw 1"
+      },
+      {
+        "face": 5,
+        "weight": 1,
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players Draw 1"
+      }
+    ]
+  },
+  "slytherin": {
+    "id": "slytherin",
+    "name": "Slytherin",
+    "faces": [
+      {
+        "face": 0,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      },
+      {
+        "face": 1,
+        "weight": 1,
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Health"
+      },
+      {
+        "face": 2,
+        "weight": 1,
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players Draw 1"
+      },
+      {
+        "face": 3,
+        "weight": 1,
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Damage"
+      },
+      {
+        "face": 4,
+        "weight": 1,
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Damage"
+      },
+      {
+        "face": 5,
+        "weight": 1,
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Damage"
+      }
+    ]
+  },
+  "gryffindor": {
+    "id": "gryffindor",
+    "name": "Gryffindor",
+    "faces": [
+      {
+        "face": 0,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      },
+      {
+        "face": 1,
+        "weight": 1,
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Health"
+      },
+      {
+        "face": 2,
+        "weight": 1,
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players Draw 1"
+      },
+      {
+        "face": 3,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      },
+      {
+        "face": 4,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      },
+      {
+        "face": 5,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      }
+    ]
+  },
+  "hufflepuff": {
+    "id": "hufflepuff",
+    "name": "Hufflepuff",
+    "faces": [
+      {
+        "face": 0,
+        "weight": 1,
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Money"
+      },
+      {
+        "face": 1,
+        "weight": 1,
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Damage"
+      },
+      {
+        "face": 2,
+        "weight": 1,
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players Draw 1"
+      },
+      {
+        "face": 3,
+        "weight": 1,
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Health"
+      },
+      {
+        "face": 4,
+        "weight": 1,
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Health"
+      },
+      {
+        "face": 5,
+        "weight": 1,
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All players gain 1 Health"
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+---
+description: "Player-facing copy is for the person playing, not the person prompting."
+alwaysApply: true
+---
+
+# Player-facing artefacts
+
+Global artefact autonomy still applies. This repo's public artefact is the cabinet: catalogue, launch, settings, empty states, and in-game chrome.
+
+The audience is the player (PRODUCT personas). The audience is not Bear, the agent, or this chat.
+
+## On the site
+
+Labels a player would say at the table. Verb-first blurbs. Game terms from that game's domain (heroes, influence, room code).
+
+## Keep off the site
+
+- Pipeline / completeness notes (`Game 1` as WIP, Phase 1, local-only-because-IP).
+- Session residue (as requested, I found, for now, pending implementation).
+- Chrome tour ("theme lives in the topbar").
+- Engine dumps (`HERO_ACTION`, `strict - countermeasure only`, `open table`).
+- Genre shop-talk when a verb will do (`Co-op deck-builder`).
+
+`Game 1` on the Hogwarts board is campaign language. `Game 1` on a catalogue blurb is a progress note.
+
+Maintainer docs (`PRODUCT.md`, `ARCHITECTURE.md`, tests, comments) may record process. The site may not.

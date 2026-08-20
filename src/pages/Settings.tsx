@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Shell } from '../components/Shell';
+import { UnlockPanel } from '../components/UnlockPanel';
+import { GAMES, isAccessGated } from '../lib/games';
 import {
   getNickname,
   getSeatColour,
+  getUnlockedGames,
   SEAT_COLOUR_PALETTE,
   type SeatColour,
   setNickname,
@@ -12,6 +15,8 @@ import {
 export function Settings() {
   const [name, setName] = useState(() => getNickname() || 'Player');
   const [seatColour, setSeatColourState] = useState<SeatColour>(() => getSeatColour());
+  const [unlocked, setUnlocked] = useState<string[]>(() => getUnlockedGames());
+  const revealed = GAMES.filter((g) => isAccessGated(g) && unlocked.includes(g.id));
 
   return (
     <Shell title="Settings">
@@ -57,7 +62,20 @@ export function Settings() {
         </div>
       </section>
 
-      <p className="launch-blurb">Theme and motion live in the topbar.</p>
+      <section aria-label="Access codes">
+        <p className="launch-blurb">Access codes</p>
+        <p className="launch-blurb">
+          Some shelves stay hidden until a code opens them on this device.
+        </p>
+        <UnlockPanel onUnlocked={() => setUnlocked(getUnlockedGames())} />
+        {revealed.length ? (
+          <ul data-testid="settings-unlocked-games">
+            {revealed.map((g) => (
+              <li key={g.id}>{g.name}</li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
     </Shell>
   );
 }

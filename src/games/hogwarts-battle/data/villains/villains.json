@@ -1,0 +1,542 @@
+{
+  "dracomalfoy": {
+    "id": "dracomalfoy",
+    "name": "Draco Malfoy",
+    "hp": 6,
+    "type": "villain",
+    "set": ["game1"],
+    "image": "villains/dracomalfoy.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "deal_damage_on_location_control_added",
+      "params": { "amount": 2, "target": "active_player" },
+      "description": "When a location control token is added, damage the active hero 2"
+    },
+    "death_effect": {
+      "type": "remove_location_control",
+      "params": { "amount": 1 },
+      "description": "Remove 1 control from location"
+    },
+    "flavor": "My father will hear about this!"
+  },
+  "quirrell": {
+    "id": "quirrell",
+    "name": "Professor Quirrell",
+    "hp": 6,
+    "type": "villain",
+    "set": ["game1"],
+    "image": "villains/quirrell.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "deal_damage",
+      "params": { "amount": 1, "target": "active_player" },
+      "description": "Damage the current hero 1"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All players gain 1 Money and 1 Health"
+    },
+    "flavor": "There is no good and evil, there is only power..."
+  },
+  "crabbeandgoyle": {
+    "id": "crabbeandgoyle",
+    "name": "Crabbe and Goyle",
+    "hp": 5,
+    "type": "villain",
+    "set": ["game1"],
+    "image": "villains/crabbeandgoyle.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "deal_damage_on_discard",
+      "params": { "amount": 1, "target": "active_player" },
+      "description": "When a player discards a card, damage that player 1"
+    },
+    "death_effect": {
+      "type": "draw_cards",
+      "params": { "amount": 1, "target": "all_players" },
+      "description": "All players draw 1 card"
+    },
+    "flavor": "We're going to make them pay."
+  },
+  "basilisk": {
+    "id": "basilisk",
+    "name": "Basilisk",
+    "hp": 8,
+    "type": "creature",
+    "set": ["game2"],
+    "image": "villains/basilisk.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "prevent_extra_draw",
+      "params": {},
+      "description": "Prevents players from drawing extra cards beyond their normal draw"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "All players draw 1 card, Remove 1 from location"
+    },
+    "flavor": "Of the many fearsome beasts that roam our land..."
+  },
+  "tomriddle": {
+    "id": "tomriddle",
+    "name": "Tom Riddle",
+    "hp": 6,
+    "type": "villain",
+    "set": ["game2"],
+    "image": "villains/tomriddle.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "per_ally_choose_penalty",
+      "params": {
+        "options": [
+          {
+            "label": "Lose 2 Health",
+            "effect": {
+              "type": "deal_damage",
+              "params": { "amount": 2, "target": "active_player" }
+            }
+          },
+          {
+            "label": "Discard 1 card",
+            "effect": {
+              "type": "discard_cards",
+              "params": { "amount": 1, "target": "active_player", "chooser": "active_player" }
+            }
+          }
+        ]
+      },
+      "description": "For each ally in hand: choose lose 2 life or discard 1 card"
+    },
+    "death_effect": {
+      "type": "choose_one_per_player",
+      "params": {
+        "prompt": "Choose one:",
+        "options": [
+          {
+            "label": "+2 Health",
+            "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+          },
+          {
+            "label": "Search discard for an ally",
+            "effect": { "type": "search_discard_for_type", "params": { "card_type": "ally" } }
+          }
+        ]
+      },
+      "description": "Each player chooses: +2 Health OR search discard for an ally"
+    },
+    "flavor": "Voldemort is my past, present, and future."
+  },
+  "luciusmalfoy": {
+    "id": "luciusmalfoy",
+    "name": "Lucius Malfoy",
+    "hp": 7,
+    "type": "villain",
+    "set": ["game2"],
+    "image": "villains/luciusmalfoy.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "heal_villains_on_location_removed",
+      "params": { "amount": 1 },
+      "description": "When location control is removed, heal all villains 1"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "All players gain 1 Money, Remove 1 from location"
+    },
+    "flavor": "Your scar is legend."
+  },
+  "peterpettigrew": {
+    "id": "peterpettigrew",
+    "name": "Peter Pettigrew",
+    "hp": 7,
+    "type": "villain",
+    "set": ["game3"],
+    "image": "villains/peterpettigrew.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "discard_top_deck_if_cost_gte",
+      "params": { "min_cost": 1, "control_added": 1 },
+      "description": "Discard top card of deck; if cost >= 1, add 1 control to location"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          {
+            "type": "search_discard_for_type",
+            "params": { "card_type": "spell", "target": "all_players" }
+          },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "All players search discard for a spell, Remove 1 from location"
+    },
+    "flavor": "I was a spy, you see..."
+  },
+  "dementor": {
+    "id": "dementor",
+    "name": "Dementor",
+    "hp": 8,
+    "type": "creature",
+    "set": ["game3"],
+    "image": "villains/dementor.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "deal_damage",
+      "params": { "amount": 2, "target": "active_player" },
+      "description": "Damage the current hero 2"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "All players gain 2 Health, Remove 1 from location"
+    },
+    "flavor": "You'll drain away even your happiest memories."
+  },
+  "bartycrouchjr": {
+    "id": "bartycrouchjr",
+    "name": "Barty Crouch Jr.",
+    "hp": 7,
+    "type": "villain",
+    "set": ["game4"],
+    "image": "villains/bartycrouchjr.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "prevent_location_removal",
+      "params": {},
+      "description": "Prevents location control removal"
+    },
+    "death_effect": {
+      "type": "remove_location_control",
+      "params": { "amount": 2 },
+      "description": "Remove 2 from location"
+    },
+    "flavor": "I'll be remembered as the greatest Dark Arts student."
+  },
+  "deatheater": {
+    "id": "deatheater",
+    "name": "Death Eater",
+    "hp": 7,
+    "type": "villain",
+    "set": ["game4"],
+    "image": "villains/deatheater4.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "damage_all_on_new_villain",
+      "params": { "amount": 1 },
+      "description": "When a new villain appears, all players take 1 damage"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "remove_location_control", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "All players gain 1 Health, Remove 1 from location"
+    },
+    "flavor": "The Dark Lord's most faithful servants."
+  },
+  "doloresumbridge": {
+    "id": "doloresumbridge",
+    "name": "Dolores Umbridge",
+    "hp": 7,
+    "type": "villain",
+    "set": ["game5"],
+    "image": "villains/doloresumbridge.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "deal_damage_on_card_cost",
+      "params": { "min_cost": 4, "amount": 1, "target": "active_player" },
+      "description": "When a card costing 4 or more is purchased, damage active hero 1"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } }
+        ]
+      },
+      "description": "All players gain 1 Money and 2 Health"
+    },
+    "flavor": "Hem, hem."
+  },
+  "voldemort": {
+    "id": "voldemort",
+    "name": "Voldemort",
+    "hp": 10,
+    "type": "villain",
+    "set": ["game5"],
+    "image": "villains/voldemort5.jpg",
+    "play_before_dark_arts": false,
+    "cannot_attack_while_other_villains": true,
+    "ongoing_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+          {
+            "type": "discard_cards",
+            "params": { "amount": 1, "target": "active_player", "chooser": "active_player" }
+          }
+        ]
+      },
+      "description": "Damage active hero 1, Discard 1 card"
+    },
+    "death_effect": {
+      "type": "none",
+      "params": {},
+      "description": "None (final boss)"
+    },
+    "flavor": "Harry Potter... the boy who lived."
+  },
+  "voldemort7": {
+    "id": "voldemort7",
+    "name": "Voldemort",
+    "hp": 12,
+    "type": "villain",
+    "set": ["game7"],
+    "image": "villains/voldemort7.jpg",
+    "play_before_dark_arts": false,
+    "requires_horcruxes_destroyed": true,
+    "on_control_removed": [
+      {
+        "type": "deal_damage",
+        "params": { "amount": 1, "per_control_removed": true, "target": "active_player" }
+      }
+    ],
+    "ongoing_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+          {
+            "type": "discard_cards",
+            "params": { "amount": 1, "target": "active_player", "chooser": "active_player" }
+          }
+        ]
+      },
+      "description": "Damage active hero 1, Discard 1 card"
+    },
+    "death_effect": {
+      "type": "none",
+      "params": {},
+      "description": "None (final boss)"
+    },
+    "flavor": "The final battle."
+  },
+  "bellatrixlestrange": {
+    "id": "bellatrixlestrange",
+    "name": "Bellatrix Lestrange",
+    "hp": 9,
+    "type": "villain",
+    "set": ["game6"],
+    "image": "villains/bellatrixlestrange.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "reveal_extra_dark_arts",
+      "params": { "count": 1 },
+      "description": "Reveal 1 extra Dark Arts event each turn"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          {
+            "type": "search_discard_for_type",
+            "params": { "card_type": "item", "target": "all_players" }
+          },
+          { "type": "remove_location_control", "params": { "amount": 2 } }
+        ]
+      },
+      "description": "All players search discard for an item, Remove 2 from location"
+    },
+    "flavor": "I killed Sirius Black! I killed Sirius Black!"
+  },
+  "fenrirgreyback": {
+    "id": "fenrirgreyback",
+    "name": "Fenrir Greyback",
+    "hp": 8,
+    "type": "villain",
+    "set": ["game6"],
+    "image": "villains/fenrirgreyback.jpg",
+    "play_before_dark_arts": true,
+    "ongoing_effect": {
+      "type": "prevent_all_healing",
+      "params": {},
+      "description": "Prevents all healing for all players"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } },
+          { "type": "remove_location_control", "params": { "amount": 2 } }
+        ]
+      },
+      "description": "All players gain 3 Health, Remove 2 from location"
+    },
+    "flavor": "I'm not a full werewolf, but I enjoy the taste of human flesh."
+  },
+  "cornishpixies": {
+    "id": "cornishpixies",
+    "name": "Cornish Pixies",
+    "hp": 6,
+    "type": "creature",
+    "set": ["box1"],
+    "image": "villains/cornishpixies.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "damage_per_even_cost_card",
+      "params": { "amount": 2, "target": "active_player" },
+      "description": "Deal 2 damage per even-cost card in the active player's hand"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All players gain 2 Health and 1 Money"
+    },
+    "flavor": "Pixies are mischievous creatures."
+  },
+  "fluffy": {
+    "id": "fluffy",
+    "name": "Fluffy",
+    "hp": 8,
+    "type": "creature",
+    "set": ["box1"],
+    "image": "villains/fluffy.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "per_item_choose_penalty",
+      "params": {
+        "options": [
+          {
+            "label": "Lose 1 Health",
+            "effect": {
+              "type": "deal_damage",
+              "params": { "amount": 1, "target": "active_player" }
+            }
+          },
+          {
+            "label": "Discard 1 card",
+            "effect": {
+              "type": "discard_cards",
+              "params": { "amount": 1, "target": "active_player", "chooser": "active_player" }
+            }
+          }
+        ]
+      },
+      "description": "For each item in hand: choose lose 1 life or discard 1 card"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All players gain 1 Health and Draw 1"
+    },
+    "flavor": "That big ugly brute."
+  },
+  "troll": {
+    "id": "troll",
+    "name": "Mountain Troll",
+    "hp": 7,
+    "type": "creature",
+    "set": ["box1"],
+    "image": "villains/troll.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "choose_one",
+      "params": {
+        "prompt": "Choose one:",
+        "options": [
+          {
+            "label": "Lose 2 Health",
+            "effect": {
+              "type": "deal_damage",
+              "params": { "amount": 2, "target": "active_player" }
+            }
+          },
+          {
+            "label": "Gain a Detention card",
+            "effect": { "type": "gain_card_to_hand", "params": { "card_id": "detention" } }
+          }
+        ]
+      },
+      "description": "Choose: Lose 2 life OR gain a Detention card"
+    },
+    "death_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "banish_card", "params": { "target": "choose", "card_type": "item" } }
+        ]
+      },
+      "description": "All players gain 1 Health, Banish an item"
+    },
+    "flavor": "Ooo, look, a troll!"
+  },
+  "norbert": {
+    "id": "norbert",
+    "name": "Norbert",
+    "hp": 6,
+    "type": "creature",
+    "set": ["box1"],
+    "image": "villains/norbert.jpg",
+    "play_before_dark_arts": false,
+    "ongoing_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+          {
+            "type": "damage_per_detention_in_hand",
+            "params": { "amount": 1, "target": "active_player" },
+            "description": "Damage per Detention card in hand"
+          }
+        ]
+      },
+      "description": "Damage 1, plus damage per Detention card in hand"
+    },
+    "death_effect": {
+      "type": "banish_card_all",
+      "params": { "description": "All players banish a card" },
+      "description": "All players banish a card"
+    },
+    "flavor": "A Norwegian Ridgeback."
+  }
+}

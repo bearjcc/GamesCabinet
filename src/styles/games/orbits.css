@@ -1,0 +1,64 @@
+.orbits-board {
+  display: grid;
+  gap: 1rem;
+  text-align: left;
+}
+
+.orbits-zone h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.orbits-empty,
+.orbits-hint {
+  color: var(--muted, #888);
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+.orbits-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+}
+
+.orbits-card {
+  border: 1px solid var(--edge, #444);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.orbits-satellite {
+  border-color: var(--accent, #6aa9ff);
+}
+
+.orbits-upgrade {
+  border-style: dashed;
+}
+
+.orbits-upgrade.is-revealed {
+  border-style: solid;
+}
+
+.orbits-card-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.orbits-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.orbits-scoreline {
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.35rem;
+}

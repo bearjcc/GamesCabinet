@@ -138,7 +138,7 @@ Until the shell can infer familiarity, expose the knobs players already reach fo
 
 ## Copy and knowledge layers
 
-Text is part of the interface, not a manual bolted on the side. Separate three questions: **What is this?** (definition), **How do I play?** (rules), **How do I get better?** (strategy - optional, never mixed into rules).
+Text is part of the interface, not a manual bolted on the side. Write it for the player at the table, not for the prompt that produced the screen. Separate three questions: **What is this?** (definition), **How do I play?** (rules), **How do I get better?** (strategy - optional, never mixed into rules).
 
 | Layer | When | Shape |
 |---|---|---|
@@ -157,4 +157,4 @@ Long-term: one game knowledge graph feeding tooltips, search, rulebooks, variant
 
 **Do:** denser grids; short descriptive copy; obvious controls; colourful boards; demonstrate before explaining; reversible or clearly safe actions; shared tabletop language across games.
 
-**Don't:** heroes, eyebrows, pill CTAs, marketing parchment aesthetics (Light theme warmth is chrome, not a landing page), glassmorphism, nested cards, promotional badges, giant type, fake nostalgia, forced tutorials, unskippable celebration, beginner-mode walls, storefront chrome in play.
+**Don't:** heroes, eyebrows, pill CTAs, marketing parchment aesthetics (Light theme warmth is chrome, not a landing page), glassmorphism, nested cards, promotional badges, giant type, fake nostalgia, forced tutorials, unskippable celebration, beginner-mode walls, storefront chrome in play, pipeline notes on the site (WIP chapter numbers, engine enum names, unimplemented tiebreaks).

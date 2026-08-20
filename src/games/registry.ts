@@ -12,15 +12,18 @@ import { FreeCell } from './freecell/game';
 import { Game2048 } from './game-2048/game';
 import { Go } from './go/game';
 import { GoFish } from './go-fish/game';
+import { HogwartsBattle } from './hogwarts-battle/game';
 import { Klondike } from './klondike/game';
 import { LetterWalker } from './letter-walker/game';
 import { Mancala } from './mancala/game';
 import { Memory } from './memory/game';
 import { Nim } from './nim/game';
 import { NineMensMorris } from './nine-mens-morris/game';
+import { Orbits } from './orbits/game';
 import { Reversi } from './reversi/game';
 import { SnakesAndLadders } from './snakes-and-ladders/game';
 import { TicTacToe } from './tic-tac-toe/game';
+import { Tracks } from './tracks/game';
 import { War } from './war/game';
 import { Yatzy } from './yatzy/game';
 
@@ -50,6 +53,9 @@ export const gameList: Game<any>[] = [
   GoFish,
   Nim,
   War,
+  Orbits,
+  Tracks,
+  HogwartsBattle,
 ];
 
 export const gamesById = {
@@ -77,6 +83,9 @@ export const gamesById = {
   'go-fish': GoFish,
   nim: Nim,
   war: War,
+  orbits: Orbits,
+  tracks: Tracks,
+  'hogwarts-battle': HogwartsBattle,
 } as const;
 
 export type GameId = keyof typeof gamesById;

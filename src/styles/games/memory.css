@@ -29,11 +29,3 @@
 .memory-cell.is-open .tt-card {
   cursor: pointer;
 }
-
-.memory-scores {
-  margin-top: 0.35rem;
-  text-align: center;
-  font-family: var(--font);
-  font-size: 0.95rem;
-  color: var(--ink-muted, var(--ink));
-}

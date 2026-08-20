@@ -36,7 +36,7 @@ export function Shell({
           </Link>
           {title ? <h1 className="page-title">{title}</h1> : null}
         </div>
-        <div className="topbar-right">
+        <div className="topbar-right" role="toolbar" aria-label="Shell controls">
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
           <Link to="/settings" className="btn ghost" data-testid="shell-settings">
             Settings

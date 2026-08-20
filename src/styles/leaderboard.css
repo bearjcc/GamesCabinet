@@ -1,5 +1,4 @@
-/* Shared solo-score chrome. Letter Walker still uses the .lw- prefix here. */
-.lw-scores,
+/* Shared solo-score chrome (LeaderboardPanel via SoloLeaderboardShell). */
 .lb-scores {
   display: grid;
   gap: 1rem;
@@ -7,21 +6,24 @@
   margin: 0 auto;
 }
 
+.lb-scores h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
 .lb-message {
   color: var(--muted);
   margin: 0;
 }
 
-/* Play / Scores tabs — SoloPlayTabs uses .solo-tabs; .lw-tabs kept for unmigrated boards. */
-.solo-tabs,
-.lw-tabs {
+/* Play / Scores tabs from SoloPlayTabs (via SoloLeaderboardShell). */
+.solo-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 }
 
-.solo-tabs .btn.is-active,
-.lw-tabs .btn.is-active {
+.solo-tabs .btn.is-active {
   outline: 2px solid var(--you);
   outline-offset: 1px;
 }

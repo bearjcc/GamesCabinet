@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Flip } from '../../components/cinematic';
+import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardFace, StockPile } from '../../components/tabletop';
@@ -49,7 +50,7 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
     },
   }));
 
-  const metaBits: string[] = [`P1 ${G.decks[0].length}`, `P2 ${G.decks[1].length}`];
+  const metaBits: string[] = [];
   if (G.lastWinner != null) {
     const seat = Number(G.lastWinner) + 1;
     metaBits.push(G.lastWasWar ? `War won by P${seat}` : `P${seat} took the trick`);
@@ -60,11 +61,14 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
       info={
         <>
           <StatusBar text={status} tone={tone} />
-          <div className="play-table__meta" data-testid="war-meta">
-            {metaBits.map((bit) => (
-              <span key={bit}>{bit}</span>
-            ))}
-          </div>
+          <MatchScoreboard
+            scores={[
+              { label: 'P1', value: G.decks[0].length },
+              { label: 'P2', value: G.decks[1].length },
+              ...metaBits.map((bit) => ({ label: 'Last', value: bit })),
+            ]}
+            testId="war-meta"
+          />
         </>
       }
       board={

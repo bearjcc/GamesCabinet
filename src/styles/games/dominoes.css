@@ -12,7 +12,7 @@
   font-size: 0.88rem;
 }
 
-.play-table:has(.dom-scroll) .play-table__meta {
+.play-table:has(.dom-scroll) .match-scoreboard {
   gap: 0.45rem 0.7rem;
   font-size: 0.78rem;
 }

@@ -93,7 +93,7 @@ The collection of games is the primary object. The UI gets out of the way. The c
 
 | Code (example) | Reveals | Notes |
 |---|---|---|
-| `HOGWARTS` | Hogwarts Battle | IP we do not own - private play for invited people; must not appear in public catalogue or search indexes |
+| `LUNALOVEGOOD` | Hogwarts Battle | IP we do not own - private play for invited people; must not appear in public catalogue or search indexes |
 | `BEAR` | Smokey Mountain Inn | First-party |
 | `CHOOCHOO` | TRACKS | First-party |
 
@@ -131,7 +131,7 @@ Avoid AI-slop web patterns: giant heroes, pill CTAs, floating cards, decorative 
 
 1. **Software, not a website.** Quiet confidence. Direct controls. Higher information density than a landing page.
 2. **The games are the object.** The cabinet holds games; it is not a storefront. Free games sit in the open; unlocks (code or later entitlement) reveal more - never a token shop.
-3. **Describe, don't advertise.** Short, matter-of-fact copy. No lifestyle language.
+3. **Describe, don't advertise.** Short, matter-of-fact copy. No lifestyle language. Write for the player at the table, not the prompt: pipeline status, session corrections, and "where we put the control" stay in chat or maintainer docs.
 4. **Earn every decoration.** If removing it clarifies the interface, remove it. Buttons look like buttons. Cards are for meaningful objects, not default chrome.
 5. **Ken Burns, not MrBeast.** Have something worth attention; do not demand attention. Motion and colour communicate state and objects, not excitement.
 6. **The game is the interface.** Once play begins, the platform disappears. The board is primary; everything else is supporting cast.

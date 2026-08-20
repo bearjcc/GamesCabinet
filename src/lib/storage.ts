@@ -1,6 +1,7 @@
 const NICKNAME_KEY = 'gamescabinet.nickname';
 const SEAT_PREFIX = 'gamescabinet.seat.';
 export const SEAT_COLOUR_KEY = 'gamescabinet.seatColour';
+const UNLOCKED_GAMES_KEY = 'gamescabinet.unlockedGames';
 
 /** Fixed palette for default seat / pawn colour preference. */
 export const SEAT_COLOUR_PALETTE = [
@@ -51,6 +52,7 @@ export type SeatSession = {
   playerID: string;
   credentials: string;
   gameName: string;
+  setupData?: unknown;
 };
 
 export function saveSeat(session: SeatSession): void {
@@ -72,4 +74,27 @@ export function loadSeat(gameName: string, matchID: string): SeatSession | null 
 
 export function clearSeat(gameName: string, matchID: string): void {
   localStorage.removeItem(`${SEAT_PREFIX}${gameName}:${matchID}`);
+}
+
+/** Ids of access-gated games revealed on this device. */
+export function getUnlockedGames(): string[] {
+  try {
+    const raw = localStorage.getItem(UNLOCKED_GAMES_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((id): id is string => typeof id === 'string');
+  } catch {
+    return [];
+  }
+}
+
+export function unlockGame(id: string): void {
+  const unlocked = getUnlockedGames();
+  if (unlocked.includes(id)) return;
+  try {
+    localStorage.setItem(UNLOCKED_GAMES_KEY, JSON.stringify([...unlocked, id]));
+  } catch {
+    /* private mode / quota */
+  }
 }

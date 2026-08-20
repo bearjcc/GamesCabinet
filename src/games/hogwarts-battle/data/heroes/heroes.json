@@ -1,0 +1,179 @@
+{
+  "harry": {
+    "id": "harry",
+    "name": "Harry Potter",
+    "starting_hp": 10,
+    "available_from": "game1",
+    "image": "starters/hedwig.jpg",
+    "ability": {
+      "id": "harry_ability",
+      "name": "The Boy Who Lived",
+      "description": "When location control is removed, all players gain Health equal to the amount removed",
+      "trigger": "on_location_control_removed",
+      "uses_per_turn": 0,
+      "available_from_game": 2,
+      "effects": [
+        {
+          "type": "heal",
+          "params": { "amount": "{control_removed}", "target": "all_players" }
+        }
+      ]
+    },
+    "starter_cards": [
+      { "card_id": "alohomora", "quantity": 7 },
+      { "card_id": "hedwig", "quantity": 1 },
+      { "card_id": "firebolt", "quantity": 1 },
+      { "card_id": "invisibilitycloak", "quantity": 1 }
+    ]
+  },
+  "ron": {
+    "id": "ron",
+    "name": "Ron Weasley",
+    "starting_hp": 10,
+    "available_from": "game1",
+    "image": "starters/pigwidgeon.jpg",
+    "ability": {
+      "id": "ron_ability",
+      "name": "Loyal Friend",
+      "description": "When 3 damage is dealt in a turn, all players gain 1 Health",
+      "trigger": "on_damage_dealt_threshold",
+      "uses_per_turn": 1,
+      "available_from_game": 2,
+      "condition": { "type": "attack_pool_gte", "threshold": 3 },
+      "effects": [
+        {
+          "type": "heal",
+          "params": { "amount": 1, "target": "all_players" }
+        }
+      ]
+    },
+    "starter_cards": [
+      { "card_id": "alohomora", "quantity": 7 },
+      { "card_id": "pigwidgeon", "quantity": 1 },
+      { "card_id": "cleansweep", "quantity": 1 },
+      { "card_id": "bertiebottseveryflavourbeans", "quantity": 1 }
+    ]
+  },
+  "hermione": {
+    "id": "hermione",
+    "name": "Hermione Granger",
+    "starting_hp": 10,
+    "available_from": "game1",
+    "image": "starters/crookshanks.jpg",
+    "ability": {
+      "id": "hermione_ability",
+      "name": "Brightest Witch of Her Age",
+      "description": "When 4 spells are played in a turn, select 2 players to gain 1 Damage each",
+      "trigger": "on_spells_played_threshold",
+      "uses_per_turn": 1,
+      "available_from_game": 2,
+      "condition": { "type": "spells_played_gte", "threshold": 4 },
+      "effects": [
+        {
+          "type": "choose_players_gain_attack",
+          "params": { "player_count": 2, "amount": 1 }
+        }
+      ]
+    },
+    "starter_cards": [
+      { "card_id": "alohomora", "quantity": 7 },
+      { "card_id": "crookshanks", "quantity": 1 },
+      { "card_id": "talesofbeedlethebard", "quantity": 1 },
+      { "card_id": "timeturner", "quantity": 1 }
+    ]
+  },
+  "neville": {
+    "id": "neville",
+    "name": "Neville Longbottom",
+    "starting_hp": 10,
+    "available_from": "game1",
+    "image": "starters/trevor.jpg",
+    "ability": {
+      "id": "neville_ability",
+      "name": "Herbology Expert",
+      "description": "When healing any player for the first time each turn, that player chooses: +1 Health OR +1 Money",
+      "trigger": "on_heal_first_per_turn",
+      "uses_per_turn": 1,
+      "available_from_game": 2,
+      "effects": [
+        {
+          "type": "choose_one",
+          "params": {
+            "prompt": "Choose one:",
+            "options": [
+              {
+                "label": "+1 Health",
+                "effect": { "type": "heal", "params": { "amount": 1, "target": "self" } }
+              },
+              {
+                "label": "+1 Money",
+                "effect": { "type": "gain_influence", "params": { "amount": 1 } }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "starter_cards": [
+      { "card_id": "alohomora", "quantity": 7 },
+      { "card_id": "trevor", "quantity": 1 },
+      { "card_id": "remembrall", "quantity": 1 },
+      { "card_id": "mandrake", "quantity": 1 }
+    ]
+  },
+  "luna": {
+    "id": "luna",
+    "name": "Luna Lovegood",
+    "starting_hp": 10,
+    "available_from": "box1",
+    "image": "starters/crumplehornedsnorkack.jpg",
+    "ability": {
+      "id": "luna_ability",
+      "name": "Wrackspurt Sensitive",
+      "description": "First card drawn each turn: Heal any player 2",
+      "trigger": "on_first_card_drawn",
+      "uses_per_turn": 1,
+      "available_from_game": 2,
+      "effects": [
+        {
+          "type": "heal",
+          "params": { "amount": 2, "target": "choose" }
+        }
+      ]
+    },
+    "starter_cards": [
+      { "card_id": "alohomora", "quantity": 7 },
+      { "card_id": "lionhat", "quantity": 1 },
+      { "card_id": "spectrespecs", "quantity": 1 },
+      { "card_id": "crumplehornedsnorkack", "quantity": 1 }
+    ]
+  },
+  "ginny": {
+    "id": "ginny",
+    "name": "Ginny Weasley",
+    "starting_hp": 10,
+    "available_from": "potions_box1",
+    "image": "starters/pigwidgeon.jpg",
+    "ability": {
+      "id": "ginny_ability",
+      "name": "Bat-Bogey Hex",
+      "description": "When you play 3 Spells in a turn, gain 2 Attack",
+      "trigger": "on_spells_played_threshold",
+      "uses_per_turn": 1,
+      "available_from_game": 2,
+      "condition": { "type": "spells_played_gte", "threshold": 3 },
+      "effects": [
+        {
+          "type": "gain_attack",
+          "params": { "amount": 2, "target": "self" }
+        }
+      ]
+    },
+    "starter_cards": [
+      { "card_id": "alohomora", "quantity": 7 },
+      { "card_id": "pigwidgeon", "quantity": 1 },
+      { "card_id": "cleansweep", "quantity": 1 },
+      { "card_id": "bertiebottseveryflavourbeans", "quantity": 1 }
+    ]
+  }
+}

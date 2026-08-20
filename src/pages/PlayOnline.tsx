@@ -1,16 +1,16 @@
 import { SocketIO } from 'boardgame.io/multiplayer';
 import { useCallback, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { JoinRoomPanel } from '../components/JoinRoomPanel';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { RoomBar } from '../components/RoomBar';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
-import { getGameMeta } from '../lib/games';
+import { getGameMeta, isAccessGated } from '../lib/games';
 import { leaveRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
 import { makeClient } from '../lib/makeClient';
-import { getNickname, loadSeat, type SeatSession } from '../lib/storage';
+import { getNickname, getUnlockedGames, loadSeat, type SeatSession } from '../lib/storage';
 
 const server = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
@@ -20,6 +20,7 @@ function toSeat(room: SeatedRoom): SeatSession {
     playerID: room.playerID,
     credentials: room.credentials,
     gameName: room.gameName,
+    ...(room.setupData === undefined ? {} : { setupData: room.setupData }),
   };
 }
 
@@ -97,6 +98,10 @@ export function PlayOnline() {
         </Link>
       </Shell>
     );
+  }
+
+  if (isAccessGated(meta) && !getUnlockedGames().includes(meta.id)) {
+    return <Navigate to={`/game/${meta.id}`} replace />;
   }
 
   if (!seat) {

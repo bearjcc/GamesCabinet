@@ -59,5 +59,30 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/games/hogwarts-battle/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noThenProperty": "off"
+          },
+          "complexity": {
+            "useOptionalChain": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/games/orbits/game.ts"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "useOptionalChain": "off"
+          }
+        }
+      }
+    }
+  ]
 }

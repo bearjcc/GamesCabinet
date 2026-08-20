@@ -4,9 +4,11 @@ import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
+import { parseHogwartsSetup } from '../games/hogwarts-battle/setup';
 import { type GameId, gamesById } from '../games/registry';
-import { getGameMeta, supportsLocalPlay } from '../lib/games';
+import { getGameMeta, isAccessGated, supportsLocalPlay } from '../lib/games';
 import { makeClient } from '../lib/makeClient';
+import { getUnlockedGames } from '../lib/storage';
 
 function withHotseatSeatSync(Board: ComponentType<BoardProps>, onSeat: (id: string) => void) {
   return function HotseatBoard(props: BoardProps) {
@@ -27,6 +29,13 @@ export function PlayLocal() {
   const [seat, setSeat] = useState('0');
 
   const seatsParam = Number(params.get('seats') || '');
+  const setupData = useMemo(
+    () =>
+      gameId === 'hogwarts-battle'
+        ? parseHogwartsSetup(params.get('year'), params.get('heroes'))
+        : undefined,
+    [gameId, params],
+  );
   const numPlayers = useMemo(() => {
     if (!meta) return 1;
     if (meta.hasSolo && !meta.hasLocal) return 1;
@@ -46,8 +55,9 @@ export function PlayLocal() {
       game,
       board,
       numPlayers,
+      setupData,
     });
-  }, [Board, game, hotseat, meta, numPlayers]);
+  }, [Board, game, hotseat, meta, numPlayers, setupData]);
 
   if (!meta || !game) {
     return (
@@ -64,6 +74,10 @@ export function PlayLocal() {
     return <Navigate to={`/game/${meta.id}`} replace />;
   }
 
+  if (isAccessGated(meta) && !getUnlockedGames().includes(meta.id)) {
+    return <Navigate to={`/game/${meta.id}`} replace />;
+  }
+
   return (
     <Shell title={hotseat ? `${meta.name} (pass and play)` : meta.name} backTo={`/game/${meta.id}`}>
       <MatchLifecycleProvider
@@ -74,7 +88,10 @@ export function PlayLocal() {
           homeTo: '/',
         }}
       >
-        <LocalClient playerID={hotseat ? seat : '0'} matchID={`local-${gameId}-${numPlayers}`} />
+        <LocalClient
+          playerID={hotseat ? seat : '0'}
+          matchID={`local-${gameId}-${numPlayers}-${setupData?.gameNumber ?? 0}`}
+        />
       </MatchLifecycleProvider>
     </Shell>
   );

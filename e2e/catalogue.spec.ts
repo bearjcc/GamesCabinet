@@ -1,8 +1,17 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('GamesCabinet smokes', () => {
-  test('home lists Phase 1 games', async ({ page }) => {
+  test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
     await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'Games', level: 1 })).toBeVisible();
+    await expect(page.getByTestId('catalogue-group-solo')).toBeVisible();
+    await expect(page.getByTestId('catalogue-group-with-others')).toBeVisible();
+    await expect(
+      page.getByTestId('catalogue-group-solo').getByTestId('home-game-2048'),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId('catalogue-group-with-others').getByTestId('home-game-tic-tac-toe'),
+    ).toBeVisible();
     await expect(page.getByTestId('home-game-tic-tac-toe')).toBeVisible();
     await expect(page.getByTestId('home-game-connect-four')).toBeVisible();
     await expect(page.getByTestId('home-game-checkers')).toBeVisible();
@@ -38,10 +47,88 @@ test.describe('GamesCabinet smokes', () => {
     await expect(motion).not.toHaveText(before);
   });
 
+  test('game launch groups modes with their seat controls', async ({ page }) => {
+    await page.goto('/game/dominoes');
+    await expect(page.getByTestId('launch-modes')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-local')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-bot')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-host')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-local').getByTestId('local-seats')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-local').getByTestId('play-local')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-host').getByTestId('party-size')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-host').getByTestId('host-room')).toBeVisible();
+  });
+
   test('invalid vs-bot route redirects to game modes', async ({ page }) => {
     await page.goto('/vs-bot/2048');
     await expect(page).toHaveURL(/\/game\/2048$/);
     await expect(page.getByTestId('play-solo')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-solo')).toBeVisible();
+  });
+
+  test('hidden shelf stays locked until its access code is entered', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('home-game-orbits')).toHaveCount(0);
+
+    await page.goto('/game/orbits');
+    await expect(page.getByTestId('launch-locked')).toBeVisible();
+
+    await page.getByTestId('unlock-code').fill('crawler');
+    await page.getByTestId('unlock-submit').click();
+    await expect(page.getByTestId('launch-mode-solo')).toBeVisible();
+
+    await page.goto('/');
+    await expect(page.getByTestId('home-game-orbits')).toBeVisible();
+  });
+
+  test('wrong access code explains itself', async ({ page }) => {
+    await page.goto('/settings');
+    await page.getByTestId('unlock-code').fill('not-a-code');
+    await page.getByTestId('unlock-submit').click();
+    await expect(page.getByTestId('unlock-feedback')).toContainText(/does not open/i);
+  });
+
+  test('Hogwarts Battle shelf unlocks for local and online play', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('home-game-hogwarts-battle')).toHaveCount(0);
+
+    await page.goto('/game/hogwarts-battle');
+    await expect(page.getByTestId('launch-locked')).toBeVisible();
+    await page.getByTestId('unlock-code').fill('LUNALOVEGOOD');
+    await page.getByTestId('unlock-submit').click();
+    await expect(page.getByTestId('launch-mode-solo')).toBeVisible();
+    await expect(page.getByTestId('launch-mode-local')).toBeVisible();
+    await expect(page.getByTestId('host-room')).toBeVisible();
+    await page.getByTestId('hogwarts-year').selectOption('7');
+
+    await page.getByTestId('play-solo').click();
+    await expect(page).toHaveURL(/\/play\/hogwarts-battle/);
+    await expect(page.getByTestId('hb-board')).toBeVisible();
+    await expect(page.getByTestId('hb-hand')).toBeVisible();
+    await expect(page.getByTestId('hb-meta')).toContainText('Game 7');
+    await expect(page.getByTestId('hb-horcruxes')).toBeVisible();
+  });
+
+  test('TRACKS shelf unlocks and drafts into a playable table', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('home-game-tracks')).toHaveCount(0);
+
+    await page.goto('/game/tracks');
+    await expect(page.getByTestId('launch-locked')).toBeVisible();
+    await page.getByTestId('unlock-code').fill('CHOOCHOO');
+    await page.getByTestId('unlock-submit').click();
+    await expect(page.getByTestId('launch-mode-local')).toBeVisible();
+
+    await page.getByTestId('launch-mode-local').getByTestId('play-local').click();
+    await expect(page).toHaveURL(/\/play\/tracks/);
+    await expect(page.getByTestId('tracks-draft')).toBeVisible();
+    // Both seats draft an objective, then the table appears.
+    await page.getByTestId('tracks-draft').locator('button').first().click();
+    await page.getByTestId('tracks-draft').locator('button').first().click();
+    await expect(page.getByTestId('tracks-board')).toBeVisible();
+    await expect(page.getByTestId('tracks-draw-deck')).toBeVisible();
+    await page.getByTestId('tracks-draw-deck').click();
+    await expect(page.getByTestId('tracks-status')).toContainText(/play a card or discard/i);
   });
 
   test('bad room code shows a clear error', async ({ page }) => {

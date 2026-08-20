@@ -6,6 +6,7 @@ describe('score ceilings', () => {
     expect(scoreCeilingFor('2048')).toBe(200_000);
     expect(scoreCeilingFor('yatzy')).toBe(2_000);
     expect(scoreCeilingFor('letter-walker')).toBe(5_000);
+    expect(scoreCeilingFor('orbits')).toBe(2_000);
   });
 
   it('rejects scores above the ceiling', () => {
@@ -13,6 +14,8 @@ describe('score ceilings', () => {
     expect(scoreWithinCeiling('2048', 200_001)).toBe(false);
     expect(scoreWithinCeiling('yatzy', 2_001)).toBe(false);
     expect(scoreWithinCeiling('letter-walker', 5_001)).toBe(false);
+    expect(scoreWithinCeiling('orbits', 2_000)).toBe(true);
+    expect(scoreWithinCeiling('orbits', 2_001)).toBe(false);
   });
 
   it('uses the default ceiling for unknown leaderboard ids', () => {

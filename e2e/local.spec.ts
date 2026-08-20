@@ -16,4 +16,21 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('memory-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
+
+  test('Hogwarts Battle accepts a year and unique hero setup', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('gamescabinet.unlockedGames', '["hogwarts-battle"]');
+    });
+    await page.goto('/game/hogwarts-battle');
+    await expect(page.getByTestId('hogwarts-setup')).toBeVisible();
+
+    await page.getByTestId('hogwarts-year').selectOption('7');
+    await page.getByTestId('hogwarts-hero-0').selectOption('neville');
+    await page.getByTestId('hogwarts-hero-1').selectOption('harry');
+    await page.getByTestId('play-local').click();
+
+    await expect(page.getByTestId('hb-meta')).toContainText('Game 7');
+    await expect(page.getByTestId('hb-hero-0')).toContainText('Neville Longbottom');
+    await expect(page.getByTestId('hb-hero-1')).toContainText('Harry Potter');
+  });
 });

@@ -1,3 +1,22 @@
+.page-heading {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.catalogue-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.catalogue-group-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
@@ -33,7 +52,8 @@
   outline-offset: 2px;
 }
 
-.game-tile h2 {
+.game-tile h2,
+.game-tile h3 {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
@@ -50,6 +70,18 @@
 .launch-blurb {
   margin: 0 0 0.85rem;
   color: var(--muted);
+}
+
+.launch-modes {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.launch-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
 }
 
 .launch-actions,
@@ -138,8 +170,20 @@
 .join-row input {
   flex: 1;
   min-width: 7rem;
+}
+
+.join-row input[data-testid="join-code"] {
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.join-name {
+  flex: 1 1 8rem;
+  min-width: 7rem;
+}
+
+.join-name input {
+  width: 100%;
 }
 
 .error {

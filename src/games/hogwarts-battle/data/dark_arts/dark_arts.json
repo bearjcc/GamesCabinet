@@ -1,0 +1,464 @@
+{
+  "expulso": {
+    "id": "expulso",
+    "name": "Expulso",
+    "set": ["game1"],
+    "quantity": 3,
+    "image": "darkarts/expulso.jpg",
+    "description": "Damage current hero 2",
+    "effects": [{ "type": "deal_damage", "params": { "amount": 2, "target": "active_player" } }],
+    "flavor": "A powerful explosive curse."
+  },
+  "petrification": {
+    "id": "petrification",
+    "name": "Petrification",
+    "set": ["game1"],
+    "quantity": 2,
+    "image": "darkarts/petrification.jpg",
+    "description": "Damage all heroes 1",
+    "effects": [{ "type": "deal_damage", "params": { "amount": 1, "target": "all_players" } }],
+    "flavor": "Victims are frozen like stone."
+  },
+  "flipendo": {
+    "id": "flipendo",
+    "name": "Flipendo",
+    "set": ["game1"],
+    "quantity": 2,
+    "image": "darkarts/flipendo.jpg",
+    "description": "Damage current hero 1, Discard 1",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+      {
+        "type": "discard_cards",
+        "params": { "amount": 1, "target": "active_player", "chooser": "active_player" }
+      }
+    ],
+    "flavor": "The Knockback Jinx."
+  },
+  "hewhomustnotbenamed": {
+    "id": "hewhomustnotbenamed",
+    "name": "He Who Must Not Be Named",
+    "set": ["game1"],
+    "quantity": 3,
+    "image": "darkarts/hewhomustnotbenamed.jpg",
+    "description": "Add 1 control to location",
+    "effects": [{ "type": "add_location_control", "params": { "amount": 1 } }],
+    "flavor": "Fear of the name increases fear of the thing itself."
+  },
+  "handofglory": {
+    "id": "handofglory",
+    "name": "Hand of Glory",
+    "set": ["game2"],
+    "quantity": 2,
+    "image": "darkarts/handofglory.jpg",
+    "description": "Damage current hero 1, Add 1 to location",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+      { "type": "add_location_control", "params": { "amount": 1 } }
+    ],
+    "flavor": "A shriveled hand that gives light only to its holder."
+  },
+  "relashio": {
+    "id": "relashio",
+    "name": "Relashio",
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "darkarts/relashio.jpg",
+    "description": "All choose: Discard item OR Lose 2 Health",
+    "effects": [
+      {
+        "type": "choose_one_all_players",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Discard an item",
+              "effect": {
+                "type": "discard_card_type",
+                "params": { "card_type": "item", "target": "self" }
+              }
+            },
+            {
+              "label": "Lose 2 Health",
+              "effect": { "type": "deal_damage", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "flavor": "Releases hot sparks from the wand tip."
+  },
+  "obliviate": {
+    "id": "obliviate",
+    "name": "Obliviate",
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "darkarts/obliviate.jpg",
+    "description": "All choose: Discard spell OR Lose 2 Health",
+    "effects": [
+      {
+        "type": "choose_one_all_players",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Discard a spell",
+              "effect": {
+                "type": "discard_card_type",
+                "params": { "card_type": "spell", "target": "self" }
+              }
+            },
+            {
+              "label": "Lose 2 Health",
+              "effect": { "type": "deal_damage", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "flavor": "The Memory Charm."
+  },
+  "poison": {
+    "id": "poison",
+    "name": "Poison",
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "darkarts/poison.jpg",
+    "description": "All choose: Discard ally OR Lose 2 Health",
+    "effects": [
+      {
+        "type": "choose_one_all_players",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Discard an ally",
+              "effect": {
+                "type": "discard_card_type",
+                "params": { "card_type": "ally", "target": "self" }
+              }
+            },
+            {
+              "label": "Lose 2 Health",
+              "effect": { "type": "deal_damage", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "flavor": "A deadly venom courses through the veins."
+  },
+  "oppugno": {
+    "id": "oppugno",
+    "name": "Oppugno",
+    "set": ["game3"],
+    "quantity": 1,
+    "image": "darkarts/oppugno.jpg",
+    "description": "All reveal top card; if cost > 0, lose 2 Health and discard",
+    "effects": [
+      {
+        "type": "reveal_and_penalty_if_cost",
+        "params": {
+          "min_cost": 1,
+          "penalty": {
+            "type": "multi_effect",
+            "params": {
+              "effects": [
+                { "type": "deal_damage", "params": { "amount": 2, "target": "self" } },
+                { "type": "discard_revealed_card", "params": {} }
+              ]
+            }
+          },
+          "target": "all_players"
+        }
+      }
+    ],
+    "flavor": "Causes objects to attack the target."
+  },
+  "tarantallegra": {
+    "id": "tarantallegra",
+    "name": "Tarantallegra",
+    "set": ["game3"],
+    "quantity": 1,
+    "image": "darkarts/tarantallegra.jpg",
+    "description": "Damage current hero 1",
+    "effects": [{ "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } }],
+    "flavor": "Makes the victim's legs dance uncontrollably."
+  },
+  "dementorskiss": {
+    "id": "dementorskiss",
+    "name": "Dementor's Kiss",
+    "set": ["game3"],
+    "quantity": 2,
+    "image": "darkarts/dementorskiss.jpg",
+    "description": "Damage current hero 2, Damage others 1",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 2, "target": "active_player" } },
+      { "type": "deal_damage", "params": { "amount": 1, "target": "other_players" } }
+    ],
+    "flavor": "Sucks out the soul of the victim."
+  },
+  "regeneration": {
+    "id": "regeneration",
+    "name": "Regeneration",
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "darkarts/regeneration.jpg",
+    "description": "Heal all villains 2",
+    "effects": [{ "type": "heal_villains", "params": { "amount": 2 } }],
+    "flavor": "Bone of the father, flesh of the servant..."
+  },
+  "avadakedavra": {
+    "id": "avadakedavra",
+    "name": "Avada Kedavra",
+    "set": ["game4"],
+    "quantity": 3,
+    "image": "darkarts/avadakedavra.jpg",
+    "description": "Damage 3 (stun adds location), Reveal 1 more Dark Arts",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 3, "target": "active_player" } },
+      {
+        "type": "conditional",
+        "condition": { "type": "active_player_stunned" },
+        "then": { "type": "add_location_control", "params": { "amount": 1 } }
+      },
+      { "type": "reveal_extra_dark_arts", "params": { "count": 1 } }
+    ],
+    "flavor": "The Killing Curse."
+  },
+  "morsmordre": {
+    "id": "morsmordre",
+    "name": "Morsmordre",
+    "set": ["game4"],
+    "quantity": 3,
+    "image": "darkarts/morsmordre.jpg",
+    "description": "Damage all 1, Add 1 location, Check for Death Eater (+1 all damage)",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 1, "target": "all_players" } },
+      { "type": "add_location_control", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "villain_in_play", "villain_id": "deatheater" },
+        "then": { "type": "deal_damage", "params": { "amount": 1, "target": "all_players" } }
+      }
+    ],
+    "flavor": "Conjures the Dark Mark."
+  },
+  "heirofslytherin": {
+    "id": "heirofslytherin",
+    "name": "Heir of Slytherin",
+    "set": ["game4"],
+    "quantity": 2,
+    "image": "darkarts/heirofslytherin.jpg",
+    "description": "Dice roll: Add location / Heal villains / All discard / Damage all",
+    "effects": [
+      {
+        "type": "roll_outcome_table",
+        "params": {
+          "outcomes": [
+            {
+              "min": 0,
+              "max": 1,
+              "effect": { "type": "add_location_control", "params": { "amount": 1 } },
+              "description": "Add 1 control to location"
+            },
+            {
+              "min": 2,
+              "max": 3,
+              "effect": { "type": "heal_villains", "params": { "amount": 2 } },
+              "description": "Heal all villains 2"
+            },
+            {
+              "min": 4,
+              "max": 5,
+              "effect": {
+                "type": "discard_cards",
+                "params": { "amount": 1, "target": "all_players", "chooser": "self" }
+              },
+              "description": "All players discard 1"
+            },
+            {
+              "min": 6,
+              "max": 7,
+              "effect": {
+                "type": "deal_damage",
+                "params": { "amount": 1, "target": "all_players" }
+              },
+              "description": "Damage all players 1"
+            }
+          ]
+        }
+      }
+    ],
+    "flavor": "The heir of Slytherin has returned."
+  },
+  "crucio": {
+    "id": "crucio",
+    "name": "Crucio",
+    "set": ["game5"],
+    "quantity": 2,
+    "image": "darkarts/crucio.jpg",
+    "description": "Damage current hero 1, Reveal 1 more Dark Arts",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+      { "type": "reveal_extra_dark_arts", "params": { "count": 1 } }
+    ],
+    "flavor": "The Cruciatus Curse."
+  },
+  "imperio": {
+    "id": "imperio",
+    "name": "Imperio",
+    "set": ["game5"],
+    "quantity": 2,
+    "image": "darkarts/imperio.jpg",
+    "description": "Active selects other player to lose 2 Health, Reveal 1 more",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 2, "target": "choose_other_player" } },
+      { "type": "reveal_extra_dark_arts", "params": { "count": 1 } }
+    ],
+    "flavor": "The Imperius Curse."
+  },
+  "educationaldecree": {
+    "id": "educationaldecree",
+    "name": "Educational Decree",
+    "set": ["game5"],
+    "quantity": 2,
+    "image": "darkarts/educationaldecree.jpg",
+    "description": "Damage per card in hand with cost >= 4",
+    "effects": [
+      {
+        "type": "deal_damage_per_card_cost",
+        "params": { "min_cost": 4, "amount": 1, "target": "active_player" }
+      }
+    ],
+    "flavor": "By order of the Ministry of Magic."
+  },
+  "legilimency": {
+    "id": "legilimency",
+    "name": "Legilimency",
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "darkarts/legilimency.jpg",
+    "description": "All reveal top card; if spell, lose 2 Health and discard",
+    "effects": [
+      {
+        "type": "reveal_and_penalty_if_type",
+        "params": {
+          "card_type": "spell",
+          "penalty": {
+            "type": "multi_effect",
+            "params": {
+              "effects": [
+                { "type": "deal_damage", "params": { "amount": 2, "target": "self" } },
+                { "type": "discard_revealed_card", "params": {} }
+              ]
+            }
+          },
+          "target": "all_players"
+        }
+      }
+    ],
+    "flavor": "The ability to read minds."
+  },
+  "sectumsempra": {
+    "id": "sectumsempra",
+    "name": "Sectumsempra",
+    "set": ["game6"],
+    "quantity": 2,
+    "image": "darkarts/sectumsempra.jpg",
+    "description": "Damage all heroes 2 (also prevents healing)",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 2, "target": "all_players" } },
+      { "type": "prevent_healing_this_turn", "params": {} }
+    ],
+    "flavor": "For enemies, slash and sever."
+  },
+  "sluguluseructo": {
+    "id": "sluguluseructo",
+    "name": "Slugulus Eructo",
+    "set": ["game6"],
+    "quantity": 1,
+    "image": "darkarts/sluguluseructo.jpg",
+    "description": "Damage all per active creature",
+    "effects": [
+      {
+        "type": "deal_damage_per_active_creature",
+        "params": { "amount": 1, "target": "all_players" }
+      }
+    ],
+    "flavor": "Causes the victim to vomit slugs."
+  },
+  "fiendfyre": {
+    "id": "fiendfyre",
+    "name": "Fiendfyre",
+    "set": ["game7"],
+    "quantity": 1,
+    "image": "darkarts/fiendfyre.jpg",
+    "description": "Damage all heroes 3",
+    "effects": [{ "type": "deal_damage", "params": { "amount": 3, "target": "all_players" } }],
+    "flavor": "Cursed fire that seeks out living things."
+  },
+  "menacinggrowl": {
+    "id": "menacinggrowl",
+    "name": "Menacing Growl",
+    "set": ["box1"],
+    "quantity": 2,
+    "image": "darkarts/menacinggrowl.jpg",
+    "description": "Damage all per card costing exactly 3",
+    "effects": [
+      {
+        "type": "deal_damage_per_card_cost_exact",
+        "params": { "exact_cost": 3, "amount": 1, "target": "all_players" }
+      }
+    ],
+    "flavor": "A low, threatening growl echoes through the halls."
+  },
+  "blastended": {
+    "id": "blastended",
+    "name": "Blast-Ended Skrewt",
+    "set": ["box1"],
+    "quantity": 1,
+    "image": "darkarts/blastended.jpg",
+    "description": "Previous hero loses 1 Health and discards 1",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 1, "target": "previous_player" } },
+      {
+        "type": "discard_cards",
+        "params": { "amount": 1, "target": "previous_player", "chooser": "previous_player" }
+      }
+    ],
+    "flavor": "A dangerous hybrid creature."
+  },
+  "ragingtroll": {
+    "id": "ragingtroll",
+    "name": "Raging Troll",
+    "set": ["box1"],
+    "quantity": 2,
+    "image": "darkarts/ragingtroll.jpg",
+    "description": "Next hero loses 2 Health, Add 1 location",
+    "effects": [
+      { "type": "deal_damage", "params": { "amount": 2, "target": "next_player" } },
+      { "type": "add_location_control", "params": { "amount": 1 } }
+    ],
+    "flavor": "The troll swings its massive club."
+  },
+  "inquisitorialsquad": {
+    "id": "inquisitorialsquad",
+    "name": "Inquisitorial Squad",
+    "set": ["box1"],
+    "quantity": 2,
+    "image": "darkarts/inquisitorialsquad.jpg",
+    "description": "Give Detention to hand, Damage all per Detention",
+    "effects": [
+      {
+        "type": "gain_card_to_hand",
+        "params": { "card_id": "detention", "target": "active_player" }
+      },
+      {
+        "type": "deal_damage_per_detention_in_hand",
+        "params": { "amount": 1, "target": "all_players" }
+      }
+    ],
+    "flavor": "Enforcing the will of the Ministry."
+  }
+}

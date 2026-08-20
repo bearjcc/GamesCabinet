@@ -1,0 +1,187 @@
+{
+  "arithmancy": {
+    "id": "arithmancy",
+    "name": "Arithmancy",
+    "image": "charcards/arithmancy.jpg",
+    "description": "Can reroll House dice; House dice cards cost 1 less",
+    "trigger": "passive",
+    "uses_per_turn": 0,
+    "cost": {},
+    "effects": [
+      {
+        "type": "reroll_house_dice",
+        "params": {},
+        "description": "You may reroll any House dice result"
+      },
+      {
+        "type": "discount_for_keyword",
+        "params": { "keyword": "house_dice", "discount": 1 },
+        "description": "Cards with House Dice cost 1 less Money"
+      }
+    ]
+  },
+  "charms": {
+    "id": "charms",
+    "name": "Charms",
+    "image": "charcards/charms.jpg",
+    "description": "Discard 2 spells to give all players +1 Money and Draw 1 (once/turn)",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "cost": { "discard_spells": 2 },
+    "effects": [
+      {
+        "type": "gain_influence",
+        "params": { "amount": 1, "target": "all_players" }
+      },
+      {
+        "type": "draw_cards",
+        "params": { "amount": 1, "target": "all_players" }
+      }
+    ]
+  },
+  "transfiguration": {
+    "id": "transfiguration",
+    "name": "Transfiguration",
+    "image": "charcards/transfiguration.jpg",
+    "description": "Discard 1 item to search deck for any card costing <= 5 (once/turn)",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "cost": { "discard_items": 1 },
+    "effects": [
+      {
+        "type": "search_deck",
+        "params": { "max_cost": 5, "target": "self" }
+      }
+    ]
+  },
+  "flyinglessons": {
+    "id": "flyinglessons",
+    "name": "Flying Lessons",
+    "image": "charcards/flyinglessons.jpg",
+    "description": "Pay 5 Money to Remove 1 from location (once/turn)",
+    "trigger": "manual",
+    "uses_per_turn": 1,
+    "cost": { "influence": 5 },
+    "effects": [
+      {
+        "type": "remove_location_control",
+        "params": { "amount": 1 }
+      }
+    ]
+  },
+  "potions": {
+    "id": "potions",
+    "name": "Potions",
+    "image": "charcards/potions.jpg",
+    "description": "When you play 1 ally + 1 item + 1 spell in a turn, choose player to gain +1 Health +1 Damage (once/turn)",
+    "trigger": "on_card_types_played",
+    "uses_per_turn": 1,
+    "cost": {},
+    "condition": {
+      "type": "played_all_three_types",
+      "types": ["ally", "item", "spell"]
+    },
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose a player to gain +1 Health and +1 Damage:",
+          "options": [
+            {
+              "label": "Gain +1 Health and +1 Damage",
+              "effect": {
+                "type": "multi_effect",
+                "params": {
+                  "effects": [
+                    { "type": "heal", "params": { "amount": 1, "target": "choose" } },
+                    { "type": "gain_attack", "params": { "amount": 1 } }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "divination": {
+    "id": "divination",
+    "name": "Divination",
+    "image": "charcards/divination.jpg",
+    "description": "When playing an item, look at top of deck, choose to discard or keep",
+    "trigger": "on_item_played",
+    "uses_per_turn": 0,
+    "cost": {},
+    "effects": [
+      {
+        "type": "peek_and_replace_or_discard",
+        "params": { "deck_position": "top" }
+      }
+    ]
+  },
+  "historyofmagic": {
+    "id": "historyofmagic",
+    "name": "History of Magic",
+    "image": "charcards/historyofmagic.jpg",
+    "description": "When purchasing a spell, Heal any player 1",
+    "trigger": "on_spell_purchased",
+    "uses_per_turn": 0,
+    "cost": {},
+    "effects": [
+      {
+        "type": "heal",
+        "params": { "amount": 1, "target": "choose" }
+      }
+    ]
+  },
+  "herbology": {
+    "id": "herbology",
+    "name": "Herbology",
+    "image": "charcards/herbology.jpg",
+    "description": "When a player is healed 3+ in a turn, that player draws 1 card",
+    "trigger": "on_heal_threshold",
+    "uses_per_turn": 0,
+    "cost": {},
+    "condition": { "type": "heal_amount_gte", "threshold": 3 },
+    "effects": [
+      {
+        "type": "draw_cards",
+        "params": { "amount": 1, "target": "healed_player" }
+      }
+    ]
+  },
+  "careofmagicalcreatures": {
+    "id": "careofmagicalcreatures",
+    "name": "Care of Magical Creatures",
+    "image": "charcards/careofmagicalcreatures.jpg",
+    "description": "First time attacking a creature each turn, Heal any player 2; When killing a creature, Remove 1 from location",
+    "trigger": "on_attack_creature",
+    "uses_per_turn": 1,
+    "cost": {},
+    "effects": [
+      {
+        "type": "heal",
+        "params": { "amount": 2, "target": "choose" }
+      }
+    ],
+    "on_creature_killed": [
+      {
+        "type": "remove_location_control",
+        "params": { "amount": 1 }
+      }
+    ]
+  },
+  "defenseagainstthedarkarts": {
+    "id": "defenseagainstthedarkarts",
+    "name": "Defense Against the Dark Arts",
+    "image": "charcards/defenseagainstthedarkarts.jpg",
+    "description": "When forced to discard by villain/dark art, gain +1 Damage +1 Health",
+    "trigger": "on_forced_discard",
+    "uses_per_turn": 0,
+    "cost": {},
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } }
+    ]
+  }
+}

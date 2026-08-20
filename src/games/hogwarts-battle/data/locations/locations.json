@@ -1,0 +1,29 @@
+{
+  "castlegates": {
+    "id": "castlegates",
+    "name": "Castle Gates",
+    "max_control": 5,
+    "dark_arts_reveal_count": 1,
+    "set": ["box1"],
+    "image": "locations/castlegates.jpg",
+    "description": "1 Dark Arts event per turn"
+  },
+  "greathall": {
+    "id": "greathall",
+    "name": "Great Hall",
+    "max_control": 7,
+    "dark_arts_reveal_count": 3,
+    "set": ["box1"],
+    "image": "locations/greathall.jpg",
+    "description": "3 Dark Arts events per turn"
+  },
+  "hagridshut": {
+    "id": "hagridshut",
+    "name": "Hagrid's Hut",
+    "max_control": 6,
+    "dark_arts_reveal_count": 2,
+    "set": ["box1"],
+    "image": "locations/hagridshut.jpg",
+    "description": "2 Dark Arts events per turn"
+  }
+}

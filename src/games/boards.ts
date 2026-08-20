@@ -12,15 +12,18 @@ import { FreeCellBoard } from './freecell/Board';
 import { Game2048Board } from './game-2048/Board';
 import { GoBoard } from './go/Board';
 import { GoFishBoard } from './go-fish/Board';
+import { HogwartsBattleBoard } from './hogwarts-battle/Board';
 import { KlondikeBoard } from './klondike/Board';
 import { LetterWalkerBoard } from './letter-walker/Board';
 import { MancalaBoard } from './mancala/Board';
 import { MemoryBoard } from './memory/Board';
 import { NimBoard } from './nim/Board';
 import { NineMensMorrisBoard } from './nine-mens-morris/Board';
+import { OrbitsBoard } from './orbits/Board';
 import { ReversiBoard } from './reversi/Board';
 import { SnakesAndLaddersBoard } from './snakes-and-ladders/Board';
 import { TicTacToeBoard } from './tic-tac-toe/Board';
+import { TracksBoard } from './tracks/Board';
 import { WarBoard } from './war/Board';
 import { YatzyBoard } from './yatzy/Board';
 
@@ -50,4 +53,7 @@ export const boards = {
   'go-fish': withMatchChrome(GoFishBoard),
   nim: withMatchChrome(NimBoard),
   war: withMatchChrome(WarBoard),
+  orbits: withMatchChrome(OrbitsBoard),
+  tracks: withMatchChrome(TracksBoard),
+  'hogwarts-battle': withMatchChrome(HogwartsBattleBoard),
 } as const;

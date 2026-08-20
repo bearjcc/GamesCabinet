@@ -8,6 +8,7 @@ export const lobby = new LobbyClient({ server });
 export type RoomInfo = {
   matchID: string;
   gameName: string;
+  setupData?: unknown;
 };
 
 export type SeatedRoom = RoomInfo & { playerID: string; credentials: string };
@@ -28,10 +29,12 @@ export async function hostRoom(
   gameName: string,
   numPlayers: number,
   playerName: string,
+  setupData?: unknown,
 ): Promise<SeatedRoom> {
   const { matchID } = await lobby.createMatch(gameName, {
     numPlayers,
     unlisted: true,
+    ...(setupData === undefined ? {} : { setupData }),
   });
   const { playerID, playerCredentials } = await lobby.joinMatch(gameName, matchID, {
     playerName: playerName.trim() || 'Player',
@@ -41,8 +44,15 @@ export async function hostRoom(
     playerID,
     credentials: playerCredentials,
     gameName,
+    ...(setupData === undefined ? {} : { setupData }),
   });
-  return { matchID, gameName, playerID, credentials: playerCredentials };
+  return {
+    matchID,
+    gameName,
+    playerID,
+    credentials: playerCredentials,
+    ...(setupData === undefined ? {} : { setupData }),
+  };
 }
 
 export async function joinRoom(code: string, playerName: string): Promise<SeatedRoom> {
@@ -70,6 +80,7 @@ export async function joinKnownRoom(room: RoomInfo, playerName: string): Promise
       gameName: room.gameName,
       playerID,
       credentials: playerCredentials,
+      ...(room.setupData === undefined ? {} : { setupData: room.setupData }),
     };
   } catch (e) {
     throw new Error(friendlyJoinError(e));
@@ -106,6 +117,7 @@ export async function rematchRoom(session: SeatSession, playerName: string): Pro
     playerID: session.playerID,
     credentials: session.credentials,
     unlisted: true,
+    ...(session.setupData === undefined ? {} : { setupData: session.setupData }),
   });
   clearSeat(session.gameName, session.matchID);
   const { playerID, playerCredentials } = await lobby.joinMatch(session.gameName, nextMatchID, {
@@ -117,6 +129,7 @@ export async function rematchRoom(session: SeatSession, playerName: string): Pro
     gameName: session.gameName,
     playerID,
     credentials: playerCredentials,
+    ...(session.setupData === undefined ? {} : { setupData: session.setupData }),
   };
   saveSeat(next);
   return next;

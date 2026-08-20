@@ -1,0 +1,410 @@
+.hogwarts-setup {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.hogwarts-setup h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.hogwarts-setup fieldset {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.hogwarts-setup legend {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.hb-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.hb-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.hb-threat,
+.hb-market,
+.hb-allies,
+.hb-pew {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hb-threat h3,
+.hb-market h3,
+.hb-allies h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.hb-location,
+.hb-dark-arts {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  border-radius: 0.35rem;
+  background: var(--surface-2);
+}
+
+.hb-object-heading,
+.hb-card-detail__heading,
+.hb-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.hb-object-heading > div:last-child,
+.hb-card-detail__heading > div:last-child {
+  min-width: 0;
+}
+
+.hb-location p,
+.hb-dark-arts ul {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.hb-dark-arts li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+}
+
+.hb-muted {
+  opacity: 0.65;
+}
+
+.hb-villain-row,
+.hb-ally-row,
+.hb-card-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hb-villain {
+  min-width: 10rem;
+  padding: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--surface) 88%, #5a1d1d);
+}
+
+.hb-villain.is-focused {
+  outline: 2px solid var(--accent, #8b4513);
+}
+
+.hb-villain__focus {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.hb-villain__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.hb-villain__atk {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.hb-villain__atk button:not(.btn) {
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+}
+
+.hb-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 6.5rem;
+  max-width: 9rem;
+  min-height: 5.5rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 0.3rem;
+  background: var(--surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.hb-card--empty {
+  min-height: 5.5rem;
+  border-style: dashed;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.hb-card.is-selected {
+  outline: 2px solid var(--accent, #8b4513);
+}
+
+.hb-card.is-disabled,
+.hb-card:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.hb-card__title {
+  font-weight: 650;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.hb-sprite {
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.65rem;
+  width: 2.65rem;
+  height: 3.45rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-radius: 0.2rem;
+  background: var(--surface-2);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  color: var(--ink);
+  text-align: center;
+}
+
+.hb-sprite__fallback {
+  padding: 0.15rem;
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.hb-sprite--atlas {
+  background-size: var(--hb-sprite-size, cover);
+}
+
+.hb-card__sub {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  text-transform: capitalize;
+}
+
+.hb-ally {
+  flex: 1 1 10rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border-radius: 0.35rem;
+}
+
+.hb-ally.is-active {
+  border-color: var(--accent, #8b4513);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #8b4513) 40%, transparent);
+}
+
+.hb-ally strong,
+.hb-ally span {
+  display: block;
+}
+
+.hb-ally-hand {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.8rem;
+}
+
+.hb-proficiency {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  font-size: 0.82rem;
+}
+
+.hb-proficiency span,
+.hb-action-reason {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.hb-proficiency .btn,
+.hb-reward .btn {
+  justify-self: start;
+}
+
+.hb-section-heading {
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.hb-section-heading h3 {
+  margin: 0;
+}
+
+.hb-section-heading > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hb-horcrux {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--surface-2) 88%, #5a1d1d);
+}
+
+.hb-horcrux__active {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.hb-horcrux__active p,
+.hb-horcrux__active span {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.hb-horcrux__sigil {
+  display: grid;
+  place-items: center;
+  min-width: 4.1rem;
+  min-height: 2.8rem;
+  padding: 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 0.25rem;
+  color: var(--accent-ink);
+  font-size: 0.68rem;
+  font-weight: 650;
+  text-align: center;
+}
+
+.hb-horcrux__rewards {
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  font-size: 0.82rem;
+}
+
+.hb-reward {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.hb-reward > span {
+  min-width: 0;
+}
+
+.hb-card-detail {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 0.35rem;
+  background: var(--surface);
+}
+
+.hb-card-detail h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.hb-card-detail p {
+  margin: 0;
+  font-size: 0.84rem;
+}
+
+.hb-card-detail__passive {
+  color: var(--muted);
+}
+
+.hb-selection-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hb-resources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.hb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hb-choice {
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+}
+
+.hb-choice p {
+  margin: 0;
+}
+
+.hb-choice__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .hb-card {
+    min-width: 5.5rem;
+  }
+
+  .hb-reward {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

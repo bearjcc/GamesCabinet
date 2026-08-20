@@ -1,0 +1,675 @@
+{
+  "peskipiksi_pesternomi": {
+    "id": "peskipiksi_pesternomi",
+    "name": "Peskipiksi Pesternomi",
+    "set": ["box1"],
+    "order": 1,
+    "associated_creatures": ["cornishpixies"],
+    "effect": {
+      "type": "encounter_limit_hand_draw",
+      "params": { "health_threshold": 4, "draw_limit": 4 },
+      "description": "If the active Hero has 4 or less Health, they only draw 4 cards instead of 5 at end of turn"
+    },
+    "completion_condition": {
+      "type": "play_even_cost_cards",
+      "params": { "count": 2 }
+    },
+    "reward": {
+      "type": "heal",
+      "params": { "amount": 1, "target": "all_players" },
+      "description": "All Heroes gain 1 Health"
+    },
+    "description": "Play 2 cards with an even cost value in one turn to complete this encounter"
+  },
+  "norberts_delivery": {
+    "id": "norberts_delivery",
+    "name": "Norbert's Delivery",
+    "set": ["box1"],
+    "order": 2,
+    "associated_creatures": ["norbert", "fluffy"],
+    "effect": {
+      "type": "encounter_on_creature_defeated",
+      "params": {
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time a Creature is defeated, the active Hero draws 1 card"
+    },
+    "completion_condition": {
+      "type": "defeat_creatures",
+      "params": { "count": 2 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 1 Health and 1 Influence"
+    },
+    "description": "Defeat 2 Creatures to complete this encounter"
+  },
+  "forbidden_forest_patrol": {
+    "id": "forbidden_forest_patrol",
+    "name": "Forbidden Forest Patrol",
+    "set": ["box1"],
+    "order": 3,
+    "associated_creatures": ["troll"],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "ally",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Ally, gain 1 Attack"
+    },
+    "completion_condition": {
+      "type": "acquire_cards",
+      "params": { "count": 3 }
+    },
+    "reward": {
+      "type": "roll_creature_die",
+      "params": {},
+      "description": "Roll the Creature Die"
+    },
+    "description": "Acquire 3 Hogwarts cards in one turn to complete this encounter"
+  },
+  "control_the_chaos": {
+    "id": "control_the_chaos",
+    "name": "Control the Chaos",
+    "set": ["box2"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_control_added",
+      "params": {
+        "effect": { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time Control is added to the Location, the active Hero takes 1 damage"
+    },
+    "completion_condition": {
+      "type": "remove_control_total",
+      "params": { "count": 3 }
+    },
+    "reward": {
+      "type": "remove_location_control",
+      "params": { "amount": 2 },
+      "description": "Remove 2 Control from the Location"
+    },
+    "description": "Remove a total of 3 Control from the Location to complete this encounter"
+  },
+  "boggart_banishment": {
+    "id": "boggart_banishment",
+    "name": "Boggart Banishment",
+    "set": ["box2"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "spell",
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play a Spell, heal 1 Health"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 2, "card_type": "spell" }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes draw 1 card and gain 1 Attack"
+    },
+    "description": "Play 2 Spells in one turn to complete this encounter"
+  },
+  "creature_lair": {
+    "id": "creature_lair",
+    "name": "Creature Lair",
+    "set": ["box2"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_creature_defeated",
+      "params": {
+        "effect": { "type": "remove_location_control", "params": { "amount": 1 } }
+      },
+      "description": "Each time a Creature is defeated, remove 1 Control from the Location"
+    },
+    "completion_condition": {
+      "type": "defeat_creatures",
+      "params": { "count": 3 }
+    },
+    "reward": {
+      "type": "roll_creature_die",
+      "params": {},
+      "description": "Roll the Creature Die"
+    },
+    "description": "Defeat 3 Creatures to complete this encounter"
+  },
+  "dice_mastery": {
+    "id": "dice_mastery",
+    "name": "Dice Mastery",
+    "set": ["box3"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_dice_rolled",
+      "params": {
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you roll a die, gain 1 Influence"
+    },
+    "completion_condition": {
+      "type": "roll_dice_total",
+      "params": { "count": 4 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 2 Health and draw 1 card"
+    },
+    "description": "Roll any die a total of 4 times to complete this encounter"
+  },
+  "patronus_lesson": {
+    "id": "patronus_lesson",
+    "name": "Patronus Lesson",
+    "set": ["box3"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "item",
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Item, draw 1 card"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 3, "card_type": "item" }
+    },
+    "reward": {
+      "type": "gain_patronus_charge",
+      "params": { "amount": 1 },
+      "description": "Gain 1 Patronus charge"
+    },
+    "description": "Play 3 Items in one turn to complete this encounter"
+  },
+  "centaur_negotiation": {
+    "id": "centaur_negotiation",
+    "name": "Centaur Negotiation",
+    "set": ["box3"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "ally",
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Ally, heal 1 Health"
+    },
+    "completion_condition": {
+      "type": "spend_influence",
+      "params": { "count": 6 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "remove_location_control", "params": { "amount": 2 } },
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } }
+        ]
+      },
+      "description": "Remove 2 Control and all Heroes gain 2 Health"
+    },
+    "description": "Spend 6 Influence in one turn to complete this encounter"
+  },
+  "final_stand": {
+    "id": "final_stand",
+    "name": "Final Stand",
+    "set": ["box4"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_villain_defeated",
+      "params": {
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }
+      },
+      "description": "Each time a Villain or Creature is defeated, all Heroes draw 1 card"
+    },
+    "completion_condition": {
+      "type": "defeat_creatures",
+      "params": { "count": 4 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "gain_attack", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 2 Health, 2 Attack, and 1 Influence"
+    },
+    "description": "Defeat 4 Creatures to complete this encounter"
+  },
+  "dark_convergence": {
+    "id": "dark_convergence",
+    "name": "Dark Convergence",
+    "set": ["box4"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_control_added",
+      "params": {
+        "effect": { "type": "deal_damage", "params": { "amount": 1, "target": "all_players" } }
+      },
+      "description": "Each time Control is added to the Location, all Heroes take 1 damage"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 3, "card_type": "spell" }
+    },
+    "reward": {
+      "type": "roll_creature_die",
+      "params": {},
+      "description": "Roll the Creature Die"
+    },
+    "description": "Play 3 Spells in one turn to complete this encounter"
+  },
+  "epic_battle": {
+    "id": "epic_battle",
+    "name": "Epic Battle",
+    "set": ["box4"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "spell",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play a Spell, gain 1 Attack"
+    },
+    "completion_condition": {
+      "type": "defeat_villains_and_creatures",
+      "params": { "count": 3 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "remove_location_control", "params": { "amount": 3 } },
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } }
+        ]
+      },
+      "description": "Remove 3 Control and all Heroes gain 3 Health"
+    },
+    "description": "Defeat 3 Villains and/or Creatures in one turn to complete this encounter"
+  },
+  "charms_class": {
+    "id": "charms_class",
+    "name": "Charms Class",
+    "set": ["potions_box1"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "spell",
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play a Spell, heal 1 Health"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 3, "card_type": "spell" }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes draw 1 card and gain 1 Influence"
+    },
+    "description": "Play 3 Spells in one turn to complete this encounter"
+  },
+  "banishing_practice": {
+    "id": "banishing_practice",
+    "name": "Banishing Practice",
+    "set": ["potions_box1"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "item",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Item, gain 1 Attack"
+    },
+    "completion_condition": {
+      "type": "acquire_cards",
+      "params": { "count": 4 }
+    },
+    "reward": {
+      "type": "heal",
+      "params": { "amount": 2, "target": "all_players" },
+      "description": "All Heroes gain 2 Health"
+    },
+    "description": "Acquire 4 Hogwarts cards in one turn to complete this encounter"
+  },
+  "leviosa_challenge": {
+    "id": "leviosa_challenge",
+    "name": "Leviosa Challenge",
+    "set": ["potions_box1"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "ally",
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Ally, draw 1 card"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 2, "card_type": "ally" }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 1 Attack and 1 Health"
+    },
+    "description": "Play 2 Allies in one turn to complete this encounter"
+  },
+  "potions_classroom": {
+    "id": "potions_classroom",
+    "name": "Potions Classroom",
+    "set": ["potions_box2"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "spell",
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play a Spell, gain 1 Influence"
+    },
+    "completion_condition": {
+      "type": "spend_influence",
+      "params": { "count": 5 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes draw 2 cards and gain 1 Health"
+    },
+    "description": "Spend 5 Influence in one turn to complete this encounter"
+  },
+  "ingredient_hunt": {
+    "id": "ingredient_hunt",
+    "name": "Ingredient Hunt",
+    "set": ["potions_box2"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "item",
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Item, draw 1 card"
+    },
+    "completion_condition": {
+      "type": "acquire_cards",
+      "params": { "count": 3 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_influence", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 2 Influence and 1 Health"
+    },
+    "description": "Acquire 3 Hogwarts cards in one turn to complete this encounter"
+  },
+  "brewing_mastery": {
+    "id": "brewing_mastery",
+    "name": "Brewing Mastery",
+    "set": ["potions_box2"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_villain_defeated",
+      "params": {
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time a Villain or Creature is defeated, the active Hero draws 1 card"
+    },
+    "completion_condition": {
+      "type": "defeat_villains_and_creatures",
+      "params": { "count": 3 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "remove_location_control", "params": { "amount": 2 } },
+          { "type": "heal", "params": { "amount": 2, "target": "all_players" } }
+        ]
+      },
+      "description": "Remove 2 Control and all Heroes gain 2 Health"
+    },
+    "description": "Defeat 3 Villains and/or Creatures in one turn to complete this encounter"
+  },
+  "snapes_dungeon": {
+    "id": "snapes_dungeon",
+    "name": "Snape's Dungeon",
+    "set": ["potions_box3"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_limit_hand_draw",
+      "params": { "health_threshold": 5, "draw_limit": 4 },
+      "description": "If the active Hero has 5 or less Health, they only draw 4 cards instead of 5 at end of turn"
+    },
+    "completion_condition": {
+      "type": "spend_influence",
+      "params": { "count": 7 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } },
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 3 Health and draw 1 card"
+    },
+    "description": "Spend 7 Influence in one turn to complete this encounter"
+  },
+  "dark_arts_potions": {
+    "id": "dark_arts_potions",
+    "name": "Dark Arts Potions",
+    "set": ["potions_box3"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "spell",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play a Spell, gain 1 Attack"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 4, "card_type": "spell" }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "remove_location_control", "params": { "amount": 2 } }
+        ]
+      },
+      "description": "All Heroes gain 2 Attack and remove 2 Control from the Location"
+    },
+    "description": "Play 4 Spells in one turn to complete this encounter"
+  },
+  "remedial_potions": {
+    "id": "remedial_potions",
+    "name": "Remedial Potions",
+    "set": ["potions_box3"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_control_added",
+      "params": {
+        "effect": { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time Control is added to the Location, the active Hero takes 1 damage"
+    },
+    "completion_condition": {
+      "type": "remove_control_total",
+      "params": { "count": 4 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } },
+          { "type": "gain_influence", "params": { "amount": 2, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 3 Health and 2 Influence"
+    },
+    "description": "Remove a total of 4 Control from the Location to complete this encounter"
+  },
+  "slughorns_class": {
+    "id": "slughorns_class",
+    "name": "Slughorn's Class",
+    "set": ["potions_box4"],
+    "order": 1,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "ally",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play an Ally, gain 1 Attack"
+    },
+    "completion_condition": {
+      "type": "play_card_types",
+      "params": { "count": 3, "card_type": "ally" }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "draw_cards", "params": { "amount": 2, "target": "all_players" } },
+          { "type": "gain_attack", "params": { "amount": 2, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes draw 2 cards and gain 2 Attack"
+    },
+    "description": "Play 3 Allies in one turn to complete this encounter"
+  },
+  "final_exam": {
+    "id": "final_exam",
+    "name": "Final Exam",
+    "set": ["potions_box4"],
+    "order": 2,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_villain_defeated",
+      "params": {
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+      },
+      "description": "Each time a Villain or Creature is defeated, all Heroes gain 1 Health"
+    },
+    "completion_condition": {
+      "type": "defeat_villains_and_creatures",
+      "params": { "count": 4 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "remove_location_control", "params": { "amount": 3 } },
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } },
+          { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }
+        ]
+      },
+      "description": "Remove 3 Control, all Heroes gain 3 Health and draw 1 card"
+    },
+    "description": "Defeat 4 Villains and/or Creatures in one turn to complete this encounter"
+  },
+  "voldemorts_lair": {
+    "id": "voldemorts_lair",
+    "name": "Voldemort's Lair",
+    "set": ["potions_box4"],
+    "order": 3,
+    "associated_creatures": [],
+    "effect": {
+      "type": "encounter_on_card_played",
+      "params": {
+        "card_type": "spell",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "active_player" } }
+      },
+      "description": "Each time you play a Spell, gain 1 Attack"
+    },
+    "completion_condition": {
+      "type": "spend_influence",
+      "params": { "count": 8 }
+    },
+    "reward": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 3, "target": "all_players" } },
+          { "type": "heal", "params": { "amount": 3, "target": "all_players" } },
+          { "type": "draw_cards", "params": { "amount": 2, "target": "all_players" } }
+        ]
+      },
+      "description": "All Heroes gain 3 Attack, 3 Health, and draw 2 cards"
+    },
+    "description": "Spend 8 Influence in one turn to complete this encounter"
+  }
+}

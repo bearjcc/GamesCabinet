@@ -8,10 +8,18 @@ export function makeClient(opts: {
   board: ComponentType<any>;
   multiplayer?: any;
   numPlayers?: number;
+  setupData?: unknown;
   debug?: boolean;
 }) {
+  const game =
+    opts.setupData === undefined
+      ? opts.game
+      : ({
+          ...opts.game,
+          setup: (context: any) => opts.game.setup?.(context, opts.setupData),
+        } as Game);
   return Client({
-    game: opts.game as Game,
+    game,
     board: opts.board,
     multiplayer: opts.multiplayer,
     numPlayers: opts.numPlayers,

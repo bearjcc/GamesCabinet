@@ -1,0 +1,376 @@
+{
+  "alohomora": {
+    "id": "alohomora",
+    "name": "Alohomora",
+    "type": "spell",
+    "cost": 0,
+    "set": ["game1"],
+    "quantity": 1,
+    "hero": null,
+    "image": "starters/alohomora.jpg",
+    "description": "Gain 1 Money",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 1 } }],
+    "keywords": ["spell", "cantrip"]
+  },
+  "pigwidgeon": {
+    "id": "pigwidgeon",
+    "name": "Pigwidgeon",
+    "type": "ally",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "ron",
+    "image": "starters/pigwidgeon.jpg",
+    "description": "Choose: 1 Damage OR 2 Health",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 1 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 1 } }
+            },
+            {
+              "label": "Heal 2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "pet", "owl"]
+  },
+  "cleansweep": {
+    "id": "cleansweep",
+    "name": "Cleansweep",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "ron",
+    "image": "starters/cleansweep.jpg",
+    "description": "1 Damage, +1 Money if villain killed this turn",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "villain_killed_this_turn" },
+        "then": { "type": "gain_influence", "params": { "amount": 1 } }
+      }
+    ],
+    "keywords": ["item", "broom"]
+  },
+  "bertiebottseveryflavourbeans": {
+    "id": "bertiebottseveryflavourbeans",
+    "name": "Bertie Bott's Every Flavour Beans",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "ron",
+    "image": "starters/bertiebottseveryflavourbeans.jpg",
+    "description": "1 Money, +1 Damage per ally played this turn",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      {
+        "type": "gain_attack_per_card_type_played",
+        "params": { "card_type": "ally", "amount": 1 }
+      }
+    ],
+    "keywords": ["item", "food"]
+  },
+  "crookshanks": {
+    "id": "crookshanks",
+    "name": "Crookshanks",
+    "type": "ally",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "hermione",
+    "image": "starters/crookshanks.jpg",
+    "description": "Choose: 1 Damage OR 2 Health",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 1 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 1 } }
+            },
+            {
+              "label": "Heal 2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "pet", "cat"]
+  },
+  "talesofbeedlethebard": {
+    "id": "talesofbeedlethebard",
+    "name": "Tales of Beedle the Bard",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "hermione",
+    "image": "starters/talesofbeedlethebard.jpg",
+    "description": "Choose: 2 Money OR All players gain 1 Money",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Gain 2 Money",
+              "effect": { "type": "gain_influence", "params": { "amount": 2 } }
+            },
+            {
+              "label": "All players gain 1 Money",
+              "effect": {
+                "type": "gain_influence",
+                "params": { "amount": 1, "target": "all_players" }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["item", "book"]
+  },
+  "timeturner": {
+    "id": "timeturner",
+    "name": "Time Turner",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "hermione",
+    "image": "starters/timeturner.jpg",
+    "description": "1 Money, purchased spells go to deck instead of discard",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 1 } }],
+    "keywords": ["item", "artifact"],
+    "passive_effect": {
+      "type": "purchased_spells_to_deck",
+      "description": "When you purchase a spell, it goes to your draw deck instead of your discard pile"
+    }
+  },
+  "hedwig": {
+    "id": "hedwig",
+    "name": "Hedwig",
+    "type": "ally",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "harry",
+    "image": "starters/hedwig.jpg",
+    "description": "Choose: 1 Damage OR 2 Health",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 1 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 1 } }
+            },
+            {
+              "label": "Heal 2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "pet", "owl"]
+  },
+  "firebolt": {
+    "id": "firebolt",
+    "name": "Firebolt",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "harry",
+    "image": "starters/firebolt.jpg",
+    "description": "1 Damage, +1 Money if villain killed this turn",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "villain_killed_this_turn" },
+        "then": { "type": "gain_influence", "params": { "amount": 1 } }
+      }
+    ],
+    "keywords": ["item", "broom"]
+  },
+  "invisibilitycloak": {
+    "id": "invisibilitycloak",
+    "name": "Invisibility Cloak",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "harry",
+    "image": "starters/invisibilitycloak.jpg",
+    "description": "1 Money. While in hand, reduce all damage taken to 1",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 1 } }],
+    "keywords": ["item", "artifact", "cloak"],
+    "passive_effect": {
+      "type": "reduce_damage_in_hand",
+      "params": { "max_damage": 1 },
+      "description": "While this card is in your hand, reduce all damage you take to 1"
+    }
+  },
+  "trevor": {
+    "id": "trevor",
+    "name": "Trevor",
+    "type": "ally",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "neville",
+    "image": "starters/trevor.jpg",
+    "description": "Choose: 1 Damage OR 2 Health",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 1 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 1 } }
+            },
+            {
+              "label": "Heal 2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "pet", "toad"]
+  },
+  "remembrall": {
+    "id": "remembrall",
+    "name": "Remembrall",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "neville",
+    "image": "starters/remembrall.jpg",
+    "description": "1 Money. On discard: +2 Money",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 1 } }],
+    "keywords": ["item", "artifact"],
+    "on_discard_effect": {
+      "type": "gain_influence",
+      "params": { "amount": 2 },
+      "description": "When this card is discarded, gain 2 Money"
+    }
+  },
+  "mandrake": {
+    "id": "mandrake",
+    "name": "Mandrake",
+    "type": "item",
+    "cost": 0,
+    "set": [],
+    "quantity": 1,
+    "hero": "neville",
+    "image": "starters/mandrake.jpg",
+    "description": "Choose: 1 Damage OR Heal any player 2",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 1 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 1 } }
+            },
+            {
+              "label": "Heal any player 2",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "choose" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["item", "creature", "plant"]
+  },
+  "lionhat": {
+    "id": "lionhat",
+    "name": "Lion Hat",
+    "type": "item",
+    "cost": 0,
+    "set": ["box1"],
+    "quantity": 1,
+    "hero": "luna",
+    "image": "starters/lionhat.jpg",
+    "description": "1 Money, +1 Damage if another player has a broom in play",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "other_player_has_keyword_in_play", "keyword": "broom" },
+        "then": { "type": "gain_attack", "params": { "amount": 1 } }
+      }
+    ],
+    "keywords": ["item", "hat"]
+  },
+  "spectrespecs": {
+    "id": "spectrespecs",
+    "name": "Spectrespecs",
+    "type": "item",
+    "cost": 0,
+    "set": ["box1"],
+    "quantity": 1,
+    "hero": "luna",
+    "image": "starters/spectrespecs.jpg",
+    "description": "1 Money. Look at top card of Dark Arts deck",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      { "type": "peek_dark_arts", "params": { "count": 1 } }
+    ],
+    "keywords": ["item", "eyewear"]
+  },
+  "crumplehornedsnorkack": {
+    "id": "crumplehornedsnorkack",
+    "name": "Crumple-Horned Snorkack",
+    "type": "ally",
+    "cost": 0,
+    "set": ["box1"],
+    "quantity": 1,
+    "hero": "luna",
+    "image": "starters/crumplehornedsnorkack.jpg",
+    "description": "Choose: 1 Damage OR 2 Health",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 1 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 1 } }
+            },
+            {
+              "label": "Heal 2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "creature"]
+  }
+}

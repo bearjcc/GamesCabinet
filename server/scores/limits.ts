@@ -5,6 +5,8 @@ export const SCORE_CEILINGS: Record<string, number> = {
   'letter-walker': 5_000,
   klondike: 52,
   freecell: 52,
+  // All deck fuel (1,150) plus booster points (400) is the solo maximum.
+  orbits: 2_000,
 };
 
 /** Fallback when a catalogue game has hasLeaderboard but no explicit ceiling. */

@@ -1,0 +1,1271 @@
+{
+  "wingardiumleviosa": {
+    "id": "wingardiumleviosa",
+    "name": "Wingardium Leviosa",
+    "type": "spell",
+    "cost": 2,
+    "set": ["game1"],
+    "quantity": 3,
+    "image": "marketcards/wingardiumleviosa.jpg",
+    "description": "1 Money, purchased items go to deck",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 1 } }],
+    "keywords": ["spell"],
+    "passive_effect": {
+      "type": "purchased_items_to_deck",
+      "description": "When you purchase an item, it goes to your draw deck instead of discard"
+    }
+  },
+  "descendo": {
+    "id": "descendo",
+    "name": "Descendo",
+    "type": "spell",
+    "cost": 5,
+    "set": ["game1"],
+    "quantity": 2,
+    "image": "marketcards/descendo.jpg",
+    "description": "2 Damage",
+    "effects": [{ "type": "gain_attack", "params": { "amount": 2 } }],
+    "keywords": ["spell"]
+  },
+  "reparo": {
+    "id": "reparo",
+    "name": "Reparo",
+    "type": "spell",
+    "cost": 3,
+    "set": ["game1"],
+    "quantity": 6,
+    "image": "marketcards/reparo.jpg",
+    "description": "Choose: 2 Money OR Draw 1 Card",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Gain 2 Money",
+              "effect": { "type": "gain_influence", "params": { "amount": 2 } }
+            },
+            {
+              "label": "Draw 1 Card",
+              "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["spell"]
+  },
+  "incendio": {
+    "id": "incendio",
+    "name": "Incendio",
+    "type": "spell",
+    "cost": 4,
+    "set": ["game1"],
+    "quantity": 4,
+    "image": "marketcards/incendio.jpg",
+    "description": "1 Damage, Draw 1 Card",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["spell"]
+  },
+  "essenceofdittany": {
+    "id": "essenceofdittany",
+    "name": "Essence of Dittany",
+    "type": "item",
+    "cost": 2,
+    "set": ["game1"],
+    "quantity": 4,
+    "image": "marketcards/essenceofdittany.jpg",
+    "description": "Heal any player 2",
+    "effects": [{ "type": "heal", "params": { "amount": 2, "target": "choose" } }],
+    "keywords": ["item", "potion"]
+  },
+  "quidditchgear": {
+    "id": "quidditchgear",
+    "name": "Quidditch Gear",
+    "type": "item",
+    "cost": 3,
+    "set": ["game1"],
+    "quantity": 4,
+    "image": "marketcards/quidditchgear.jpg",
+    "description": "1 Damage, 1 Health",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["item"]
+  },
+  "goldensnitch": {
+    "id": "goldensnitch",
+    "name": "Golden Snitch",
+    "type": "item",
+    "cost": 5,
+    "set": ["game1"],
+    "quantity": 1,
+    "image": "marketcards/goldensnitch.jpg",
+    "description": "2 Money, Draw 1 Card",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 2 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["item"]
+  },
+  "sortinghat": {
+    "id": "sortinghat",
+    "name": "Sorting Hat",
+    "type": "item",
+    "cost": 4,
+    "set": ["game1"],
+    "quantity": 1,
+    "image": "marketcards/sortinghat.jpg",
+    "description": "2 Money, purchased allies go to deck",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 2 } }],
+    "keywords": ["item", "artifact"],
+    "passive_effect": {
+      "type": "purchased_allies_to_deck",
+      "description": "When you purchase an ally, it goes to your draw deck instead of discard"
+    }
+  },
+  "oliverwood": {
+    "id": "oliverwood",
+    "name": "Oliver Wood",
+    "type": "ally",
+    "cost": 3,
+    "set": ["game1"],
+    "quantity": 1,
+    "image": "marketcards/oliverwood.jpg",
+    "description": "1 Damage, Heal any 2 if villain killed",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "villain_killed_this_turn" },
+        "then": { "type": "heal", "params": { "amount": 2, "target": "choose" } }
+      }
+    ],
+    "keywords": ["ally"]
+  },
+  "albusdumbledore": {
+    "id": "albusdumbledore",
+    "name": "Albus Dumbledore",
+    "type": "ally",
+    "cost": 8,
+    "set": ["game1"],
+    "quantity": 1,
+    "image": "marketcards/albusdumbledore.jpg",
+    "description": "All: +1 Money, +1 Health, +1 Damage, Draw 1",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+      { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }
+    ],
+    "keywords": ["ally", "professor", "order_of_phoenix"]
+  },
+  "rubeushagrid": {
+    "id": "rubeushagrid",
+    "name": "Rubeus Hagrid",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game1"],
+    "quantity": 1,
+    "image": "marketcards/rubeushagrid.jpg",
+    "description": "1 Damage, All players gain 1 Health",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 1, "target": "all_players" } }
+    ],
+    "keywords": ["ally", "professor"]
+  },
+  "expelliarmus": {
+    "id": "expelliarmus",
+    "name": "Expelliarmus",
+    "type": "spell",
+    "cost": 6,
+    "set": ["game2"],
+    "quantity": 2,
+    "image": "marketcards/expelliarmus.jpg",
+    "description": "2 Damage, Draw 1 Card",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["spell"]
+  },
+  "polyjuicepotion": {
+    "id": "polyjuicepotion",
+    "name": "Polyjuice Potion",
+    "type": "item",
+    "cost": 3,
+    "set": ["game2"],
+    "quantity": 2,
+    "image": "marketcards/polyjuicepotion.jpg",
+    "description": "Copy an ally's effects from play area",
+    "effects": [
+      {
+        "type": "copy_ally_effect_from_play",
+        "params": {}
+      }
+    ],
+    "keywords": ["item", "potion"]
+  },
+  "nimbustwothousandandone": {
+    "id": "nimbustwothousandandone",
+    "name": "Nimbus Two Thousand and One",
+    "type": "item",
+    "cost": 5,
+    "set": ["game2"],
+    "quantity": 2,
+    "image": "marketcards/nimbustwothousandandone.jpg",
+    "description": "2 Damage, +2 Money if villain killed",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "villain_killed_this_turn" },
+        "then": { "type": "gain_influence", "params": { "amount": 2 } }
+      }
+    ],
+    "keywords": ["item", "broom"]
+  },
+  "fawkesthephoenix": {
+    "id": "fawkesthephoenix",
+    "name": "Fawkes the Phoenix",
+    "type": "ally",
+    "cost": 5,
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "marketcards/fawkesthephoenix.jpg",
+    "description": "Choose: 2 Damage OR All players gain 2 Health",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Deal 2 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 2 } }
+            },
+            {
+              "label": "All players gain 2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "all_players" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "creature", "phoenix"]
+  },
+  "mollyweasley": {
+    "id": "mollyweasley",
+    "name": "Molly Weasley",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "marketcards/mollyweasley.jpg",
+    "description": "All players gain 1 Money, All gain 2 Health",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+      { "type": "heal", "params": { "amount": 2, "target": "all_players" } }
+    ],
+    "keywords": ["ally", "weasley"]
+  },
+  "dobbythehouseelf": {
+    "id": "dobbythehouseelf",
+    "name": "Dobby the House Elf",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "marketcards/dobbythehouseelf.jpg",
+    "description": "Remove 1 from location, Draw 1 Card",
+    "effects": [
+      { "type": "remove_location_control", "params": { "amount": 1 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["ally", "house_elf"]
+  },
+  "arthurweasley": {
+    "id": "arthurweasley",
+    "name": "Arthur Weasley",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "marketcards/arthurweasley.jpg",
+    "description": "All players gain 2 Money",
+    "effects": [{ "type": "gain_influence", "params": { "amount": 2, "target": "all_players" } }],
+    "keywords": ["ally", "weasley", "ministry"]
+  },
+  "ginnyweasley": {
+    "id": "ginnyweasley",
+    "name": "Ginny Weasley",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "marketcards/ginnyweasley.jpg",
+    "description": "1 Damage, 1 Money",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "gain_influence", "params": { "amount": 1 } }
+    ],
+    "keywords": ["ally", "weasley"]
+  },
+  "gilderoylockhart": {
+    "id": "gilderoylockhart",
+    "name": "Gilderoy Lockhart",
+    "type": "ally",
+    "cost": 2,
+    "set": ["game2"],
+    "quantity": 1,
+    "image": "marketcards/gilderoylockhart.jpg",
+    "description": "Draw 1, Discard 1. On discard: Draw 1",
+    "effects": [
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } },
+      { "type": "discard_cards", "params": { "amount": 1, "target": "self", "chooser": "self" } }
+    ],
+    "keywords": ["ally", "professor"],
+    "on_discard_effect": {
+      "type": "draw_cards",
+      "params": { "amount": 1, "target": "self" },
+      "description": "When this card is discarded, draw 1 card"
+    }
+  },
+  "lumos": {
+    "id": "lumos",
+    "name": "Lumos",
+    "type": "spell",
+    "cost": 4,
+    "set": ["game3"],
+    "quantity": 2,
+    "image": "marketcards/lumos.jpg",
+    "description": "All players draw 1 Card",
+    "effects": [{ "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } }],
+    "keywords": ["spell"]
+  },
+  "finite": {
+    "id": "finite",
+    "name": "Finite",
+    "type": "spell",
+    "cost": 3,
+    "set": ["game3"],
+    "quantity": 2,
+    "image": "marketcards/finite.jpg",
+    "description": "Remove 1 from location",
+    "effects": [{ "type": "remove_location_control", "params": { "amount": 1 } }],
+    "keywords": ["spell"]
+  },
+  "petrificustotalus": {
+    "id": "petrificustotalus",
+    "name": "Petrificus Totalus",
+    "type": "spell",
+    "cost": 6,
+    "set": ["game3"],
+    "quantity": 2,
+    "image": "marketcards/petrificustotalus.jpg",
+    "description": "1 Damage, Block villain effects this turn",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "block_villain_effects", "params": { "duration": "turn" } }
+    ],
+    "keywords": ["spell"]
+  },
+  "expectopatronum": {
+    "id": "expectopatronum",
+    "name": "Expecto Patronum",
+    "type": "spell",
+    "cost": 5,
+    "set": ["game3"],
+    "quantity": 2,
+    "image": "marketcards/expectopatronum.jpg",
+    "description": "1 Damage, Remove 1 from location",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "remove_location_control", "params": { "amount": 1 } }
+    ],
+    "keywords": ["spell"]
+  },
+  "maraudersmap": {
+    "id": "maraudersmap",
+    "name": "Marauder's Map",
+    "type": "item",
+    "cost": 5,
+    "set": ["game3"],
+    "quantity": 1,
+    "image": "marketcards/maraudersmap.jpg",
+    "description": "Draw 2 Cards. On discard: All draw 1",
+    "effects": [{ "type": "draw_cards", "params": { "amount": 2, "target": "self" } }],
+    "keywords": ["item", "artifact"],
+    "on_discard_effect": {
+      "type": "draw_cards",
+      "params": { "amount": 1, "target": "all_players" },
+      "description": "When this card is discarded, all players draw 1"
+    }
+  },
+  "crystalball": {
+    "id": "crystalball",
+    "name": "Crystal Ball",
+    "type": "item",
+    "cost": 3,
+    "set": ["game3"],
+    "quantity": 2,
+    "image": "marketcards/crystalball.jpg",
+    "description": "Draw 2, Discard 1",
+    "effects": [
+      { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+      { "type": "discard_cards", "params": { "amount": 1, "target": "self", "chooser": "self" } }
+    ],
+    "keywords": ["item"]
+  },
+  "butterbeer": {
+    "id": "butterbeer",
+    "name": "Butterbeer",
+    "type": "item",
+    "cost": 3,
+    "set": ["game3"],
+    "quantity": 3,
+    "image": "marketcards/butterbeer.jpg",
+    "description": "Select 2 players to gain 1 Health + 1 Money (exclusive choice)",
+    "effects": [
+      {
+        "type": "select_players_exclusive",
+        "params": {
+          "player_count": 2,
+          "effects": [
+            { "type": "heal", "params": { "amount": 1, "target": "selected" } },
+            { "type": "gain_influence", "params": { "amount": 1, "target": "selected" } }
+          ]
+        }
+      }
+    ],
+    "keywords": ["item", "food"]
+  },
+  "chocolatefrog": {
+    "id": "chocolatefrog",
+    "name": "Chocolate Frog",
+    "type": "item",
+    "cost": 2,
+    "set": ["game3"],
+    "quantity": 3,
+    "image": "marketcards/chocolatefrog.jpg",
+    "description": "Choose player to gain 1 Health + 1 Money. On discard: same",
+    "effects": [
+      { "type": "heal", "params": { "amount": 1, "target": "choose" } },
+      { "type": "gain_influence", "params": { "amount": 1 } }
+    ],
+    "keywords": ["item", "food"],
+    "on_discard_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "heal", "params": { "amount": 1, "target": "choose" } },
+          { "type": "gain_influence", "params": { "amount": 1 } }
+        ]
+      },
+      "description": "When discarded: Choose player to gain 1 Health + 1 Money"
+    }
+  },
+  "remuslupin": {
+    "id": "remuslupin",
+    "name": "Remus Lupin",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game3"],
+    "quantity": 1,
+    "image": "marketcards/remuslupin.jpg",
+    "description": "1 Damage, Heal any player 3",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 3, "target": "choose" } }
+    ],
+    "keywords": ["ally", "professor", "order_of_phoenix"]
+  },
+  "sybilltrelawney": {
+    "id": "sybilltrelawney",
+    "name": "Sybill Trelawney",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game3"],
+    "quantity": 1,
+    "image": "marketcards/sybilltrelawney.jpg",
+    "description": "Draw 2, Discard 1 (+2 Money if spell discarded)",
+    "effects": [
+      { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+      {
+        "type": "discard_with_bonus_if_type",
+        "params": {
+          "amount": 1,
+          "bonus_card_type": "spell",
+          "bonus": { "type": "gain_influence", "params": { "amount": 2 } }
+        }
+      }
+    ],
+    "keywords": ["ally", "professor", "divination"]
+  },
+  "siriusblack": {
+    "id": "siriusblack",
+    "name": "Sirius Black",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game3"],
+    "quantity": 1,
+    "image": "marketcards/siriusblack.jpg",
+    "description": "2 Damage, 1 Money",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2 } },
+      { "type": "gain_influence", "params": { "amount": 1 } }
+    ],
+    "keywords": ["ally", "order_of_phoenix"]
+  },
+  "protego": {
+    "id": "protego",
+    "name": "Protego",
+    "type": "spell",
+    "cost": 5,
+    "set": ["game4"],
+    "quantity": 3,
+    "image": "marketcards/protego.jpg",
+    "description": "1 Damage, 1 Health. On discard: +1 Damage +1 Health",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["spell"],
+    "on_discard_effect": {
+      "type": "multi_effect",
+      "params": {
+        "effects": [
+          { "type": "gain_attack", "params": { "amount": 1 } },
+          { "type": "heal", "params": { "amount": 1, "target": "self" } }
+        ]
+      },
+      "description": "When discarded: +1 Damage, +1 Health"
+    }
+  },
+  "accio": {
+    "id": "accio",
+    "name": "Accio",
+    "type": "spell",
+    "cost": 4,
+    "set": ["game4"],
+    "quantity": 2,
+    "image": "marketcards/accio.jpg",
+    "description": "Choose: 2 Money OR Search discard for item",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Gain 2 Money",
+              "effect": { "type": "gain_influence", "params": { "amount": 2 } }
+            },
+            {
+              "label": "Search discard for item",
+              "effect": { "type": "search_discard_for_type", "params": { "card_type": "item" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["spell"]
+  },
+  "hogwartsahistory": {
+    "id": "hogwartsahistory",
+    "name": "Hogwarts: A History",
+    "type": "item",
+    "cost": 4,
+    "set": ["game4"],
+    "quantity": 6,
+    "image": "marketcards/hogwartsahistory.jpg",
+    "description": "Choose a House die to roll",
+    "effects": [
+      {
+        "type": "choose_house_dice",
+        "params": {}
+      }
+    ],
+    "keywords": ["item", "book", "house_dice"],
+    "house_dice": true
+  },
+  "pensieve": {
+    "id": "pensieve",
+    "name": "Pensieve",
+    "type": "item",
+    "cost": 5,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/pensieve.jpg",
+    "description": "Select 2 players: 1 Money + Draw 1 (exclusive)",
+    "effects": [
+      {
+        "type": "select_players_exclusive",
+        "params": {
+          "player_count": 2,
+          "effects": [
+            { "type": "gain_influence", "params": { "amount": 1, "target": "selected" } },
+            { "type": "draw_cards", "params": { "amount": 1, "target": "selected" } }
+          ]
+        }
+      }
+    ],
+    "keywords": ["item", "artifact"]
+  },
+  "triwizardcup": {
+    "id": "triwizardcup",
+    "name": "Triwizard Cup",
+    "type": "item",
+    "cost": 5,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/triwizardcup.jpg",
+    "description": "1 Damage, 1 Money, 1 Health",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["item", "artifact"]
+  },
+  "fleurdelacour": {
+    "id": "fleurdelacour",
+    "name": "Fleur Delacour",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/fleurdelacour.jpg",
+    "description": "2 Money, +2 Health if ally played (house dice)",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 2 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "ally_played_this_turn" },
+        "then": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+      }
+    ],
+    "keywords": ["ally"],
+    "house_dice": true
+  },
+  "alastormadeyemoody": {
+    "id": "alastormadeyemoody",
+    "name": "Alastor 'Mad-Eye' Moody",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/alastormadeyemoody.jpg",
+    "description": "2 Money, Remove 1 from location",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 2 } },
+      { "type": "remove_location_control", "params": { "amount": 1 } }
+    ],
+    "keywords": ["ally", "order_of_phoenix", "auror"]
+  },
+  "filiusflitwick": {
+    "id": "filiusflitwick",
+    "name": "Filius Flitwick",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/filiusflitwick.jpg",
+    "description": "1 Damage, Draw 1, Ravenclaw Dice",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } },
+      { "type": "roll_house_dice", "params": { "house": "ravenclaw" } }
+    ],
+    "keywords": ["ally", "professor", "house_dice"],
+    "house_dice": true
+  },
+  "pomonasprout": {
+    "id": "pomonasprout",
+    "name": "Pomona Sprout",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/pomonasprout.jpg",
+    "description": "1 Money, Heal any 2, Hufflepuff Dice",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 2, "target": "choose" } },
+      { "type": "roll_house_dice", "params": { "house": "hufflepuff" } }
+    ],
+    "keywords": ["ally", "professor", "house_dice"],
+    "house_dice": true
+  },
+  "severussnape": {
+    "id": "severussnape",
+    "name": "Severus Snape",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/severussnape.jpg",
+    "description": "1 Damage, 2 Health, Slytherin Dice",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "heal", "params": { "amount": 2, "target": "self" } },
+      { "type": "roll_house_dice", "params": { "house": "slytherin" } }
+    ],
+    "keywords": ["ally", "professor", "house_dice"],
+    "house_dice": true
+  },
+  "minervamcgonagall": {
+    "id": "minervamcgonagall",
+    "name": "Minerva McGonagall",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/minervamcgonagall.jpg",
+    "description": "1 Money, 1 Damage, Gryffindor Dice",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "roll_house_dice", "params": { "house": "gryffindor" } }
+    ],
+    "keywords": ["ally", "professor", "house_dice"],
+    "house_dice": true
+  },
+  "viktorkrum": {
+    "id": "viktorkrum",
+    "name": "Viktor Krum",
+    "type": "ally",
+    "cost": 5,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/viktorkrum.jpg",
+    "description": "2 Damage, +1 Health +1 Money if villain killed",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "villain_killed_this_turn" },
+        "then": {
+          "type": "multi_effect",
+          "params": {
+            "effects": [
+              { "type": "heal", "params": { "amount": 1, "target": "self" } },
+              { "type": "gain_influence", "params": { "amount": 1 } }
+            ]
+          }
+        }
+      }
+    ],
+    "keywords": ["ally", "champion"]
+  },
+  "cedricdiggory": {
+    "id": "cedricdiggory",
+    "name": "Cedric Diggory",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game4"],
+    "quantity": 1,
+    "image": "marketcards/cedricdiggory.jpg",
+    "description": "1 Damage, Hufflepuff Dice",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "roll_house_dice", "params": { "house": "hufflepuff" } }
+    ],
+    "keywords": ["ally", "champion", "house_dice"],
+    "house_dice": true
+  },
+  "stupefy": {
+    "id": "stupefy",
+    "name": "Stupefy",
+    "type": "spell",
+    "cost": 6,
+    "set": ["game5"],
+    "quantity": 2,
+    "image": "marketcards/stupefy.jpg",
+    "description": "1 Damage, Remove 1 from location, Draw 1",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "remove_location_control", "params": { "amount": 1 } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["spell"]
+  },
+  "owls": {
+    "id": "owls",
+    "name": "O.W.L.S.",
+    "type": "item",
+    "cost": 4,
+    "set": ["game5"],
+    "quantity": 2,
+    "image": "marketcards/owls.jpg",
+    "description": "2 Money, +1 Damage +1 Health if 2 spells played",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 2 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "spells_played_gte", "threshold": 2 },
+        "then": {
+          "type": "multi_effect",
+          "params": {
+            "effects": [
+              { "type": "gain_attack", "params": { "amount": 1 } },
+              { "type": "heal", "params": { "amount": 1, "target": "self" } }
+            ]
+          }
+        }
+      }
+    ],
+    "keywords": ["item", "exam"]
+  },
+  "chochang": {
+    "id": "chochang",
+    "name": "Cho Chang",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "marketcards/chochang.jpg",
+    "description": "Draw 3, Discard 2, Ravenclaw Dice",
+    "effects": [
+      { "type": "draw_cards", "params": { "amount": 3, "target": "self" } },
+      { "type": "discard_cards", "params": { "amount": 2, "target": "self", "chooser": "self" } },
+      { "type": "roll_house_dice", "params": { "house": "ravenclaw" } }
+    ],
+    "keywords": ["ally", "house_dice"],
+    "house_dice": true
+  },
+  "georgeweasley": {
+    "id": "georgeweasley",
+    "name": "George Weasley",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "marketcards/georgeweasley.jpg",
+    "description": "1 Damage, Weasley Twins (Health), Gryffindor Dice",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "card_in_play", "card_id": "fredweasley" },
+        "then": { "type": "heal", "params": { "amount": 1, "target": "self" } }
+      },
+      { "type": "roll_house_dice", "params": { "house": "gryffindor" } }
+    ],
+    "keywords": ["ally", "weasley", "weasley_twins", "house_dice"],
+    "house_dice": true
+  },
+  "fredweasley": {
+    "id": "fredweasley",
+    "name": "Fred Weasley",
+    "type": "ally",
+    "cost": 4,
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "marketcards/fredweasley.jpg",
+    "description": "1 Damage, Weasley Twins (Money), Gryffindor Dice",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "card_in_play", "card_id": "georgeweasley" },
+        "then": { "type": "gain_influence", "params": { "amount": 1 } }
+      },
+      { "type": "roll_house_dice", "params": { "house": "gryffindor" } }
+    ],
+    "keywords": ["ally", "weasley", "weasley_twins", "house_dice"],
+    "house_dice": true
+  },
+  "kingsleyshacklebolt": {
+    "id": "kingsleyshacklebolt",
+    "name": "Kingsley Shacklebolt",
+    "type": "ally",
+    "cost": 7,
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "marketcards/kingsleyshacklebolt.jpg",
+    "description": "2 Damage, 1 Health, Remove 1 from location",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2 } },
+      { "type": "heal", "params": { "amount": 1, "target": "self" } },
+      { "type": "remove_location_control", "params": { "amount": 1 } }
+    ],
+    "keywords": ["ally", "order_of_phoenix", "auror"]
+  },
+  "nymphadoratonks": {
+    "id": "nymphadoratonks",
+    "name": "Nymphadora Tonks",
+    "type": "ally",
+    "cost": 5,
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "marketcards/nymphadoratonks.jpg",
+    "description": "Choose: 3 Money OR 2 Damage OR Remove 1 from location",
+    "effects": [
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Gain 3 Money",
+              "effect": { "type": "gain_influence", "params": { "amount": 3 } }
+            },
+            {
+              "label": "Deal 2 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 2 } }
+            },
+            {
+              "label": "Remove 1 from location",
+              "effect": { "type": "remove_location_control", "params": { "amount": 1 } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally", "order_of_phoenix", "auror"]
+  },
+  "lunalovegood": {
+    "id": "lunalovegood",
+    "name": "Luna Lovegood",
+    "type": "ally",
+    "cost": 5,
+    "set": ["game5"],
+    "quantity": 1,
+    "image": "marketcards/lunalovegood.jpg",
+    "description": "1 Money, +1 Damage if item played, Ravenclaw Dice",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "card_type_played_this_turn", "card_type": "item" },
+        "then": { "type": "gain_attack", "params": { "amount": 1 } }
+      },
+      { "type": "roll_house_dice", "params": { "house": "ravenclaw" } }
+    ],
+    "keywords": ["ally", "house_dice"],
+    "house_dice": true
+  },
+  "confundus": {
+    "id": "confundus",
+    "name": "Confundus",
+    "type": "spell",
+    "cost": 3,
+    "set": ["game6"],
+    "quantity": 2,
+    "image": "marketcards/confundus.jpg",
+    "description": "1 Damage, Remove 1 from location when all villains hit",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "all_villains_hit_this_turn" },
+        "then": { "type": "remove_location_control", "params": { "amount": 1 } }
+      }
+    ],
+    "keywords": ["spell"]
+  },
+  "horaceslughorn": {
+    "id": "horaceslughorn",
+    "name": "Horace Slughorn",
+    "type": "ally",
+    "cost": 6,
+    "set": ["game6"],
+    "quantity": 1,
+    "image": "marketcards/horaceslughorn.jpg",
+    "description": "All Choose: +1 Money OR +1 Health, Slytherin Dice",
+    "effects": [
+      {
+        "type": "choose_one_all_players",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "+1 Money",
+              "effect": { "type": "gain_influence", "params": { "amount": 1 } }
+            },
+            {
+              "label": "+1 Health",
+              "effect": { "type": "heal", "params": { "amount": 1, "target": "self" } }
+            }
+          ]
+        }
+      },
+      { "type": "roll_house_dice", "params": { "house": "slytherin" } }
+    ],
+    "keywords": ["ally", "professor", "house_dice"],
+    "house_dice": true
+  },
+  "advancedpotionmaking": {
+    "id": "advancedpotionmaking",
+    "name": "Advanced Potion Making",
+    "type": "item",
+    "cost": 6,
+    "set": ["game6"],
+    "quantity": 1,
+    "image": "marketcards/advancedpotionmaking.jpg",
+    "description": "All gain 2 Health, max health players gain +1 Damage +1 Card",
+    "effects": [
+      { "type": "heal", "params": { "amount": 2, "target": "all_players" } },
+      {
+        "type": "conditional_per_player",
+        "condition": { "type": "at_max_health" },
+        "then": {
+          "type": "multi_effect",
+          "params": {
+            "effects": [
+              { "type": "gain_attack", "params": { "amount": 1 } },
+              { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+            ]
+          }
+        }
+      }
+    ],
+    "keywords": ["item", "book", "potion"]
+  },
+  "bezoar": {
+    "id": "bezoar",
+    "name": "Bezoar",
+    "type": "item",
+    "cost": 4,
+    "set": ["game6"],
+    "quantity": 2,
+    "image": "marketcards/bezoar.jpg",
+    "description": "Heal any player 3, Draw 1",
+    "effects": [
+      { "type": "heal", "params": { "amount": 3, "target": "choose" } },
+      { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+    ],
+    "keywords": ["item", "potion"]
+  },
+  "deluminator": {
+    "id": "deluminator",
+    "name": "Deluminator",
+    "type": "item",
+    "cost": 6,
+    "set": ["game6"],
+    "quantity": 1,
+    "image": "marketcards/deluminator.jpg",
+    "description": "Remove 2 from location",
+    "effects": [{ "type": "remove_location_control", "params": { "amount": 2 } }],
+    "keywords": ["item", "artifact"]
+  },
+  "felixfelicis": {
+    "id": "felixfelicis",
+    "name": "Felix Felicis",
+    "type": "item",
+    "cost": 7,
+    "set": ["game6"],
+    "quantity": 2,
+    "image": "marketcards/felixfelicis.jpg",
+    "description": "Choose 2 of: 2 Damage, 2 Money, 2 Health, Draw 2",
+    "effects": [
+      {
+        "type": "choose_n",
+        "params": {
+          "n": 2,
+          "prompt": "Choose 2:",
+          "options": [
+            {
+              "label": "2 Damage",
+              "effect": { "type": "gain_attack", "params": { "amount": 2 } }
+            },
+            {
+              "label": "2 Money",
+              "effect": { "type": "gain_influence", "params": { "amount": 2 } }
+            },
+            {
+              "label": "2 Health",
+              "effect": { "type": "heal", "params": { "amount": 2, "target": "self" } }
+            },
+            {
+              "label": "Draw 2",
+              "effect": { "type": "draw_cards", "params": { "amount": 2, "target": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["item", "potion"]
+  },
+  "elderwand": {
+    "id": "elderwand",
+    "name": "Elder Wand",
+    "type": "item",
+    "cost": 7,
+    "set": ["game7"],
+    "quantity": 1,
+    "image": "marketcards/elderwand.jpg",
+    "description": "+1 Damage +1 Health per spell played this turn",
+    "effects": [
+      {
+        "type": "gain_per_card_type_played",
+        "params": {
+          "card_type": "spell",
+          "attack_per": 1,
+          "health_per": 1
+        }
+      }
+    ],
+    "keywords": ["item", "artifact", "deathly_hallow"]
+  },
+  "swordofgryffindor": {
+    "id": "swordofgryffindor",
+    "name": "Sword of Gryffindor",
+    "type": "item",
+    "cost": 7,
+    "set": ["game7"],
+    "quantity": 1,
+    "image": "marketcards/swordofgryffindor.jpg",
+    "description": "2 Damage, 2x Gryffindor Dice",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 2 } },
+      { "type": "roll_house_dice", "params": { "house": "gryffindor", "count": 2 } }
+    ],
+    "keywords": ["item", "artifact", "house_dice"],
+    "house_dice": true
+  },
+  "finiteincantatem": {
+    "id": "finiteincantatem",
+    "name": "Finite Incantatem",
+    "type": "spell",
+    "cost": 6,
+    "set": ["box1"],
+    "quantity": 2,
+    "image": "marketcards/finiteincantatem.jpg",
+    "description": "Remove 1 from location",
+    "effects": [{ "type": "remove_location_control", "params": { "amount": 1 } }],
+    "keywords": ["spell"]
+  },
+  "tergeo": {
+    "id": "tergeo",
+    "name": "Tergeo",
+    "type": "spell",
+    "cost": 2,
+    "set": ["box1"],
+    "quantity": 6,
+    "image": "marketcards/tergeo.jpg",
+    "description": "1 Money, Banish item from hand to draw 1",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      {
+        "type": "optional_banish_for_effect",
+        "params": {
+          "card_type": "item",
+          "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "self" } }
+        }
+      }
+    ],
+    "keywords": ["spell"]
+  },
+  "harp": {
+    "id": "harp",
+    "name": "Harp",
+    "type": "item",
+    "cost": 6,
+    "set": ["box1"],
+    "quantity": 1,
+    "image": "marketcards/harp.jpg",
+    "description": "1 Damage, Block creature effects",
+    "effects": [
+      { "type": "gain_attack", "params": { "amount": 1 } },
+      { "type": "block_creature_effects", "params": { "duration": "turn" } }
+    ],
+    "keywords": ["item"]
+  },
+  "oldsock": {
+    "id": "oldsock",
+    "name": "Old Sock",
+    "type": "item",
+    "cost": 1,
+    "set": ["box1"],
+    "quantity": 2,
+    "image": "marketcards/oldsock.jpg",
+    "description": "1 Money, +2 Damage if Dobby in other player's hand. On discard: +2 Money",
+    "effects": [
+      { "type": "gain_influence", "params": { "amount": 1 } },
+      {
+        "type": "conditional",
+        "condition": { "type": "card_in_other_player_hand", "card_id": "dobbythehouseelf" },
+        "then": { "type": "gain_attack", "params": { "amount": 2 } }
+      }
+    ],
+    "keywords": ["item"],
+    "on_discard_effect": {
+      "type": "gain_influence",
+      "params": { "amount": 2 },
+      "description": "When discarded: +2 Money"
+    }
+  },
+  "detention": {
+    "id": "detention",
+    "name": "Detention",
+    "type": "item",
+    "cost": 0,
+    "set": ["box1"],
+    "quantity": 0,
+    "image": "marketcards/detention.jpg",
+    "description": "No play effect. On discard: -2 Health",
+    "effects": [],
+    "keywords": ["item", "detention", "generated"],
+    "on_discard_effect": {
+      "type": "deal_damage",
+      "params": { "amount": 2, "target": "self" },
+      "description": "When discarded: Lose 2 Health"
+    }
+  },
+  "argusfilchandmrsnorris": {
+    "id": "argusfilchandmrsnorris",
+    "name": "Argus Filch and Mrs. Norris",
+    "type": "ally",
+    "cost": 4,
+    "set": ["box1"],
+    "quantity": 1,
+    "image": "marketcards/argusfilchandmrsnorris.jpg",
+    "description": "Draw 2, Choose: Discard 1 OR Banish from hand",
+    "effects": [
+      { "type": "draw_cards", "params": { "amount": 2, "target": "self" } },
+      {
+        "type": "choose_one",
+        "params": {
+          "prompt": "Choose one:",
+          "options": [
+            {
+              "label": "Discard 1",
+              "effect": {
+                "type": "discard_cards",
+                "params": { "amount": 1, "target": "self", "chooser": "self" }
+              }
+            },
+            {
+              "label": "Banish from hand",
+              "effect": { "type": "banish_card_from_hand", "params": { "chooser": "self" } }
+            }
+          ]
+        }
+      }
+    ],
+    "keywords": ["ally"]
+  },
+  "fang": {
+    "id": "fang",
+    "name": "Fang",
+    "type": "ally",
+    "cost": 3,
+    "set": ["box1"],
+    "quantity": 1,
+    "image": "marketcards/fang.jpg",
+    "description": "Select player to gain 2 Health + 1 Money",
+    "effects": [
+      { "type": "heal", "params": { "amount": 2, "target": "choose" } },
+      { "type": "gain_influence", "params": { "amount": 1, "target": "chosen_player" } }
+    ],
+    "keywords": ["ally", "pet", "dog"]
+  }
+}

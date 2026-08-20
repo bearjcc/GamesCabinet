@@ -1,5 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
+import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, StockPile } from '../../components/tabletop';
@@ -40,22 +41,23 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
     },
   }));
 
-  const booksLine =
-    pid >= 0
-      ? `Books ${G.books[pid]} - Opp ${G.books[opponentOf(pid)]}`
-      : `Books P1 ${G.books[0]} - P2 ${G.books[1]}`;
-
   return (
     <PlayTable
       info={
         <>
           <StatusBar text={status} tone={tone} />
-          <div className="play-table__meta" data-testid="go-fish-meta">
-            <span>{booksLine}</span>
-            <span>Stock: {G.stock.length}</span>
-            {opp >= 0 ? <span>Opp hand: {oppHandCount}</span> : null}
-            {G.pendingFishRank != null ? <span>Fishing: {G.pendingFishRank}</span> : null}
-          </div>
+          <MatchScoreboard
+            scores={[
+              { label: 'Books', value: pid >= 0 ? G.books[pid] : '-' },
+              { label: 'Opp', value: pid >= 0 ? G.books[opponentOf(pid)] : '-' },
+              { label: 'Stock', value: G.stock.length },
+              ...(opp >= 0 ? [{ label: 'Opp hand', value: oppHandCount }] : []),
+              ...(G.pendingFishRank != null
+                ? [{ label: 'Fishing', value: G.pendingFishRank }]
+                : []),
+            ]}
+            testId="go-fish-meta"
+          />
         </>
       }
       board={

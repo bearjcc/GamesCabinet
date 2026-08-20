@@ -16,6 +16,9 @@
 @import "./games/game-2048.css";
 @import "./games/yatzy.css";
 @import "./games/letter-walker.css";
+@import "./games/orbits.css";
+@import "./games/tracks.css";
+@import "./games/hogwarts-battle.css";
 @import "./games/crazy-eights.css";
 @import "./games/reversi.css";
 @import "./games/memory.css";

@@ -1,0 +1,44 @@
+{
+  "creature": {
+    "id": "creature",
+    "name": "Creature Die",
+    "faces": [
+      {
+        "face": 0,
+        "symbol": "heart",
+        "effect": { "type": "heal", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All Heroes gain 1 Health"
+      },
+      {
+        "face": 1,
+        "symbol": "lightning",
+        "effect": { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All Heroes gain 1 Attack"
+      },
+      {
+        "face": 2,
+        "symbol": "shield",
+        "effect": { "type": "gain_influence", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All Heroes gain 1 Influence"
+      },
+      {
+        "face": 3,
+        "symbol": "card",
+        "effect": { "type": "draw_cards", "params": { "amount": 1, "target": "all_players" } },
+        "description": "All Heroes draw 1 card"
+      },
+      {
+        "face": 4,
+        "symbol": "cards",
+        "effect": { "type": "draw_cards", "params": { "amount": 2, "target": "all_players" } },
+        "description": "All Heroes draw 2 cards"
+      },
+      {
+        "face": 5,
+        "symbol": "skull",
+        "effect": { "type": "remove_location_control", "params": { "amount": 1 } },
+        "description": "Remove 1 Control from the Location"
+      }
+    ]
+  }
+}

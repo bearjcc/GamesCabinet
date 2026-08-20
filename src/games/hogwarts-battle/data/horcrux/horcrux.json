@@ -1,0 +1,114 @@
+{
+  "diary": {
+    "id": "diary",
+    "name": "Tom Riddle's Diary",
+    "order": 1,
+    "image": "horcrux/diary.jpg",
+    "description": "Each time a Hero plays an Ally, that Hero loses 1 Health.",
+    "destroy_symbols": ["draw"],
+    "ongoing": {
+      "trigger": "on_ally_played",
+      "effects": [{ "type": "deal_damage", "params": { "amount": 1, "target": "self" } }]
+    },
+    "reward": {
+      "trigger": "on_allies_played_threshold",
+      "condition": { "type": "allies_played_gte", "threshold": 2 },
+      "effects": [{ "type": "heal", "params": { "amount": 2, "target": "choose_one_player" } }],
+      "description": "If you play two or more Allies on a turn, any one Hero gains 2 Health."
+    }
+  },
+  "ring": {
+    "id": "ring",
+    "name": "Marvolo Gaunt's Ring",
+    "order": 2,
+    "image": "horcrux/ring.jpg",
+    "description": "If a Hero assigns 2 or more Attack to a Villain, that Hero loses 2 Health.",
+    "destroy_symbols": ["attack"],
+    "ongoing": {
+      "trigger": "on_attack_assigned_gte",
+      "condition": { "type": "attack_assigned_gte", "threshold": 2 },
+      "effects": [{ "type": "deal_damage", "params": { "amount": 2, "target": "self" } }]
+    },
+    "reward": {
+      "trigger": "on_location_control_removed",
+      "effects": [{ "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } }],
+      "description": "Each time 1 or more control is removed from the Location, ALL Heroes gain 1 Attack."
+    }
+  },
+  "locket": {
+    "id": "locket",
+    "name": "Salazar Slytherin's Locket",
+    "order": 3,
+    "image": "horcrux/locket.jpg",
+    "description": "Each time a Hero plays a Spell, that Hero loses 1 Health.",
+    "destroy_symbols": ["heal", "draw"],
+    "ongoing": {
+      "trigger": "on_spell_played",
+      "effects": [{ "type": "deal_damage", "params": { "amount": 1, "target": "self" } }]
+    },
+    "reward": {
+      "trigger": "manual",
+      "cost": { "discard_from_hand": 2 },
+      "effects": [{ "type": "remove_location_control", "params": { "amount": 1 } }],
+      "description": "Discard 2 cards from your hand to Remove 1 control from the Location."
+    }
+  },
+  "cup": {
+    "id": "cup",
+    "name": "Helga Hufflepuff's Cup",
+    "order": 4,
+    "image": "horcrux/cup.jpg",
+    "description": "Each time a Hero acquires a card with a value of 4 or more, that Hero loses 1 Health.",
+    "destroy_symbols": ["influence", "attack"],
+    "ongoing": {
+      "trigger": "on_card_acquired_cost_gte",
+      "condition": { "type": "card_cost_gte", "threshold": 4 },
+      "effects": [{ "type": "deal_damage", "params": { "amount": 1, "target": "self" } }]
+    },
+    "reward": {
+      "trigger": "on_self_card_acquired",
+      "effects": [
+        { "type": "gain_attack", "params": { "amount": 1, "target": "all_players" } },
+        { "type": "gain_influence", "params": { "amount": 2, "target": "all_players" } }
+      ],
+      "description": "Each time you acquire a card, ALL Heroes gain 1 Attack and 2 Influence."
+    }
+  },
+  "diadem": {
+    "id": "diadem",
+    "name": "Rowena Ravenclaw's Diadem",
+    "order": 5,
+    "image": "horcrux/diadem.jpg",
+    "description": "Each time control is added to the Location, the active Hero loses 2 Health.",
+    "destroy_symbols": ["draw", "heal", "attack"],
+    "ongoing": {
+      "trigger": "on_location_control_added",
+      "effects": [{ "type": "deal_damage", "params": { "amount": 2, "target": "active_player" } }]
+    },
+    "reward": {
+      "trigger": "on_spell_played",
+      "effects": [{ "type": "gain_attack", "params": { "amount": 1, "target": "self" } }],
+      "description": "Each time you play a Spell, gain 1 Attack."
+    }
+  },
+  "nagini": {
+    "id": "nagini",
+    "name": "Nagini",
+    "order": 6,
+    "image": "horcrux/nagini.jpg",
+    "description": "At the start of each turn, the active Hero loses 1 Health and cannot gain Health this turn.",
+    "destroy_symbols": ["influence", "attack", "heal", "draw"],
+    "ongoing": {
+      "trigger": "on_turn_start",
+      "effects": [
+        { "type": "deal_damage", "params": { "amount": 1, "target": "active_player" } },
+        { "type": "prevent_healing_this_turn", "params": {} }
+      ]
+    },
+    "reward": {
+      "trigger": "immediate",
+      "effects": [{ "type": "gain_attack", "params": { "amount": 2, "target": "all_players" } }],
+      "description": "When destroyed, ALL Heroes gain 2 Attack."
+    }
+  }
+}

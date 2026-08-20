@@ -4,11 +4,13 @@ import {
   DEFAULT_SEAT_COLOUR,
   getNickname,
   getSeatColour,
+  getUnlockedGames,
   loadSeat,
   SEAT_COLOUR_PALETTE,
   saveSeat,
   setNickname,
   setSeatColour,
+  unlockGame,
 } from './storage';
 
 const store = new Map<string, string>();
@@ -93,5 +95,51 @@ describe('storage', () => {
     });
     expect(getSeatColour()).toBe(DEFAULT_SEAT_COLOUR);
     expect(() => setSeatColour(DEFAULT_SEAT_COLOUR)).not.toThrow();
+  });
+});
+
+describe('access code unlocks', () => {
+  it('starts with no unlocked games', () => {
+    stubLocalStorage();
+    expect(getUnlockedGames()).toEqual([]);
+  });
+
+  it('persists unlocked games without duplicates', () => {
+    stubLocalStorage();
+    unlockGame('orbits');
+    unlockGame('tracks');
+    unlockGame('orbits');
+    expect(getUnlockedGames()).toEqual(['orbits', 'tracks']);
+    expect(store.get('gamescabinet.unlockedGames')).toBe('["orbits","tracks"]');
+  });
+
+  it('treats corrupt or non-array unlock data as empty', () => {
+    stubLocalStorage();
+    store.set('gamescabinet.unlockedGames', '{bad');
+    expect(getUnlockedGames()).toEqual([]);
+    store.set('gamescabinet.unlockedGames', '{"game":1}');
+    expect(getUnlockedGames()).toEqual([]);
+  });
+
+  it('drops non-string entries from stored unlocks', () => {
+    stubLocalStorage();
+    store.set('gamescabinet.unlockedGames', '["orbits",7,null]');
+    expect(getUnlockedGames()).toEqual(['orbits']);
+  });
+
+  it('survives storage being unavailable', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {
+        throw new Error('blocked');
+      },
+      removeItem: () => {
+        throw new Error('blocked');
+      },
+    });
+    expect(getUnlockedGames()).toEqual([]);
+    expect(() => unlockGame('orbits')).not.toThrow();
   });
 });

@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Deal, Flip } from '../../components/cinematic';
+import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
@@ -143,16 +144,15 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
       info={
         <>
           <StatusBar text={status} tone={tone} />
-          <div className="play-table__meta" data-testid="ce-meta">
-            <span>Stock: {G.stock.length}</span>
-            {G.hands.map((h, i) =>
-              i === pid ? null : (
-                <span key={i}>
-                  P{i + 1}: {h.length}
-                </span>
+          <MatchScoreboard
+            scores={[
+              { label: 'Stock', value: G.stock.length },
+              ...G.hands.flatMap((h, seat) =>
+                seat === pid ? [] : [{ label: `P${seat + 1}`, value: h.length }],
               ),
-            )}
-          </div>
+            ]}
+            testId="ce-meta"
+          />
         </>
       }
       board={

@@ -3,7 +3,6 @@ import { getLetterWalkerActions } from './actions';
 
 const readyPlay = {
   playable: true,
-  boardTab: 'play' as const,
   selectedCount: 4,
   wordLength: 4,
   dictReady: true,
@@ -36,14 +35,6 @@ describe('getLetterWalkerActions', () => {
       variant: 'secondary',
       disabled: false,
     });
-  });
-
-  it('disables all intents on the scores tab with a reason', () => {
-    const actions = getLetterWalkerActions({ ...readyPlay, boardTab: 'scores' });
-    for (const action of actions) {
-      expect(action.disabled).toBe(true);
-      expect(action.disabledReason).toBe('Switch to the Play tab');
-    }
   });
 
   it('disables submit when the puzzle is complete', () => {
@@ -87,7 +78,7 @@ describe('getLetterWalkerActions', () => {
     });
   });
 
-  it('keeps new puzzle enabled after completion on the play tab', () => {
+  it('keeps new puzzle enabled after completion', () => {
     const actions = getLetterWalkerActions({ ...readyPlay, playable: false });
     const next = actions.find((a) => a.id === 'new-puzzle');
     expect(next).toMatchObject({ disabled: false });

@@ -11,6 +11,13 @@ export type GameMeta = {
   hasLocal?: boolean;
   /** Solo leaderboard via shared scores API. */
   hasLeaderboard?: boolean;
+  /** Hidden from the catalogue until this code is entered locally. */
+  accessCode?: string;
+  /**
+   * Online host/join. Defaults to on when maxPlayers >= 2.
+   * Set false for local-only titles (e.g. private IP decks).
+   */
+  hasOnline?: boolean;
 };
 
 export const GAMES: GameMeta[] = [
@@ -236,10 +243,65 @@ export const GAMES: GameMeta[] = [
     hasBot: true,
     hasLocal: true,
   },
+  {
+    id: 'orbits',
+    name: 'Orbits',
+    blurb: 'Solo rocket programme. Fuel the stack, survive the launch.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+    hasLeaderboard: true,
+    accessCode: 'crawler',
+  },
+  {
+    id: 'tracks',
+    name: 'TRACKS',
+    blurb: 'Lay track. Connect start to destination. Complete objectives.',
+    minPlayers: 2,
+    maxPlayers: 6,
+    hasBot: false,
+    hasLocal: true,
+    accessCode: 'CHOOCHOO',
+  },
+  {
+    id: 'hogwarts-battle',
+    name: 'Hogwarts Battle',
+    blurb: 'Buy cards. Defeat villains. Keep Hogwarts.',
+    minPlayers: 1,
+    maxPlayers: 4,
+    hasBot: false,
+    hasSolo: true,
+    hasLocal: true,
+    hasOnline: true,
+    accessCode: 'LUNALOVEGOOD',
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {
   return GAMES.find((g) => g.id === id);
+}
+
+/** Hidden shelves stay out of the grid and SEO until a local code reveals them. */
+export function isAccessGated(meta: GameMeta): boolean {
+  return Boolean(meta.accessCode);
+}
+
+export function isGameVisible(meta: GameMeta, unlocked: readonly string[]): boolean {
+  return !isAccessGated(meta) || unlocked.includes(meta.id);
+}
+
+export function visibleGames(unlocked: readonly string[], games: GameMeta[] = GAMES): GameMeta[] {
+  return games.filter((game) => isGameVisible(game, unlocked));
+}
+
+export function findGameByAccessCode(
+  code: string,
+  games: GameMeta[] = GAMES,
+): GameMeta | undefined {
+  const normalised = code.trim().toLowerCase();
+  if (!normalised) return undefined;
+  return games.find((game) => game.accessCode?.trim().toLowerCase() === normalised);
 }
 
 export function supportsLocalPlay(meta: GameMeta): boolean {
@@ -248,4 +310,31 @@ export function supportsLocalPlay(meta: GameMeta): boolean {
 
 export function supportsBotPlay(meta: GameMeta): boolean {
   return Boolean(meta.hasBot);
+}
+
+/** Solo-only titles (one player, no pass-and-play / online seats). */
+export function isSoloOnly(meta: GameMeta): boolean {
+  return Boolean(meta.hasSolo) && meta.maxPlayers === 1;
+}
+
+export type CatalogueGroup = {
+  id: 'solo' | 'with-others';
+  label: string;
+  games: GameMeta[];
+};
+
+/** Partition the catalogue for scanning; each game appears once. */
+export function catalogueGroups(games: GameMeta[] = GAMES): CatalogueGroup[] {
+  const solo: GameMeta[] = [];
+  const withOthers: GameMeta[] = [];
+  for (const game of games) {
+    if (isSoloOnly(game)) solo.push(game);
+    else withOthers.push(game);
+  }
+  const groups: CatalogueGroup[] = [];
+  if (solo.length) groups.push({ id: 'solo', label: 'Solo', games: solo });
+  if (withOthers.length) {
+    groups.push({ id: 'with-others', label: 'With others', games: withOthers });
+  }
+  return groups;
 }

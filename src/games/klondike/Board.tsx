@@ -1,10 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useMemo, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { LeaderboardPanel } from '../../components/LeaderboardPanel';
-import { PlayTable } from '../../components/PlayTable';
-import { ScoreSubmitter } from '../../components/ScoreSubmitter';
-import { SoloPlayTabs } from '../../components/SoloPlayTabs';
+import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { StockPile } from '../../components/tabletop/CardPile';
@@ -143,140 +140,129 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
   }));
 
   return (
-    <>
-      <ScoreSubmitter gameId="klondike" pendingSubmit={pendingSubmit} />
-      <PlayTable
-        info={
-          <>
-            <StatusBar text={status} tone={tone} />
-            <SoloPlayTabs value={tab} onChange={setTab} testIdPrefix="klondike" />
-          </>
-        }
-        board={
-          tab === 'scores' ? (
-            <LeaderboardPanel gameId="klondike" testIdPrefix="klondike" />
-          ) : (
-            <div className="klondike-board" data-testid="klondike-board">
-              <div className="klondike-top">
-                <StockPile
-                  count={G.stock.length}
-                  onDraw={playable ? onStock : undefined}
-                  disabled={!playable || (G.stock.length === 0 && G.waste.length === 0)}
-                  testId="klondike-stock"
+    <SoloLeaderboardShell
+      gameId="klondike"
+      pendingSubmit={pendingSubmit}
+      tab={tab}
+      onTabChange={setTab}
+      testIdPrefix="klondike"
+      info={<StatusBar text={status} tone={tone} />}
+      board={
+        <div className="klondike-board" data-testid="klondike-board">
+          <div className="klondike-top">
+            <StockPile
+              count={G.stock.length}
+              onDraw={playable ? onStock : undefined}
+              disabled={!playable || (G.stock.length === 0 && G.waste.length === 0)}
+              testId="klondike-stock"
+            />
+            <div className="klondike-waste" data-testid="klondike-waste">
+              {wasteTop ? (
+                <CardFace
+                  card={wasteTop}
+                  assetSrc={kenneyPlayingCardAsset(wasteTop)}
+                  selected={wasteSelected}
+                  playable={playable}
+                  onSelect={playable ? onWaste : undefined}
+                  testId="klondike-waste-top"
                 />
-                <div className="klondike-waste" data-testid="klondike-waste">
-                  {wasteTop ? (
-                    <CardFace
-                      card={wasteTop}
-                      assetSrc={kenneyPlayingCardAsset(wasteTop)}
-                      selected={wasteSelected}
-                      playable={playable}
-                      onSelect={playable ? onWaste : undefined}
-                      testId="klondike-waste-top"
-                    />
-                  ) : (
-                    <div className="tt-card tt-card--empty" data-testid="klondike-waste-empty">
-                      Waste
-                    </div>
-                  )}
+              ) : (
+                <div className="tt-card tt-card--empty" data-testid="klondike-waste-empty">
+                  Waste
                 </div>
-                <div className="klondike-foundations" data-testid="klondike-foundations">
-                  {G.foundations.map((pile, i) => {
-                    const top = topCard(pile);
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        className="klondike-foundation"
-                        data-testid={`klondike-foundation-${i}`}
-                        disabled={!playable || !selection}
-                        onClick={() => onFoundation(i)}
-                        aria-label={`Foundation ${i + 1}${top ? `, ${top.rank} of ${top.suit}` : ', empty'}`}
-                      >
-                        {top ? (
-                          <CardFace
-                            card={top}
-                            assetSrc={kenneyPlayingCardAsset(top)}
-                            testId={`klondike-foundation-${i}-top`}
-                          />
-                        ) : (
-                          <div
-                            className="tt-card tt-card--empty"
-                            data-testid={`klondike-foundation-${i}-empty`}
-                          >
-                            A
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="klondike-tableau" data-testid="klondike-tableau">
-                {G.tableau.map((column, col) => (
-                  <div
-                    key={col}
-                    className="klondike-column"
-                    data-testid={`klondike-tableau-${col}`}
-                  >
-                    {column.length === 0 ? (
-                      <button
-                        type="button"
-                        className="tt-card tt-card--empty klondike-column__empty"
-                        data-testid={`klondike-tableau-${col}-empty`}
-                        disabled={!playable || !selection}
-                        onClick={() => onTableauEmpty(col)}
-                        aria-label={`Empty tableau column ${col + 1}`}
-                      >
-                        K
-                      </button>
-                    ) : (
-                      column.map((card, index) => {
-                        const selected =
-                          selection?.source === 'tableau' &&
-                          selection.col === col &&
-                          index >= selection.startIndex;
-                        if (!card.faceUp) {
-                          return (
-                            <div
-                              key={card.id}
-                              className="klondike-slot"
-                              style={{ top: `${index * 1.35}rem` }}
-                            >
-                              <CardBack
-                                testId={`klondike-tableau-${col}-card-${index}`}
-                                label="Face-down card"
-                              />
-                            </div>
-                          );
-                        }
-                        return (
-                          <div
-                            key={card.id}
-                            className="klondike-slot"
-                            style={{ top: `${index * 1.35}rem` }}
-                          >
-                            <CardFace
-                              card={card}
-                              assetSrc={kenneyPlayingCardAsset(card)}
-                              selected={selected}
-                              playable={playable}
-                              onSelect={playable ? () => onTableauCard(col, index) : undefined}
-                              testId={`klondike-tableau-${col}-card-${index}`}
-                            />
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                ))}
-              </div>
+              )}
             </div>
-          )
-        }
-        actions={<ActionSurface label="Klondike actions" actions={surfaceActions} />}
-      />
-    </>
+            <div className="klondike-foundations" data-testid="klondike-foundations">
+              {G.foundations.map((pile, i) => {
+                const top = topCard(pile);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className="klondike-foundation"
+                    data-testid={`klondike-foundation-${i}`}
+                    disabled={!playable || !selection}
+                    onClick={() => onFoundation(i)}
+                    aria-label={`Foundation ${i + 1}${top ? `, ${top.rank} of ${top.suit}` : ', empty'}`}
+                  >
+                    {top ? (
+                      <CardFace
+                        card={top}
+                        assetSrc={kenneyPlayingCardAsset(top)}
+                        testId={`klondike-foundation-${i}-top`}
+                      />
+                    ) : (
+                      <div
+                        className="tt-card tt-card--empty"
+                        data-testid={`klondike-foundation-${i}-empty`}
+                      >
+                        A
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="klondike-tableau" data-testid="klondike-tableau">
+            {G.tableau.map((column, col) => (
+              <div key={col} className="klondike-column" data-testid={`klondike-tableau-${col}`}>
+                {column.length === 0 ? (
+                  <button
+                    type="button"
+                    className="tt-card tt-card--empty klondike-column__empty"
+                    data-testid={`klondike-tableau-${col}-empty`}
+                    disabled={!playable || !selection}
+                    onClick={() => onTableauEmpty(col)}
+                    aria-label={`Empty tableau column ${col + 1}`}
+                  >
+                    K
+                  </button>
+                ) : (
+                  column.map((card, index) => {
+                    const selected =
+                      selection?.source === 'tableau' &&
+                      selection.col === col &&
+                      index >= selection.startIndex;
+                    if (!card.faceUp) {
+                      return (
+                        <div
+                          key={card.id}
+                          className="klondike-slot"
+                          style={{ top: `${index * 1.35}rem` }}
+                        >
+                          <CardBack
+                            testId={`klondike-tableau-${col}-card-${index}`}
+                            label="Face-down card"
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div
+                        key={card.id}
+                        className="klondike-slot"
+                        style={{ top: `${index * 1.35}rem` }}
+                      >
+                        <CardFace
+                          card={card}
+                          assetSrc={kenneyPlayingCardAsset(card)}
+                          selected={selected}
+                          playable={playable}
+                          onSelect={playable ? () => onTableauCard(col, index) : undefined}
+                          testId={`klondike-tableau-${col}-card-${index}`}
+                        />
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+      actions={<ActionSurface label="Klondike actions" actions={surfaceActions} />}
+    />
   );
 }

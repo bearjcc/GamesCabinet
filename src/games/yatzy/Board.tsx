@@ -2,10 +2,9 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Roll } from '../../components/cinematic';
-import { LeaderboardPanel } from '../../components/LeaderboardPanel';
+import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
-import { ScoreSubmitter } from '../../components/ScoreSubmitter';
-import { SoloPlayTabs } from '../../components/SoloPlayTabs';
+import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
 import type { SubmitScoreInput } from '../../lib/scores';
@@ -101,7 +100,6 @@ export function YatzyBoard({
     return name?.trim() || `P${i + 1}`;
   };
 
-  const showPlayChrome = !solo || tab === 'play';
   const pewActions = getYatzyActions({ rolls: G.rolls, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
     ...action,
@@ -110,114 +108,117 @@ export function YatzyBoard({
     },
   }));
 
-  return (
+  const info = (
     <>
-      {solo ? <ScoreSubmitter gameId="yatzy" pendingSubmit={pendingSubmit} /> : null}
-      <PlayTable
-        info={
-          <>
-            <StatusBar text={status} tone={tone} />
-            <div className="play-table__meta" data-testid="yatzy-meta">
-              <span>Roll {G.rolls}/3</span>
-            </div>
-            {solo ? <SoloPlayTabs value={tab} onChange={setTab} testIdPrefix="yatzy" /> : null}
-          </>
-        }
-        board={
-          solo && tab === 'scores' ? (
-            <LeaderboardPanel gameId="yatzy" testIdPrefix="yatzy" />
-          ) : (
-            <div className="yatzy-card-wrap">
-              <table className="yatzy-card" data-testid="yatzy-card">
-                <thead>
-                  <tr>
-                    <th scope="col">Category</th>
-                    {G.scores.map((_, i) => (
-                      <th
-                        key={i}
-                        scope="col"
-                        className={i === Number(ctx.currentPlayer) ? 'is-active' : ''}
-                      >
-                        {seatLabel(i)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {CATEGORIES.map((meta) => (
-                    <tr key={meta.category}>
-                      <th scope="row">{meta.name}</th>
-                      {G.scores.map((card, i) => {
-                        const scored = card[meta.category];
-                        const isYou = i === pid && canScore && scored === null;
-                        if (isYou) {
-                          const preview = scoreFns[meta.category as ScoringCategory](G.dice);
-                          return (
-                            <td key={i}>
-                              <button
-                                type="button"
-                                className="yatzy-score-btn"
-                                data-testid={`yatzy-score-${meta.category}`}
-                                onClick={() => moves.selectScore(meta.category)}
-                              >
-                                {preview}
-                              </button>
-                            </td>
-                          );
-                        }
-                        return (
-                          <td key={i} className={scored === null ? 'is-empty' : ''}>
-                            {scored === null ? '—' : scored}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                  <tr className="yatzy-sub">
-                    <th scope="row">Upper</th>
-                    {G.scores.map((card, i) => (
-                      <td key={i}>{upperTotal(card)}</td>
-                    ))}
-                  </tr>
-                  <tr className="yatzy-sub">
-                    <th scope="row">Bonus</th>
-                    {G.scores.map((card, i) => (
-                      <td key={i}>{upperBonus(card)}</td>
-                    ))}
-                  </tr>
-                  <tr className="yatzy-total">
-                    <th scope="row">Total</th>
-                    {G.scores.map((card, i) => (
-                      <td key={i}>{grandTotal(card)}</td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )
-        }
-        pew={
-          showPlayChrome ? (
-            <div className="yatzy-dice">
-              <Roll key={rollPulse} active={rollPulse > 0} className="yatzy-dice__cinematic">
-                <DiceTray
-                  dice={G.dice}
-                  held={G.held}
-                  disabled={!canHold}
-                  onToggle={(i) => moves.toggleDie(i)}
-                  faceArt={YATZY_FACE_ART}
-                  testId="yatzy-dice"
-                  testIdPrefix="yatzy-die"
-                  label="Dice"
-                />
-              </Roll>
-            </div>
-          ) : null
-        }
-        actions={
-          showPlayChrome ? <ActionSurface label="Yatzy actions" actions={surfaceActions} /> : null
-        }
-      />
+      <StatusBar text={status} tone={tone} />
+      <MatchScoreboard scores={[{ label: 'Roll', value: `${G.rolls}/3` }]} testId="yatzy-meta" />
     </>
   );
+
+  const card = (
+    <div className="yatzy-card-wrap">
+      <table className="yatzy-card" data-testid="yatzy-card">
+        <thead>
+          <tr>
+            <th scope="col">Category</th>
+            {G.scores.map((_, i) => (
+              <th
+                key={i}
+                scope="col"
+                className={i === Number(ctx.currentPlayer) ? 'is-active' : ''}
+              >
+                {seatLabel(i)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {CATEGORIES.map((meta) => (
+            <tr key={meta.category}>
+              <th scope="row">{meta.name}</th>
+              {G.scores.map((scoreCard, i) => {
+                const scored = scoreCard[meta.category];
+                const isYou = i === pid && canScore && scored === null;
+                if (isYou) {
+                  const preview = scoreFns[meta.category as ScoringCategory](G.dice);
+                  return (
+                    <td key={i}>
+                      <button
+                        type="button"
+                        className="yatzy-score-btn"
+                        data-testid={`yatzy-score-${meta.category}`}
+                        onClick={() => moves.selectScore(meta.category)}
+                      >
+                        {preview}
+                      </button>
+                    </td>
+                  );
+                }
+                return (
+                  <td key={i} className={scored === null ? 'is-empty' : ''}>
+                    {scored === null ? '—' : scored}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+          <tr className="yatzy-sub">
+            <th scope="row">Upper</th>
+            {G.scores.map((scoreCard, i) => (
+              <td key={i}>{upperTotal(scoreCard)}</td>
+            ))}
+          </tr>
+          <tr className="yatzy-sub">
+            <th scope="row">Bonus</th>
+            {G.scores.map((scoreCard, i) => (
+              <td key={i}>{upperBonus(scoreCard)}</td>
+            ))}
+          </tr>
+          <tr className="yatzy-total">
+            <th scope="row">Total</th>
+            {G.scores.map((scoreCard, i) => (
+              <td key={i}>{grandTotal(scoreCard)}</td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const pew = (
+    <div className="yatzy-dice">
+      <Roll key={rollPulse} active={rollPulse > 0} className="yatzy-dice__cinematic">
+        <DiceTray
+          dice={G.dice}
+          held={G.held}
+          disabled={!canHold}
+          onToggle={(i) => moves.toggleDie(i)}
+          faceArt={YATZY_FACE_ART}
+          testId="yatzy-dice"
+          testIdPrefix="yatzy-die"
+          label="Dice"
+        />
+      </Roll>
+    </div>
+  );
+
+  const actionSurface = <ActionSurface label="Yatzy actions" actions={surfaceActions} />;
+
+  if (solo) {
+    return (
+      <SoloLeaderboardShell
+        gameId="yatzy"
+        pendingSubmit={pendingSubmit}
+        tab={tab}
+        onTabChange={setTab}
+        testIdPrefix="yatzy"
+        info={info}
+        board={card}
+        pew={pew}
+        actions={actionSurface}
+      />
+    );
+  }
+
+  return <PlayTable info={info} board={card} pew={pew} actions={actionSurface} />;
 }

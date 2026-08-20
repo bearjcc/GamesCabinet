@@ -19,6 +19,10 @@ export default defineConfig({
         '**/*.tsx',
         'src/games/boards.ts',
         'src/lib/makeClient.ts',
+        '**/__tests__/**',
+        // Hogwarts Battle: large ported engine with its own Vitest suite (1300+ tests).
+        // Kept out of the global 100% gate until Agency-driven deckbuilder kit owns more of it.
+        'src/games/hogwarts-battle/**',
       ],
       thresholds: {
         lines: 100,

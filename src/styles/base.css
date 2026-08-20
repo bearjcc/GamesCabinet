@@ -74,7 +74,7 @@ a:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 0.45rem 0.75rem;
   margin-bottom: 0.85rem;
   padding-bottom: 0.65rem;
   border-bottom: 1px solid var(--line);
@@ -84,8 +84,9 @@ a:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem 0.85rem;
+  gap: 0.35rem 0.75rem;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .brand {
@@ -120,8 +121,16 @@ a:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   margin-left: auto;
+  flex: 0 1 auto;
+  justify-content: flex-end;
+}
+
+.topbar-trailing {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
 .theme-cycle,
@@ -160,7 +169,27 @@ a:focus-visible {
       calc(0.65rem + env(safe-area-inset-left, 0px));
   }
 
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-left,
+  .topbar-right {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .topbar-right {
+    justify-content: flex-start;
+  }
+
+  .page-title {
+    width: 100%;
+  }
+
   .name-field input {
-    width: 7.5rem;
+    width: 100%;
+    max-width: 12rem;
   }
 }

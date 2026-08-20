@@ -16,3 +16,12 @@ blob-report
 output
 .biome
 data/scores.json
+
+# Local Tabletop Simulator source material and generated inspection output.
+# Keep the small extraction scripts, never the scans or derived card crops.
+scripts/tts-hb/cards/
+scripts/tts-hb/sheets/
+scripts/tts-hb/montages/
+scripts/tts-hb/manifest.json
+scripts/tts-hb/deck-map.json
+scripts/__pycache__/

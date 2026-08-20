@@ -62,6 +62,32 @@ test.describe('GamesCabinet smokes', () => {
     await close();
   });
 
+  test('unlocked Hogwarts Battle hosts an unlisted configured room', async ({ browser }) => {
+    const { hostPage, guestPage, close } = await openOnlinePair(browser);
+    const unlock = () => {
+      localStorage.setItem('gamescabinet.unlockedGames', '["hogwarts-battle"]');
+    };
+    await hostPage.addInitScript(unlock);
+    await guestPage.addInitScript(unlock);
+
+    await hostPage.goto('/game/hogwarts-battle');
+    await hostPage.getByTestId('hogwarts-year').selectOption('7');
+    await hostPage.getByTestId('hogwarts-hero-0').selectOption('neville');
+    await hostPage.getByTestId('hogwarts-hero-1').selectOption('harry');
+    await hostPage.getByTestId('host-room').click();
+    await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
+    const code = await readRoomCode(hostPage);
+
+    await guestPage.goto(`/g/hogwarts-battle/${code}`);
+    await guestPage.getByLabel('Your name').fill('Guest');
+    await guestPage.getByTestId('join-room').click();
+
+    await expect(hostPage.getByTestId('hb-meta')).toContainText('Game 7');
+    await expect(hostPage.getByTestId('hb-hero-0')).toContainText('Neville Longbottom');
+    await expect(hostPage.getByTestId('hb-hero-1')).toContainText('Harry Potter');
+    await close();
+  });
+
   test('online rematch after a finished tic-tac-toe game', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 

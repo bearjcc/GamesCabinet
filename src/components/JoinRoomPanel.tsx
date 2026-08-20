@@ -9,7 +9,7 @@ type Props = {
   gameName?: string;
   codeEditable?: boolean;
   title?: string;
-  /** Show nickname field (deep link). Home keeps nickname in the shell. */
+  /** Nickname field when joining from home or a share link. */
   askName?: boolean;
   onJoined: (room: SeatedRoom) => void;
 };

@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Snap } from '../../components/cinematic';
+import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
@@ -204,16 +205,15 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       info={
         <>
           <StatusBar text={status} tone={tone} />
-          <div className="play-table__meta" data-testid="dom-meta">
-            <span>Boneyard: {G.boneyard.length}</span>
-            {G.hands.map((h, i) =>
-              i === pid ? null : (
-                <span key={i}>
-                  P{i + 1}: {h.length} tiles
-                </span>
+          <MatchScoreboard
+            scores={[
+              { label: 'Boneyard', value: G.boneyard.length },
+              ...G.hands.flatMap((h, seat) =>
+                seat === pid ? [] : [{ label: `P${seat + 1}`, value: `${h.length} tiles` }],
               ),
-            )}
-          </div>
+            ]}
+            testId="dom-meta"
+          />
         </>
       }
       board={
