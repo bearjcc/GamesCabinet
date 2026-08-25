@@ -40,7 +40,7 @@ GamesCabinet is a platform. Before adding a feature, mechanic, or UI to one game
 
 Examples of the gate in practice: scoring and per-player score display should not stay Dominoes-only once other scored games arrive; letter-walker led the leaderboard store because 2048 (and other solos) need the same path.
 
-Agent checklist: `.cursor/rules/shared-mechanics.mdc`.
+Agent checklist: `.cursor/rules/shared-mechanics.mdc`. Slice queue: [`docs/slices.md`](./docs/slices.md).
 
 ## Presentation layer
 

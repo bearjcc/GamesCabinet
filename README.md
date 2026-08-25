@@ -39,13 +39,15 @@ First-time e2e browsers: `npx playwright install chromium`
 3. Checkers (English draughts)
 4. Dominoes (double-six draw, spinners)
 
-Open a game from the home grid, then choose **Play vs bot** or **Host a room**. Join with a short room code only (game is resolved from the code). Shareable as `/g/<game>/<code>`.
+Open a game from the home grid, set the seats, then **Start** or **Host**. Join with a short room code only (game is resolved from the code). Shareable as `/g/<game>/<code>`.
 
 Ship order: four games solid → tests / `check` green → Bear vibe check → Railway on GamesCabi.net → live multi-device tests.
 
 ## Wayfinding
 
-Decision map: https://github.com/bearjcc/GamesCabinet/issues/1
+Agent queue: [`docs/slices.md`](./docs/slices.md) · Cursor: [`AGENTS.md`](./AGENTS.md)
+
+Decision map (background): https://github.com/bearjcc/GamesCabinet/issues/1
 
 ## Assets
 

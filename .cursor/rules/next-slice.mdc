@@ -1,0 +1,14 @@
+---
+description: Pick work from docs/slices.md when the user asks for the next slice
+alwaysApply: true
+---
+
+# Next slice
+
+When the user says **implement next slice**, **next slice**, or **continue the queue**:
+
+1. Read `.cursor/skills/implement-next-slice/SKILL.md`.
+2. Read `docs/slices.md`.
+3. Do the first unchecked **AFK** slice. Stop if the first open item is **HITL**.
+
+Do not treat GitHub issues, `~/.cursor/plans`, or chat transcripts as the queue. Those are background. `docs/slices.md` is the queue.

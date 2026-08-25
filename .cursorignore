@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+coverage
+playwright-report
+test-results
+blob-report
+output
+.biome
+.scratch
+data/scores.json
+
+# Bulk art; keep docs and game code indexed
+assets/kenney
+public/assets/kenney
+public/assets/hogwarts-battle
+scripts/tts-hb/cards
+scripts/tts-hb/sheets
+scripts/tts-hb/montages
