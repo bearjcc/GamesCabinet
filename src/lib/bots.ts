@@ -1,5 +1,5 @@
+import type { Game, State } from 'boardgame.io';
 import { MCTSBot } from 'boardgame.io/ai';
-import type { GameMeta } from './games';
 
 export type BotDifficulty = 'easy' | 'medium' | 'hard';
 
@@ -31,17 +31,6 @@ export function botDifficultyLabel(difficulty: BotDifficulty): string {
   return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 }
 
-/**
- * Bot-safe seat count for vs-bot matches.
- * Always 2 for now (human seat 0 + one MCTS bot on seat 1).
- * 3-4p bot parties (multiple AI seats) are deferred - do not silently launch 4p MCTS.
- */
-export function botSeatCount(
-  _meta: Pick<GameMeta, 'hasBot' | 'minPlayers' | 'maxPlayers'>,
-): number {
-  return 2;
-}
-
 export function createMctsBotClass(difficulty: BotDifficulty) {
   const preset = MCTS_PRESETS[difficulty];
   return class extends MCTSBot {
@@ -53,4 +42,24 @@ export function createMctsBotClass(difficulty: BotDifficulty) {
       });
     }
   };
+}
+
+export type BotMove = {
+  type: string;
+  args?: unknown[];
+};
+
+export async function chooseBotMove(
+  game: Game,
+  state: State,
+  playerID: string,
+  difficulty: BotDifficulty = 'medium',
+): Promise<BotMove | null> {
+  const enumerate = game.ai?.enumerate;
+  if (!enumerate || state.ctx.gameover) return null;
+  const Bot = createMctsBotClass(difficulty);
+  const bot = new Bot({ enumerate, game });
+  const result = await bot.play(state, playerID);
+  const payload = result.action.payload;
+  return { type: payload.type, args: payload.args };
 }

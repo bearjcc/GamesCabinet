@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   clearSeat,
   DEFAULT_SEAT_COLOUR,
+  deviceSeats,
   getNickname,
   getSeatColour,
   getUnlockedGames,
@@ -52,6 +53,29 @@ describe('storage', () => {
     expect(loadSeat('tic-tac-toe', 'ABC123')).toEqual(session);
     clearSeat('tic-tac-toe', 'ABC123');
     expect(loadSeat('tic-tac-toe', 'ABC123')).toBeNull();
+  });
+
+  it('persists every this-table seat on a mixed host', () => {
+    stubLocalStorage();
+    const session = {
+      matchID: 'MIX9',
+      playerID: '0',
+      credentials: 'cred-0',
+      gameName: 'crazy-eights',
+      localSeats: [
+        { playerID: '0', credentials: 'cred-0' },
+        { playerID: '2', credentials: 'cred-2', kind: 'bot' as const },
+      ],
+    };
+    saveSeat(session);
+    expect(loadSeat('crazy-eights', 'MIX9')).toEqual(session);
+    expect(deviceSeats(session)).toEqual(session.localSeats);
+    expect(deviceSeats({ playerID: '1', credentials: 'only' })).toEqual([
+      { playerID: '1', credentials: 'only' },
+    ]);
+    expect(deviceSeats({ playerID: '1', credentials: 'only', localSeats: [] })).toEqual([
+      { playerID: '1', credentials: 'only' },
+    ]);
   });
 
   it('returns null for corrupt seat JSON', () => {

@@ -1,10 +1,34 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('GamesCabinet smokes', () => {
+  test('crazy-eights this table plus two bots reaches board and hand', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-crazy-eights').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('table-seat-2-kind-bot').click();
+    await page.getByTestId('play-start').click();
+    await expect(page).toHaveURL(/kinds=local%2Cbot%2Cbot|kinds=local,bot,bot/);
+    await expect(page.getByTestId('ce-board')).toBeVisible();
+    await expect(page.getByTestId('ce-hand')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+  });
+
+  test('crazy-eights two at this table plus a bot reaches the board', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('home-game-crazy-eights').click();
+    await page.getByTestId('table-seat-2-kind-bot').click();
+    await page.getByTestId('play-start').click();
+    await expect(page).toHaveURL(/kinds=local%2Clocal%2Cbot|kinds=local,local,bot/);
+    await expect(page.getByTestId('ce-board')).toBeVisible();
+    await expect(page.getByTestId('ce-hand')).toBeVisible();
+    await expect(page.getByRole('status')).toBeVisible();
+  });
+
   test('crazy-eights play vs bot reaches board and hand', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-crazy-eights').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('ce-board')).toBeVisible();
     await expect(page.getByTestId('ce-hand')).toBeVisible();
     await expect(page.getByTestId('ce-discard-top')).toBeVisible();
@@ -14,7 +38,8 @@ test.describe('GamesCabinet smokes', () => {
   test('tic-tac-toe play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-tic-tac-toe').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('ttt-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -52,7 +77,8 @@ test.describe('GamesCabinet smokes', () => {
   test('connect-four play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-connect-four').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('c4-board')).toBeVisible();
     await page.getByTestId('c4-col-3').click();
     await expect(page.getByTestId('action-surface')).toBeVisible();
@@ -63,7 +89,8 @@ test.describe('GamesCabinet smokes', () => {
   test('checkers play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-checkers').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('checkers-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -71,7 +98,8 @@ test.describe('GamesCabinet smokes', () => {
   test('dominoes play vs bot reaches board and hand', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-dominoes').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('dom-board')).toBeVisible();
     await expect(page.getByTestId('dom-hand')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
@@ -89,7 +117,8 @@ test.describe('GamesCabinet smokes', () => {
   test('yatzy play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-yatzy').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -97,7 +126,8 @@ test.describe('GamesCabinet smokes', () => {
   test('reversi play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-reversi').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('reversi-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -105,7 +135,8 @@ test.describe('GamesCabinet smokes', () => {
   test('memory play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-memory').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('memory-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -113,7 +144,8 @@ test.describe('GamesCabinet smokes', () => {
   test('mancala play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-mancala').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('mancala-board')).toBeVisible();
     await expect(page.getByRole('status').filter({ hasText: /turn/i })).toBeVisible();
   });
@@ -121,7 +153,8 @@ test.describe('GamesCabinet smokes', () => {
   test('go play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-go').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('go-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -129,7 +162,8 @@ test.describe('GamesCabinet smokes', () => {
   test('chinese checkers play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-chinese-checkers').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chinese-checkers-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -137,7 +171,8 @@ test.describe('GamesCabinet smokes', () => {
   test('battleship play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-battleship').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('battleship-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -145,7 +180,8 @@ test.describe('GamesCabinet smokes', () => {
   test('chess play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-chess').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -153,7 +189,8 @@ test.describe('GamesCabinet smokes', () => {
   test("nine men's morris play vs bot reaches a playable board", async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-nine-mens-morris').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('nmm-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -161,7 +198,8 @@ test.describe('GamesCabinet smokes', () => {
   test('backgammon play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-backgammon').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('backgammon-board')).toBeVisible();
     await expect(page.getByRole('status').filter({ hasText: /turn/i })).toBeVisible();
   });
@@ -169,7 +207,8 @@ test.describe('GamesCabinet smokes', () => {
   test('dots and boxes play vs bot reaches a playable board', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-dots-and-boxes').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('dab-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
@@ -177,7 +216,8 @@ test.describe('GamesCabinet smokes', () => {
   test('go-fish play vs bot reaches board and hand', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-go-fish').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('go-fish-board')).toBeVisible();
     await expect(page.getByTestId('go-fish-hand')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();

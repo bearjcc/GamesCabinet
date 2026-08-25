@@ -47,13 +47,28 @@ export function setSeatColour(colour: SeatColour): void {
   }
 }
 
+export type DeviceSeat = {
+  playerID: string;
+  credentials: string;
+  kind?: 'local' | 'bot';
+};
+
 export type SeatSession = {
   matchID: string;
   playerID: string;
   credentials: string;
   gameName: string;
   setupData?: unknown;
+  localSeats?: DeviceSeat[];
 };
+
+export function deviceSeats(
+  session: Pick<SeatSession, 'playerID' | 'credentials' | 'localSeats'>,
+): DeviceSeat[] {
+  return session.localSeats && session.localSeats.length > 0
+    ? session.localSeats
+    : [{ playerID: session.playerID, credentials: session.credentials }];
+}
 
 export function saveSeat(session: SeatSession): void {
   localStorage.setItem(

@@ -4,7 +4,7 @@ test.describe('FreeCell', () => {
   test('solo board mounts with cascades, freecells, and foundations', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-freecell').click();
-    await page.getByTestId('play-solo').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('freecell-board')).toBeVisible();
     await expect(page.getByTestId('freecell-cascades')).toBeVisible();
     await expect(page.getByTestId('freecell-freecells')).toBeVisible();

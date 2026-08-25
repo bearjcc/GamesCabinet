@@ -4,7 +4,7 @@ test.describe('2048 undo', () => {
   test('undo control restores after a successful swipe', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-2048').click();
-    await page.getByTestId('play-solo').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('animated-counter')).toBeVisible();
 

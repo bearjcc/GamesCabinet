@@ -1,5 +1,5 @@
 import { SocketIO } from 'boardgame.io/multiplayer';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { JoinRoomPanel } from '../components/JoinRoomPanel';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
@@ -7,10 +7,18 @@ import { RoomBar } from '../components/RoomBar';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
+import { createSilentBotBoard } from '../lib/botSeat';
 import { getGameMeta, isAccessGated } from '../lib/games';
+import { withHotseatSeatSync } from '../lib/hotseat';
 import { leaveRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
 import { makeClient } from '../lib/makeClient';
-import { getNickname, getUnlockedGames, loadSeat, type SeatSession } from '../lib/storage';
+import {
+  deviceSeats,
+  getNickname,
+  getUnlockedGames,
+  loadSeat,
+  type SeatSession,
+} from '../lib/storage';
 
 const server = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
@@ -20,6 +28,7 @@ function toSeat(room: SeatedRoom): SeatSession {
     playerID: room.playerID,
     credentials: room.credentials,
     gameName: room.gameName,
+    ...(room.localSeats === undefined ? {} : { localSeats: room.localSeats }),
     ...(room.setupData === undefined ? {} : { setupData: room.setupData }),
   };
 }
@@ -29,19 +38,47 @@ export function PlayOnline() {
   const navigate = useNavigate();
   const meta = getGameMeta(gameId);
   const game = gamesById[gameId as GameId];
+  const Board = boards[gameId as GameId];
   const matchCode = code.toUpperCase();
   const [seat, setSeat] = useState<SeatSession | null>(() => loadSeat(gameId, matchCode));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const tableSeats = seat ? deviceSeats(seat) : [];
+  const humanSeats = tableSeats.filter((entry) => entry.kind !== 'bot');
+  const botSeats = tableSeats.filter((entry) => entry.kind === 'bot');
+  const humanIDs = humanSeats.map((entry) => entry.playerID);
+  const humanKey = humanIDs.join(',');
+  const firstHuman = humanSeats[0]?.playerID ?? seat?.playerID ?? '0';
+  const [activeID, setActiveID] = useState(firstHuman);
+
+  useEffect(() => {
+    setActiveID(firstHuman);
+  }, [firstHuman]);
+
+  const activeSeat = humanSeats.find((entry) => entry.playerID === activeID) ?? humanSeats[0];
 
   const MatchClient = useMemo(() => {
-    if (!game) return null;
+    if (!game || !Board) return null;
+    const humans = new Set(humanKey.split(',').filter(Boolean));
+    const board =
+      humans.size > 1
+        ? withHotseatSeatSync(Board, setActiveID, (playerID) => humans.has(playerID))
+        : Board;
     return makeClient({
       game,
-      board: boards[gameId as GameId],
+      board,
       multiplayer: SocketIO({ server }),
     });
-  }, [game, gameId]);
+  }, [Board, game, humanKey]);
+
+  const BotClient = useMemo(() => {
+    if (!game || botSeats.length === 0) return null;
+    return makeClient({
+      game,
+      board: createSilentBotBoard(game),
+      multiplayer: SocketIO({ server }),
+    });
+  }, [botSeats.length, game]);
 
   const exitHome = useCallback(async () => {
     if (!seat) {
@@ -144,11 +181,23 @@ export function PlayOnline() {
         }}
       >
         <MatchClient
+          key={`${seat.matchID}-${activeSeat?.playerID ?? seat.playerID}`}
           matchID={seat.matchID}
-          playerID={seat.playerID}
-          credentials={seat.credentials}
+          playerID={activeSeat?.playerID ?? seat.playerID}
+          credentials={activeSeat?.credentials ?? seat.credentials}
         />
       </MatchLifecycleProvider>
+      {BotClient
+        ? botSeats.map((entry) => (
+            <div hidden key={`${seat.matchID}-bot-${entry.playerID}`}>
+              <BotClient
+                matchID={seat.matchID}
+                playerID={entry.playerID}
+                credentials={entry.credentials}
+              />
+            </div>
+          ))
+        : null}
     </Shell>
   );
 }

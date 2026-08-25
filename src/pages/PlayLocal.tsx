@@ -1,5 +1,4 @@
-import type { BoardProps } from 'boardgame.io/react';
-import { type ComponentType, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { Shell } from '../components/Shell';
@@ -7,18 +6,9 @@ import { boards } from '../games/boards';
 import { parseHogwartsSetup } from '../games/hogwarts-battle/setup';
 import { type GameId, gamesById } from '../games/registry';
 import { getGameMeta, isAccessGated, supportsLocalPlay } from '../lib/games';
+import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
 import { getUnlockedGames } from '../lib/storage';
-
-function withHotseatSeatSync(Board: ComponentType<BoardProps>, onSeat: (id: string) => void) {
-  return function HotseatBoard(props: BoardProps) {
-    useEffect(() => {
-      if (props.ctx.gameover) return;
-      onSeat(props.ctx.currentPlayer);
-    }, [props.ctx.currentPlayer, props.ctx.gameover]);
-    return <Board {...props} />;
-  };
-}
 
 /** Offline local match (solo or hotseat) without the lobby server. */
 export function PlayLocal() {

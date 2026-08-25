@@ -4,7 +4,8 @@ test.describe('Chess', () => {
   test('play vs bot reaches a playable board and accepts a legal move', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('home-game-chess').click();
-    await page.getByTestId('play-bot').click();
+    await page.getByTestId('table-seat-1-kind-bot').click();
+    await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
 

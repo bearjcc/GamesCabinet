@@ -1,5 +1,27 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { openOnlinePair, readRoomCode } from './helpers';
+
+async function playCrazyEightsTurn(page: Page) {
+  const playable = page.locator('.tt-hand button.is-playable');
+  if ((await playable.count()) > 0) {
+    await playable.first().click();
+    const suit = page.getByTestId('ce-suit-hearts');
+    if (await suit.isVisible().catch(() => false)) {
+      await suit.click();
+    }
+    return;
+  }
+  await page.getByTestId('ce-stock-draw').click();
+  if ((await playable.count()) > 0) {
+    await playable.first().click();
+    const suit = page.getByTestId('ce-suit-hearts');
+    if (await suit.isVisible().catch(() => false)) {
+      await suit.click();
+    }
+    return;
+  }
+  await page.getByTestId('ce-pass').click();
+}
 
 test.describe('GamesCabinet smokes', () => {
   test('host room and second player joins via deep link', async ({ browser }) => {
@@ -7,6 +29,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-tic-tac-toe').click();
+    await hostPage.getByTestId('table-seat-0-kind-online').click();
+    await hostPage.getByTestId('table-seat-1-kind-online').click();
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('room-code')).toBeVisible();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
@@ -25,11 +49,78 @@ test.describe('GamesCabinet smokes', () => {
     await close();
   });
 
+  test('host keeps this table and an online seat for a guest', async ({ browser }) => {
+    const { hostPage, guestPage, close } = await openOnlinePair(browser);
+
+    await hostPage.goto('/');
+    await hostPage.getByTestId('home-game-tic-tac-toe').click();
+    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await hostPage.getByTestId('host-room').click();
+    await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
+    const code = await readRoomCode(hostPage);
+
+    await guestPage.goto(`/g/tic-tac-toe/${code}`);
+    await guestPage.getByLabel('Your name').fill('Guest');
+    await guestPage.getByTestId('join-room').click();
+    await expect(guestPage.getByTestId('ttt-board')).toBeVisible();
+    await expect(hostPage.getByTestId('ttt-board')).toBeVisible();
+
+    await hostPage.getByTestId('ttt-cell-0').click();
+    await expect(guestPage.getByTestId('ttt-cell-0')).toContainText('X');
+
+    await close();
+  });
+
+  test('two at this table plus an online seat reach the board', async ({ browser }) => {
+    const { hostPage, guestPage, close } = await openOnlinePair(browser);
+
+    await hostPage.goto('/');
+    await hostPage.getByTestId('home-game-crazy-eights').click();
+    await hostPage.getByTestId('table-seat-2-kind-online').click();
+    await hostPage.getByTestId('host-room').click();
+    await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
+    const code = await readRoomCode(hostPage);
+
+    await guestPage.goto(`/g/crazy-eights/${code}`);
+    await guestPage.getByLabel('Your name').fill('Guest');
+    await guestPage.getByTestId('join-room').click();
+    await expect(guestPage.getByTestId('ce-board')).toBeVisible();
+    await expect(hostPage.getByTestId('ce-board')).toBeVisible();
+
+    await close();
+  });
+
+  test('host keeps a bot seat and an online seat for a guest', async ({ browser }) => {
+    test.setTimeout(90_000);
+    const { hostPage, guestPage, close } = await openOnlinePair(browser);
+
+    await hostPage.goto('/');
+    await hostPage.getByTestId('home-game-crazy-eights').click();
+    await hostPage.getByTestId('table-seat-1-kind-bot').click();
+    await hostPage.getByTestId('table-seat-2-kind-online').click();
+    await hostPage.getByTestId('host-room').click();
+    await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
+    const code = await readRoomCode(hostPage);
+
+    await guestPage.goto(`/g/crazy-eights/${code}`);
+    await guestPage.getByLabel('Your name').fill('Guest');
+    await guestPage.getByTestId('join-room').click();
+    await expect(guestPage.getByTestId('ce-board')).toBeVisible();
+    await expect(hostPage.getByTestId('ce-board')).toBeVisible();
+
+    await playCrazyEightsTurn(hostPage);
+    await expect(guestPage.locator('.status')).toContainText(/Your turn/i, { timeout: 30_000 });
+
+    await close();
+  });
+
   test('host room and guest joins via home code entry', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-connect-four').click();
+    await hostPage.getByTestId('table-seat-0-kind-online').click();
+    await hostPage.getByTestId('table-seat-1-kind-online').click();
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
 
@@ -47,7 +138,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-yatzy').click();
-    await hostPage.getByTestId('party-size').selectOption('2');
+    await hostPage.getByTestId('table-seat-0-kind-online').click();
+    await hostPage.getByTestId('table-seat-1-kind-online').click();
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
@@ -72,8 +164,11 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/game/hogwarts-battle');
     await hostPage.getByTestId('hogwarts-year').selectOption('7');
+    await hostPage.getByTestId('table-seat-1-kind-local').click();
     await hostPage.getByTestId('hogwarts-hero-0').selectOption('neville');
     await hostPage.getByTestId('hogwarts-hero-1').selectOption('harry');
+    await hostPage.getByTestId('table-seat-0-kind-online').click();
+    await hostPage.getByTestId('table-seat-1-kind-online').click();
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
     const code = await readRoomCode(hostPage);
@@ -93,6 +188,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-tic-tac-toe').click();
+    await hostPage.getByTestId('table-seat-0-kind-online').click();
+    await hostPage.getByTestId('table-seat-1-kind-online').click();
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
 

@@ -12,6 +12,14 @@ vi.mock('./storage', () => ({
   clearSeat: vi.fn(),
   getNickname: vi.fn(() => 'Tester'),
   setNickname: vi.fn(),
+  deviceSeats: (session: {
+    playerID: string;
+    credentials: string;
+    localSeats?: { playerID: string; credentials: string }[];
+  }) =>
+    session.localSeats && session.localSeats.length > 0
+      ? session.localSeats
+      : [{ playerID: session.playerID, credentials: session.credentials }],
 }));
 
 vi.mock('boardgame.io/client', () => ({
@@ -114,6 +122,87 @@ describe('hostRoom', () => {
       numPlayers: 2,
       unlisted: true,
       setupData,
+    });
+  });
+
+  it('joins every this-table seat when hosting a mixed table', async () => {
+    lobbyMocks.createMatch.mockResolvedValue({ matchID: 'MIX1' });
+    lobbyMocks.joinMatch
+      .mockResolvedValueOnce({ playerID: '0', playerCredentials: 'cred-0' })
+      .mockResolvedValueOnce({ playerID: '2', playerCredentials: 'cred-2' });
+    const { hostRoom } = await loadLobby();
+    const { saveSeat } = await import('./storage');
+
+    await expect(hostRoom('crazy-eights', 3, 'Bear', undefined, ['0', '2'])).resolves.toEqual({
+      matchID: 'MIX1',
+      gameName: 'crazy-eights',
+      playerID: '0',
+      credentials: 'cred-0',
+      localSeats: [
+        { playerID: '0', credentials: 'cred-0' },
+        { playerID: '2', credentials: 'cred-2' },
+      ],
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(1, 'crazy-eights', 'MIX1', {
+      playerID: '0',
+      playerName: 'Bear',
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(2, 'crazy-eights', 'MIX1', {
+      playerID: '2',
+      playerName: 'Bear',
+    });
+    expect(saveSeat).toHaveBeenCalledWith({
+      matchID: 'MIX1',
+      playerID: '0',
+      credentials: 'cred-0',
+      gameName: 'crazy-eights',
+      localSeats: [
+        { playerID: '0', credentials: 'cred-0' },
+        { playerID: '2', credentials: 'cred-2' },
+      ],
+    });
+  });
+
+  it('joins bot chairs as Bot when hosting an online table', async () => {
+    lobbyMocks.createMatch.mockResolvedValue({ matchID: 'MIXB' });
+    lobbyMocks.joinMatch
+      .mockResolvedValueOnce({ playerID: '0', playerCredentials: 'cred-0' })
+      .mockResolvedValueOnce({ playerID: '1', playerCredentials: 'cred-bot' });
+    const { hostRoom } = await loadLobby();
+    const { saveSeat } = await import('./storage');
+
+    await expect(
+      hostRoom('crazy-eights', 3, 'Bear', undefined, [
+        { playerID: '0', kind: 'local' },
+        { playerID: '1', kind: 'bot' },
+      ]),
+    ).resolves.toEqual({
+      matchID: 'MIXB',
+      gameName: 'crazy-eights',
+      playerID: '0',
+      credentials: 'cred-0',
+      localSeats: [
+        { playerID: '0', credentials: 'cred-0' },
+        { playerID: '1', credentials: 'cred-bot', kind: 'bot' },
+      ],
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(1, 'crazy-eights', 'MIXB', {
+      playerID: '0',
+      playerName: 'Bear',
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(2, 'crazy-eights', 'MIXB', {
+      playerID: '1',
+      playerName: 'Bot',
+    });
+    expect(saveSeat).toHaveBeenCalledWith({
+      matchID: 'MIXB',
+      playerID: '0',
+      credentials: 'cred-0',
+      gameName: 'crazy-eights',
+      localSeats: [
+        { playerID: '0', credentials: 'cred-0' },
+        { playerID: '1', credentials: 'cred-bot', kind: 'bot' },
+      ],
     });
   });
 });
@@ -314,6 +403,133 @@ describe('leaveRoom and rematchRoom', () => {
       credentials: 'cred',
       unlisted: true,
       setupData,
+    });
+  });
+
+  it('leaves every this-table seat on a mixed host', async () => {
+    lobbyMocks.leaveMatch.mockResolvedValue(undefined);
+    const { leaveRoom } = await loadLobby();
+    await leaveRoom({
+      matchID: 'LEAVE3',
+      playerID: '0',
+      credentials: 'cred-0',
+      gameName: 'crazy-eights',
+      localSeats: [
+        { playerID: '0', credentials: 'cred-0' },
+        { playerID: '2', credentials: 'cred-2' },
+      ],
+    });
+    expect(lobbyMocks.leaveMatch).toHaveBeenNthCalledWith(1, 'crazy-eights', 'LEAVE3', {
+      playerID: '0',
+      credentials: 'cred-0',
+    });
+    expect(lobbyMocks.leaveMatch).toHaveBeenNthCalledWith(2, 'crazy-eights', 'LEAVE3', {
+      playerID: '2',
+      credentials: 'cred-2',
+    });
+  });
+
+  it('rejoins every this-table seat after rematch', async () => {
+    lobbyMocks.playAgain.mockResolvedValue({ nextMatchID: 'NEXT4' });
+    lobbyMocks.joinMatch
+      .mockResolvedValueOnce({ playerID: '0', playerCredentials: 'next-0' })
+      .mockResolvedValueOnce({ playerID: '2', playerCredentials: 'next-2' });
+    const { rematchRoom } = await loadLobby();
+    const { saveSeat } = await import('./storage');
+
+    await expect(
+      rematchRoom(
+        {
+          matchID: 'OLD4',
+          playerID: '0',
+          credentials: 'cred-0',
+          gameName: 'crazy-eights',
+          localSeats: [
+            { playerID: '0', credentials: 'cred-0' },
+            { playerID: '2', credentials: 'cred-2' },
+          ],
+        },
+        'Bear',
+      ),
+    ).resolves.toEqual({
+      matchID: 'NEXT4',
+      gameName: 'crazy-eights',
+      playerID: '0',
+      credentials: 'next-0',
+      localSeats: [
+        { playerID: '0', credentials: 'next-0' },
+        { playerID: '2', credentials: 'next-2' },
+      ],
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(1, 'crazy-eights', 'NEXT4', {
+      playerID: '0',
+      playerName: 'Bear',
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(2, 'crazy-eights', 'NEXT4', {
+      playerID: '2',
+      playerName: 'Bear',
+    });
+    expect(saveSeat).toHaveBeenCalledWith({
+      matchID: 'NEXT4',
+      gameName: 'crazy-eights',
+      playerID: '0',
+      credentials: 'next-0',
+      localSeats: [
+        { playerID: '0', credentials: 'next-0' },
+        { playerID: '2', credentials: 'next-2' },
+      ],
+    });
+  });
+
+  it('rejoins bot chairs as Bot after rematch', async () => {
+    lobbyMocks.playAgain.mockResolvedValue({ nextMatchID: 'NEXTB' });
+    lobbyMocks.joinMatch
+      .mockResolvedValueOnce({ playerID: '0', playerCredentials: 'next-0' })
+      .mockResolvedValueOnce({ playerID: '1', playerCredentials: 'next-bot' });
+    const { rematchRoom } = await loadLobby();
+    const { saveSeat } = await import('./storage');
+
+    await expect(
+      rematchRoom(
+        {
+          matchID: 'OLDB',
+          playerID: '0',
+          credentials: 'cred-0',
+          gameName: 'crazy-eights',
+          localSeats: [
+            { playerID: '0', credentials: 'cred-0' },
+            { playerID: '1', credentials: 'cred-bot', kind: 'bot' },
+          ],
+        },
+        'Bear',
+      ),
+    ).resolves.toEqual({
+      matchID: 'NEXTB',
+      gameName: 'crazy-eights',
+      playerID: '0',
+      credentials: 'next-0',
+      localSeats: [
+        { playerID: '0', credentials: 'next-0' },
+        { playerID: '1', credentials: 'next-bot', kind: 'bot' },
+      ],
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(1, 'crazy-eights', 'NEXTB', {
+      playerID: '0',
+      playerName: 'Bear',
+    });
+    expect(lobbyMocks.joinMatch).toHaveBeenNthCalledWith(2, 'crazy-eights', 'NEXTB', {
+      playerID: '1',
+      playerName: 'Bot',
+    });
+    expect(saveSeat).toHaveBeenCalledWith({
+      matchID: 'NEXTB',
+      gameName: 'crazy-eights',
+      playerID: '0',
+      credentials: 'next-0',
+      localSeats: [
+        { playerID: '0', credentials: 'next-0' },
+        { playerID: '1', credentials: 'next-bot', kind: 'bot' },
+      ],
     });
   });
 });

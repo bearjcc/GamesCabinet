@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_HOGWARTS_HERO_IDS,
+  getHogwartsHeroesForYear,
+  getHogwartsHeroIdsForYear,
   HOGWARTS_CAMPAIGNS,
   parseHogwartsSetup,
   selectHogwartsHeroIds,
@@ -27,6 +29,26 @@ describe('Hogwarts Battle setup', () => {
       'neville',
     ]);
     expect(selectHogwartsHeroIds(['neville', 'harry'], 2)).toEqual(['neville', 'harry']);
+  });
+
+  it('uses each campaign year hero pool and its seat limit', () => {
+    expect(getHogwartsHeroIdsForYear(1)).toEqual(['harry', 'ron', 'hermione', 'neville']);
+    expect(getHogwartsHeroIdsForYear(8)).toEqual(['harry', 'ron', 'hermione', 'neville', 'luna']);
+    expect(getHogwartsHeroesForYear(1)).toHaveLength(4);
+    expect(getHogwartsHeroesForYear(8).at(-1)).toEqual({
+      id: 'luna',
+      name: 'Luna Lovegood',
+    });
+  });
+
+  it('fills selected heroes from the selected year pool', () => {
+    expect(selectHogwartsHeroIds(['luna'], 5, getHogwartsHeroIdsForYear(8))).toEqual([
+      'luna',
+      'harry',
+      'ron',
+      'hermione',
+      'neville',
+    ]);
   });
 
   it('falls back to the first base-game heroes for invalid setup query values', () => {

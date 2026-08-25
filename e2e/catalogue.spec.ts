@@ -47,23 +47,24 @@ test.describe('GamesCabinet smokes', () => {
     await expect(motion).not.toHaveText(before);
   });
 
-  test('game launch groups modes with their seat controls', async ({ page }) => {
+  test('game launch arranges seats around one start action', async ({ page }) => {
     await page.goto('/game/dominoes');
     await expect(page.getByTestId('launch-modes')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-local')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-bot')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-host')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-local').getByTestId('local-seats')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-local').getByTestId('play-local')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-host').getByTestId('party-size')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-host').getByTestId('host-room')).toBeVisible();
+    await expect(page.getByTestId('table-seat-0')).toBeVisible();
+    await expect(page.getByTestId('table-seat-1')).toBeVisible();
+    await expect(page.getByTestId('play-start')).toBeEnabled();
+    await expect(page.getByTestId('host-room')).toHaveCount(0);
+
+    await page.getByTestId('table-seat-0-kind-online').click();
+    await page.getByTestId('table-seat-1-kind-online').click();
+    await expect(page.getByTestId('host-room')).toBeEnabled();
   });
 
   test('invalid vs-bot route redirects to game modes', async ({ page }) => {
     await page.goto('/vs-bot/2048');
     await expect(page).toHaveURL(/\/game\/2048$/);
-    await expect(page.getByTestId('play-solo')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-solo')).toBeVisible();
+    await expect(page.getByTestId('play-start')).toBeVisible();
+    await expect(page.getByTestId('launch-modes')).toBeVisible();
   });
 
   test('hidden shelf stays locked until its access code is entered', async ({ page }) => {
@@ -75,7 +76,7 @@ test.describe('GamesCabinet smokes', () => {
 
     await page.getByTestId('unlock-code').fill('crawler');
     await page.getByTestId('unlock-submit').click();
-    await expect(page.getByTestId('launch-mode-solo')).toBeVisible();
+    await expect(page.getByTestId('play-start')).toBeVisible();
 
     await page.goto('/');
     await expect(page.getByTestId('home-game-orbits')).toBeVisible();
@@ -96,12 +97,13 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('launch-locked')).toBeVisible();
     await page.getByTestId('unlock-code').fill('LUNALOVEGOOD');
     await page.getByTestId('unlock-submit').click();
-    await expect(page.getByTestId('launch-mode-solo')).toBeVisible();
-    await expect(page.getByTestId('launch-mode-local')).toBeVisible();
-    await expect(page.getByTestId('host-room')).toBeVisible();
+    await expect(page.getByTestId('play-start')).toBeVisible();
+    await page.getByTestId('table-seat-1-kind-local').click();
     await page.getByTestId('hogwarts-year').selectOption('7');
 
-    await page.getByTestId('play-solo').click();
+    await page.getByTestId('hogwarts-hero-0').selectOption('neville');
+    await page.getByTestId('hogwarts-hero-1').selectOption('harry');
+    await page.getByTestId('play-start').click();
     await expect(page).toHaveURL(/\/play\/hogwarts-battle/);
     await expect(page.getByTestId('hb-board')).toBeVisible();
     await expect(page.getByTestId('hb-hand')).toBeVisible();
@@ -117,9 +119,9 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('launch-locked')).toBeVisible();
     await page.getByTestId('unlock-code').fill('CHOOCHOO');
     await page.getByTestId('unlock-submit').click();
-    await expect(page.getByTestId('launch-mode-local')).toBeVisible();
+    await expect(page.getByTestId('play-start')).toBeVisible();
 
-    await page.getByTestId('launch-mode-local').getByTestId('play-local').click();
+    await page.getByTestId('play-start').click();
     await expect(page).toHaveURL(/\/play\/tracks/);
     await expect(page.getByTestId('tracks-draft')).toBeVisible();
     // Both seats draft an objective, then the table appears.

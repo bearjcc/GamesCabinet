@@ -5,13 +5,12 @@ import { TicTacToe, type TTTState } from '../games/tic-tac-toe/game';
 import {
   BOT_DIFFICULTIES,
   botDifficultyLabel,
-  botSeatCount,
+  chooseBotMove,
   createMctsBotClass,
   cycleBotDifficulty,
   MCTS_PRESETS,
   parseBotDifficulty,
 } from './bots';
-import { getGameMeta } from './games';
 
 describe('MCTS_PRESETS', () => {
   it('keeps medium at the current PlayBot baseline', () => {
@@ -69,13 +68,40 @@ describe('botDifficultyLabel', () => {
   });
 });
 
-describe('botSeatCount', () => {
-  it('returns 2 for current hasBot games (vs one MCTS seat)', () => {
-    for (const id of ['dominoes', 'crazy-eights', 'yatzy', 'tic-tac-toe'] as const) {
-      const meta = getGameMeta(id)!;
-      expect(meta.hasBot).toBe(true);
-      expect(botSeatCount(meta)).toBe(2);
-    }
+describe('chooseBotMove', () => {
+  it('picks a legal tic-tac-toe cell that is not already taken', async () => {
+    const client = Client({
+      game: TicTacToe,
+      numPlayers: 2,
+    });
+    client.moves.clickCell(4);
+    const state = client.getState();
+    expect(state).toBeTruthy();
+    const move = await chooseBotMove(TicTacToe, state!, '1');
+    expect(move?.type).toBe('clickCell');
+    const cell = move?.args?.[0];
+    expect(typeof cell).toBe('number');
+    expect(cell).not.toBe(4);
+    client.stop();
+  });
+
+  it('returns null when the game has no AI or is already over', async () => {
+    const client = Client({
+      game: TicTacToe,
+      numPlayers: 2,
+    });
+    const state = client.getState()!;
+    expect(
+      await chooseBotMove(
+        TicTacToe,
+        { ...state, ctx: { ...state.ctx, gameover: { winner: '0' } } },
+        '1',
+      ),
+    ).toBeNull();
+    expect(
+      await chooseBotMove({ name: 'no-ai', setup: () => ({}), moves: {} }, state, '0'),
+    ).toBeNull();
+    client.stop();
   });
 });
 

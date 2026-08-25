@@ -1,16 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { HogwartsSetupPanel } from '../components/HogwartsSetupPanel';
 import { Shell } from '../components/Shell';
+import { TableSetup } from '../components/TableSetup';
 import { UnlockPanel } from '../components/UnlockPanel';
 import {
   createHogwartsSetupData,
-  DEFAULT_HOGWARTS_HERO_IDS,
+  getHogwartsHeroesForYear,
+  getHogwartsHeroIdsForYear,
+  HOGWARTS_CAMPAIGNS,
   hogwartsPlayQuery,
 } from '../games/hogwarts-battle/setup';
 import { getGameMeta, isAccessGated } from '../lib/games';
 import { hostRoom } from '../lib/lobby';
 import { getNickname, getUnlockedGames, setNickname } from '../lib/storage';
+import {
+  deriveLaunch,
+  occupiedKindsQuery,
+  ownedDeviceJoins,
+  type TableSeat,
+} from '../lib/tableSetup';
 
 export function GameLaunch() {
   const { gameId = '' } = useParams();
@@ -18,28 +26,77 @@ export function GameLaunch() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [partySize, setPartySize] = useState(2);
-  const [localSeats, setLocalSeats] = useState(2);
   const [justUnlocked, setJustUnlocked] = useState(false);
-  const [hogwartsSetup, setHogwartsSetup] = useState(() =>
-    createHogwartsSetupData(1, DEFAULT_HOGWARTS_HERO_IDS),
-  );
+  const [hogwartsYear, setHogwartsYear] = useState(1);
+  const maxSeats =
+    meta?.id === 'hogwarts-battle'
+      ? getHogwartsHeroIdsForYear(hogwartsYear).length
+      : (meta?.maxPlayers ?? 1);
+  const [tableSeats, setTableSeats] = useState<TableSeat[]>(() => createTableSeats(meta, 1));
+
+  useEffect(() => {
+    setTableSeats(createTableSeats(meta, 1));
+  }, [meta]);
+
+  const boundedSeats = useMemo(() => tableSeats.slice(0, maxSeats), [maxSeats, tableSeats]);
+  const launchPlan = meta
+    ? deriveLaunch(meta, boundedSeats)
+    : { status: 'invalid' as const, reason: '' };
+  const hogwartsSetup =
+    meta?.id === 'hogwarts-battle'
+      ? createHogwartsSetupData(
+          hogwartsYear,
+          boundedSeats
+            .filter((seat) => seat.kind !== 'empty')
+            .map(
+              (seat, index) => seat.role ?? getHogwartsHeroIdsForYear(hogwartsYear)[index] ?? '',
+            ),
+        )
+      : undefined;
+
+  function updateSeats(next: TableSeat[]) {
+    setTableSeats(next);
+  }
+
+  function changeHogwartsYear(nextYear: number) {
+    if (meta?.id !== 'hogwarts-battle') return;
+    const availableHeroIds = getHogwartsHeroIdsForYear(nextYear);
+    setHogwartsYear(nextYear);
+    setTableSeats((previousSeats) =>
+      Array.from({ length: availableHeroIds.length }, (_, index) => ({
+        ...(previousSeats[index] ?? { kind: 'empty' as const }),
+        role: availableHeroIds[index],
+      })),
+    );
+  }
+
+  function changeHogwartsHero(index: number, heroId: string) {
+    setTableSeats((previousSeats) => {
+      const nextSeats = previousSeats.map((seat) => ({ ...seat }));
+      const previousIndex = nextSeats.findIndex(
+        (seat, seatIndex) => seatIndex !== index && seat.role === heroId,
+      );
+      if (previousIndex >= 0) {
+        nextSeats[previousIndex]!.role = nextSeats[index]!.role;
+      }
+      nextSeats[index]!.role = heroId;
+      return nextSeats;
+    });
+  }
 
   async function onHost() {
-    if (!meta) return;
+    if (!meta || launchPlan.status !== 'ready' || launchPlan.mode !== 'online') return;
     setBusy(true);
     setError('');
     const name = getNickname() || 'Player';
     setNickname(name);
-    const floor = Math.max(2, meta.minPlayers);
-    const numPlayers =
-      meta.maxPlayers > floor ? Math.min(meta.maxPlayers, Math.max(floor, partySize)) : floor;
     try {
       const room = await hostRoom(
         meta.id,
-        numPlayers,
+        launchPlan.seats,
         name,
-        meta.id === 'hogwarts-battle' ? hogwartsSetup : undefined,
+        hogwartsSetup,
+        ownedDeviceJoins(boundedSeats),
       );
       navigate(`/g/${room.gameName}/${room.matchID}`);
     } catch (e) {
@@ -47,6 +104,19 @@ export function GameLaunch() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function onStart() {
+    if (!meta || launchPlan.status !== 'ready' || launchPlan.mode === 'online') return;
+    if (launchPlan.mode === 'bot') {
+      navigate(`/vs-bot/${meta.id}?kinds=${occupiedKindsQuery(boundedSeats)}`);
+      return;
+    }
+    const query =
+      meta.id === 'hogwarts-battle' && hogwartsSetup
+        ? hogwartsPlayQuery(hogwartsSetup, launchPlan.seats)
+        : `?seats=${launchPlan.seats}`;
+    navigate(`/play/${meta.id}${query}`);
   }
 
   if (!meta) {
@@ -72,118 +142,71 @@ export function GameLaunch() {
     );
   }
 
-  const onlineSizes: number[] = [];
-  for (let n = Math.max(2, meta.minPlayers); n <= meta.maxPlayers; n++) onlineSizes.push(n);
-
-  const localSizes: number[] = [];
-  if (meta.hasLocal) {
-    for (let n = Math.max(2, meta.minPlayers); n <= meta.maxPlayers; n++) localSizes.push(n);
-  }
-
-  const hasOnline = meta.hasOnline !== false && meta.maxPlayers >= 2;
-  const primaryIsSolo = Boolean(meta.hasSolo);
-  const primaryIsLocal = !primaryIsSolo && Boolean(meta.hasLocal);
-  const primaryIsBot = !primaryIsSolo && !primaryIsLocal && Boolean(meta.hasBot);
-  const primaryIsHost = !primaryIsSolo && !primaryIsLocal && !primaryIsBot && hasOnline;
-  const hogwartsQuery = meta.id === 'hogwarts-battle' ? hogwartsPlayQuery(hogwartsSetup, 1) : '';
-  const localQuery =
-    meta.id === 'hogwarts-battle'
-      ? hogwartsPlayQuery(hogwartsSetup, localSizes.length > 1 ? localSeats : (localSizes[0] ?? 2))
-      : '';
-
   return (
     <Shell title={meta.name} backTo="/">
       <p className="launch-blurb">{meta.blurb}</p>
-      {meta.id === 'hogwarts-battle' ? (
-        <HogwartsSetupPanel value={hogwartsSetup} onChange={setHogwartsSetup} />
-      ) : null}
-      <div className="launch-modes" data-testid="launch-modes">
-        {meta.hasSolo ? (
-          <div className="launch-mode" data-testid="launch-mode-solo">
-            <Link
-              className={primaryIsSolo ? 'btn primary' : 'btn'}
-              to={`/play/${meta.id}${meta.id === 'hogwarts-battle' ? hogwartsQuery : '?seats=1'}`}
-              data-testid="play-solo"
-            >
-              Play
-            </Link>
-          </div>
-        ) : null}
-
-        {meta.hasLocal ? (
-          <div className="launch-mode" data-testid="launch-mode-local">
-            {localSizes.length > 1 ? (
-              <label className="party-size">
-                <span>{meta.id === 'hogwarts-battle' ? 'Heroes' : 'Players'}</span>
-                <select
-                  value={localSeats}
-                  data-testid="local-seats"
-                  onChange={(e) => setLocalSeats(Number(e.target.value))}
-                >
-                  {localSizes.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            <Link
-              className={primaryIsLocal ? 'btn primary' : 'btn'}
-              to={
-                meta.id === 'hogwarts-battle'
-                  ? `/play/${meta.id}${localQuery}`
-                  : `/play/${meta.id}?seats=${localSizes.length > 1 ? localSeats : (localSizes[0] ?? 2)}`
-              }
-              data-testid="play-local"
-            >
-              Pass and play
-            </Link>
-          </div>
-        ) : null}
-
-        {meta.hasBot ? (
-          <div className="launch-mode" data-testid="launch-mode-bot">
-            <Link
-              className={primaryIsBot ? 'btn primary' : 'btn'}
-              to={`/vs-bot/${meta.id}`}
-              data-testid="play-bot"
-            >
-              Play vs bot
-            </Link>
-          </div>
-        ) : null}
-
-        {hasOnline ? (
-          <div className="launch-mode" data-testid="launch-mode-host">
-            {onlineSizes.length > 1 ? (
-              <label className="party-size">
-                <span>Online players</span>
-                <select
-                  value={partySize}
-                  data-testid="party-size"
-                  onChange={(e) => setPartySize(Number(e.target.value))}
-                >
-                  {onlineSizes.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            <button
-              type="button"
-              className={primaryIsHost ? 'btn primary' : 'btn'}
-              disabled={busy}
-              onClick={onHost}
-              data-testid="host-room"
-            >
-              Host a room
-            </button>
-          </div>
-        ) : null}
-      </div>
+      <TableSetup
+        action={
+          <button
+            className="btn primary"
+            data-testid={
+              launchPlan.status === 'ready' && launchPlan.mode === 'online'
+                ? 'host-room'
+                : 'play-start'
+            }
+            disabled={busy || launchPlan.status !== 'ready'}
+            onClick={
+              launchPlan.status === 'ready' && launchPlan.mode === 'online' ? onHost : onStart
+            }
+            type="button"
+          >
+            {launchPlan.status === 'ready' && launchPlan.mode === 'online' ? 'Host' : 'Start'}
+          </button>
+        }
+        centreContent={
+          meta.id === 'hogwarts-battle' ? (
+            <label className="table-year">
+              <span>Year</span>
+              <select
+                data-testid="hogwarts-year"
+                onChange={(event) => changeHogwartsYear(Number(event.target.value))}
+                value={hogwartsYear}
+              >
+                {HOGWARTS_CAMPAIGNS.map((campaign) => (
+                  <option key={campaign.number} value={campaign.number}>
+                    Year {campaign.number}: {campaign.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null
+        }
+        maxSeats={maxSeats}
+        meta={meta}
+        onChange={updateSeats}
+        seatDetails={
+          meta.id === 'hogwarts-battle'
+            ? (seat, index) => (
+                <label className="table-seat-detail">
+                  <span>Hero</span>
+                  <select
+                    data-testid={`hogwarts-hero-${index}`}
+                    onChange={(event) => changeHogwartsHero(index, event.target.value)}
+                    value={seat.role ?? getHogwartsHeroIdsForYear(hogwartsYear)[index]}
+                  >
+                    {getHogwartsHeroesForYear(hogwartsYear).map((hero) => (
+                      <option key={hero.id} value={hero.id}>
+                        {hero.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )
+            : undefined
+        }
+        seats={boundedSeats}
+        showColours={meta.id !== 'hogwarts-battle'}
+      />
       {error ? (
         <p className="error" role="alert">
           {error}
@@ -191,4 +214,17 @@ export function GameLaunch() {
       ) : null}
     </Shell>
   );
+}
+
+function createTableSeats(meta: ReturnType<typeof getGameMeta>, year: number): TableSeat[] {
+  const maxSeats =
+    meta?.id === 'hogwarts-battle'
+      ? getHogwartsHeroIdsForYear(year).length
+      : (meta?.maxPlayers ?? 1);
+  const defaultCount = Math.min(maxSeats, meta && meta.minPlayers >= 2 ? meta.minPlayers : 1);
+  const heroes = meta?.id === 'hogwarts-battle' ? getHogwartsHeroIdsForYear(year) : [];
+  return Array.from({ length: maxSeats }, (_, index) => ({
+    kind: index < defaultCount ? ('local' as const) : ('empty' as const),
+    ...(heroes[index] ? { role: heroes[index] } : {}),
+  }));
 }

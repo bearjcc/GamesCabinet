@@ -14,7 +14,7 @@ import {
   startTurn,
 } from './engine/turnLogic';
 import { createInitialGameState, type HogwartsGameState } from './engine/types';
-import { type HogwartsSetupData, selectHogwartsHeroIds } from './setup';
+import { getHogwartsHeroIdsForYear, type HogwartsSetupData, selectHogwartsHeroIds } from './setup';
 
 export type { HogwartsSetupData } from './setup';
 
@@ -27,7 +27,8 @@ export const HogwartsBattle: Game<HogwartsGameState> = {
     const state = createInitialGameState();
     const gameNumber = setupData?.gameNumber ?? 1;
     const numPlayers = ctx.numPlayers;
-    const heroIds = selectHogwartsHeroIds(setupData?.heroIds, numPlayers);
+    const availableHeroIds = getHogwartsHeroIdsForYear(gameNumber);
+    const heroIds = selectHogwartsHeroIds(setupData?.heroIds, numPlayers, availableHeroIds);
     const playerKeys = Array.from({ length: numPlayers }, (_, i) => String(i));
 
     setupGame(state, gameNumber, heroIds, setupData?.seed);

@@ -77,6 +77,216 @@
   gap: 0.55rem;
 }
 
+.table-setup {
+  min-height: min(66dvh, 38rem);
+}
+
+.table-stage {
+  display: grid;
+  grid-template:
+    "north north north" auto
+    "west well east" minmax(12rem, 1fr)
+    "south south south" auto / minmax(0, 1fr) minmax(12rem, 1.35fr) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.table-stage-5 {
+  grid-template:
+    "north north north" auto
+    "west well east" minmax(12rem, 1fr)
+    "southwest south southeast" auto / minmax(0, 1fr) minmax(12rem, 1.35fr) minmax(0, 1fr);
+}
+
+.table-stage-6 {
+  grid-template:
+    "northwest north north north northeast" auto
+    "west well well well east" minmax(12rem, 1fr)
+    "southwest south south south southeast" auto / minmax(0, 1fr) minmax(0, 0.8fr)
+    minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1fr);
+}
+
+.table-seat {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+}
+
+.table-seat-0 {
+  grid-area: north;
+}
+
+.table-seat-1 {
+  grid-area: east;
+}
+
+.table-seat-2 {
+  grid-area: south;
+}
+
+.table-seat-3 {
+  grid-area: west;
+}
+
+.table-stage-5 .table-seat-2 {
+  grid-area: southeast;
+}
+
+.table-stage-5 .table-seat-3 {
+  grid-area: southwest;
+}
+
+.table-stage-5 .table-seat-4 {
+  grid-area: west;
+}
+
+.table-stage-6 .table-seat-0 {
+  grid-area: north;
+}
+
+.table-stage-6 .table-seat-1 {
+  grid-area: northeast;
+}
+
+.table-stage-6 .table-seat-2 {
+  grid-area: southeast;
+}
+
+.table-stage-6 .table-seat-3 {
+  grid-area: south;
+}
+
+.table-stage-6 .table-seat-4 {
+  grid-area: southwest;
+}
+
+.table-stage-6 .table-seat-5 {
+  grid-area: west;
+}
+
+.table-seat:nth-child(n + 5) {
+  grid-column: 1 / -1;
+}
+
+.table-seat-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.table-seat-number,
+.table-well-kicker {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.table-seat-state {
+  color: var(--accent-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.table-seat-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.table-seat-colours {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.table-colour {
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.table-colour.selected {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface-2);
+  outline: 1px solid var(--ink);
+}
+
+.table-colour:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.table-well {
+  grid-area: well;
+  display: grid;
+  gap: 0.55rem;
+  align-content: center;
+  min-height: 12rem;
+  padding: 1rem;
+  border: 1px solid var(--hover-line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  text-align: center;
+}
+
+.table-well h2,
+.table-well p {
+  margin: 0;
+}
+
+.table-well h2 {
+  font-size: 1.2rem;
+}
+
+.table-well p {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.table-well-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.table-year,
+.table-seat-detail {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.table-year select,
+.table-seat-detail select {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.table-well .table-setup-hint {
+  color: var(--danger);
+}
+
+.table-setup-action {
+  display: flex;
+  justify-content: center;
+}
+
 .launch-mode {
   display: flex;
   flex-wrap: wrap;
@@ -146,6 +356,22 @@
   border-color: var(--hover-line);
 }
 
+.table-seat-kinds .btn {
+  min-height: 2rem;
+  padding-inline: 0.45rem;
+  font-size: 0.8rem;
+}
+
+.table-seat-kinds .btn.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.table-setup-action .btn {
+  min-width: 7rem;
+}
+
 .join-panel {
   padding-top: 0.85rem;
   border-top: 1px solid var(--line);
@@ -207,5 +433,28 @@
 @media (max-width: 28rem) {
   .game-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .table-setup {
+    min-height: 0;
+  }
+
+  .table-stage {
+    grid-template-areas:
+      "well"
+      "north"
+      "east"
+      "south"
+      "west";
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .table-stage-5 .table-seat,
+  .table-stage-6 .table-seat {
+    grid-area: auto;
+  }
+
+  .table-seat:nth-child(n + 5) {
+    grid-column: auto;
   }
 }
