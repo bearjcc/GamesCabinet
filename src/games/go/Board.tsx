@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getGoActions } from './actions';
 import { type GoState, legalPlaces, SIZE } from './game';
@@ -61,7 +62,7 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
                     : `${cell === '0' ? 'Black' : 'White'} stone at ${file}${rank}`
                 }
               >
-                {cell !== null ? <span className="go-stone" aria-hidden /> : null}
+                {cell !== null ? <Token player={cell} variant="disc" size="md" /> : null}
               </button>
             );
           })}

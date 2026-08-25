@@ -7,17 +7,18 @@ import { StatusBar } from '../../components/StatusBar';
 import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { kenneyIcon } from '../shared/tokens';
 import { getChessActions } from './actions';
 import type { ChessState, Piece, PieceType } from './game';
 import { legalMoves, rc } from './game';
 
 const PIECE_SRC: Record<PieceType, string> = {
-  K: '/assets/kenney/board-game-icons/Vector/Icons/chess_king.svg',
-  Q: '/assets/kenney/board-game-icons/Vector/Icons/chess_queen.svg',
-  R: '/assets/kenney/board-game-icons/Vector/Icons/chess_rook.svg',
-  B: '/assets/kenney/board-game-icons/Vector/Icons/chess_bishop.svg',
-  N: '/assets/kenney/board-game-icons/Vector/Icons/chess_knight.svg',
-  P: '/assets/kenney/board-game-icons/Vector/Icons/chess_pawn.svg',
+  K: kenneyIcon('chess_king'),
+  Q: kenneyIcon('chess_queen'),
+  R: kenneyIcon('chess_rook'),
+  B: kenneyIcon('chess_bishop'),
+  N: kenneyIcon('chess_knight'),
+  P: kenneyIcon('chess_pawn'),
 };
 
 const PIECE_NAME: Record<PieceType, string> = {

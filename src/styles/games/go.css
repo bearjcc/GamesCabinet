@@ -49,19 +49,16 @@
   background: rgba(0, 0, 0, 0.18);
 }
 
-.go-stone {
+.go-cell .tt-token {
   width: 100%;
   height: 100%;
-  border-radius: 999px;
-  display: block;
-  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.28);
 }
 
-.go-cell.p0 .go-stone {
+.go-cell .tt-token--p0 {
   background: #1a1a1a;
 }
 
-.go-cell.p1 .go-stone {
+.go-cell .tt-token--p1 {
   background: #f4f1ea;
   box-shadow:
     inset 0 -2px 4px rgba(0, 0, 0, 0.12),

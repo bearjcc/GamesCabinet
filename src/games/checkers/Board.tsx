@@ -4,9 +4,11 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { Lift, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Token } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { KENNEY_CROWN } from '../shared/tokens';
 import { getCheckersActions } from './actions';
 import type { CheckersState, Piece } from './game';
 import { legalMoves, rc } from './game';
@@ -59,7 +61,14 @@ type PieceChromeProps = {
 
 /** Client-only Lift/Snap pulse; remounts so motion never gates G or taps. */
 function PieceChrome({ piece, liftPulse, liftActive, snapPulse, snapActive }: PieceChromeProps) {
-  const inner = <span className={`ck-piece p${piece.player}${piece.king ? ' king' : ''}`} />;
+  const inner = (
+    <Token
+      player={piece.player}
+      variant="disc"
+      size="md"
+      badgeSrc={piece.king ? KENNEY_CROWN : null}
+    />
+  );
   if (snapActive) {
     return (
       <Snap key={snapPulse} active={snapActive} className="ck-piece__cinematic">

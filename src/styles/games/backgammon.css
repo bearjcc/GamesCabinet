@@ -76,6 +76,19 @@
   line-height: 1;
 }
 
+.bg-point .tt-token {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.bg-point.has-p0 .tt-token--p0 {
+  background: #f2efe6;
+}
+
+.bg-point.has-p1 .tt-token--p1 {
+  background: #1a1a1a;
+}
+
 .bg-point-count {
   width: 1.25rem;
   height: 1.25rem;

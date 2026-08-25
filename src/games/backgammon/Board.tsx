@@ -2,7 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { DiceTray } from '../../components/tabletop';
+import { DiceTray, Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getBackgammonActions } from './actions';
 import { BAR, type BackgammonState, checkerCount, legalPlays, pointOwner } from './game';
@@ -84,7 +84,12 @@ export function BackgammonBoard({
         aria-label={`Point ${point}${count ? `, ${count} checkers` : ', empty'}`}
       >
         <span className="bg-point-num">{point}</span>
-        {count > 0 ? <span className="bg-point-count">{count}</span> : null}
+        {count > 0 && owner ? (
+          <>
+            <Token player={owner} variant="disc" size="sm" />
+            <span className="bg-point-count">{count}</span>
+          </>
+        ) : null}
       </button>
     );
   };

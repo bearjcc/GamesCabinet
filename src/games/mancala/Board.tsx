@@ -2,11 +2,14 @@ import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { Counter } from '../../components/tabletop';
+import { Counter, Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getMancalaActions } from './actions';
 import type { MancalaState } from './game';
 import { ownPits, P0_STORE, P1_STORE } from './game';
+
+/** Cap pit stones so a full store stays compact on phone. */
+const VISUAL_STONE_CAP = 8;
 
 export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaState>) {
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
@@ -29,6 +32,7 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
 
   const pitButton = (i: number) => {
     const canSow = playable.has(i) && G.pits[i] > 0;
+    const stoneCount = Math.min(G.pits[i], VISUAL_STONE_CAP);
     return (
       <button
         key={i}
@@ -39,6 +43,11 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
         onClick={() => moves.sow(i)}
         aria-label={`Pit ${i}, ${G.pits[i]} stones`}
       >
+        <span className="mancala-stones" aria-hidden>
+          {Array.from({ length: stoneCount }, (_, n) => (
+            <Token key={n} player="0" variant="chip" size="sm" />
+          ))}
+        </span>
         <Counter value={G.pits[i]} label={`Pit ${i}`} />
       </button>
     );

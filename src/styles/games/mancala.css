@@ -33,8 +33,28 @@
   font-family: var(--font);
   font-size: 1.15rem;
   font-weight: 700;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.mancala-stones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  max-width: 90%;
+}
+
+.mancala-stones .tt-token {
+  width: 0.42rem;
+  height: 0.42rem;
+}
+
+.mancala-stones .tt-token--p0 {
+  background: #d8c49a;
 }
 
 .mancala-pit {

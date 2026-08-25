@@ -50,6 +50,15 @@
   background: #2a6a94;
   cursor: default;
   touch-action: manipulation;
+  display: grid;
+  place-items: center;
+}
+
+.battleship-mark {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .battleship-cell.is-ship {

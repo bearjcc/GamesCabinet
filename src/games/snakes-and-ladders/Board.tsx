@@ -7,6 +7,7 @@ import { StatusBar } from '../../components/StatusBar';
 import { DieFace, Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { asDieFaceValue } from '../shared/dice';
+import { KENNEY_LADDER, KENNEY_SNAKE } from '../shared/tokens';
 import { getSnakesAndLaddersActions } from './actions';
 import {
   BOARD_SIZE,
@@ -118,9 +119,17 @@ export function SnakesAndLaddersBoard({
                 >
                   <span className="sal-cell-num">{n}</span>
                   {tele ? (
-                    <span className="sal-cell-tele" aria-hidden="true">
-                      {SNAKES_AND_LADDERS[n]}
-                    </span>
+                    <>
+                      <img
+                        className="sal-cell-mark"
+                        src={tele.startsWith('Ladder') ? KENNEY_LADDER : KENNEY_SNAKE}
+                        alt=""
+                        draggable={false}
+                      />
+                      <span className="sal-cell-tele" aria-hidden="true">
+                        {SNAKES_AND_LADDERS[n]}
+                      </span>
+                    </>
                   ) : null}
                   {occupants.length > 0 ? (
                     <span className="sal-pawns">

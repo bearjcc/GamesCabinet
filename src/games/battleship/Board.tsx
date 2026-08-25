@@ -4,6 +4,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { deriveMatchStatus } from '../../lib/matchStatus';
+import { KENNEY_HIT, KENNEY_MISS, KENNEY_SUNK } from '../shared/tokens';
 import { getBattleshipActions } from './actions';
 import {
   type BattleshipState,
@@ -16,6 +17,13 @@ import {
 
 function opponent(player: string): string {
   return player === '0' ? '1' : '0';
+}
+
+function shotMark(shot: Shot): string | null {
+  if (shot === 'sunk') return KENNEY_SUNK;
+  if (shot === 'hit') return KENNEY_HIT;
+  if (shot === 'miss') return KENNEY_MISS;
+  return null;
 }
 
 function cellLabel(shot: Shot, hasShip: boolean): string {
@@ -104,6 +112,7 @@ export function BattleshipBoard({
                   canPlace &&
                   nextId !== null &&
                   isLegalPlacement(own.ships, nextId, i, orientation);
+                const mark = shotMark(shot);
                 return (
                   <button
                     key={`own-${i}`}
@@ -124,7 +133,11 @@ export function BattleshipBoard({
                       }
                     }}
                     aria-label={`${cellLabel(shot, hasShip)} own ${i}`}
-                  />
+                  >
+                    {mark ? (
+                      <img className="battleship-mark" src={mark} alt="" draggable={false} />
+                    ) : null}
+                  </button>
                 );
               })}
             </div>
@@ -140,6 +153,7 @@ export function BattleshipBoard({
             >
               {opp.shots.map((shot, i) => {
                 const open = canFire && shot === null;
+                const mark = shotMark(shot);
                 return (
                   <button
                     key={`opp-${i}`}
@@ -153,7 +167,11 @@ export function BattleshipBoard({
                       if (open) moves.fire(i);
                     }}
                     aria-label={`${cellLabel(shot, false)} opponent ${i}`}
-                  />
+                  >
+                    {mark ? (
+                      <img className="battleship-mark" src={mark} alt="" draggable={false} />
+                    ) : null}
+                  </button>
                 );
               })}
             </div>

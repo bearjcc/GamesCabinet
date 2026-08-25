@@ -44,30 +44,17 @@
   box-shadow: inset 0 0 0 3px var(--you);
 }
 
-.ck-piece {
-  width: 72%;
-  height: 72%;
-  border-radius: 999px;
-  display: block;
-  transition: background var(--motion-duration) var(--motion-ease);
-}
-
-.ck-piece.p0 {
+.ck-sq .tt-token--p0 {
   background: #c44949;
 }
 
-.ck-piece.p1 {
+.ck-sq .tt-token--p1 {
   background: #2b2b2b;
 }
 
-.ck-piece.king::after {
-  content: "K";
-  display: grid;
-  place-items: center;
-  height: 100%;
-  color: #f0d78c;
-  font-weight: 700;
-  font-size: 0.85rem;
+.ck-sq .tt-token {
+  width: 72%;
+  height: 72%;
 }
 
 .ck-piece__cinematic {
@@ -77,7 +64,7 @@
   place-items: center;
 }
 
-.ck-piece__cinematic .ck-piece {
+.ck-piece__cinematic .tt-token {
   width: 100%;
   height: 100%;
 }

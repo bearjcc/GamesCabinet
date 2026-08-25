@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getChineseCheckersActions } from './actions';
 import {
@@ -159,7 +160,7 @@ export function ChineseCheckersBoard({
                   if (peg && selectable.has(i)) setSelected(i);
                 }}
               >
-                {peg ? <span className={`cc-peg p${peg}`} aria-hidden /> : null}
+                {peg ? <Token player={peg} variant="pawn" size="md" /> : null}
               </button>
             );
           })}
