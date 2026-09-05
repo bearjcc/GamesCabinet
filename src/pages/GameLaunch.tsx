@@ -35,6 +35,7 @@ export function GameLaunch() {
   const [tableSeats, setTableSeats] = useState<TableSeat[]>(() => createTableSeats(meta, 1));
 
   useEffect(() => {
+    setHogwartsYear(1);
     setTableSeats(createTableSeats(meta, 1));
   }, [meta]);
 

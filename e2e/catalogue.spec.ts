@@ -111,6 +111,20 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('hb-horcruxes')).toBeVisible();
   });
 
+  test('Hogwarts year resets when switching games from the launch screen', async ({ page }) => {
+    await page.goto('/game/hogwarts-battle');
+    await page.getByTestId('unlock-code').fill('LUNALOVEGOOD');
+    await page.getByTestId('unlock-submit').click();
+    await page.getByTestId('hogwarts-year').selectOption('7');
+    await expect(page.getByTestId('hogwarts-year')).toHaveValue('7');
+
+    await page.goto('/game/dominoes');
+    await expect(page.getByTestId('launch-modes')).toBeVisible();
+
+    await page.goto('/game/hogwarts-battle');
+    await expect(page.getByTestId('hogwarts-year')).toHaveValue('1');
+  });
+
   test('TRACKS shelf unlocks and drafts into a playable table', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('home-game-tracks')).toHaveCount(0);
