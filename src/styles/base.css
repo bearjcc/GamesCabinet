@@ -133,12 +133,6 @@ a:focus-visible {
   min-width: 0;
 }
 
-.theme-cycle,
-.motion-cycle {
-  min-width: 4.25rem;
-  text-transform: capitalize;
-}
-
 .name-field input {
   width: 9.5rem;
   min-height: var(--tap-min);

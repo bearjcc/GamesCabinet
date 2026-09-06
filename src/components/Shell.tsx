@@ -1,5 +1,7 @@
 import { type ReactNode, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { IconLink } from './IconControl';
+import { IconSettings } from './icons';
 import { MotionCycle } from './MotionCycle';
 import { ThemeCycle } from './ThemeCycle';
 
@@ -38,9 +40,9 @@ export function Shell({
         </div>
         <div className="topbar-right" role="toolbar" aria-label="Shell controls">
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
-          <Link to="/settings" className="btn ghost" data-testid="shell-settings">
-            Settings
-          </Link>
+          <IconLink to="/settings" label="Settings" testId="shell-settings">
+            <IconSettings />
+          </IconLink>
           <MotionCycle />
           <ThemeCycle />
         </div>

@@ -42,9 +42,9 @@ test.describe('GamesCabinet smokes', () => {
     await page.goto('/');
     const motion = page.getByTestId('motion-cycle');
     await expect(motion).toBeVisible();
-    const before = await motion.innerText();
+    const before = await motion.getAttribute('aria-label');
     await motion.click();
-    await expect(motion).not.toHaveText(before);
+    await expect(motion).not.toHaveAttribute('aria-label', before ?? '');
   });
 
   test('game launch arranges seats around one start action', async ({ page }) => {

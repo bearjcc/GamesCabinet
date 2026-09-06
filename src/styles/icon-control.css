@@ -1,0 +1,23 @@
+.icon-control {
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0;
+  line-height: 1;
+}
+
+.icon-control svg {
+  display: block;
+}
+
+.icon-control.is-pressed {
+  outline: 2px solid var(--you);
+  outline-offset: 1px;
+}
+
+.topbar-right .icon-control {
+  flex-shrink: 0;
+}

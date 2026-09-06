@@ -12,6 +12,7 @@ export function SoloLeaderboardShell({
   tab,
   onTabChange,
   testIdPrefix,
+  showTabs = true,
   info,
   board,
   pew,
@@ -24,6 +25,8 @@ export function SoloLeaderboardShell({
   tab: SoloPlayTab;
   onTabChange: (tab: SoloPlayTab) => void;
   testIdPrefix: string;
+  /** When false, callers supply their own scores navigation (e.g. compact toolbar). */
+  showTabs?: boolean;
   info: ReactNode;
   board: ReactNode;
   pew?: ReactNode;
@@ -45,7 +48,9 @@ export function SoloLeaderboardShell({
         info={
           <>
             {info}
-            <SoloPlayTabs value={tab} onChange={onTabChange} testIdPrefix={testIdPrefix} />
+            {showTabs ? (
+              <SoloPlayTabs value={tab} onChange={onTabChange} testIdPrefix={testIdPrefix} />
+            ) : null}
           </>
         }
         board={

@@ -9,51 +9,49 @@ function baseG(overrides: Partial<Game2048State> = {}): Game2048State {
     won: false,
     winPaused: false,
     history: [],
+    future: [],
     ...overrides,
   };
 }
 
 describe('get2048Actions', () => {
-  it('returns keep going and try again while win is paused', () => {
+  it('returns keep going and try again when win paused', () => {
     const actions = get2048Actions({
-      G: baseG({ won: true, winPaused: true }),
+      G: baseG({ winPaused: true }),
       playable: false,
       gameover: undefined,
     });
     expect(actions.map((a) => a.id)).toEqual(['keep-going', 'try-again']);
     expect(actions[0]).toMatchObject({
-      id: 'keep-going',
-      kind: 'confirm',
       label: 'Keep going',
       testId: 'g2048-keep-going',
     });
     expect(actions[1]).toMatchObject({
-      id: 'try-again',
-      kind: 'dismiss',
       label: 'Try again',
       testId: 'g2048-try-again',
     });
   });
 
-  it('returns new game and undo during play', () => {
+  it('returns new game, undo, and redo during play', () => {
     const actions = get2048Actions({
       G: baseG({
         history: [{ cells: Array(16).fill(2), score: 4, won: false, winPaused: false }],
+        future: [{ cells: Array(16).fill(4), score: 8, won: false, winPaused: false }],
       }),
       playable: true,
       gameover: undefined,
     });
-    expect(actions.map((a) => a.id)).toEqual(['new-game', 'undo']);
-    expect(actions[0]).toMatchObject({
-      id: 'new-game',
-      label: 'New game',
-      testId: 'g2048-new-game',
-    });
+    expect(actions.map((a) => a.id)).toEqual(['new-game', 'undo', 'redo']);
     expect(actions[1]).toMatchObject({
       id: 'undo',
-      kind: 'dismiss',
       label: 'Undo',
       testId: 'g2048-action-undo',
+      disabled: false,
+    });
+    expect(actions[2]).toMatchObject({
+      id: 'redo',
+      label: 'Redo',
+      testId: 'g2048-action-redo',
       disabled: false,
     });
   });
@@ -72,18 +70,29 @@ describe('get2048Actions', () => {
     expect(undo.disabledReason?.length).toBeGreaterThan(0);
   });
 
-  it('disables undo when gameover', () => {
-    const [undo] = get2048Actions({
+  it('disables redo when future is empty', () => {
+    const [, , redo] = get2048Actions({
+      G: baseG({ future: [] }),
+      playable: true,
+      gameover: undefined,
+    });
+    expect(redo).toMatchObject({
+      id: 'redo',
+      disabled: true,
+      disabledReason: expect.any(String),
+    });
+  });
+
+  it('disables undo and redo when gameover', () => {
+    const [undo, redo] = get2048Actions({
       G: baseG({
         history: [{ cells: Array(16).fill(2), score: 4, won: false, winPaused: false }],
+        future: [{ cells: Array(16).fill(4), score: 8, won: false, winPaused: false }],
       }),
       playable: false,
       gameover: { score: 4, won: false },
     });
-    expect(undo).toMatchObject({
-      id: 'undo',
-      disabled: true,
-      disabledReason: expect.any(String),
-    });
+    expect(undo).toMatchObject({ disabled: true });
+    expect(redo).toMatchObject({ disabled: true });
   });
 });

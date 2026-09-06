@@ -3,8 +3,58 @@
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: min(70vw, 22rem);
+  min-height: min(70vw, 24rem);
   touch-action: none;
+}
+
+.g2048-toolbar-wrap {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.g2048-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.g2048-toolbar__actions,
+.g2048-toolbar__links {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.g2048-toolbar__scores {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.85rem;
+  flex: 1 1 8rem;
+  justify-content: center;
+  min-width: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.g2048-toolbar__score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.g2048-toolbar__help {
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.35;
 }
 
 .g2048-win-overlay {
@@ -137,7 +187,14 @@
 }
 
 .g2048-score-value {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
+}
+
+@media (max-width: 24rem) {
+  .g2048-toolbar__scores {
+    flex-basis: 100%;
+    order: 3;
+  }
 }
 
 .g2048-controls {
