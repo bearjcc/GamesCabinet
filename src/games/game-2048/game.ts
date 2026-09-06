@@ -3,17 +3,20 @@ import { INVALID_MOVE } from '../invalidMove';
 
 export type SwipeDir = 'up' | 'down' | 'left' | 'right';
 
-/** Snapshot restored by undo (board + score + win flag). */
+/** Snapshot restored by undo (board + score + win flags). */
 export type Game2048Snapshot = {
   cells: (number | null)[];
   score: number;
   won: boolean;
+  winPaused: boolean;
 };
 
 export type Game2048State = {
   cells: (number | null)[];
   score: number;
   won: boolean;
+  /** True after first 2048 until the player chooses Keep going. */
+  winPaused: boolean;
   /** Previous successful swipe states; oldest first. */
   history: Game2048Snapshot[];
 };
@@ -113,6 +116,7 @@ export function pushUndoSnapshot(G: Game2048State): void {
     cells: G.cells.slice(),
     score: G.score,
     won: G.won,
+    winPaused: G.winPaused,
   });
   while (G.history.length > HISTORY_LIMIT) {
     G.history.shift();
@@ -129,11 +133,12 @@ export const Game2048: Game<Game2048State> = {
     const cells: (number | null)[] = Array(LEN).fill(null);
     spawn(cells, random);
     spawn(cells, random);
-    return { cells, score: 0, won: false, history: [] };
+    return { cells, score: 0, won: false, winPaused: false, history: [] };
   },
   turn: { minMoves: 1, maxMoves: 1 },
   moves: {
     swipe: ({ G, random }, dir: SwipeDir) => {
+      if (G.winPaused) return INVALID_MOVE;
       if (dir !== 'up' && dir !== 'down' && dir !== 'left' && dir !== 'right') {
         return INVALID_MOVE;
       }
@@ -142,8 +147,18 @@ export const Game2048: Game<Game2048State> = {
       pushUndoSnapshot(G);
       G.cells = cells;
       G.score += gained;
-      if (cells.some((c) => c === 2048)) G.won = true;
+      const reached2048 = cells.some((c) => c === 2048);
+      if (reached2048 && !G.won) {
+        G.won = true;
+        G.winPaused = true;
+      } else if (reached2048) {
+        G.won = true;
+      }
       spawn(G.cells, random);
+    },
+    keepGoing: ({ G, ctx }) => {
+      if (!G.winPaused || ctx.gameover) return INVALID_MOVE;
+      G.winPaused = false;
     },
     undo: ({ G, ctx }) => {
       if (ctx.gameover || G.history.length === 0) return INVALID_MOVE;
@@ -151,6 +166,7 @@ export const Game2048: Game<Game2048State> = {
       G.cells = prev.cells;
       G.score = prev.score;
       G.won = prev.won;
+      G.winPaused = prev.winPaused;
     },
   },
   endIf: ({ G }) => {

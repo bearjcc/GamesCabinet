@@ -11,7 +11,7 @@ import {
   cycleBotDifficulty,
   parseBotDifficulty,
 } from '../lib/bots';
-import { getGameMeta, supportsBotPlay } from '../lib/games';
+import { getGameMeta, isSoloOnly, soloPlayPath, supportsBotPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { localRematchMatchID } from '../lib/localRematch';
 import { makeClient } from '../lib/makeClient';
@@ -74,7 +74,7 @@ export function PlayBot() {
     launchPlan?.status !== 'ready' ||
     launchPlan.mode !== 'bot'
   ) {
-    return <Navigate to={`/game/${meta.id}`} replace />;
+    return <Navigate to={isSoloOnly(meta) ? soloPlayPath(meta.id) : `/game/${meta.id}`} replace />;
   }
 
   return (
