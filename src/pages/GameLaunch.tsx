@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Shell } from '../components/Shell';
 import { TableSetup } from '../components/TableSetup';
 import { UnlockPanel } from '../components/UnlockPanel';
@@ -10,7 +10,7 @@ import {
   HOGWARTS_CAMPAIGNS,
   hogwartsPlayQuery,
 } from '../games/hogwarts-battle/setup';
-import { getGameMeta, isAccessGated } from '../lib/games';
+import { getGameMeta, isAccessGated, isSoloOnly, soloPlayPath } from '../lib/games';
 import { hostRoom } from '../lib/lobby';
 import { getNickname, getUnlockedGames, setNickname } from '../lib/storage';
 import {
@@ -141,6 +141,10 @@ export function GameLaunch() {
         </div>
       </Shell>
     );
+  }
+
+  if (isSoloOnly(meta)) {
+    return <Navigate to={soloPlayPath(meta.id)} replace />;
   }
 
   return (

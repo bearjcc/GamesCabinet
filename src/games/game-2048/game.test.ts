@@ -2,6 +2,7 @@ import { Client } from 'boardgame.io/client';
 import { describe, expect, it } from 'vitest';
 import {
   canMove,
+  canRedo,
   canUndo,
   Game2048,
   type Game2048State,
@@ -54,7 +55,14 @@ describe('Game2048', () => {
     const cells = emptyBoard();
     cells[3] = 2;
     const client = clientWithSetup(
-      () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+      () => ({
+        cells: cells.slice(),
+        score: 0,
+        won: false,
+        winPaused: false,
+        history: [],
+        future: [],
+      }),
       'noop',
     );
     const before = cellsOf(client);
@@ -70,7 +78,14 @@ describe('Game2048', () => {
     cells[0] = 2;
     cells[1] = 2;
     const client = clientWithSetup(
-      () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+      () => ({
+        cells: cells.slice(),
+        score: 0,
+        won: false,
+        winPaused: false,
+        history: [],
+        future: [],
+      }),
       'merge',
     );
     client.moves.swipe('left');
@@ -86,25 +101,85 @@ describe('Game2048', () => {
         cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
         score: 99,
         won: false,
+        winPaused: false,
         history: [],
+        future: [],
       }),
       'dead',
     );
     expect(client.getState()?.ctx.gameover).toEqual({ score: 99, won: false });
   });
 
-  it('marks won when a 2048 tile appears', () => {
+  it('marks won and pauses when a 2048 tile appears', () => {
     const cells = emptyBoard();
     cells[0] = 1024;
     cells[1] = 1024;
     const client = clientWithSetup(
-      () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+      () => ({
+        cells: cells.slice(),
+        score: 0,
+        won: false,
+        winPaused: false,
+        history: [],
+        future: [],
+      }),
       'win',
     );
     client.moves.swipe('left');
     const G = GOf(client);
     expect(G.cells).toContain(2048);
     expect(G.won).toBe(true);
+    expect(G.winPaused).toBe(true);
+    client.moves.swipe('left');
+    expect(GOf(client).cells).toEqual(G.cells);
+  });
+
+  it('keepGoing clears win pause so play can continue', () => {
+    const cells = emptyBoard();
+    cells[0] = 1024;
+    cells[1] = 1024;
+    cells[2] = 2;
+    const client = clientWithSetup(
+      () => ({
+        cells: cells.slice(),
+        score: 0,
+        won: false,
+        winPaused: false,
+        history: [],
+        future: [],
+      }),
+      'keep-going',
+    );
+    client.moves.swipe('left');
+    expect(GOf(client).winPaused).toBe(true);
+    client.moves.keepGoing();
+    expect(GOf(client).winPaused).toBe(false);
+    const historyBefore = GOf(client).history.length;
+    client.moves.swipe('down');
+    expect(GOf(client).history.length).toBeGreaterThan(historyBefore);
+  });
+
+  it('rejects keepGoing when not paused', () => {
+    const client = startClient();
+    client.moves.keepGoing();
+    expect(GOf(client).winPaused).toBe(false);
+  });
+
+  it('rejects keepGoing after game over', () => {
+    const client = clientWithSetup(
+      () => ({
+        cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
+        score: 99,
+        won: true,
+        winPaused: true,
+        history: [],
+        future: [],
+      }),
+      'keep-going-over',
+    );
+    expect(client.getState()?.ctx.gameover).toBeTruthy();
+    client.moves.keepGoing();
+    expect(GOf(client).winPaused).toBe(true);
   });
 
   it('rejects an invalid swipe direction', () => {
@@ -141,7 +216,14 @@ describe('Game2048', () => {
       cells[0] = 2;
       cells[1] = 2;
       const client = clientWithSetup(
-        () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+        () => ({
+          cells: cells.slice(),
+          score: 0,
+          won: false,
+          winPaused: false,
+          history: [],
+          future: [],
+        }),
         'undo-merge',
       );
       const beforeCells = cellsOf(client).slice();
@@ -157,13 +239,21 @@ describe('Game2048', () => {
       expect(restored.score).toBe(0);
       expect(restored.won).toBe(false);
       expect(restored.history).toEqual([]);
+      expect(restored.future).toHaveLength(1);
     });
 
     it('does not record history for a rejected swipe', () => {
       const cells = emptyBoard();
       cells[3] = 2;
       const client = clientWithSetup(
-        () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+        () => ({
+          cells: cells.slice(),
+          score: 0,
+          won: false,
+          winPaused: false,
+          history: [],
+          future: [],
+        }),
         'undo-noop',
       );
       client.moves.swipe('right');
@@ -176,7 +266,14 @@ describe('Game2048', () => {
       const cells = emptyBoard();
       cells[0] = 2;
       const client = clientWithSetup(
-        () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+        () => ({
+          cells: cells.slice(),
+          score: 0,
+          won: false,
+          winPaused: false,
+          history: [],
+          future: [],
+        }),
         'undo-stack',
       );
       client.moves.swipe('right');
@@ -201,7 +298,9 @@ describe('Game2048', () => {
         cells: emptyBoard(),
         score: 0,
         won: false,
+        winPaused: false,
         history: [],
+        future: [],
       };
       for (let i = 0; i < HISTORY_LIMIT + 3; i++) {
         G.score = i;
@@ -218,13 +317,16 @@ describe('Game2048', () => {
           cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
           score: 99,
           won: false,
+          winPaused: false,
           history: [
             {
               cells: emptyBoard(),
               score: 0,
               won: false,
+              winPaused: false,
             },
           ],
+          future: [],
         }),
         'undo-over',
       );
@@ -240,12 +342,108 @@ describe('Game2048', () => {
         cells: emptyBoard(),
         score: 0,
         won: false,
+        winPaused: false,
         history: [],
+        future: [],
       };
       expect(canUndo(empty, undefined)).toBe(false);
-      empty.history.push({ cells: emptyBoard(), score: 1, won: false });
+      empty.history.push({ cells: emptyBoard(), score: 1, won: false, winPaused: false });
       expect(canUndo(empty, undefined)).toBe(true);
       expect(canUndo(empty, { score: 1, won: false })).toBe(false);
+    });
+
+    it('redo restores a move undone with undo', () => {
+      const cells = emptyBoard();
+      cells[0] = 2;
+      cells[1] = 2;
+      const client = clientWithSetup(
+        () => ({
+          cells: cells.slice(),
+          score: 0,
+          won: false,
+          winPaused: false,
+          history: [],
+          future: [],
+        }),
+        'redo-merge',
+      );
+      const beforeCells = cellsOf(client).slice();
+      client.moves.swipe('left');
+      const afterSwipe = GOf(client);
+      expect(afterSwipe.score).toBe(4);
+
+      client.moves.undo();
+      expect(GOf(client).cells).toEqual(beforeCells);
+      expect(GOf(client).future).toHaveLength(1);
+
+      client.moves.redo();
+      const redone = GOf(client);
+      expect(redone.cells).toEqual(afterSwipe.cells);
+      expect(redone.score).toBe(afterSwipe.score);
+      expect(redone.future).toEqual([]);
+    });
+
+    it('clears redo stack on a new swipe', () => {
+      const cells = emptyBoard();
+      cells[0] = 2;
+      cells[1] = 2;
+      const client = clientWithSetup(
+        () => ({
+          cells: cells.slice(),
+          score: 0,
+          won: false,
+          winPaused: false,
+          history: [],
+          future: [],
+        }),
+        'redo-clear',
+      );
+      client.moves.swipe('left');
+      client.moves.undo();
+      expect(GOf(client).future).toHaveLength(1);
+      client.moves.swipe('right');
+      expect(GOf(client).future).toEqual([]);
+    });
+
+    it('reports canRedo from future and gameover', () => {
+      const empty: Game2048State = {
+        cells: emptyBoard(),
+        score: 0,
+        won: false,
+        winPaused: false,
+        history: [],
+        future: [],
+      };
+      expect(canRedo(empty, undefined)).toBe(false);
+      empty.future.push({ cells: emptyBoard(), score: 1, won: false, winPaused: false });
+      expect(canRedo(empty, undefined)).toBe(true);
+      expect(canRedo(empty, { score: 1, won: false })).toBe(false);
+    });
+
+    it('rejects redo when future is empty', () => {
+      const client = startClient();
+      const before = GOf(client);
+      client.moves.redo();
+      expect(GOf(client).cells).toEqual(before.cells);
+    });
+
+    it('rejects redo after game over', () => {
+      const client = clientWithSetup(
+        () => ({
+          cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
+          score: 99,
+          won: false,
+          winPaused: false,
+          history: [],
+          future: [{ cells: emptyBoard(), score: 0, won: false, winPaused: false }],
+        }),
+        'redo-over',
+      );
+      expect(client.getState()?.ctx.gameover).toBeTruthy();
+      const before = GOf(client);
+      client.moves.redo();
+      expect(GOf(client).cells).toEqual(before.cells);
+      expect(GOf(client).future).toHaveLength(1);
     });
   });
 });

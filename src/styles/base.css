@@ -59,6 +59,7 @@ a:focus-visible {
   min-height: 0;
   display: flex;
   flex-direction: column;
+  gap: 1.1rem;
 }
 
 /* boardgame.io Client wrapper — pass height through to PlayTable */
@@ -70,23 +71,21 @@ a:focus-visible {
 }
 
 .topbar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem 0.75rem;
+  column-gap: 0.5rem;
   margin-bottom: 0.85rem;
   padding-bottom: 0.65rem;
   border-bottom: 1px solid var(--line);
 }
 
-.topbar-left {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.75rem;
+.topbar-start {
+  justify-self: start;
+}
+
+.topbar-center {
   min-width: 0;
-  flex: 1 1 auto;
 }
 
 .brand {
@@ -100,6 +99,11 @@ a:focus-visible {
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.01em;
+  min-width: 0;
+}
+
+.brand-wordmark {
+  white-space: nowrap;
 }
 
 .brand-mark {
@@ -115,16 +119,20 @@ a:focus-visible {
   font-size: 1rem;
   font-weight: 600;
   color: var(--muted);
+  text-align: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .topbar-right {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 0.35rem;
-  margin-left: auto;
-  flex: 0 1 auto;
-  justify-content: flex-end;
+  gap: 0.2rem;
+  justify-self: end;
+  flex-shrink: 0;
 }
 
 .topbar-trailing {
@@ -133,10 +141,22 @@ a:focus-visible {
   min-width: 0;
 }
 
-.theme-cycle,
-.motion-cycle {
-  min-width: 4.25rem;
-  text-transform: capitalize;
+.shell:has(.play-table) {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.shell:has(.play-table) .main {
+  gap: 0.2rem;
+}
+
+.shell:has(.play-table) .topbar {
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.shell:has(.play-table) .bgio-client {
+  flex: 1;
+  min-height: 0;
 }
 
 .name-field input {
@@ -156,11 +176,6 @@ a:focus-visible {
   outline-offset: 1px;
 }
 
-.main {
-  display: grid;
-  gap: 1.1rem;
-}
-
 @media (max-width: 28rem) {
   .shell {
     padding: calc(0.6rem + env(safe-area-inset-top, 0px))
@@ -169,23 +184,12 @@ a:focus-visible {
       calc(0.65rem + env(safe-area-inset-left, 0px));
   }
 
-  .topbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .topbar-left,
-  .topbar-right {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .topbar-right {
-    justify-content: flex-start;
+  .brand-wordmark {
+    font-size: 1.1rem;
   }
 
   .page-title {
-    width: 100%;
+    font-size: 0.95rem;
   }
 
   .name-field input {

@@ -5,6 +5,7 @@
 */
 @import "./tokens.css";
 @import "./base.css";
+@import "./icon-control.css";
 @import "./catalogue.css";
 @import "./play-table.css";
 @import "./leaderboard.css";

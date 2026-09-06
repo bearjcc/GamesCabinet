@@ -1,5 +1,5 @@
 import type { SemanticAction } from '../../lib/actions';
-import { canUndo, type Game2048State } from './game';
+import { canRedo, canUndo, type Game2048State } from './game';
 
 export type Game2048ActionInput = {
   G: Game2048State;
@@ -7,36 +7,60 @@ export type Game2048ActionInput = {
   gameover?: unknown;
 };
 
-const SWIPES = [
-  { id: 'swipe-up', label: 'Up', testId: 'g2048-action-up' },
-  { id: 'swipe-down', label: 'Down', testId: 'g2048-action-down' },
-  { id: 'swipe-left', label: 'Left', testId: 'g2048-action-left' },
-  { id: 'swipe-right', label: 'Right', testId: 'g2048-action-right' },
-] as const;
+/** Chrome actions for solo 2048 (undo, redo, new game, win pause). Tile moves use keys / swipe. */
+export function get2048Actions({ G, gameover }: Game2048ActionInput): SemanticAction[] {
+  if (G.winPaused && !gameover) {
+    return [
+      {
+        id: 'keep-going',
+        kind: 'confirm',
+        label: 'Keep going',
+        variant: 'primary',
+        testId: 'g2048-keep-going',
+      },
+      {
+        id: 'try-again',
+        kind: 'dismiss',
+        label: 'Try again',
+        variant: 'secondary',
+        testId: 'g2048-try-again',
+      },
+    ];
+  }
 
-/** Pure pew intents for solo 2048 swipes and undo. */
-export function get2048Actions({ G, playable, gameover }: Game2048ActionInput): SemanticAction[] {
   const undoOk = canUndo(G, gameover);
-  const swipes: SemanticAction[] = SWIPES.map((s) => ({
-    id: s.id,
-    kind: 'move' as const,
-    label: s.label,
-    variant: 'primary' as const,
-    disabled: !playable,
-    disabledReason: playable ? undefined : 'Game not playable',
-    testId: s.testId,
-  }));
+  const redoOk = canRedo(G, gameover);
+  const actions: SemanticAction[] = [];
 
-  return [
-    ...swipes,
-    {
-      id: 'undo',
+  if (!gameover) {
+    actions.push({
+      id: 'new-game',
       kind: 'dismiss',
-      label: 'Undo',
+      label: 'New game',
       variant: 'secondary',
-      disabled: !undoOk,
-      disabledReason: undoOk ? undefined : gameover ? 'Game over' : 'Nothing to undo',
-      testId: 'g2048-action-undo',
-    },
-  ];
+      testId: 'g2048-new-game',
+    });
+  }
+
+  actions.push({
+    id: 'undo',
+    kind: 'dismiss',
+    label: 'Undo',
+    variant: 'secondary',
+    disabled: !undoOk,
+    disabledReason: undoOk ? undefined : gameover ? 'Game over' : 'Nothing to undo',
+    testId: 'g2048-action-undo',
+  });
+
+  actions.push({
+    id: 'redo',
+    kind: 'dismiss',
+    label: 'Redo',
+    variant: 'secondary',
+    disabled: !redoOk,
+    disabledReason: redoOk ? undefined : gameover ? 'Game over' : 'Nothing to redo',
+    testId: 'g2048-action-redo',
+  });
+
+  return actions;
 }

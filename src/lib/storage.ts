@@ -2,6 +2,7 @@ const NICKNAME_KEY = 'gamescabinet.nickname';
 const SEAT_PREFIX = 'gamescabinet.seat.';
 export const SEAT_COLOUR_KEY = 'gamescabinet.seatColour';
 const UNLOCKED_GAMES_KEY = 'gamescabinet.unlockedGames';
+const SOLO_BEST_PREFIX = 'gamescabinet.best.';
 
 /** Fixed palette for default seat / pawn colour preference. */
 export const SEAT_COLOUR_PALETTE = [
@@ -112,4 +113,34 @@ export function unlockGame(id: string): void {
   } catch {
     /* private mode / quota */
   }
+}
+
+/** Best solo score for a game, persisted on this device. */
+export function getSoloBestScore(gameId: string): number {
+  try {
+    const raw = localStorage.getItem(`${SOLO_BEST_PREFIX}${gameId}`);
+    if (!raw) return 0;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function setSoloBestScore(gameId: string, score: number): void {
+  if (!Number.isFinite(score) || score < 0) return;
+  try {
+    localStorage.setItem(`${SOLO_BEST_PREFIX}${gameId}`, String(Math.floor(score)));
+  } catch {
+    /* private mode / quota */
+  }
+}
+
+export function updateSoloBestScore(gameId: string, score: number): number {
+  const best = getSoloBestScore(gameId);
+  if (score > best) {
+    setSoloBestScore(gameId, score);
+    return score;
+  }
+  return best;
 }

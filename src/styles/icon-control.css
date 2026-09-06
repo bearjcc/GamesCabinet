@@ -1,0 +1,46 @@
+.icon-control {
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0;
+  line-height: 1;
+}
+
+.icon-control svg {
+  display: block;
+}
+
+.icon-control.is-pressed {
+  outline: 2px solid var(--you);
+  outline-offset: 1px;
+}
+
+.topbar-right .icon-control {
+  flex-shrink: 0;
+}
+
+.g2048-toolbar .icon-control {
+  --toolbar-icon: 2.35rem;
+  width: var(--toolbar-icon);
+  height: var(--toolbar-icon);
+  min-width: var(--toolbar-icon);
+  min-height: var(--toolbar-icon);
+}
+
+.g2048-toolbar .icon-control svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+@media (max-width: 28rem) {
+  .topbar-right .icon-control {
+    --shell-icon: 2.45rem;
+    width: var(--shell-icon);
+    height: var(--shell-icon);
+    min-width: var(--shell-icon);
+    min-height: var(--shell-icon);
+  }
+}

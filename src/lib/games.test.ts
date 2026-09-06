@@ -8,6 +8,7 @@ import {
   isAccessGated,
   isGameVisible,
   isSoloOnly,
+  soloPlayPath,
   supportsBotPlay,
   supportsLocalPlay,
   visibleGames,
@@ -29,10 +30,19 @@ describe('games catalogue', () => {
     expect(GAMES.length).toBeGreaterThan(0);
   });
 
-  it('marks solo-only titles from meta flags', () => {
+  it('marks solo-only titles from explicit soloOnly flag', () => {
     expect(isSoloOnly(getGameMeta('2048')!)).toBe(true);
+    expect(isSoloOnly(getGameMeta('letter-walker')!)).toBe(true);
+    expect(isSoloOnly(getGameMeta('klondike')!)).toBe(true);
+    expect(isSoloOnly(getGameMeta('freecell')!)).toBe(true);
+    expect(isSoloOnly(getGameMeta('orbits')!)).toBe(true);
     expect(isSoloOnly(getGameMeta('yatzy')!)).toBe(false);
+    expect(isSoloOnly(getGameMeta('hogwarts-battle')!)).toBe(false);
     expect(isSoloOnly(getGameMeta('tic-tac-toe')!)).toBe(false);
+  });
+
+  it('builds solo play paths without table setup', () => {
+    expect(soloPlayPath('2048')).toBe('/play/2048');
   });
 
   it('partitions the catalogue without duplicating games', () => {
