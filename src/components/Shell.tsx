@@ -25,19 +25,21 @@ export function Shell({
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="topbar-left">
-          <Link to={backTo} className="brand">
-            <img
-              className="brand-mark"
-              src="/brand/gamescabinet-mark.png"
-              width={24}
-              height={24}
-              alt=""
-            />
-            GamesCabinet
-          </Link>
-          {title ? <h1 className="page-title">{title}</h1> : null}
-        </div>
+        <Link to={backTo} className="brand topbar-start" aria-label="GamesCabinet home">
+          <img
+            className="brand-mark"
+            src="/brand/gamescabinet-mark.png"
+            width={24}
+            height={24}
+            alt=""
+          />
+          {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
+        </Link>
+        {title ? (
+          <h1 className="page-title">{title}</h1>
+        ) : (
+          <div className="topbar-center" aria-hidden="true" />
+        )}
         <div className="topbar-right" role="toolbar" aria-label="Shell controls">
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
           <IconLink to="/settings" label="Settings" testId="shell-settings">

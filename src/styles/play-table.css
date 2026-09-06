@@ -129,8 +129,25 @@
   gap: 0.75rem;
 }
 
+.shell:has(.play-table) .match-chrome {
+  gap: 0.2rem;
+}
+
 .match-chrome > .play-table {
   flex: 1;
+  min-height: 0;
+}
+
+.play-table:has(.g2048-toolbar) {
+  --play-gap: 0.35rem;
+}
+
+.play-table:has(.g2048-toolbar) .play-table__info {
+  gap: 0.2rem;
+}
+
+.play-table:has(.g2048-toolbar) .play-table__board {
+  overflow: hidden;
 }
 
 .match-actions {

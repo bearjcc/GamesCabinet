@@ -22,22 +22,25 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 28rem) {
-  .topbar-right {
-    flex-wrap: nowrap;
-    gap: 0.15rem;
-  }
+.g2048-toolbar .icon-control {
+  --toolbar-icon: 2.35rem;
+  width: var(--toolbar-icon);
+  height: var(--toolbar-icon);
+  min-width: var(--toolbar-icon);
+  min-height: var(--toolbar-icon);
+}
 
+.g2048-toolbar .icon-control svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+@media (max-width: 28rem) {
   .topbar-right .icon-control {
-    --shell-icon: 2.5rem;
+    --shell-icon: 2.45rem;
     width: var(--shell-icon);
     height: var(--shell-icon);
     min-width: var(--shell-icon);
     min-height: var(--shell-icon);
-  }
-
-  .topbar-right .icon-control svg {
-    width: 1.05rem;
-    height: 1.05rem;
   }
 }

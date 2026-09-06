@@ -78,17 +78,11 @@ export function Game2048Toolbar({
 
         <div className="g2048-toolbar__scores" data-testid="g2048-score">
           <span className="g2048-toolbar__score">
-            <span className="g2048-score-label">
-              <span className="sr-only">Score</span>
-              <span aria-hidden="true">S</span>
-            </span>
+            <span className="g2048-score-label">Score</span>
             <AnimatedCounter value={score} className="g2048-score-value" />
           </span>
           <span className="g2048-toolbar__score">
-            <span className="g2048-score-label">
-              <span className="sr-only">Best</span>
-              <span aria-hidden="true">B</span>
-            </span>
+            <span className="g2048-score-label">Best</span>
             <span className="g2048-score-value" data-testid="g2048-best">
               {bestScore}
             </span>
