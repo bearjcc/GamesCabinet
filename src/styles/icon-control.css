@@ -21,3 +21,23 @@
 .topbar-right .icon-control {
   flex-shrink: 0;
 }
+
+@media (max-width: 28rem) {
+  .topbar-right {
+    flex-wrap: nowrap;
+    gap: 0.15rem;
+  }
+
+  .topbar-right .icon-control {
+    --shell-icon: 2.5rem;
+    width: var(--shell-icon);
+    height: var(--shell-icon);
+    min-width: var(--shell-icon);
+    min-height: var(--shell-icon);
+  }
+
+  .topbar-right .icon-control svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}
