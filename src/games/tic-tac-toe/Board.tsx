@@ -1,10 +1,9 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { controlA11y } from '../../lib/actions';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getTicTacToeActions, squareMarkState } from './actions';
+import { squareMarkState } from './actions';
 import type { TTTState } from './game';
 
 const marks = ['X', 'O'] as const;
@@ -15,15 +14,6 @@ export function TicTacToeBoard({ G, ctx, moves, playerID, isActive }: BoardProps
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn — tap a square' },
   });
-
-  const pewActions = getTicTacToeActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^click-cell-(\d+)$/.exec(action.id);
-      if (match) moves.clickCell(Number(match[1]));
-    },
-  }));
 
   return (
     <PlayTable
@@ -63,7 +53,6 @@ export function TicTacToeBoard({ G, ctx, moves, playerID, isActive }: BoardProps
           })}
         </div>
       }
-      actions={<ActionSurface label="Tic-tac-toe actions" actions={surfaceActions} />}
     />
   );
 }

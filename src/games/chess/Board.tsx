@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { Lift, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
@@ -8,7 +7,6 @@ import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
 import { kenneyIcon } from '../shared/tokens';
-import { getChessActions } from './actions';
 import type { ChessState, Piece, PieceType } from './game';
 import { legalMoves, rc } from './game';
 
@@ -115,7 +113,6 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
   const prevBoardRef = useRef(cloneBoard(G.board));
 
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
-  const player = playerID ?? ctx.currentPlayer;
   const legal = yourTurn ? legalMoves(G, ctx.currentPlayer) : [];
   const targets =
     selected === null ? [] : legal.filter((m) => m.from === selected).map((m) => m.to);
@@ -160,16 +157,19 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
     },
   });
 
-  const pewActions = getChessActions({ G, player, yourTurn, selected });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^move-to-(\d+)$/.exec(action.id);
-      if (!match || selected === null) return;
-      moves.move(selected, Number(match[1]));
+  const handleSquareClick = (index: number, piece: Piece | null, isTarget: boolean) => {
+    if (!yourTurn) return;
+    if (isTarget && selected !== null) {
+      moves.move(selected, index);
       setSelected(null);
-    },
-  }));
+      return;
+    }
+    if (piece && selectable.has(index)) {
+      setSelected(selected === index ? null : index);
+      return;
+    }
+    setSelected(null);
+  };
 
   return (
     <PlayTable
@@ -197,17 +197,8 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                disabled={
-                  !yourTurn || (!!piece && !selectable.has(i) && !isTarget) || (!piece && !isTarget)
-                }
-                onClick={() => {
-                  if (isTarget && selected !== null) {
-                    moves.move(selected, i);
-                    setSelected(null);
-                    return;
-                  }
-                  if (piece && selectable.has(i)) setSelected(i);
-                }}
+                disabled={!yourTurn}
+                onClick={() => handleSquareClick(i, piece, isTarget)}
               >
                 {piece ? (
                   <PieceChrome
@@ -223,7 +214,6 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
           })}
         </div>
       }
-      actions={<ActionSurface label="Chess actions" actions={surfaceActions} />}
     />
   );
 }
