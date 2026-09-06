@@ -60,11 +60,10 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('host-room')).toBeEnabled();
   });
 
-  test('invalid vs-bot route redirects to game modes', async ({ page }) => {
+  test('invalid vs-bot route redirects to solo play for 2048', async ({ page }) => {
     await page.goto('/vs-bot/2048');
-    await expect(page).toHaveURL(/\/game\/2048$/);
-    await expect(page.getByTestId('play-start')).toBeVisible();
-    await expect(page.getByTestId('launch-modes')).toBeVisible();
+    await expect(page).toHaveURL(/\/play\/2048$/);
+    await expect(page.getByTestId('g2048-board')).toBeVisible();
   });
 
   test('hidden shelf stays locked until its access code is entered', async ({ page }) => {
@@ -76,7 +75,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await page.getByTestId('unlock-code').fill('crawler');
     await page.getByTestId('unlock-submit').click();
-    await expect(page.getByTestId('play-start')).toBeVisible();
+    await expect(page).toHaveURL(/\/play\/orbits/);
+    await expect(page.getByTestId('orbits-board')).toBeVisible();
 
     await page.goto('/');
     await expect(page.getByTestId('home-game-orbits')).toBeVisible();

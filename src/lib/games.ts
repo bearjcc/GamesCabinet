@@ -7,6 +7,8 @@ export type GameMeta = {
   hasBot: boolean;
   /** Offline local Client at `/play/:id` (solo). */
   hasSolo?: boolean;
+  /** Single player only: skip table setup; engine runs with numPlayers 1. */
+  soloOnly?: boolean;
   /** Offline pass-and-play at `/play/:id` (2+ seats). */
   hasLocal?: boolean;
   /** Solo leaderboard via shared scores API. */
@@ -65,6 +67,7 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 1,
     hasBot: false,
     hasSolo: true,
+    soloOnly: true,
     hasLeaderboard: true,
   },
   {
@@ -86,6 +89,7 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 1,
     hasBot: false,
     hasSolo: true,
+    soloOnly: true,
     hasLeaderboard: true,
   },
   {
@@ -132,6 +136,7 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 1,
     hasBot: false,
     hasSolo: true,
+    soloOnly: true,
     hasLeaderboard: true,
   },
   {
@@ -142,6 +147,7 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 1,
     hasBot: false,
     hasSolo: true,
+    soloOnly: true,
     hasLeaderboard: true,
   },
   {
@@ -251,6 +257,7 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 1,
     hasBot: false,
     hasSolo: true,
+    soloOnly: true,
     hasLeaderboard: true,
     accessCode: 'crawler',
   },
@@ -314,7 +321,12 @@ export function supportsBotPlay(meta: GameMeta): boolean {
 
 /** Solo-only titles (one player, no pass-and-play / online seats). */
 export function isSoloOnly(meta: GameMeta): boolean {
-  return Boolean(meta.hasSolo) && meta.maxPlayers === 1;
+  return meta.soloOnly === true;
+}
+
+/** Local solo play route; no table setup. */
+export function soloPlayPath(gameId: string): string {
+  return `/play/${gameId}`;
 }
 
 export type CatalogueGroup = {

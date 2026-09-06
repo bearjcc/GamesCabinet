@@ -5,13 +5,16 @@ import {
   deviceSeats,
   getNickname,
   getSeatColour,
+  getSoloBestScore,
   getUnlockedGames,
   loadSeat,
   SEAT_COLOUR_PALETTE,
   saveSeat,
   setNickname,
   setSeatColour,
+  setSoloBestScore,
   unlockGame,
+  updateSoloBestScore,
 } from './storage';
 
 const store = new Map<string, string>();
@@ -165,5 +168,49 @@ describe('access code unlocks', () => {
     });
     expect(getUnlockedGames()).toEqual([]);
     expect(() => unlockGame('orbits')).not.toThrow();
+  });
+});
+
+describe('solo best scores', () => {
+  it('reads and writes best scores per game', () => {
+    stubLocalStorage();
+    expect(getSoloBestScore('2048')).toBe(0);
+    setSoloBestScore('2048', 128);
+    expect(getSoloBestScore('2048')).toBe(128);
+    expect(store.get('gamescabinet.best.2048')).toBe('128');
+  });
+
+  it('updateSoloBestScore only increases the stored best', () => {
+    stubLocalStorage();
+    setSoloBestScore('2048', 100);
+    expect(updateSoloBestScore('2048', 80)).toBe(100);
+    expect(updateSoloBestScore('2048', 240)).toBe(240);
+    expect(getSoloBestScore('2048')).toBe(240);
+  });
+
+  it('falls back when best score storage is unavailable', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {
+        throw new Error('blocked');
+      },
+      removeItem: () => {
+        throw new Error('blocked');
+      },
+    });
+    expect(getSoloBestScore('2048')).toBe(0);
+    expect(() => setSoloBestScore('2048', 42)).not.toThrow();
+  });
+
+  it('ignores invalid stored best scores and bad writes', () => {
+    stubLocalStorage();
+    store.set('gamescabinet.best.2048', 'not-a-number');
+    expect(getSoloBestScore('2048')).toBe(0);
+    setSoloBestScore('2048', -5);
+    expect(getSoloBestScore('2048')).toBe(0);
+    setSoloBestScore('2048', Number.NaN);
+    expect(getSoloBestScore('2048')).toBe(0);
   });
 });

@@ -2,9 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('2048 undo', () => {
   test('undo control restores after a successful swipe', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-2048').click();
-    await page.getByTestId('play-start').click();
+    await page.goto('/play/2048');
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('animated-counter')).toBeVisible();
 
@@ -12,8 +10,8 @@ test.describe('2048 undo', () => {
     await expect(undo).toBeDisabled();
 
     const before = await page.getByTestId('g2048-board').innerText();
-    for (const dir of ['left', 'right', 'up', 'down'] as const) {
-      await page.getByTestId(`g2048-action-${dir}`).click();
+    for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']) {
+      await page.keyboard.press(key);
       if (await undo.isEnabled()) break;
     }
     await expect(undo).toBeEnabled();
@@ -21,5 +19,35 @@ test.describe('2048 undo', () => {
     await undo.click();
     await expect.poll(async () => page.getByTestId('g2048-board').innerText()).toBe(before);
     await expect(undo).toBeDisabled();
+  });
+});
+
+test.describe('2048 polish', () => {
+  test('new game resets the board during play', async ({ page }) => {
+    await page.goto('/play/2048');
+    await expect(page.getByTestId('g2048-board')).toBeVisible();
+    await page.keyboard.press('ArrowLeft');
+    const afterMove = await page.getByTestId('g2048-board').innerText();
+    await page.getByTestId('g2048-new-game').click();
+    await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(afterMove);
+    await expect(page.getByTestId('g2048-action-undo')).toBeDisabled();
+  });
+
+  test('WASD moves tiles', async ({ page }) => {
+    await page.goto('/play/2048');
+    await expect(page.getByTestId('g2048-board')).toBeVisible();
+    const before = await page.getByTestId('g2048-board').innerText();
+    await page.keyboard.press('d');
+    await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
+  });
+
+  test('best score persists in local storage', async ({ page }) => {
+    await page.goto('/play/2048');
+    await expect(page.getByTestId('g2048-best')).toHaveText('0');
+    await page.evaluate(() => {
+      localStorage.setItem('gamescabinet.best.2048', '512');
+    });
+    await page.reload();
+    await expect(page.getByTestId('g2048-best')).toHaveText('512');
   });
 });

@@ -5,7 +5,7 @@ import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { parseHogwartsSetup } from '../games/hogwarts-battle/setup';
 import { type GameId, gamesById } from '../games/registry';
-import { getGameMeta, isAccessGated, supportsLocalPlay } from '../lib/games';
+import { getGameMeta, isAccessGated, isSoloOnly, supportsLocalPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
 import { getUnlockedGames } from '../lib/storage';
@@ -28,6 +28,7 @@ export function PlayLocal() {
   );
   const numPlayers = useMemo(() => {
     if (!meta) return 1;
+    if (isSoloOnly(meta)) return 1;
     if (meta.hasSolo && !meta.hasLocal) return 1;
     if (meta.hasSolo && Number.isFinite(seatsParam) && seatsParam === 1) return 1;
     const floor = meta.hasLocal ? Math.max(2, meta.minPlayers) : meta.minPlayers;
@@ -69,12 +70,15 @@ export function PlayLocal() {
   }
 
   return (
-    <Shell title={hotseat ? `${meta.name} (pass and play)` : meta.name} backTo={`/game/${meta.id}`}>
+    <Shell
+      title={hotseat ? `${meta.name} (pass and play)` : meta.name}
+      backTo={isSoloOnly(meta) ? '/' : `/game/${meta.id}`}
+    >
       <MatchLifecycleProvider
         value={{
           resetOnPlayAgain: true,
           playAgainLabel: 'Play again',
-          gameLaunchTo: `/game/${meta.id}`,
+          gameLaunchTo: isSoloOnly(meta) ? '/' : `/game/${meta.id}`,
           homeTo: '/',
         }}
       >
