@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { Lift, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
@@ -9,7 +8,6 @@ import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
 import { KENNEY_CROWN } from '../shared/tokens';
-import { getCheckersActions } from './actions';
 import type { CheckersState, Piece } from './game';
 import { legalMoves, rc } from './game';
 
@@ -98,7 +96,6 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
   const prevBoardRef = useRef(cloneBoard(G.board));
 
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
-  const player = playerID ?? ctx.currentPlayer;
   const legal = yourTurn ? legalMoves(G, ctx.currentPlayer) : [];
   const targets =
     selected === null ? [] : legal.filter((m) => m.from === selected).map((m) => m.to);
@@ -143,16 +140,19 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
     },
   });
 
-  const pewActions = getCheckersActions({ G, player, yourTurn, selected });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^move-to-(\d+)$/.exec(action.id);
-      if (!match || selected === null) return;
-      moves.movePiece(selected, Number(match[1]));
+  const handleSquareClick = (index: number, piece: Piece | null, isTarget: boolean) => {
+    if (!yourTurn) return;
+    if (isTarget && selected !== null) {
+      moves.movePiece(selected, index);
       setSelected(null);
-    },
-  }));
+      return;
+    }
+    if (piece && selectable.has(index)) {
+      setSelected(selected === index ? null : index);
+      return;
+    }
+    setSelected(null);
+  };
 
   return (
     <PlayTable
@@ -184,17 +184,8 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                disabled={
-                  !yourTurn || (!!piece && !selectable.has(i) && !isTarget) || (!piece && !isTarget)
-                }
-                onClick={() => {
-                  if (isTarget && selected !== null) {
-                    moves.movePiece(selected, i);
-                    setSelected(null);
-                    return;
-                  }
-                  if (piece && selectable.has(i)) setSelected(i);
-                }}
+                disabled={!yourTurn}
+                onClick={() => handleSquareClick(i, piece, isTarget)}
               >
                 {piece ? (
                   <PieceChrome
@@ -210,7 +201,6 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
           })}
         </div>
       }
-      actions={<ActionSurface label="Checkers actions" actions={surfaceActions} />}
     />
   );
 }

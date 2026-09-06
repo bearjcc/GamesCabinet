@@ -98,6 +98,20 @@ Prefer simulated weight over full physics: squash, ease-out rotate, soft land, c
 
 Rationale for the object/chrome split: `docs/adr/0001-ui-operating-system-layer.md`.
 
+## Board-first interaction law
+
+**Moves happen on the board.** Players click pieces, squares, cards, and columns — not a parallel menu of move buttons. The pew (`PlayTable` bottom slot) is for hands, dice, and rare whole-hand shortcuts — never a grid of "Column 3" / "Move to e4" buttons that replace board interaction.
+
+| Pattern | Rule |
+|---|---|
+| **Grid / abstract** | Cells, columns, and pieces are the hit targets. Illegal taps explain why (tooltip / status), not a dead alternate UI. |
+| **Deck-builders** | Click a card to play it. One **Play whole hand** button is allowed (Ascension-style bulk shortcut). |
+| **Connect Four** | On your turn, hover (or finger-drag on touch) shows your disc held above the column; click or release drops it. No column-number button strip. |
+| **Chess & checkers** | Click a piece → legal squares highlight → click a destination. Deselect by clicking the same piece again or any non-destination square. |
+| **SemanticAction data** | Legality still derives from `(G, ctx)` outside JSX (see ADR 0001) — but **render** it as board highlights, not pew move menus. |
+
+When keyboard or screen-reader paths need explicit intents, expose them without duplicating the primary board UX as a button grid.
+
 ## Interaction guidelines
 
 These are the day-to-day rules for boards and shell. They implement the product principles without waiting for the full UI OS.
@@ -109,6 +123,7 @@ These are the day-to-day rules for boards and shell. They implement the product 
 5. **Selection reveals affordances.** Prefer object-driven actions over invisible mode switches (play / edit / spectator as parallel apps). Modes that change what a click means need a very strong reason.
 6. **Disabled actions explain themselves.** "Why can't I?" is part of the interface, not a dead button.
 7. **Defaults with override slots.** Shared dice, cards, meeples, tracks - behaviour and interaction stay shared; faces, meshes, and sounds are swappable. Override is the exception.
+8. **Board-first (see law above).** If the tabletop has a natural click target, use it. Pew buttons are shortcuts and confirmations, not a second game board.
 
 ## Agency guidelines
 
@@ -153,8 +168,41 @@ Progressive reading: amount of text expands with curiosity. Context beats encycl
 
 Long-term: one game knowledge graph feeding tooltips, search, rulebooks, variant diffs, and grounded Q&A - see [`PRODUCT.md`](./PRODUCT.md) and [`ARCHITECTURE.md`](./ARCHITECTURE.md). Tic-tac-toe stays tiny; Spirit Island gets a web.
 
+## Anti-slop / forbidden tells
+
+This cabinet is a quiet app, not a marketing site or a vibecoded demo. Personality lives in **boards**, the **brand mark**, and **theme** — not template chrome.
+
+### Typography & colour
+
+| Avoid | Use instead |
+|---|---|
+| Inter, Geist, Space Grotesk, or other "default AI" stacks | `Source Sans 3` (UI), `Fraunces` (wordmark only) — see Typography |
+| Indigo/violet accent defaults, purple-blue gradients | Theme neutrals + brand pops from the logo tokens |
+| Bright CTA blue on every control | Ink-fill primary sparingly; bordered default buttons |
+
+### Layout & surfaces
+
+| Avoid | Use instead |
+|---|---|
+| Glassmorphism, orbs, blobs, page gradients | Surface + 1px line (Elevation) |
+| Identical icon-feature cards in a grid | Dense game tiles; one-line blurbs |
+| Pill eyebrows / section labels | Hairline dividers; status bar copy |
+| Generic shadcn-card sameness on every surface | PlayTable slots; boards own saturated colour |
+| Hover-lift on everything | Motion on game objects only (Motion) |
+| Sparkle / "AI" badges, promotional ribbons | None in play; catalogue stays factual |
+
+### Interaction tells
+
+| Avoid | Use instead |
+|---|---|
+| Move-button grids ("Drop column 4", "Move to e4") | Board-first interaction law |
+| Hover-only essentials | Touch-first targets; `prefers-reduced-motion` path |
+| Coach-mark tours in play | Status bar + inline hints that fade with familiarity |
+
+**Light/cream chrome** can read as template if boards are grey and anonymous. Keep shell quiet; let each board and the stamped brand mark carry character.
+
 ## Do / Don't
 
-**Do:** denser grids; short descriptive copy; obvious controls; colourful boards; demonstrate before explaining; reversible or clearly safe actions; shared tabletop language across games.
+**Do:** denser grids; short descriptive copy; board-native controls; colourful boards; demonstrate before explaining; reversible or clearly safe actions; shared tabletop language across games; Kenney CC0 art by default with per-game override when identity needs it.
 
-**Don't:** heroes, eyebrows, pill CTAs, marketing parchment aesthetics (Light theme warmth is chrome, not a landing page), glassmorphism, nested cards, promotional badges, giant type, fake nostalgia, forced tutorials, unskippable celebration, beginner-mode walls, storefront chrome in play, pipeline notes on the site (WIP chapter numbers, engine enum names, unimplemented tiebreaks).
+**Don't:** heroes, eyebrows, pill CTAs, marketing parchment aesthetics (Light theme warmth is chrome, not a landing page), glassmorphism, nested cards, promotional badges, giant type, fake nostalgia, forced tutorials, unskippable celebration, beginner-mode walls, storefront chrome in play, pipeline notes on the site (WIP chapter numbers, engine enum names, unimplemented tiebreaks), vibecode accent colours, move-menu button strips, AI-slop typography defaults.

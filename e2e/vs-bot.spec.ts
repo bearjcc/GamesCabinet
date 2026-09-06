@@ -81,7 +81,6 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('c4-board')).toBeVisible();
     await page.getByTestId('c4-col-3').click();
-    await expect(page.getByTestId('action-surface')).toBeVisible();
     await expect(page.getByTestId('c4-col-3')).toHaveAttribute('aria-label', 'Drop in column 4');
     await expect(page.getByRole('status')).toBeVisible();
   });

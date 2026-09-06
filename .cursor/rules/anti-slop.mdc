@@ -1,0 +1,35 @@
+---
+description: "Board-first interaction and anti-slop visual contract. Source of truth: DESIGN.md."
+alwaysApply: true
+---
+
+# Anti-slop & board-first
+
+Read [`DESIGN.md`](../../DESIGN.md) before changing chrome, boards, or play interaction. Do not invent parallel design tokens.
+
+## Board-first interaction law
+
+- **Moves on the board.** Click pieces, squares, cards, columns — not pew button grids that duplicate board actions.
+- **Connect Four:** hover / finger-drag shows held disc above column; tap or release drops. No "Column N" buttons.
+- **Chess & checkers:** select piece → highlight legal squares → click destination. Deselect on second click of same piece or non-destination square.
+- **Deck-builders:** click card to play; optional single "Play whole hand" shortcut only.
+- **SemanticAction** legality still derives from `(G, ctx)` outside JSX; render as highlights on the board, not move menus.
+
+## Forbidden tells (cabinet-specific)
+
+Do not introduce:
+
+- Inter / Geist / Space Grotesk or other default AI font stacks
+- Indigo-violet accents, purple-blue gradients, vibecode palettes
+- Glass, orbs, blobs, page gradients, hover-lift on chrome
+- Identical icon-feature cards, pill eyebrows, sparkle/AI badges
+- Generic card-on-card sameness on every surface
+- Move-button grids replacing board interaction
+
+## Keep
+
+- Source Sans 3 + Fraunces wordmark; four themes; brand pops from logo
+- PlayTable slots (info / board / pew); Kenney CC0 default art
+- Quiet chrome; personality in boards and brand mark
+
+Player-facing copy rules: `.cursor/rules/player-facing.mdc`.
