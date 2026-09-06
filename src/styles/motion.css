@@ -26,10 +26,12 @@
   .ck-sq,
   .ck-piece,
   .g2048-cell,
+  .g2048-cell.is-new,
   .yatzy-score-btn,
   .lw-mode,
   .lw-cell {
     transition: none;
+    animation: none;
   }
 }
 
@@ -50,10 +52,12 @@
 [data-motion="reduced"] .ck-sq,
 [data-motion="reduced"] .ck-piece,
 [data-motion="reduced"] .g2048-cell,
+[data-motion="reduced"] .g2048-cell.is-new,
 [data-motion="reduced"] .yatzy-score-btn,
 [data-motion="reduced"] .lw-mode,
 [data-motion="reduced"] .lw-cell {
   transition: none;
+  animation: none;
 }
 
 /* Cinematic primitives: CSS fallbacks that honour the shared duration token. */

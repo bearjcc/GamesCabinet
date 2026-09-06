@@ -54,7 +54,7 @@ describe('Game2048', () => {
     const cells = emptyBoard();
     cells[3] = 2;
     const client = clientWithSetup(
-      () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+      () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
       'noop',
     );
     const before = cellsOf(client);
@@ -70,7 +70,7 @@ describe('Game2048', () => {
     cells[0] = 2;
     cells[1] = 2;
     const client = clientWithSetup(
-      () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+      () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
       'merge',
     );
     client.moves.swipe('left');
@@ -86,6 +86,7 @@ describe('Game2048', () => {
         cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
         score: 99,
         won: false,
+        winPaused: false,
         history: [],
       }),
       'dead',
@@ -93,18 +94,61 @@ describe('Game2048', () => {
     expect(client.getState()?.ctx.gameover).toEqual({ score: 99, won: false });
   });
 
-  it('marks won when a 2048 tile appears', () => {
+  it('marks won and pauses when a 2048 tile appears', () => {
     const cells = emptyBoard();
     cells[0] = 1024;
     cells[1] = 1024;
     const client = clientWithSetup(
-      () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+      () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
       'win',
     );
     client.moves.swipe('left');
     const G = GOf(client);
     expect(G.cells).toContain(2048);
     expect(G.won).toBe(true);
+    expect(G.winPaused).toBe(true);
+    client.moves.swipe('left');
+    expect(GOf(client).cells).toEqual(G.cells);
+  });
+
+  it('keepGoing clears win pause so play can continue', () => {
+    const cells = emptyBoard();
+    cells[0] = 1024;
+    cells[1] = 1024;
+    cells[2] = 2;
+    const client = clientWithSetup(
+      () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
+      'keep-going',
+    );
+    client.moves.swipe('left');
+    expect(GOf(client).winPaused).toBe(true);
+    client.moves.keepGoing();
+    expect(GOf(client).winPaused).toBe(false);
+    const historyBefore = GOf(client).history.length;
+    client.moves.swipe('down');
+    expect(GOf(client).history.length).toBeGreaterThan(historyBefore);
+  });
+
+  it('rejects keepGoing when not paused', () => {
+    const client = startClient();
+    client.moves.keepGoing();
+    expect(GOf(client).winPaused).toBe(false);
+  });
+
+  it('rejects keepGoing after game over', () => {
+    const client = clientWithSetup(
+      () => ({
+        cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
+        score: 99,
+        won: true,
+        winPaused: true,
+        history: [],
+      }),
+      'keep-going-over',
+    );
+    expect(client.getState()?.ctx.gameover).toBeTruthy();
+    client.moves.keepGoing();
+    expect(GOf(client).winPaused).toBe(true);
   });
 
   it('rejects an invalid swipe direction', () => {
@@ -141,7 +185,7 @@ describe('Game2048', () => {
       cells[0] = 2;
       cells[1] = 2;
       const client = clientWithSetup(
-        () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+        () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
         'undo-merge',
       );
       const beforeCells = cellsOf(client).slice();
@@ -163,7 +207,7 @@ describe('Game2048', () => {
       const cells = emptyBoard();
       cells[3] = 2;
       const client = clientWithSetup(
-        () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+        () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
         'undo-noop',
       );
       client.moves.swipe('right');
@@ -176,7 +220,7 @@ describe('Game2048', () => {
       const cells = emptyBoard();
       cells[0] = 2;
       const client = clientWithSetup(
-        () => ({ cells: cells.slice(), score: 0, won: false, history: [] }),
+        () => ({ cells: cells.slice(), score: 0, won: false, winPaused: false, history: [] }),
         'undo-stack',
       );
       client.moves.swipe('right');
@@ -201,6 +245,7 @@ describe('Game2048', () => {
         cells: emptyBoard(),
         score: 0,
         won: false,
+        winPaused: false,
         history: [],
       };
       for (let i = 0; i < HISTORY_LIMIT + 3; i++) {
@@ -218,11 +263,13 @@ describe('Game2048', () => {
           cells: [2, 4, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2],
           score: 99,
           won: false,
+          winPaused: false,
           history: [
             {
               cells: emptyBoard(),
               score: 0,
               won: false,
+              winPaused: false,
             },
           ],
         }),
@@ -240,10 +287,11 @@ describe('Game2048', () => {
         cells: emptyBoard(),
         score: 0,
         won: false,
+        winPaused: false,
         history: [],
       };
       expect(canUndo(empty, undefined)).toBe(false);
-      empty.history.push({ cells: emptyBoard(), score: 1, won: false });
+      empty.history.push({ cells: emptyBoard(), score: 1, won: false, winPaused: false });
       expect(canUndo(empty, undefined)).toBe(true);
       expect(canUndo(empty, { score: 1, won: false })).toBe(false);
     });

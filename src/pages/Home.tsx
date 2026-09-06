@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { JoinRoomPanel } from '../components/JoinRoomPanel';
 import { Shell } from '../components/Shell';
-import { catalogueGroups, visibleGames } from '../lib/games';
+import { catalogueGroups, isSoloOnly, soloPlayPath, visibleGames } from '../lib/games';
 import { getUnlockedGames } from '../lib/storage';
 
 export function Home() {
@@ -27,7 +27,7 @@ export function Home() {
               <Link
                 key={g.id}
                 className="game-tile"
-                to={`/game/${g.id}`}
+                to={isSoloOnly(g) ? soloPlayPath(g.id) : `/game/${g.id}`}
                 data-testid={`home-game-${g.id}`}
               >
                 <h3>{g.name}</h3>

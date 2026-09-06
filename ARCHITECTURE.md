@@ -87,6 +87,8 @@ Room join UX: short code only (game resolved via `/rooms/:code`). Shareable path
 
 `src/lib/games.ts` is the cabinet catalogue (id, name, blurb, player counts, bot/solo flags). boardgame.io `name` on each `Game` must stay aligned with catalogue ids used in routes and Lobby.
 
+**Solo-only** (`soloOnly: true` on `GameMeta`, `isSoloOnly()` in code): one human, no table setup. Home and `/game/:id` deep links go straight to `/play/:id`; `PlayLocal` always uses `numPlayers: 1` with no seat or colour bootstrap. Yatzy and Hogwarts Battle are not solo-only (they support multiple seats or modes).
+
 Games are modular folders. Dominoes is one game in the cabinet, not the architecture. Do not hard-code Dominoes assumptions into the shell.
 
 ## Persistence (current vs deferred)

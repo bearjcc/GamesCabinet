@@ -1,3 +1,38 @@
+.g2048-play-area {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: min(70vw, 22rem);
+  touch-action: none;
+}
+
+.g2048-win-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  pointer-events: none;
+}
+
+.g2048-win-title {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--brand-yellow) 85%, var(--surface));
+  color: var(--brand-umber);
+  font-weight: 700;
+}
+
+.g2048-scores {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+}
+
 .g2048-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(3.4rem, 4.5rem));
@@ -21,7 +56,24 @@
   transition:
     background var(--motion-duration) var(--motion-ease),
     color var(--motion-duration) var(--motion-ease),
-    font-size var(--motion-duration) var(--motion-ease);
+    font-size var(--motion-duration) var(--motion-ease),
+    transform var(--motion-duration) var(--motion-ease);
+}
+
+.g2048-cell.is-new {
+  animation: g2048-pop var(--motion-duration) var(--motion-ease);
+}
+
+@keyframes g2048-pop {
+  0% {
+    transform: scale(0.82);
+  }
+  45% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .g2048-cell.v2 {
@@ -58,6 +110,16 @@
   background: #edc22e;
   color: #f9f6f2;
   font-size: 1rem;
+}
+.g2048-cell.v4096 {
+  background: #e8b563;
+  color: #f9f6f2;
+  font-size: 0.95rem;
+}
+.g2048-cell.v8192 {
+  background: #e4a84f;
+  color: #f9f6f2;
+  font-size: 0.9rem;
 }
 
 .g2048-scoreline {
