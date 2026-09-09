@@ -1,11 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter, Token } from '../../components/tabletop';
+import { controlA11y } from '../../lib/actions';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getNimActions } from './actions';
 import type { NimState } from './game';
+import { legalTakes, MAX_TAKE } from './game';
 
 /** Cap visual tokens so a full heap stays compact on phone. */
 const VISUAL_TOKEN_CAP = 13;
@@ -17,16 +17,8 @@ export function NimBoard({ G, ctx, moves, playerID, isActive }: BoardProps<NimSt
     labels: { yourTurn: 'Your turn - take 1 to 3 stones' },
   });
 
-  const pewActions = getNimActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^take-(\d+)$/.exec(action.id);
-      if (match) moves.take(Number(match[1]));
-    },
-  }));
-
   const tokenCount = Math.min(G.heap, VISUAL_TOKEN_CAP);
+  const legal = new Set(legalTakes(G.heap));
 
   return (
     <PlayTable
@@ -40,20 +32,32 @@ export function NimBoard({ G, ctx, moves, playerID, isActive }: BoardProps<NimSt
             aria-label={`${G.heap} stones in the heap`}
             data-testid="nim-pile"
           >
-            {Array.from({ length: tokenCount }, (_, i) => (
-              <Token
-                key={i}
-                player="0"
-                variant="chip"
-                size="sm"
-                label={`Stone ${i + 1}`}
-                testId={`nim-stone-${i}`}
-              />
-            ))}
+            {Array.from({ length: tokenCount }, (_, i) => {
+              const takeN = i + 1;
+              const can = yourTurn && takeN <= MAX_TAKE && legal.has(takeN);
+              const a11y = controlA11y({
+                label: `Take ${takeN} stone${takeN === 1 ? '' : 's'}`,
+                disabled: !can,
+                disabledReason: yourTurn ? 'Not enough stones' : 'Wait for your turn',
+              });
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={`nim-stone${can ? ' is-open' : ''}`}
+                  disabled={!can}
+                  data-testid={`nim-stone-${i}`}
+                  title={a11y.title}
+                  aria-label={a11y.ariaLabel}
+                  onClick={() => moves.take(takeN)}
+                >
+                  <Token player="0" variant="chip" size="sm" label={`Stone ${i + 1}`} />
+                </button>
+              );
+            })}
           </div>
         </div>
       }
-      actions={<ActionSurface label="Nim actions" actions={surfaceActions} />}
     />
   );
 }

@@ -1,10 +1,8 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getDotsAndBoxesActions } from './actions';
 import {
   allLineKeys,
   BOX_COLS,
@@ -52,15 +50,6 @@ export function DotsAndBoxesBoard({
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - claim a line' },
   });
-  const pewActions = getDotsAndBoxesActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^claim-(.+)$/.exec(action.id);
-      if (match) moves.claimLine(match[1]);
-    },
-  }));
-
   const width = PAD * 2 + BOX_COLS * CELL;
   const height = PAD * 2 + BOX_ROWS * CELL;
 
@@ -186,7 +175,6 @@ export function DotsAndBoxesBoard({
           </svg>
         </div>
       }
-      actions={<ActionSurface label="Dots and Boxes actions" actions={surfaceActions} />}
     />
   );
 }

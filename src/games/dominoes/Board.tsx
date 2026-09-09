@@ -11,6 +11,7 @@ import { Snap } from '../../components/cinematic';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { boardFirstChromeActions } from '../../lib/actions';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
@@ -34,12 +35,6 @@ function kenneySrc(tile: Tile): string {
 
 function remToPx(rem: number): number {
   return rem * Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
-}
-
-function endIndexFromPlayActionId(id: string): number | null {
-  if (id === 'play-starter') return -1;
-  const match = /^play-end-(\d+)$/.exec(id);
-  return match ? Number(match[1]) : null;
 }
 
 export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesState>) {
@@ -91,7 +86,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
     if (drag) status = 'Drop on a glowing end';
     else if (handIndex === null) status = 'Your turn — drag or tap a tile';
     else if (G.board.length === 0) status = 'Play starter below, or drop on the table';
-    else status = 'Tap a glowing end or Play on end below';
+    else status = 'Tap a glowing end to play';
   }
 
   const clientToStageRem = (clientX: number, clientY: number) => {
@@ -181,22 +176,16 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       ? placementForEnd(G.ends[hoverEnd], dragTile)
       : null;
 
-  const pewActions = getDominoesActions({ G, player: pid, yourTurn, handIndex });
-  const surfaceActions = pewActions.map((action) => ({
+  const chromeActions = boardFirstChromeActions(
+    getDominoesActions({ G, player: pid, yourTurn, handIndex }),
+  ).map((action) => ({
     ...action,
     onAction: () => {
       if (action.id === 'draw') {
         moves.drawTile();
         return;
       }
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const endIndex = endIndexFromPlayActionId(action.id);
-      if (endIndex === null || handIndex === null) return;
-      moves.playTile(handIndex, endIndex);
-      setHandIndex(null);
+      if (action.id === 'pass') moves.pass();
     },
   }));
 
@@ -342,7 +331,11 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
           ))}
         </div>
       }
-      actions={<ActionSurface label="Dominoes actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Dominoes actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

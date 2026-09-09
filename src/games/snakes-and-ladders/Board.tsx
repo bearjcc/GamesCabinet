@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { Roll } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
@@ -8,7 +7,6 @@ import { DieFace, Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { asDieFaceValue } from '../shared/dice';
 import { KENNEY_LADDER, KENNEY_SNAKE } from '../shared/tokens';
-import { getSnakesAndLaddersActions } from './actions';
 import {
   BOARD_SIZE,
   FINAL_SQUARE,
@@ -46,13 +44,9 @@ export function SnakesAndLaddersBoard({
     prevRollRef.current = G.lastRoll;
   }, [G.lastRoll]);
 
-  const pewActions = getSnakesAndLaddersActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'roll') moves.roll();
-    },
-  }));
+  const roll = () => {
+    if (yourTurn) moves.roll();
+  };
 
   const cells: number[] = [];
   for (let row = 0; row < BOARD_SIZE; row++) {
@@ -76,7 +70,15 @@ export function SnakesAndLaddersBoard({
               </span>
               <span className="sal-goal">Goal: {FINAL_SQUARE}</span>
             </div>
-            <div className="sal-die-slot" aria-live="polite">
+            <button
+              type="button"
+              className={`sal-die-slot${yourTurn ? ' is-open' : ''}`}
+              data-testid="sal-die-roll"
+              disabled={!yourTurn}
+              onClick={roll}
+              aria-label={yourTurn ? 'Roll the die' : 'Die'}
+              aria-live="polite"
+            >
               {G.lastRoll != null ? (
                 <Roll key={rollPulse} active={rollPulse > 0} className="sal-die-cinematic">
                   <DieFace
@@ -86,11 +88,11 @@ export function SnakesAndLaddersBoard({
                   />
                 </Roll>
               ) : (
-                <div className="sal-die-empty" data-testid="sal-die-empty">
-                  Roll to start
-                </div>
+                <span className="sal-die-empty" data-testid="sal-die-empty">
+                  Tap to roll
+                </span>
               )}
-            </div>
+            </button>
           </div>
           <div className="sal-grid" role="grid" aria-label="Snakes and Ladders board">
             {cells.map((n) => {
@@ -151,7 +153,6 @@ export function SnakesAndLaddersBoard({
           </div>
         </div>
       }
-      actions={<ActionSurface label="Snakes and Ladders actions" actions={surfaceActions} />}
     />
   );
 }

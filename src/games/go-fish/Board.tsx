@@ -1,13 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, StockPile } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { kenneyPlayingCardAsset, type Rank } from '../shared/cards';
-import { getGoFishActions } from './actions';
-import { canDraw, type GoFishState, opponentOf } from './game';
+import { kenneyPlayingCardAsset } from '../shared/cards';
+import { canAsk, canDraw, type GoFishState, opponentOf } from './game';
 
 export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoFishState>) {
   const pid = playerID === null || playerID === undefined ? -1 : Number(playerID);
@@ -26,20 +24,12 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
     labels: { yourTurn: yourTurnLabel },
   });
 
-  const pewActions = getGoFishActions({ G, player: pid, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'draw') {
-        moves.draw();
-        return;
-      }
-      if (action.id.startsWith('ask-')) {
-        const rank = action.id.slice('ask-'.length) as Rank;
-        moves.ask(rank);
-      }
-    },
-  }));
+  const onCardSelect = (index: number) => {
+    if (!yourTurn || pid < 0 || G.pendingFishRank != null) return;
+    const card = hand[index];
+    if (!card || !canAsk(G, pid, card.rank)) return;
+    moves.ask(card.rank);
+  };
 
   return (
     <PlayTable
@@ -81,12 +71,16 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
       pew={
         <CardHand
           cards={hand}
-          disabled
+          disabled={!yourTurn || G.pendingFishRank != null}
+          isPlayable={(_, i) => {
+            const card = hand[i];
+            return Boolean(card && yourTurn && pid >= 0 && canAsk(G, pid, card.rank));
+          }}
+          onSelect={onCardSelect}
           assetFor={kenneyPlayingCardAsset}
           testIdPrefix="go-fish-hand"
         />
       }
-      actions={<ActionSurface label="Go Fish actions" actions={surfaceActions} />}
     />
   );
 }

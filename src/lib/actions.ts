@@ -75,3 +75,15 @@ export function actionAriaLabel(action: SemanticAction): string {
     disabledReason: action.disabledReason,
   }).ariaLabel;
 }
+
+/**
+ * Keep pew intents that are genuine chrome (roll, pass, draw pile, confirm).
+ * Drop move/select intents and rank-ask shortcuts that belong on the board or hand.
+ */
+export function boardFirstChromeActions(actions: SemanticAction[]): SemanticAction[] {
+  return actions.filter((action) => {
+    if (action.kind === 'move' || action.kind === 'select') return false;
+    if (action.id.startsWith('ask-')) return false;
+    return true;
+  });
+}

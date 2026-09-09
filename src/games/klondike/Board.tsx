@@ -5,6 +5,7 @@ import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { StockPile } from '../../components/tabletop/CardPile';
+import { boardFirstChromeActions } from '../../lib/actions';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { kenneyPlayingCardAsset } from '../shared/cards';
 import { getKlondikeActions, type KlondikeSelection } from './actions';
@@ -113,31 +114,14 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
   const wasteSelected = selection?.source === 'waste';
   const wasteTop = topCard(G.waste);
 
-  const pewActions = getKlondikeActions({ G, playable, selection });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'draw') {
-        clear();
-        moves.draw();
-        return;
-      }
-      if (action.id === 'waste-to-foundation') {
-        moves.wasteToFoundation();
-        clear();
-        return;
-      }
-      const tableauMatch = /^tableau-to-foundation-(\d+)$/.exec(action.id);
-      if (tableauMatch) {
-        moves.tableauToFoundation(Number(tableauMatch[1]));
-        clear();
-        return;
-      }
-      if (action.id === 'clear') {
-        clear();
-      }
-    },
-  }));
+  const chromeActions = boardFirstChromeActions(getKlondikeActions({ G, playable, selection }))
+    .filter((action) => action.id !== 'draw')
+    .map((action) => ({
+      ...action,
+      onAction: () => {
+        if (action.id === 'clear') clear();
+      },
+    }));
 
   return (
     <SoloLeaderboardShell
@@ -262,7 +246,11 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
           </div>
         </div>
       }
-      actions={<ActionSurface label="Klondike actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Klondike actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

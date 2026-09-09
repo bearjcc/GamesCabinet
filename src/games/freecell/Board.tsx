@@ -4,6 +4,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { CardFace } from '../../components/tabletop/CardFace';
+import { boardFirstChromeActions } from '../../lib/actions';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { type Card, kenneyPlayingCardAsset } from '../shared/cards';
 import { type FreeCellSelection, getFreeCellActions } from './actions';
@@ -38,34 +39,14 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
 
   const clear = () => setSelection(null);
 
-  const pewActions = getFreeCellActions({ G, playable, selection });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'clear') {
-        clear();
-        return;
-      }
-      if (!selection) return;
-      if (action.id === 'to-foundation') {
-        if (selection.source === 'cascade' && selection.count === 1) {
-          moves.cascadeToFoundation(selection.col);
-          clear();
-          return;
-        }
-        if (selection.source === 'freecell') {
-          moves.freecellToFoundation(selection.index);
-          clear();
-        }
-        return;
-      }
-      const freecellMatch = /^to-freecell-(\d+)$/.exec(action.id);
-      if (freecellMatch && selection.source === 'cascade' && selection.count === 1) {
-        moves.cascadeToFreecell(selection.col, Number(freecellMatch[1]));
-        clear();
-      }
-    },
-  }));
+  const chromeActions = boardFirstChromeActions(getFreeCellActions({ G, playable, selection })).map(
+    (action) => ({
+      ...action,
+      onAction: () => {
+        if (action.id === 'clear') clear();
+      },
+    }),
+  );
 
   const onFreecell = (index: number) => {
     if (!playable) return;
@@ -257,7 +238,11 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
           </div>
         </div>
       }
-      actions={<ActionSurface label="FreeCell actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="FreeCell actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

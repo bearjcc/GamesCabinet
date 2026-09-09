@@ -1,10 +1,8 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getNineMensMorrisActions } from './actions';
 import {
   ADJACENT,
   type Cell,
@@ -76,32 +74,6 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
     isYourTurn: yourTurn,
     labels: { yourTurn: yourTurnLabel },
   });
-
-  const pewActions = getNineMensMorrisActions({ G, player, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const place = /^place-(\d+)$/.exec(action.id);
-      if (place) {
-        moves.place(Number(place[1]));
-        return;
-      }
-      const remove = /^remove-(\d+)$/.exec(action.id);
-      if (remove) {
-        moves.remove(Number(remove[1]));
-        return;
-      }
-      const select = /^select-(\d+)$/.exec(action.id);
-      if (select) {
-        moves.select(Number(select[1]));
-        return;
-      }
-      const moveTo = /^move-to-(\d+)$/.exec(action.id);
-      if (moveTo && G.selected !== null) {
-        moves.move(Number(moveTo[1]));
-      }
-    },
-  }));
 
   return (
     <PlayTable
@@ -184,7 +156,6 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
           })}
         </div>
       }
-      actions={<ActionSurface label="Nine Men's Morris actions" actions={surfaceActions} />}
     />
   );
 }

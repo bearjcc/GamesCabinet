@@ -6,6 +6,7 @@ import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
+import { boardFirstChromeActions } from '../../lib/actions';
 import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
@@ -92,13 +93,14 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     return set;
   }, [hand, match, yourTurn]);
 
-  const pewActions = getCrazyEightsActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'pass') moves.pass();
-    },
-  }));
+  const chromeActions = boardFirstChromeActions(getCrazyEightsActions({ G, yourTurn })).map(
+    (action) => ({
+      ...action,
+      onAction: () => {
+        if (action.id === 'pass') moves.pass();
+      },
+    }),
+  );
 
   const { text: baseStatus, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
@@ -198,7 +200,11 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
           testIdPrefix="ce-hand"
         />
       }
-      actions={<ActionSurface label="Crazy Eights actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Crazy Eights actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

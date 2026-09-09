@@ -8,7 +8,7 @@ test.describe('Snakes and Ladders', () => {
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('sal-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
-    await page.getByTestId('sal-action-roll').click();
+    await page.getByTestId('sal-die-roll').click();
     await expect(page.getByTestId('sal-die')).toBeVisible();
   });
 });

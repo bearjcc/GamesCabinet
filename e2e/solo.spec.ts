@@ -29,8 +29,6 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-yatzy').click();
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
-    await expect(page.getByTestId('action-surface')).toBeVisible();
-    await expect(page.getByTestId('play-table-actions')).toBeVisible();
     await page.getByTestId('yatzy-roll').click();
     await page.getByTestId('yatzy-score-chance').click();
     await expect(page.getByRole('status')).toBeVisible();

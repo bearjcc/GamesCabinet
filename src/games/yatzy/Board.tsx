@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { Roll } from '../../components/cinematic';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
@@ -9,7 +8,6 @@ import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { composeDieFaceArt, dieFaceArtMap, kenneyDieFaceAsset } from '../shared/dice';
-import { getYatzyActions } from './actions';
 import type { YatzyState } from './game';
 import {
   CATEGORIES,
@@ -100,13 +98,7 @@ export function YatzyBoard({
     return name?.trim() || `P${i + 1}`;
   };
 
-  const pewActions = getYatzyActions({ rolls: G.rolls, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'roll') moves.rollDice();
-    },
-  }));
+  const canRoll = yourTurn && G.rolls < 3;
 
   const info = (
     <>
@@ -199,10 +191,18 @@ export function YatzyBoard({
           label="Dice"
         />
       </Roll>
+      {canRoll ? (
+        <button
+          type="button"
+          className="btn yatzy-roll"
+          data-testid="yatzy-roll"
+          onClick={() => moves.rollDice()}
+        >
+          Roll ({G.rolls}/3)
+        </button>
+      ) : null}
     </div>
   );
-
-  const actionSurface = <ActionSurface label="Yatzy actions" actions={surfaceActions} />;
 
   if (solo) {
     return (
@@ -215,10 +215,9 @@ export function YatzyBoard({
         info={info}
         board={card}
         pew={pew}
-        actions={actionSurface}
       />
     );
   }
 
-  return <PlayTable info={info} board={card} pew={pew} actions={actionSurface} />;
+  return <PlayTable info={info} board={card} pew={pew} />;
 }

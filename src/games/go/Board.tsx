@@ -3,6 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
+import { boardFirstChromeActions } from '../../lib/actions';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getGoActions } from './actions';
 import { type GoState, legalPlaces, SIZE } from './game';
@@ -22,18 +23,14 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
     },
   });
 
-  const pewActions = getGoActions({ G, player, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const match = /^place-(\d+)$/.exec(action.id);
-      if (match) moves.place(Number(match[1]));
-    },
-  }));
+  const chromeActions = boardFirstChromeActions(getGoActions({ G, player, yourTurn })).map(
+    (action) => ({
+      ...action,
+      onAction: () => {
+        if (action.id === 'pass') moves.pass();
+      },
+    }),
+  );
 
   return (
     <PlayTable
@@ -68,7 +65,11 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
           })}
         </div>
       }
-      actions={<ActionSurface label="Go actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Go actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }
