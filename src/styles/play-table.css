@@ -48,7 +48,8 @@
 .play-table__board:has(.dom-scroll),
 .play-table__board:has(.yatzy-card-wrap),
 .play-table__board:has(.ce-table),
-.play-table__board:has(.lw-play) {
+.play-table__board:has(.lw-play),
+.play-table__board:has(.hb-board) {
   place-items: stretch;
   align-content: stretch;
 }
