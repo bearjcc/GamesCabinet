@@ -43,44 +43,10 @@
   color: var(--tile-ink);
 }
 
-.lw-board-wrap {
+.lw-board {
   --lw-gap: 0.2rem;
   --lw-pad: 0.25rem;
-  --lw-arrow: var(--tap-min);
-  --lw-cell: min(
-    2.8rem,
-    calc((100cqw - 2 * var(--lw-arrow) - 9 * var(--lw-gap) - 2 * var(--lw-pad)) / 8)
-  );
-  display: grid;
-  gap: var(--lw-gap);
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 0 auto;
-}
-
-.lw-col-arrows {
-  display: grid;
-  grid-template-columns: repeat(8, var(--lw-cell));
-  gap: var(--lw-gap);
-  margin-inline: calc(var(--lw-arrow) + var(--lw-gap));
-}
-
-.lw-mid {
-  display: grid;
-  grid-template-columns: var(--lw-arrow) minmax(0, 1fr) var(--lw-arrow);
-  gap: var(--lw-gap);
-  align-items: center;
-  min-width: 0;
-}
-
-.lw-row-arrows {
-  display: grid;
-  grid-template-rows: repeat(8, var(--lw-cell));
-  gap: var(--lw-gap);
-}
-
-.lw-board {
+  --lw-cell: min(2.8rem, calc((100cqw - 9 * var(--lw-gap) - 2 * var(--lw-pad)) / 8));
   display: grid;
   grid-template-columns: repeat(8, var(--lw-cell));
   grid-template-rows: repeat(8, var(--lw-cell));
@@ -113,15 +79,6 @@
 .lw-cell.is-selected {
   background: color-mix(in srgb, var(--you) 70%, var(--tile));
   color: var(--ink-contrast);
-}
-
-.lw-arrow {
-  width: var(--lw-arrow);
-  height: var(--lw-arrow);
-  min-width: var(--lw-arrow);
-  min-height: var(--lw-arrow);
-  padding: 0;
-  font-size: 0.85rem;
 }
 
 .lw-actions {
@@ -186,7 +143,7 @@
 }
 
 @media (max-width: 28rem) {
-  .lw-board-wrap {
+  .lw-board {
     --lw-gap: 0.15rem;
     --lw-pad: 0.15rem;
   }

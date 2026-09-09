@@ -51,6 +51,12 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
   const match = matchContext(G);
   const mayDraw = yourTurn && pid >= 0 && canDraw(G, pid);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clear local UI when the seat changes
+  useEffect(() => {
+    setSelected(null);
+    setPickingSuit(false);
+  }, [ctx.currentPlayer]);
+
   useEffect(() => {
     const nextLens = handLengths(G.hands);
     const nextTopId = topOf(G.discard)?.id;
@@ -92,7 +98,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     return set;
   }, [hand, match, yourTurn]);
 
-  const pewActions = getCrazyEightsActions({ G, yourTurn });
+  const pewActions = getCrazyEightsActions({ G, player: pid, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
@@ -118,10 +124,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     if (!yourTurn) return;
     const card = hand[index];
     if (!card || !match) return;
-    if (!canPlayMatching(card, match, { wildRanks: [WILD_RANK] })) {
-      setSelected(index);
-      return;
-    }
+    if (!canPlayMatching(card, match, { wildRanks: [WILD_RANK] })) return;
     if (card.rank === WILD_RANK) {
       setSelected(index);
       setPickingSuit(true);
@@ -189,8 +192,9 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
       pew={
         <CardHand
           cards={hand}
-          selectedIndex={selected}
+          selectedIndex={pickingSuit ? selected : null}
           disabled={!yourTurn}
+          mode="physical"
           isPlayable={(_, i) => playableIndexes.has(i)}
           isWild={(card) => isWildEightId(card.id)}
           assetFor={resolveAsset}
@@ -198,7 +202,11 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
           testIdPrefix="ce-hand"
         />
       }
-      actions={<ActionSurface label="Crazy Eights actions" actions={surfaceActions} />}
+      actions={
+        pewActions.length > 0 ? (
+          <ActionSurface label="Crazy Eights actions" actions={surfaceActions} />
+        ) : null
+      }
     />
   );
 }

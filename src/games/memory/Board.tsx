@@ -1,16 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { useEffect, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
-import { Flip } from '../../components/cinematic';
+import { useEffect } from 'react';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
-import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { readEffectiveMotion } from '../../lib/motion';
 import { type Card, kenneyPlayingCardAsset, makeCard, type Rank } from '../shared/cards';
-import { getMemoryActions } from './actions';
 import { GRID, type MemoryCard, type MemoryState, PAIR_COUNT } from './game';
 
 const PAIR_RANKS: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8'];
@@ -20,6 +15,10 @@ export function pairFace(pairId: number): Card {
   return makeCard(pairId < PAIR_COUNT / 2 ? 'hearts' : 'spades', rank);
 }
 
+const PRELOAD_ASSETS = Array.from({ length: PAIR_COUNT }, (_, pairId) =>
+  kenneyPlayingCardAsset(pairFace(pairId)),
+);
+
 type MemoryCellProps = {
   index: number;
   card: MemoryCard;
@@ -27,76 +26,64 @@ type MemoryCellProps = {
   onFlip: () => void;
 };
 
-/** Client-only Flip pulse; remounts so motion never gates G or taps. */
 function MemoryCell({ index, card, can, onFlip }: MemoryCellProps) {
-  const [flipPulse, setFlipPulse] = useState(0);
-  const [flipActive, setFlipActive] = useState(false);
-  const prevFaceUpRef = useRef(card.faceUp);
-
-  useEffect(() => {
-    if (card.faceUp === prevFaceUpRef.current) return;
-    prevFaceUpRef.current = card.faceUp;
-    setFlipPulse((n) => n + 1);
-  }, [card.faceUp]);
-
-  useEffect(() => {
-    if (flipPulse === 0) return;
-    setFlipActive(true);
-    const ms = primitiveProfile('flip', readEffectiveMotion()).durationMs;
-    const t = window.setTimeout(() => setFlipActive(false), ms);
-    return () => window.clearTimeout(t);
-  }, [flipPulse]);
-
   const face = pairFace(card.pairId);
+  const assetSrc = kenneyPlayingCardAsset(face);
 
   return (
-    <div
+    <button
+      type="button"
       className={`memory-cell${can ? ' is-open' : ''}${card.faceUp ? ' is-up' : ''}`}
-      role="gridcell"
+      disabled={!can}
       data-testid={`memory-cell-${index}`}
+      aria-label={card.faceUp ? `Matched ${face.rank}` : `Face-down card ${index + 1}`}
+      onClick={can ? onFlip : undefined}
     >
-      <Flip key={flipPulse} active={flipActive} className="memory-cell__cinematic">
-        {card.faceUp ? (
-          <CardFace card={face} assetSrc={kenneyPlayingCardAsset(face)} />
-        ) : (
-          <CardBack
-            onClick={can ? onFlip : undefined}
-            disabled={!can}
-            label={`Face-down card ${index + 1}`}
-          />
-        )}
-      </Flip>
-    </div>
+      <div className="memory-card">
+        <div className="memory-card__inner">
+          <div className="memory-card__back">
+            <CardBack label={`Face-down card ${index + 1}`} />
+          </div>
+          <div className="memory-card__face">
+            <CardFace card={face} assetSrc={assetSrc} />
+          </div>
+        </div>
+      </div>
+    </button>
   );
 }
 
 export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<MemoryState>) {
+  const solo = ctx.numPlayers === 1;
   const yourTurn = Boolean(isActive && !ctx.gameover);
+
+  useEffect(() => {
+    for (const src of PRELOAD_ASSETS) {
+      const img = new Image();
+      img.src = src;
+    }
+  }, []);
+
   const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: 'Your turn - flip a card' },
-  });
-  const pewActions = getMemoryActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^flip-(\d+)$/.exec(action.id);
-      if (match) moves.flip(Number(match[1]));
+    labels: {
+      yourTurn: solo ? 'Flip a card' : 'Your turn — flip a card',
     },
-  }));
+  });
+
+  const scores = solo
+    ? [{ label: 'Pairs', value: G.scores[0] }]
+    : [
+        { label: 'P1', value: G.scores[0] },
+        { label: 'P2', value: G.scores[1] },
+      ];
 
   return (
     <PlayTable
       info={
         <>
           <StatusBar text={status} tone={tone} />
-          <MatchScoreboard
-            scores={[
-              { label: 'P1', value: G.scores[0] },
-              { label: 'P2', value: G.scores[1] },
-            ]}
-            testId="memory-scores"
-          />
+          <MatchScoreboard scores={scores} testId="memory-scores" />
         </>
       }
       board={
@@ -115,7 +102,6 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
           })}
         </div>
       }
-      actions={<ActionSurface label="Memory actions" actions={surfaceActions} />}
     />
   );
 }

@@ -17,31 +17,10 @@ function emptyG(): ReversiState {
 }
 
 describe('getReversiActions', () => {
-  it('lists enabled Place intents for each legal square on turn', () => {
+  it('returns no pew intents when legal places exist on the board', () => {
     const G = openingG();
-    const places = legalPlaces(G, '0');
-    expect(places.length).toBeGreaterThan(0);
-
-    const actions = getReversiActions({ G, player: '0', yourTurn: true });
-    expect(actions.map((a) => a.id)).toEqual(places.map((i) => `place-${i}`));
-    expect(actions[0]).toMatchObject({
-      kind: 'move',
-      disabled: false,
-      variant: 'primary',
-      testId: `reversi-action-${places[0]}`,
-    });
-    expect(actions[0]?.label).toMatch(/^Place at [a-h][1-8]$/);
-  });
-
-  it('disables place intents off-turn with a reason', () => {
-    const G = openingG();
-    const actions = getReversiActions({ G, player: '0', yourTurn: false });
-    expect(actions.length).toBeGreaterThan(0);
-    for (const action of actions) {
-      expect(action.id).toMatch(/^place-\d+$/);
-      expect(action.disabled).toBe(true);
-      expect(action.disabledReason).toBe('Wait for your turn');
-    }
+    expect(legalPlaces(G, '0').length).toBeGreaterThan(0);
+    expect(getReversiActions({ G, player: '0', yourTurn: true })).toEqual([]);
   });
 
   it('exposes an enabled pass intent when no legal places on turn', () => {

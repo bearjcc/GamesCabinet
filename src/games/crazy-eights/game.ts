@@ -49,6 +49,17 @@ export function canDraw(G: CrazyEightsState, player: number): boolean {
   return G.stock.length > 0 || G.discard.length > 1;
 }
 
+/** Pass after a draw, or when no card can be played and the stock cannot be drawn. */
+export function canPass(G: CrazyEightsState, player: number): boolean {
+  const ctx = matchContext(G);
+  if (!ctx) return false;
+  const hand = G.hands[player];
+  if (!hand) return false;
+  if (handHasPlay(hand, ctx, { wildRanks: [WILD_RANK] })) return false;
+  if (canDraw(G, player)) return G.drewThisTurn;
+  return true;
+}
+
 export const CrazyEights: Game<CrazyEightsState> = {
   name: 'crazy-eights',
   setup: ({ ctx, random }) => {
@@ -85,8 +96,9 @@ export const CrazyEights: Game<CrazyEightsState> = {
       drawOne(G, pid, (cards) => random.Shuffle(cards));
       G.drewThisTurn = true;
     },
-    pass: ({ G, events }) => {
-      if (!G.drewThisTurn) return INVALID_MOVE;
+    pass: ({ G, ctx, events }) => {
+      const pid = Number(ctx.currentPlayer);
+      if (!canPass(G, pid)) return INVALID_MOVE;
       G.drewThisTurn = false;
       events.endTurn();
     },
@@ -117,7 +129,7 @@ export const CrazyEights: Game<CrazyEightsState> = {
       if (canDraw(G, pid)) {
         moves.push({ move: 'drawCard' });
       }
-      if (G.drewThisTurn) {
+      if (canPass(G, pid)) {
         moves.push({ move: 'pass' });
       }
       return moves;

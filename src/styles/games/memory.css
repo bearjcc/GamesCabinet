@@ -1,7 +1,7 @@
 .memory-board {
   display: grid;
   gap: 0.45rem;
-  width: min(100%, 28rem);
+  width: min(100%, 30rem);
   margin: 0 auto;
   padding: 0.5rem;
 }
@@ -9,23 +9,61 @@
 .memory-cell {
   min-width: 0;
   aspect-ratio: 5 / 7;
-  display: grid;
-  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+  touch-action: manipulation;
 }
 
-.memory-cell__cinematic {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  perspective: 48rem;
-}
-
-.memory-cell .tt-card {
-  width: 100%;
-  height: 100%;
-}
-
-.memory-cell.is-open .tt-card {
+.memory-cell.is-open {
   cursor: pointer;
+}
+
+.memory-card {
+  width: 100%;
+  height: 100%;
+  perspective: 40rem;
+}
+
+.memory-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.32s ease;
+}
+
+.memory-cell.is-up .memory-card__inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card__back,
+.memory-card__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 0.45rem;
+  overflow: hidden;
+}
+
+.memory-card__face {
+  transform: rotateY(180deg);
+}
+
+.memory-card .tt-card {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  box-shadow: none;
+}
+
+.memory-card .tt-card--art {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 18%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-card__inner {
+    transition: none;
+  }
 }

@@ -57,6 +57,10 @@
   height: 100%;
 }
 
+.reversi-cell__flip {
+  perspective: 12rem;
+}
+
 /* Dark / light discs on green felt (brand pops; avoid --you green-on-green). */
 .reversi-cell .tt-token--p0 {
   background: var(--brand-navy);

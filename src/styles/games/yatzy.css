@@ -1,40 +1,56 @@
 .yatzy-card-wrap {
-  width: min(100%, var(--board-max));
-  align-self: stretch;
-  justify-self: stretch;
+  width: min(100%, 22rem);
+  align-self: center;
+  justify-self: center;
   max-height: 100%;
   overflow: auto;
   margin: 0 auto;
 }
 
-/* Pew host for shared DiceTray (.tt-dice / .tt-die from tabletop.css). */
 .yatzy-dice {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  justify-content: center;
-  width: 100%;
-}
-
-.yatzy-dice__cinematic {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
   justify-content: center;
   width: 100%;
 }
 
 .yatzy-dice .tt-die {
-  width: var(--tap-min);
-  height: var(--tap-min);
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
+  width: 2.65rem;
+  height: 2.65rem;
+  min-width: 2.65rem;
+  min-height: 2.65rem;
+}
+
+.yatzy-dice.is-rolling .tt-die__img {
+  animation: yatzy-die-tumble 0.34s ease;
+}
+
+@keyframes yatzy-die-tumble {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  35% {
+    transform: rotate(14deg) scale(1.06);
+  }
+  70% {
+    transform: rotate(-10deg) scale(1.02);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yatzy-dice.is-rolling .tt-die__img {
+    animation: none;
+  }
 }
 
 .yatzy-card {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  font-size: 0.78rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -43,13 +59,20 @@
 .yatzy-card th,
 .yatzy-card td {
   border-bottom: 1px solid var(--line);
-  padding: 0.45rem 0.5rem;
+  padding: 0.22rem 0.28rem;
   text-align: center;
+  line-height: 1.2;
 }
 
 .yatzy-card th[scope="row"] {
   text-align: left;
   font-weight: 600;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.yatzy-card thead th {
+  font-size: 0.72rem;
 }
 
 .yatzy-card thead th.is-active {
@@ -61,24 +84,23 @@
 }
 
 .yatzy-score-btn {
-  min-width: var(--tap-min);
-  min-height: 2.25rem;
-  padding: 0.35rem 0.55rem;
+  min-width: 2rem;
+  min-height: 1.75rem;
+  padding: 0.15rem 0.35rem;
   border: 1px solid var(--you);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) - 2px);
   background: color-mix(in srgb, var(--you) 14%, var(--surface));
   color: var(--ink);
   font-weight: 600;
+  font-size: 0.78rem;
   cursor: pointer;
-  transition:
-    background var(--motion-duration) var(--motion-ease),
-    border-color var(--motion-duration) var(--motion-ease);
 }
 
 .yatzy-sub td,
 .yatzy-sub th {
   color: var(--muted);
   font-weight: 500;
+  font-size: 0.72rem;
 }
 
 .yatzy-total th,

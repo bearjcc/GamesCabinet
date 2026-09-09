@@ -1,0 +1,40 @@
+.game-rules {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.game-rules__summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink);
+  list-style: none;
+}
+
+.game-rules__summary::-webkit-details-marker {
+  display: none;
+}
+
+.game-rules__summary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform var(--motion-duration) var(--motion-ease);
+}
+
+.game-rules[open] .game-rules__summary::before {
+  transform: rotate(90deg);
+}
+
+.game-rules__body {
+  margin-top: 0.35rem;
+  padding-left: 0.85rem;
+}
+
+.game-rules__body p {
+  margin: 0 0 0.35rem;
+}
+
+.game-rules__body ul {
+  margin: 0;
+  padding-left: 1rem;
+}

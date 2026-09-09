@@ -12,9 +12,28 @@ import {
   type Tile,
 } from './game';
 
-function dominoClient(setup: () => DominoesState, numPlayers = 2) {
+function fillDominoState(
+  partial: Partial<DominoesState> & { hands: Tile[][] },
+  n = 2,
+): DominoesState {
+  return {
+    boneyard: partial.boneyard ?? [],
+    ends: partial.ends ?? [],
+    board: partial.board ?? [],
+    spinnerId: partial.spinnerId ?? null,
+    scores: partial.scores ?? Array.from({ length: n }, () => 0),
+    showing: partial.showing ?? false,
+    roundScored: partial.roundScored ?? false,
+    hands: partial.hands,
+  };
+}
+
+function dominoClient(setup: () => Partial<DominoesState> & { hands: Tile[][] }, numPlayers = 2) {
   const client = Client({
-    game: { ...Dominoes, setup },
+    game: {
+      ...Dominoes,
+      setup: () => fillDominoState(setup(), numPlayers),
+    },
     numPlayers,
   });
   client.start();
@@ -35,6 +54,9 @@ describe('playableEndIndexes', () => {
       ends: [],
       board: [],
       spinnerId: null,
+      scores: [0, 0],
+      showing: false,
+      roundScored: false,
     };
     expect(playableEndIndexes(G, { a: 3, b: 5, id: '3-5' })).toEqual([-1]);
   });
@@ -50,6 +72,9 @@ describe('playableEndIndexes', () => {
       ends,
       board: [{ tile: { a: 6, b: 2, id: '6-2' }, x: 0, y: 0, rot: 0 }],
       spinnerId: null,
+      scores: [0, 0],
+      showing: false,
+      roundScored: false,
     };
     const tile: Tile = { a: 6, b: 4, id: '4-6' };
     expect(playableEndIndexes(G, tile)).toEqual([0]);
@@ -77,37 +102,34 @@ describe('canDraw and canPass', () => {
   const boardTile = { tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 as const };
 
   it('disallows draw and pass while a legal play exists', () => {
-    const G: DominoesState = {
+    const G = fillDominoState({
       hands: [[{ a: 5, b: 1, id: '5-1' }], [{ a: 2, b: 4, id: '2-4' }]],
       boneyard: [{ a: 2, b: 2, id: '2-2' }],
       ends: [blockedEnd],
       board: [boardTile],
-      spinnerId: null,
-    };
+    });
     expect(canDraw(G, 0)).toBe(false);
     expect(canPass(G, 0)).toBe(false);
   });
 
   it('allows draw only when the boneyard has tiles and nothing matches', () => {
-    const G: DominoesState = {
+    const G = fillDominoState({
       hands: [[{ a: 1, b: 2, id: '1-2' }], [{ a: 3, b: 4, id: '3-4' }]],
       boneyard: [{ a: 2, b: 2, id: '2-2' }],
       ends: [blockedEnd],
       board: [boardTile],
-      spinnerId: null,
-    };
+    });
     expect(canDraw(G, 0)).toBe(true);
     expect(canPass(G, 0)).toBe(false);
   });
 
   it('allows pass only when the boneyard is empty and nothing matches', () => {
-    const G: DominoesState = {
+    const G = fillDominoState({
       hands: [[{ a: 1, b: 2, id: '1-2' }], [{ a: 3, b: 4, id: '3-4' }]],
       boneyard: [],
       ends: [blockedEnd],
       board: [boardTile],
-      spinnerId: null,
-    };
+    });
     expect(canDraw(G, 0)).toBe(false);
     expect(canPass(G, 0)).toBe(true);
   });
@@ -121,9 +143,8 @@ describe('Dominoes game', () => {
         setup: () => {
           const tile: Tile = { a: 6, b: 6, id: '6-6' };
           const bad: Tile = { a: 1, b: 2, id: '1-2' };
-          return {
+          return fillDominoState({
             hands: [[bad], [{ a: 3, b: 4, id: '3-4' }]],
-            boneyard: [],
             ends: [
               { id: '6-6-N', value: 6, x: 0, y: -1, dir: 'N' as const },
               { id: '6-6-E', value: 6, x: 1, y: 0, dir: 'E' as const },
@@ -132,7 +153,7 @@ describe('Dominoes game', () => {
             ],
             board: [{ tile, x: 0, y: 0, rot: 90 as const }],
             spinnerId: tile.id,
-          };
+          });
         },
       },
     });
@@ -190,6 +211,20 @@ describe('Dominoes game', () => {
     expect(G(client).hands[0]).toHaveLength(0);
   });
 
+  it('scores the winner when a player empties their hand', () => {
+    const client = dominoClient(() => ({
+      hands: [[{ a: 5, b: 2, id: '5-2' }], [{ a: 3, b: 4, id: '3-4' }]],
+      boneyard: [],
+      ends: [{ id: 'e0', value: 5, x: -1, y: 0, dir: 'W' }],
+      board: [{ tile: { a: 5, b: 5, id: '5-5' }, x: 0, y: 0, rot: 90 }],
+      spinnerId: '5-5',
+      roundScored: false,
+    }));
+    client.moves.playTile(0, 0);
+    expect(client.getState()?.ctx.gameover).toEqual({ winner: '0' });
+    expect(G(client).scores).toEqual([7, 0]);
+  });
+
   it('ends when a player empties their hand', () => {
     const client = dominoClient(() => ({
       hands: [[{ a: 5, b: 2, id: '5-2' }], [{ a: 3, b: 4, id: '3-4' }]],
@@ -227,15 +262,18 @@ describe('Dominoes game', () => {
     expect(client.getState()?.ctx.currentPlayer).toBe('1');
   });
 
-  it('ends blocked with the lowest pip count', () => {
+  it('ends blocked with the lowest pip count and scores the winner', () => {
     const client = dominoClient(() => ({
       hands: [[{ a: 0, b: 1, id: '0-1' }], [{ a: 2, b: 4, id: '2-4' }]],
       boneyard: [],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
     }));
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    client.moves.pass();
     expect(client.getState()?.ctx.gameover).toEqual({ winner: '0', blocked: true });
+    expect(G(client).scores).toEqual([6, 0]);
+    expect(G(client).showing).toBe(true);
   });
 
   it('ends blocked as a draw when pip totals tie', () => {
@@ -244,9 +282,46 @@ describe('Dominoes game', () => {
       boneyard: [],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
     }));
+    client.moves.pass();
     expect(client.getState()?.ctx.gameover).toEqual({ draw: true, blocked: true });
+    expect(G(client).showing).toBe(true);
+  });
+
+  it('plays without scoring when the hand still has tiles', () => {
+    const client = dominoClient(() => ({
+      hands: [
+        [
+          { a: 6, b: 2, id: '6-2' },
+          { a: 0, b: 1, id: '0-1' },
+        ],
+        [{ a: 1, b: 2, id: '1-2' }],
+      ],
+      boneyard: [],
+      ends: [{ id: 'e0', value: 6, x: -1, y: 0, dir: 'W' }],
+      board: [{ tile: { a: 6, b: 4, id: '6-4' }, x: 0, y: 0, rot: 0 }],
+      spinnerId: null,
+      scores: [0, 0],
+      roundScored: false,
+    }));
+    client.moves.playTile(0, 0);
+    expect(G(client).hands[0]).toHaveLength(1);
+    expect(G(client).scores).toEqual([0, 0]);
+    expect(G(client).roundScored).toBe(false);
+  });
+
+  it('does not double-score when the round was already awarded', () => {
+    const client = dominoClient(() => ({
+      hands: [[{ a: 5, b: 2, id: '5-2' }], [{ a: 3, b: 4, id: '3-4' }]],
+      boneyard: [],
+      ends: [{ id: 'e0', value: 5, x: -1, y: 0, dir: 'W' }],
+      board: [{ tile: { a: 5, b: 5, id: '5-5' }, x: 0, y: 0, rot: 90 }],
+      spinnerId: '5-5',
+      scores: [7, 0],
+      roundScored: true,
+    }));
+    client.moves.playTile(0, 0);
+    expect(G(client).scores).toEqual([7, 0]);
   });
 
   it('rejects draw and pass while a legal play exists', () => {
@@ -386,13 +461,12 @@ describe('Dominoes game', () => {
   });
 
   it('rejects invalid end indexes and draws while a play exists', () => {
-    const badEnd: DominoesState = {
+    const badEnd = fillDominoState({
       hands: [[{ a: 5, b: 1, id: '5-1' }], [{ a: 2, b: 4, id: '2-4' }]],
       boneyard: [{ a: 2, b: 2, id: '2-2' }],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.moves!.playTile as any)(
         { G: badEnd, ctx: { currentPlayer: '0' }, events: { endTurn: vi.fn() } } as never,
@@ -401,13 +475,11 @@ describe('Dominoes game', () => {
       ),
     ).toBe(INVALID_MOVE);
 
-    const badMatch: DominoesState = {
+    const badMatch = fillDominoState({
       hands: [[{ a: 1, b: 2, id: '1-2' }], [{ a: 3, b: 4, id: '3-4' }]],
-      boneyard: [],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.moves!.playTile as any)(
         { G: badMatch, ctx: { currentPlayer: '0' }, events: { endTurn: vi.fn() } } as never,
@@ -416,24 +488,21 @@ describe('Dominoes game', () => {
       ),
     ).toBe(INVALID_MOVE);
 
-    const drawG: DominoesState = {
+    const drawG = fillDominoState({
       hands: [[{ a: 5, b: 1, id: '5-1' }], [{ a: 2, b: 4, id: '2-4' }]],
       boneyard: [{ a: 2, b: 2, id: '2-2' }],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.moves!.drawTile as any)({ G: drawG, ctx: { currentPlayer: '0' } } as never),
     ).toBe(INVALID_MOVE);
 
-    const emptyPit: DominoesState = {
+    const emptyPit = fillDominoState({
       hands: [[{ a: 1, b: 2, id: '1-2' }], [{ a: 3, b: 4, id: '3-4' }]],
-      boneyard: [],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.moves!.drawTile as any)({ G: emptyPit, ctx: { currentPlayer: '0' } } as never),
     ).toBe(INVALID_MOVE);
@@ -494,39 +563,34 @@ describe('Dominoes game', () => {
 
 describe('Dominoes ai', () => {
   it('enumerates play, draw, and pass moves', () => {
-    const playG: DominoesState = {
+    const playG = fillDominoState({
       hands: [[{ a: 6, b: 2, id: '6-2' }], []],
-      boneyard: [],
       ends: [{ id: 'e0', value: 6, x: -1, y: 0, dir: 'W' }],
       board: [{ tile: { a: 6, b: 4, id: '6-4' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.ai!.enumerate as (G: any, ctx: any) => any[])(playG, {
         currentPlayer: '0',
       } as never),
     ).toEqual([{ move: 'playTile', args: [0, 0] }]);
 
-    const drawG: DominoesState = {
+    const drawG = fillDominoState({
       hands: [[{ a: 0, b: 1, id: '0-1' }], []],
       boneyard: [{ a: 2, b: 2, id: '2-2' }],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.ai!.enumerate as (G: any, ctx: any) => any[])(drawG, {
         currentPlayer: '0',
       } as never),
     ).toEqual([{ move: 'drawTile', args: [] }]);
 
-    const passG: DominoesState = {
+    const passG = fillDominoState({
       hands: [[{ a: 0, b: 1, id: '0-1' }], []],
-      boneyard: [],
       ends: [{ id: 'e0', value: 5, x: 1, y: 0, dir: 'E' }],
       board: [{ tile: { a: 5, b: 3, id: '5-3' }, x: 0, y: 0, rot: 0 }],
-      spinnerId: null,
-    };
+    });
     expect(
       (Dominoes.ai!.enumerate as (G: any, ctx: any) => any[])(passG, {
         currentPlayer: '0',

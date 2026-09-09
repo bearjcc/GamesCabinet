@@ -5,6 +5,7 @@ import {
   CrazyEights,
   type CrazyEightsState,
   canDraw,
+  canPass,
   canPlayCard,
   handSizeFor,
   matchContext,
@@ -120,6 +121,19 @@ describe('CrazyEights moves', () => {
     expect(G(client)).toEqual(before);
   });
 
+  it('allows pass when nothing is playable and the stock cannot be drawn', () => {
+    const client = ceClient(() =>
+      baseState({
+        hands: [[makeCard('spades', '2')], [makeCard('clubs', '3')]],
+        stock: [],
+        discard: [makeCard('hearts', '5')],
+      }),
+    );
+    expect(canPass(G(client), 0)).toBe(true);
+    client.moves.pass();
+    expect(client.getState()?.ctx.currentPlayer).toBe('1');
+  });
+
   it('draws from stock and allows pass only after a draw', () => {
     const client = ceClient(() =>
       baseState({
@@ -154,6 +168,11 @@ describe('CrazyEights moves', () => {
   it('reports canDraw false without a discard top or a missing hand', () => {
     expect(canDraw(baseState({ discard: [] }), 0)).toBe(false);
     expect(canDraw(baseState({ hands: [] }), 0)).toBe(false);
+  });
+
+  it('reports canPass false without a discard top or a missing hand', () => {
+    expect(canPass(baseState({ discard: [] }), 0)).toBe(false);
+    expect(canPass(baseState({ hands: [] }), 0)).toBe(false);
   });
 
   it('reshuffles the discard into stock when drawing from an empty stock', () => {

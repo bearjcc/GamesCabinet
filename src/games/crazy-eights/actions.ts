@@ -1,17 +1,22 @@
 import type { SemanticAction } from '../../lib/actions';
-import type { CrazyEightsState } from './game';
+import { type CrazyEightsState, canPass } from './game';
 
 export type CrazyEightsActionInput = {
   G: CrazyEightsState;
+  player: number;
   yourTurn: boolean;
 };
 
 /** Pure pew intents for Crazy Eights (Pass). Draw stays on StockPile via game.canDraw. */
-export function getCrazyEightsActions({ G, yourTurn }: CrazyEightsActionInput): SemanticAction[] {
-  const passOk = yourTurn && G.drewThisTurn;
+export function getCrazyEightsActions({
+  G,
+  player,
+  yourTurn,
+}: CrazyEightsActionInput): SemanticAction[] {
+  const passOk = yourTurn && canPass(G, player);
   let disabledReason: string | undefined;
   if (!yourTurn) disabledReason = 'Wait for your turn';
-  else if (!G.drewThisTurn) disabledReason = 'Draw a card before you can pass';
+  else if (!passOk) disabledReason = 'Play a card or draw first';
 
   return [
     {

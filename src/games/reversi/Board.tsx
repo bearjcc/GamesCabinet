@@ -1,7 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { Drop, Snap } from '../../components/cinematic';
+import { Flip, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
@@ -55,9 +55,13 @@ function DiscChrome({ player, snapPulse, snapActive, dropPulse, dropActive }: Di
   }
   if (dropActive) {
     return (
-      <Drop key={dropPulse} active={dropActive} className="reversi-cell__cinematic">
+      <Flip
+        key={dropPulse}
+        active={dropActive}
+        className="reversi-cell__cinematic reversi-cell__flip"
+      >
         {inner}
-      </Drop>
+      </Flip>
     );
   }
   return inner;
@@ -108,7 +112,7 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
   useEffect(() => {
     if (flipPulse === 0) return;
     setFlipActive(true);
-    const ms = primitiveProfile('drop', readEffectiveMotion()).durationMs;
+    const ms = primitiveProfile('flip', readEffectiveMotion()).durationMs;
     const t = window.setTimeout(() => setFlipActive(false), ms);
     return () => window.clearTimeout(t);
   }, [flipPulse]);
@@ -184,7 +188,11 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
           })}
         </div>
       }
-      actions={<ActionSurface label="Reversi actions" actions={surfaceActions} />}
+      actions={
+        surfaceActions.length > 0 ? (
+          <ActionSurface label="Reversi actions" actions={surfaceActions} />
+        ) : null
+      }
     />
   );
 }

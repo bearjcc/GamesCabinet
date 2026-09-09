@@ -27,6 +27,12 @@ export type DominoesState = {
   ends: OpenEnd[];
   board: PlacedTile[];
   spinnerId: string | null;
+  /** Cumulative match score per seat. */
+  scores: number[];
+  /** Hands revealed for pip count after a blocked round. */
+  showing: boolean;
+  /** Guard so endIf scoring runs once per round. */
+  roundScored: boolean;
 };
 
 function allTiles(): Tile[] {
@@ -43,8 +49,45 @@ function isDouble(t: Tile): boolean {
   return t.a === t.b;
 }
 
-function pipSum(hand: Tile[]): number {
+export function pipSum(hand: Tile[]): number {
   return hand.reduce((s, t) => s + t.a + t.b, 0);
+}
+
+export function roundPoints(G: DominoesState, winner: number, numPlayers: number): number {
+  let points = 0;
+  for (let i = 0; i < numPlayers; i++) {
+    if (i !== winner) points += pipSum(G.hands[i]);
+  }
+  return points;
+}
+
+function tableBlocked(G: DominoesState): boolean {
+  const anyoneCan = G.boneyard.length > 0 || G.hands.some((_, i) => canPlayAny(G, i));
+  return !anyoneCan;
+}
+
+function lowestPipWinner(G: DominoesState, numPlayers: number): number | null {
+  let bestScore = Infinity;
+  const tied: number[] = [];
+  for (let i = 0; i < numPlayers; i++) {
+    const s = pipSum(G.hands[i]);
+    if (s < bestScore) {
+      bestScore = s;
+      tied.length = 0;
+      tied.push(i);
+    } else if (s === bestScore) {
+      tied.push(i);
+    }
+  }
+  return tied.length === 1 ? tied[0] : null;
+}
+
+function awardRound(G: DominoesState, winner: number, numPlayers: number, blocked = false): void {
+  if (G.roundScored) return;
+  const points = roundPoints(G, winner, numPlayers);
+  G.scores = G.scores.map((score, seat) => (seat === winner ? score + points : score));
+  G.roundScored = true;
+  if (blocked) G.showing = true;
 }
 
 function step(x: number, y: number, d: Dir): { x: number; y: number } {
@@ -107,6 +150,9 @@ export const Dominoes: Game<DominoesState> = {
       ends: [],
       board: [],
       spinnerId: null,
+      scores: Array.from({ length: n }, () => 0),
+      showing: false,
+      roundScored: false,
     };
   },
   turn: { minMoves: 1, maxMoves: 40 },
@@ -140,6 +186,7 @@ export const Dominoes: Game<DominoesState> = {
             { id: `${tile.id}-E`, value: tile.b, x: 1, y: 0, dir: 'E' },
           ];
         }
+        if (hand.length === 0) awardRound(G, pid, ctx.numPlayers);
         events.endTurn();
         return;
       }
@@ -178,6 +225,7 @@ export const Dominoes: Game<DominoesState> = {
           dir: end.dir,
         });
       }
+      if (hand.length === 0) awardRound(G, pid, ctx.numPlayers);
       events.endTurn();
     },
     drawTile: ({ G, ctx }) => {
@@ -188,6 +236,15 @@ export const Dominoes: Game<DominoesState> = {
     pass: ({ G, ctx, events }) => {
       const pid = Number(ctx.currentPlayer);
       if (!canPass(G, pid)) return INVALID_MOVE;
+      if (tableBlocked(G) && !G.roundScored) {
+        const winner = lowestPipWinner(G, ctx.numPlayers);
+        if (winner !== null) {
+          awardRound(G, winner, ctx.numPlayers, true);
+        } else {
+          G.showing = true;
+          G.roundScored = true;
+        }
+      }
       events.endTurn();
     },
   },
@@ -195,23 +252,10 @@ export const Dominoes: Game<DominoesState> = {
     for (let i = 0; i < ctx.numPlayers; i++) {
       if (G.hands[i].length === 0) return { winner: String(i) };
     }
-    const anyoneCan = G.boneyard.length > 0 || G.hands.some((_, i) => canPlayAny(G, i));
-    if (!anyoneCan) {
-      let bestScore = Infinity;
-      const tied: number[] = [];
-      for (let i = 0; i < ctx.numPlayers; i++) {
-        const s = pipSum(G.hands[i]);
-        if (s < bestScore) {
-          bestScore = s;
-          tied.length = 0;
-          tied.push(i);
-        } else if (s === bestScore) {
-          tied.push(i);
-        }
-      }
-      if (tied.length !== 1) return { draw: true, blocked: true };
-      return { winner: String(tied[0]), blocked: true };
-    }
+    if (!tableBlocked(G) || !G.roundScored) return;
+    const winner = lowestPipWinner(G, ctx.numPlayers);
+    if (winner === null) return { draw: true, blocked: true };
+    return { winner: String(winner), blocked: true };
   },
   ai: {
     enumerate: (G, ctx) => {

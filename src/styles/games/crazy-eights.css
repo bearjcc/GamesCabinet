@@ -2,10 +2,15 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.25rem;
   place-items: center;
-  padding: 0.75rem 0.5rem;
-  min-height: 9rem;
+  padding: 1rem 0.5rem;
+  min-height: 12rem;
+}
+
+.ce-table .tt-card {
+  width: clamp(4.5rem, 22vw, 5.75rem);
+  height: clamp(6.4rem, 31vw, 8.1rem);
 }
 
 .ce-stock__cinematic,
@@ -17,6 +22,20 @@
   transition: opacity var(--motion-duration) var(--motion-ease, ease);
 }
 
-.ce-discard__cinematic {
-  perspective: 48rem;
+.play-table:has(.ce-table) .tt-hand {
+  min-height: 8.5rem;
+  padding: 0.5rem 0.35rem 0.25rem;
+}
+
+.play-table:has(.ce-table) .tt-hand__slot {
+  margin-left: -1.4rem;
+}
+
+.play-table:has(.ce-table) .tt-hand .tt-card {
+  width: clamp(3.8rem, 18vw, 4.85rem);
+  height: clamp(5.4rem, 26vw, 6.9rem);
+}
+
+.play-table:has(.ce-table) .tt-hand__slot:first-child {
+  margin-left: 0;
 }
