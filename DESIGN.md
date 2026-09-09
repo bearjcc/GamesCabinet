@@ -206,3 +206,11 @@ This cabinet is a quiet app, not a marketing site or a vibecoded demo. Personali
 **Do:** denser grids; short descriptive copy; board-native controls; colourful boards; demonstrate before explaining; reversible or clearly safe actions; shared tabletop language across games; Kenney CC0 art by default with per-game override when identity needs it.
 
 **Don't:** heroes, eyebrows, pill CTAs, marketing parchment aesthetics (Light theme warmth is chrome, not a landing page), glassmorphism, nested cards, promotional badges, giant type, fake nostalgia, forced tutorials, unskippable celebration, beginner-mode walls, storefront chrome in play, pipeline notes on the site (WIP chapter numbers, engine enum names, unimplemented tiebreaks), vibecode accent colours, move-menu button strips, AI-slop typography defaults.
+
+## Table setup (launch screen)
+
+Research: Tabletop Simulator ties **seat colour to table position** (tap a spot, see the piece move); Board Game Arena assigns colours automatically and shows them on **player pieces**, not a separate palette; Ascension digital skips colour picking and uses **fixed player positions** with avatars.
+
+**Borrowed:** seats arranged around a central well; each spot shows a **disc token** (or open ring) as the player's piece colour; tap the spot to claim or cycle seat type; Hogwarts uses **hero names** on the spot instead of a generic colour grid; campaign year is a **compact chip row** (years 1-7 only).
+
+**Refused:** per-seat dropdowns and swatch grids; a separate colour puzzle decoupled from pieces; settings-form button strips for Empty / Local / Online / Bot; Ascension-style hidden colour assignment without showing whose piece is whose at the table.

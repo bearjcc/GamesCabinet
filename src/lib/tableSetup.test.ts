@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { GameMeta } from './games';
 import {
+  defaultClaimKind,
   deriveLaunch,
   getSeatKinds,
+  nextSeatKind,
   occupiedKindsQuery,
   ownedDeviceJoins,
   playerIDsOfKind,
+  seatKindCycle,
   seatsFromKindsQuery,
   type TableSeat,
 } from './tableSetup';
@@ -185,5 +188,25 @@ describe('table setup', () => {
       status: 'invalid',
       reason: 'Choose at least 2 seats.',
     });
+  });
+
+  it('cycles seat kinds in tabletop order when claiming and advancing', () => {
+    expect(seatKindCycle(twoPlayerGame)).toEqual(['local', 'bot', 'online', 'empty']);
+    expect(defaultClaimKind(twoPlayerGame)).toBe('local');
+    expect(nextSeatKind(twoPlayerGame, 'empty', { claim: true })).toBe('local');
+    expect(nextSeatKind(twoPlayerGame, 'local')).toBe('bot');
+    expect(nextSeatKind(twoPlayerGame, 'bot')).toBe('online');
+    expect(nextSeatKind(twoPlayerGame, 'online')).toBe('empty');
+  });
+
+  it('falls back when no claimable seat kinds are configured', () => {
+    const emptyOnly = {
+      ...twoPlayerGame,
+      hasBot: false,
+      hasLocal: false,
+      hasOnline: false,
+    };
+    expect(defaultClaimKind(emptyOnly)).toBe('local');
+    expect(nextSeatKind(emptyOnly, 'other' as TableSeat['kind'])).toBe('local');
   });
 });
