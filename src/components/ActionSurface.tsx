@@ -18,7 +18,17 @@ export function ActionSurface({
   actions: ActionSurfaceItem[];
   label?: string;
 }) {
-  if (!actions.length) return null;
+  if (!actions.length) {
+    return (
+      <div
+        className="action-surface action-surface--reserved"
+        role="group"
+        aria-label={label}
+        aria-hidden="true"
+        data-testid="action-surface"
+      />
+    );
+  }
 
   return (
     <div className="action-surface" role="group" aria-label={label} data-testid="action-surface">

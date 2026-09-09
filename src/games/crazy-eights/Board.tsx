@@ -7,6 +7,7 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
+import { turnStatusText } from '../../lib/matchPlayers';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
 import type { Suit } from '../shared/cards';
@@ -108,10 +109,11 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
   });
   let status = baseStatus;
   if (yourTurn && !ctx.gameover) {
-    if (pickingSuit) status = 'Choose a suit for your eight';
-    else if (selected != null) status = 'Play the selected card, or pick another';
-    else if (G.drewThisTurn) status = 'Play a card or pass';
-    else status = 'Your turn — play or draw';
+    const named = turnStatusText(ctx.currentPlayer);
+    if (pickingSuit) status = `${named} — choose a suit for your eight`;
+    else if (selected != null) status = `${named} — play the selected card, or pick another`;
+    else if (G.drewThisTurn) status = `${named} — play a card or pass`;
+    else status = `${named} — play or draw`;
   }
 
   function tryPlay(index: number) {
@@ -141,6 +143,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
@@ -151,6 +154,15 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
                 seat === pid ? [] : [{ label: `P${seat + 1}`, value: h.length }],
               ),
             ]}
+            rules={{
+              summary: 'How points work',
+              body: (
+                <>
+                  <p>When a hand ends, count the cards left in each loser&apos;s hand.</p>
+                  <p>Number cards score face value; face cards score 10; eights score 50.</p>
+                </>
+              ),
+            }}
             testId="ce-meta"
           />
         </>

@@ -58,6 +58,7 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
@@ -67,6 +68,21 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
               { label: 'P2', value: G.decks[1].length },
               ...metaBits.map((bit) => ({ label: 'Last', value: bit })),
             ]}
+            rules={{
+              summary: 'How points work',
+              body: (
+                <>
+                  <p>
+                    Each card you win joins your deck. Higher card wins the battle; ties start a
+                    war.
+                  </p>
+                  <p>
+                    Collect every card to win. Deck counts above are cards still in play for each
+                    seat.
+                  </p>
+                </>
+              ),
+            }}
             testId="war-meta"
           />
         </>

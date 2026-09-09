@@ -110,7 +110,11 @@ export function withMatchChrome<G>(
       <div className="match-chrome">
         {waiting ? <WaitingSeats matchData={props.matchData} /> : null}
         {waiting ? null : <Board {...props} />}
-        {actions.length ? <MatchActions actions={actions} busy={busy} /> : null}
+        {actions.length ? (
+          <div className="match-chrome__overlay" data-testid="match-chrome-overlay">
+            <MatchActions actions={actions} busy={busy} />
+          </div>
+        ) : null}
       </div>
     );
   }

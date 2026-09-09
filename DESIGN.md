@@ -98,6 +98,21 @@ Prefer simulated weight over full physics: squash, ease-out rotate, soft land, c
 
 Rationale for the object/chrome split: `docs/adr/0001-ui-operating-system-layer.md`.
 
+## Play chrome laws
+
+In-play shell and `PlayTable` enforce these rules so every game inherits the same table behaviour. Game boards supply content; shared chrome owns navigation, turn copy, layout stability, scoring help, and felt treatment.
+
+| Law | Rule |
+|---|---|
+| **Home mark** | The brand in the top-left always opens `/`. When play needs a back path, `Shell` renders a separate Back control — never hijack the logo. |
+| **Stable board frame** | Once the board is drawn, its size does not change. Status, pew actions, endgame buttons, win lines, and rules sit in reserved chrome or overlay the board — no layout shift when commands appear. `PlayTable` reserves pew height when actions are present; `MatchChrome` endgame actions overlay the board. |
+| **Named turns** | Turn status names the active seat (lobby name, colour, symbol, or `Player N`). Never flash generic "Your turn" / "you". Use `deriveMatchStatus` + `turnStatusText`; append action hints after an em dash. |
+| **Hot-seat hold** | Pass-and-play waits `HOTSEAT_TURN_HOLD_MS` (~1.6s) before switching the active seat so humans can read whose turn it is. Bots keep moving; the banner names the next human seat during the hold. |
+| **Scoring help** | Games with points expose how scoring works via `MatchScoreboard` + `ScoreRulesPanel`: collapsed by default, compact toggle, body overlays without stealing board space. |
+| **Felt tables** | Felt and card games set `PlayTable felt`. The page background is the table (`--felt-bg` in `felt.css`) — no arbitrary coloured panel behind cards or tiles. |
+
+Implementation homes: `Shell.tsx`, `PlayTable.tsx`, `MatchChrome.tsx`, `MatchScoreboard.tsx`, `ScoreRulesPanel.tsx`, `deriveMatchStatus`, `withHotseatSeatSync`, `felt.css`, `play-table.css`.
+
 ## Board-first interaction law
 
 **Moves happen on the board.** Players click pieces, squares, cards, and columns — not a parallel menu of move buttons. The pew (`PlayTable` bottom slot) is for hands, dice, and rare whole-hand shortcuts — never a grid of "Column 3" / "Move to e4" buttons that replace board interaction.

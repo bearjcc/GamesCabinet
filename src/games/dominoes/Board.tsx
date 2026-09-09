@@ -11,6 +11,7 @@ import { Snap } from '../../components/cinematic';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { turnStatusText } from '../../lib/matchPlayers';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
@@ -88,10 +89,11 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
   });
   let status = baseStatus;
   if (yourTurn && !ctx.gameover) {
-    if (drag) status = 'Drop on a glowing end';
-    else if (handIndex === null) status = 'Your turn — drag or tap a tile';
-    else if (G.board.length === 0) status = 'Play starter below, or drop on the table';
-    else status = 'Tap a glowing end or Play on end below';
+    const named = turnStatusText(ctx.currentPlayer, { matchData: undefined });
+    if (drag) status = `${named} — drop on a glowing end`;
+    else if (handIndex === null) status = `${named} — drag or tap a tile`;
+    else if (G.board.length === 0) status = `${named} — play starter below, or drop on the table`;
+    else status = `${named} — tap a glowing end or Play on end below`;
   }
 
   const clientToStageRem = (clientX: number, clientY: number) => {
@@ -202,6 +204,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
@@ -212,6 +215,17 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
                 seat === pid ? [] : [{ label: `P${seat + 1}`, value: `${h.length} tiles` }],
               ),
             ]}
+            rules={{
+              summary: 'How points work',
+              body: (
+                <>
+                  <p>When someone goes out, each opponent counts the pips left in their hand.</p>
+                  <p>
+                    Those pips are added to the winner&apos;s score. Lowest total wins the match.
+                  </p>
+                </>
+              ),
+            }}
             testId="dom-meta"
           />
         </>

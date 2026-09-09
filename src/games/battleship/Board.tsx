@@ -178,11 +178,7 @@ export function BattleshipBoard({
           </div>
         </div>
       }
-      actions={
-        surfaceActions.length > 0 ? (
-          <ActionSurface label="Battleship actions" actions={surfaceActions} />
-        ) : null
-      }
+      actions={<ActionSurface label="Battleship actions" actions={surfaceActions} />}
     />
   );
 }

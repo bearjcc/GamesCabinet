@@ -12,7 +12,8 @@ export function TicTacToeBoard({ G, ctx, moves, playerID, isActive }: BoardProps
   const yourTurn = Boolean(isActive && !ctx.gameover);
   const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: 'Your turn — tap a square' },
+    turnHint: 'tap a square',
+    nameForPlayer: (id) => marks[Number(id)],
   });
 
   return (

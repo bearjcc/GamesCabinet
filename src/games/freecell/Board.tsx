@@ -143,6 +143,7 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
   return (
     <SoloLeaderboardShell
       gameId="freecell"
+      felt
       pendingSubmit={pendingSubmit}
       tab={tab}
       onTabChange={setTab}

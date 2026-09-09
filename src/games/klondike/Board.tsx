@@ -142,6 +142,7 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
   return (
     <SoloLeaderboardShell
       gameId="klondike"
+      felt
       pendingSubmit={pendingSubmit}
       tab={tab}
       onTabChange={setTab}

@@ -1,3 +1,6 @@
+import type { FilteredMetadata } from 'boardgame.io';
+import { hintFromLegacyYourTurn, type PlayerNameOptions, turnStatusText } from './matchPlayers';
+
 export type StatusTone = 'neutral' | 'you' | 'wait' | 'done';
 
 export type MatchStatus = {
@@ -20,8 +23,12 @@ export type MatchStatusCtx = {
 };
 
 export type DeriveMatchStatusOptions = {
-  /** Custom copy for the common match-status cases. */
+  /** Custom copy for waiting / endgame cases. */
   labels?: Partial<MatchStatusLabels>;
+  /** Action hint appended after the named turn line. */
+  turnHint?: string;
+  matchData?: FilteredMetadata;
+  nameForPlayer?: (playerID: string) => string;
   /**
    * Override seat-vs-currentPlayer turn detection (e.g. boardgame.io `isActive`,
    * or UI that still treats the seat as active while selecting a piece).
@@ -42,6 +49,18 @@ const DEFAULT_LABELS: MatchStatusLabels = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+function nameOptions(options?: DeriveMatchStatusOptions): PlayerNameOptions {
+  return {
+    matchData: options?.matchData,
+    nameForPlayer: options?.nameForPlayer,
+  };
+}
+
+function resolveTurnHint(options?: DeriveMatchStatusOptions): string | undefined {
+  if (options?.turnHint?.trim()) return options.turnHint.trim();
+  return hintFromLegacyYourTurn(options?.labels?.yourTurn);
 }
 
 /** Pure status line for the common turn / endgame cases across cabinet boards. */
@@ -69,10 +88,12 @@ export function deriveMatchStatus(
   }
 
   const yourTurn = options?.isYourTurn ?? (playerID != null && playerID === ctx.currentPlayer);
+  const hint = yourTurn ? resolveTurnHint(options) : undefined;
+  const text = turnStatusText(ctx.currentPlayer, nameOptions(options), hint);
 
   if (yourTurn) {
-    return { text: labels.yourTurn, tone: 'you' };
+    return { text, tone: 'you' };
   }
 
-  return { text: labels.theirTurn, tone: 'wait' };
+  return { text, tone: 'wait' };
 }

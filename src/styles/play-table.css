@@ -1,3 +1,5 @@
+@import "./felt.css";
+
 .game-panel {
   display: grid;
   gap: 0.75rem;
@@ -17,6 +19,14 @@
   display: grid;
   gap: 0.4rem;
   flex-shrink: 0;
+  min-height: var(--play-info-min, 3.35rem);
+  position: relative;
+}
+
+.match-scoreboard-wrap {
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
 }
 
 .match-scoreboard {
@@ -35,6 +45,57 @@
   color: var(--ink);
 }
 
+.score-rules {
+  position: relative;
+}
+
+.score-rules__toggle {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: var(--tap-min);
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  user-select: none;
+}
+
+.score-rules__toggle::-webkit-details-marker {
+  display: none;
+}
+
+.score-rules__toggle::before {
+  content: "+";
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.score-rules[open] .score-rules__toggle::before {
+  content: "−";
+}
+
+.score-rules__body {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.25rem);
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  box-shadow: 0 0.35rem 0.75rem rgb(0 0 0 / 12%);
+}
+
 .play-table__board {
   /* Flex grower: claims leftover height; scrolls when board content overflows. */
   flex: 1 1 auto;
@@ -43,6 +104,7 @@
   place-items: center;
   align-content: center;
   overflow: auto;
+  position: relative;
 }
 
 .play-table__board:has(.dom-scroll),
@@ -68,6 +130,10 @@
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
+.play-table--reserve-pew .play-table__pew {
+  min-height: var(--pew-min-height, 3.35rem);
+}
+
 .play-table__pew-body {
   display: flex;
   flex-direction: column;
@@ -78,6 +144,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.play-table--reserve-pew .play-table__actions {
+  min-height: var(--pew-actions-min, 2.85rem);
 }
 
 .action-surface {
@@ -86,6 +157,11 @@
   gap: 0.4rem;
   align-items: stretch;
   justify-content: center;
+}
+
+.action-surface--reserved {
+  min-height: var(--pew-actions-min, 2.85rem);
+  visibility: hidden;
 }
 
 .action-surface__btn {
@@ -127,14 +203,26 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  position: relative;
 }
 
 .match-chrome > .play-table {
   flex: 1;
 }
 
+.match-chrome__overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  padding: 0.55rem 0.65rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+}
+
 .match-actions {
-  margin-top: 0.15rem;
+  margin-top: 0;
 }
 
 .waiting-panel {
@@ -179,6 +267,9 @@
   background: var(--surface-2);
   font-weight: 600;
   font-size: 0.95rem;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
 }
 
 .play-table__info .status {
@@ -235,6 +326,7 @@
 
   .play-table__info {
     gap: 0.25rem;
+    min-height: var(--play-info-min, 2.85rem);
   }
 
   /* Denser meta row (CSS-only; callers keep the same markup). */
@@ -282,6 +374,7 @@
   .play-table .status {
     padding: 0.4rem 0.55rem;
     font-size: 0.88rem;
+    min-height: 2.35rem;
   }
 
   .play-table .room-chip {
@@ -304,6 +397,7 @@
 
   .play-table__info {
     gap: 0.15rem;
+    min-height: var(--play-info-min, 2.5rem);
   }
 
   .play-table__pew {
@@ -313,5 +407,6 @@
   .play-table .status {
     padding: 0.3rem 0.45rem;
     font-size: 0.84rem;
+    min-height: 2.1rem;
   }
 }
