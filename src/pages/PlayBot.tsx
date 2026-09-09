@@ -2,6 +2,7 @@ import { Local } from 'boardgame.io/multiplayer';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
+import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
@@ -15,6 +16,7 @@ import { getGameMeta, isSoloOnly, soloPlayPath, supportsBotPlay } from '../lib/g
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { localRematchMatchID } from '../lib/localRematch';
 import { makeClient } from '../lib/makeClient';
+import { parseSeatColoursQuery } from '../lib/seatColours';
 import { deriveLaunch, playerIDsOfKind, seatsFromKindsQuery } from '../lib/tableSetup';
 
 export function PlayBot() {
@@ -30,6 +32,10 @@ export function PlayBot() {
   const localIDs = useMemo(() => playerIDsOfKind(tableSeats, 'local'), [tableSeats]);
   const botIDs = useMemo(() => playerIDsOfKind(tableSeats, 'bot'), [tableSeats]);
   const numPlayers = tableSeats.filter((seat) => seat.kind !== 'empty').length;
+  const seatColours = useMemo(
+    () => parseSeatColoursQuery(params.get('colours'), numPlayers),
+    [numPlayers, params],
+  );
   const firstLocal = localIDs[0] ?? '0';
   /** Client.reset() nulls multiplayer state; bump match id for a fresh Local+bots match. */
   const [rematchGen, setRematchGen] = useState(0);
@@ -113,7 +119,9 @@ export function PlayBot() {
           homeTo: '/',
         }}
       >
-        <BotClient key={`${matchID}-${difficulty}`} playerID={seat} matchID={matchID} />
+        <SeatColoursProvider colours={seatColours}>
+          <BotClient key={`${matchID}-${difficulty}`} playerID={seat} matchID={matchID} />
+        </SeatColoursProvider>
       </MatchLifecycleProvider>
     </Shell>
   );

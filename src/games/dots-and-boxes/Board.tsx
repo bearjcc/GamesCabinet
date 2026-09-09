@@ -1,6 +1,8 @@
 import type { BoardProps } from 'boardgame.io/react';
+import type { CSSProperties } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
+import { useSeatColour } from '../../components/SeatColours';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter } from '../../components/tabletop';
 import { deriveMatchStatus } from '../../lib/matchStatus';
@@ -48,6 +50,12 @@ export function DotsAndBoxesBoard({
   isActive,
 }: BoardProps<DotsAndBoxesState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
+  const p0Colour = useSeatColour('0');
+  const p1Colour = useSeatColour('1');
+  const boardStyle = {
+    ...(p0Colour ? { '--dab-p0': p0Colour } : {}),
+    ...(p1Colour ? { '--dab-p1': p1Colour } : {}),
+  } as CSSProperties;
   const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - claim a line' },
@@ -84,6 +92,7 @@ export function DotsAndBoxesBoard({
           data-testid="dab-board"
           role="group"
           aria-label="Dots and Boxes board"
+          style={boardStyle}
         >
           <svg
             className="dab-svg"

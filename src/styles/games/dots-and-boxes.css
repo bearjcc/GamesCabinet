@@ -45,11 +45,11 @@
 }
 
 .dab-line.claimed.p0 {
-  stroke: #b45309;
+  stroke: var(--dab-p0, #b45309);
 }
 
 .dab-line.claimed.p1 {
-  stroke: #1d4ed8;
+  stroke: var(--dab-p1, #1d4ed8);
 }
 
 .dab-line-hit {
@@ -72,9 +72,9 @@
 }
 
 .dab-box.p0 {
-  fill: #b45309;
+  fill: var(--dab-p0, #b45309);
 }
 
 .dab-box.p1 {
-  fill: #1d4ed8;
+  fill: var(--dab-p1, #1d4ed8);
 }

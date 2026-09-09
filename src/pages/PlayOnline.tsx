@@ -4,6 +4,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { JoinRoomPanel } from '../components/JoinRoomPanel';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { RoomBar } from '../components/RoomBar';
+import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
@@ -12,6 +13,7 @@ import { getGameMeta, isAccessGated } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { leaveRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
 import { makeClient } from '../lib/makeClient';
+import { parseSeatColoursQuery } from '../lib/seatColours';
 import {
   deviceSeats,
   getNickname,
@@ -30,6 +32,7 @@ function toSeat(room: SeatedRoom): SeatSession {
     gameName: room.gameName,
     ...(room.localSeats === undefined ? {} : { localSeats: room.localSeats }),
     ...(room.setupData === undefined ? {} : { setupData: room.setupData }),
+    ...(room.seatColourQuery ? { seatColourQuery: room.seatColourQuery } : {}),
   };
 }
 
@@ -50,6 +53,11 @@ export function PlayOnline() {
   const humanKey = humanIDs.join(',');
   const firstHuman = humanSeats[0]?.playerID ?? seat?.playerID ?? '0';
   const [activeID, setActiveID] = useState(firstHuman);
+  const seatColours = useMemo(() => {
+    if (!seat?.seatColourQuery) return [];
+    const total = seat.seatColourQuery.split(',').length;
+    return parseSeatColoursQuery(seat.seatColourQuery, total);
+  }, [seat?.seatColourQuery]);
 
   useEffect(() => {
     setActiveID(firstHuman);
@@ -180,21 +188,25 @@ export function PlayOnline() {
           onGameLaunch: exitModes,
         }}
       >
-        <MatchClient
-          key={`${seat.matchID}-${activeSeat?.playerID ?? seat.playerID}`}
-          matchID={seat.matchID}
-          playerID={activeSeat?.playerID ?? seat.playerID}
-          credentials={activeSeat?.credentials ?? seat.credentials}
-        />
+        <SeatColoursProvider colours={seatColours}>
+          <MatchClient
+            key={`${seat.matchID}-${activeSeat?.playerID ?? seat.playerID}`}
+            matchID={seat.matchID}
+            playerID={activeSeat?.playerID ?? seat.playerID}
+            credentials={activeSeat?.credentials ?? seat.credentials}
+          />
+        </SeatColoursProvider>
       </MatchLifecycleProvider>
       {BotClient
         ? botSeats.map((entry) => (
             <div hidden key={`${seat.matchID}-bot-${entry.playerID}`}>
-              <BotClient
-                matchID={seat.matchID}
-                playerID={entry.playerID}
-                credentials={entry.credentials}
-              />
+              <SeatColoursProvider colours={seatColours}>
+                <BotClient
+                  matchID={seat.matchID}
+                  playerID={entry.playerID}
+                  credentials={entry.credentials}
+                />
+              </SeatColoursProvider>
             </div>
           ))
         : null}
