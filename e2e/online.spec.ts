@@ -66,7 +66,7 @@ test.describe('GamesCabinet smokes', () => {
     await expect(hostPage.getByTestId('ttt-board')).toBeVisible();
 
     await hostPage.getByTestId('ttt-cell-0').click();
-    await expect(guestPage.getByTestId('ttt-cell-0')).toContainText('X');
+    await expect(guestPage.getByTestId('ttt-cell-0')).toHaveAttribute('data-mark', 'X');
 
     await close();
   });

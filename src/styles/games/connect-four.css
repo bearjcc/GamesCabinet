@@ -1,39 +1,83 @@
-.c4-board {
+.c4-rack {
+  position: relative;
+  width: min(100%, var(--board-max));
+  max-width: min(100%, calc((100dvh - 12rem) * 7 / 6));
+  margin: 0 auto;
+  touch-action: manipulation;
+}
+
+.c4-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
   gap: 0.35rem;
   padding: 0.7rem;
   border-radius: var(--radius-lg);
   background: #2c5f8a;
-  width: min(100%, var(--board-max));
-  max-width: min(100%, calc((100dvh - 12rem) * 7 / 6));
-  margin: 0 auto;
+  aspect-ratio: 7 / 6;
 }
 
-.c4-col {
+.c4-slot {
   position: relative;
-  display: grid;
-  grid-template-rows: repeat(6, minmax(0, 1fr));
-  gap: 0.35rem;
+  aspect-ratio: 1;
   min-width: 0;
-  min-height: calc(6 * var(--tap-min));
-  padding: 0.2rem;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  cursor: default;
-  transition: background var(--motion-duration) var(--motion-ease);
+  min-height: 0;
+}
+
+.c4-disc {
+  position: absolute;
+  inset: 4%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+
+.c4-disc .tt-token {
+  width: 100%;
+  height: 100%;
+}
+
+.c4-disc--p0 .tt-token {
+  background: var(--brand-yellow);
+  color: var(--brand-umber);
+}
+
+.c4-disc--p1 .tt-token {
+  background: var(--brand-red);
+  color: var(--ink-contrast, #fafafa);
+}
+
+.c4-hole-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(circle at center, transparent 44%, #2c5f8a 45%);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 18%);
+}
+
+.c4-disc.is-dropping {
+  animation: c4-drop 0.42s cubic-bezier(0.33, 1, 0.45, 1) forwards;
+}
+
+@keyframes c4-drop {
+  from {
+    transform: translateY(calc(-1 * var(--c4-drop-rows, 1) * (100% + 0.35rem)));
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
 .c4-held {
   position: absolute;
-  top: -0.55rem;
-  left: 50%;
-  z-index: 1;
-  width: calc(100% - 0.4rem);
+  top: 0.15rem;
+  z-index: 4;
+  width: calc(100% / 7 - 0.45rem);
   aspect-ratio: 1;
   transform: translateX(-50%) translateY(-100%);
-  opacity: 0.92;
   pointer-events: none;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
 }
@@ -43,51 +87,88 @@
   height: 100%;
 }
 
-.c4-col.is-held.is-open {
-  background: rgba(255, 255, 255, 0.08);
+.c4-held--p0 .tt-token {
+  background: var(--brand-yellow);
+  color: var(--brand-umber);
+}
+
+.c4-held--p1 .tt-token {
+  background: var(--brand-red);
+  color: var(--ink-contrast, #fafafa);
+}
+
+.c4-columns {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  z-index: 3;
+}
+
+.c4-col {
+  border: 0;
+  background: transparent;
+  cursor: default;
+  min-height: 0;
+  padding: 0;
 }
 
 .c4-col.is-open {
   cursor: pointer;
 }
 
-.c4-col.is-open:hover,
-.c4-col.is-open:focus-visible {
-  background: rgba(255, 255, 255, 0.12);
+.c4-lip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.55rem;
+  z-index: 3;
+  pointer-events: none;
 }
 
-.c4-cell {
-  aspect-ratio: 1;
-  min-height: 0;
-  border-radius: 999px;
-  background: transparent;
-  display: grid;
-  place-items: center;
-  transition: box-shadow var(--motion-duration) var(--motion-ease);
+.c4-win-line {
+  position: absolute;
+  inset: 0.7rem;
+  z-index: 5;
+  width: calc(100% - 1.4rem);
+  height: calc(100% - 1.4rem);
+  pointer-events: none;
 }
 
-.c4-cell.pe {
-  background: #1a2332;
+.c4-win-line line {
+  stroke: var(--brand-cream);
+  stroke-width: 0.05;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 45%));
 }
 
-.c4-col.is-open:hover .c4-cell.pe,
-.c4-col.is-open:focus-visible .c4-cell.pe {
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45);
+.play-table:has([data-testid="c4-board"]) .play-table__info {
+  min-height: 2.75rem;
 }
 
-/* Filled cells render shared .tt-token (see tabletop.css). */
-.c4-cell .tt-token {
-  width: 100%;
-  height: 100%;
+.match-chrome:has([data-testid="c4-board"]) {
+  position: relative;
 }
 
-/* Yellow / red chips on blue rack (brand pops). */
-.c4-cell .tt-token--p0 {
-  background: var(--brand-yellow);
-  color: var(--brand-umber);
+.match-chrome:has([data-testid="c4-board"]) .match-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  margin: 0;
+  padding: 0.45rem 0.15rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border-top: 1px solid var(--line);
 }
 
-.c4-cell .tt-token--p1 {
-  background: var(--brand-red);
-  color: var(--ink-contrast, #fafafa);
+@media (prefers-reduced-motion: reduce) {
+  .c4-disc.is-dropping {
+    animation: none;
+  }
+}
+
+[data-motion="reduced"] .c4-disc.is-dropping {
+  animation: none;
 }
