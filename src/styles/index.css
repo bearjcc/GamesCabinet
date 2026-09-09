@@ -23,6 +23,7 @@
 @import "./games/reversi.css";
 @import "./games/memory.css";
 @import "./games/mancala.css";
+@import "./games/solitaire.css";
 @import "./games/klondike.css";
 @import "./games/freecell.css";
 @import "./games/go.css";

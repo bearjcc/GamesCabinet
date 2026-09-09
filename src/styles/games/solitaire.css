@@ -1,0 +1,92 @@
+/* Shared Klondike / FreeCell — full-bleed felt, Kenney card proportions (140×190). */
+
+.play-table__board:has(.sol-board) {
+  place-items: stretch;
+  align-content: stretch;
+  background: #1a6b38;
+  padding: 0;
+}
+
+.sol-board {
+  --sol-card-aspect: 140 / 190;
+  --sol-card-pad: 2px;
+  --sol-card-border: 1px;
+  --sol-stack-step: calc(var(--sol-card-w, 4.5rem) * 190 / 140 * 0.22);
+
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.4rem 0.65rem;
+  gap: 0.65rem;
+  background: #1a6b38;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.sol-board .tt-card {
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--sol-card-aspect);
+  box-sizing: border-box;
+  padding: var(--sol-card-pad);
+  border: var(--sol-card-border) solid rgb(0 0 0 / 35%);
+  background: #fffef8;
+  border-radius: 0.35rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 22%);
+}
+
+.sol-board .tt-card--art {
+  background: #fffef8;
+}
+
+.sol-board .tt-card--empty {
+  border-style: dashed;
+  border-color: rgb(255 255 255 / 45%);
+  background: rgb(0 0 0 / 12%);
+  color: rgb(255 255 255 / 75%);
+  font-size: 0.7rem;
+}
+
+.sol-board .tt-card.is-selected {
+  outline: 2px solid #f5e6a8;
+  outline-offset: 1px;
+  transform: translateY(-0.2rem);
+  z-index: 2;
+}
+
+.sol-board .tt-card.is-dragging {
+  opacity: 0.35;
+}
+
+.sol-board .tt-card__img {
+  border-radius: 0.2rem;
+}
+
+.sol-drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 4px 10px rgb(0 0 0 / 45%));
+}
+
+.sol-drag-ghost .tt-card {
+  width: var(--sol-ghost-w, 4.5rem);
+  height: auto;
+  aspect-ratio: var(--sol-card-aspect);
+}
+
+.sol-drag-ghost__stack .tt-card:not(:first-child) {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.sol-drop.is-lit {
+  outline: 2px solid #f5e6a8;
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
