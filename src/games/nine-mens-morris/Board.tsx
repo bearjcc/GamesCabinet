@@ -3,7 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getNineMensMorrisActions } from './actions';
 import {
   ADJACENT,
@@ -72,7 +72,7 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
   else if (G.selected === null) yourTurnLabel = 'Your turn — select a piece';
   else yourTurnLabel = 'Your turn — choose a destination';
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: yourTurnLabel },
   });

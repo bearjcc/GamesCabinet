@@ -3,7 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getDotsAndBoxesActions } from './actions';
 import {
   allLineKeys,
@@ -48,7 +48,7 @@ export function DotsAndBoxesBoard({
   isActive,
 }: BoardProps<DotsAndBoxesState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - claim a line' },
   });

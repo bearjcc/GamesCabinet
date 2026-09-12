@@ -3,7 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter, Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getNimActions } from './actions';
 import type { NimState } from './game';
 
@@ -12,7 +12,7 @@ const VISUAL_TOKEN_CAP = 13;
 
 export function NimBoard({ G, ctx, moves, playerID, isActive }: BoardProps<NimState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - take 1 to 3 stones' },
   });

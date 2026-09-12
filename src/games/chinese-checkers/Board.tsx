@@ -4,7 +4,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getChineseCheckersActions } from './actions';
 import {
   type ChineseCheckersState,
@@ -89,7 +89,7 @@ export function ChineseCheckersBoard({
       : relocate.filter((m) => m.from === effectiveSelected).map((m) => m.to);
   const selectable = new Set(chainFrom !== null ? [chainFrom] : relocate.map((m) => m.from));
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: {
       yourTurn:

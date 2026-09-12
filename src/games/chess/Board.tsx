@@ -4,8 +4,8 @@ import { Lift, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { primitiveProfile } from '../../lib/cinematic';
-import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { kenneyIcon } from '../shared/tokens';
 import type { ChessState, Piece, PieceType } from './game';
 import { legalMoves, rc } from './game';
@@ -150,7 +150,7 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
     return () => window.clearTimeout(t);
   }, [landPulse]);
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: {
       yourTurn: selected === null ? 'Your turn - tap a piece' : 'Tap a square to move',

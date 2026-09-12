@@ -3,7 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter, Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getMancalaActions } from './actions';
 import type { MancalaState } from './game';
 import { ownPits, P0_STORE, P1_STORE } from './game';
@@ -14,7 +14,7 @@ const VISUAL_STONE_CAP = 8;
 export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaState>) {
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
   const player = playerID ?? ctx.currentPlayer;
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - tap a pit' },
   });

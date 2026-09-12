@@ -3,7 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray, Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getBackgammonActions } from './actions';
 import { BAR, type BackgammonState, checkerCount, legalPlays, pointOwner } from './game';
 
@@ -22,7 +22,7 @@ export function BackgammonBoard({
   const plays = yourTurn ? legalPlays(G, ctx.currentPlayer) : [];
   const playableFrom = new Set(plays.map((p) => p.from));
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: {
       yourTurn: G.hasRolled

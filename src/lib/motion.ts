@@ -75,8 +75,8 @@ export function applyEffectiveMotion(preferred: MotionIntensity = getMotion()): 
  */
 export const MOTION_DURATION_MS: Record<MotionIntensity, number> = {
   reduced: 0,
-  normal: 140,
-  playful: 220,
+  normal: 200,
+  playful: 280,
 };
 
 /** CSS `--motion-ease` token values (stylesheets only). */

@@ -5,8 +5,8 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
-import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { KENNEY_CROWN } from '../shared/tokens';
 import type { CheckersState, Piece } from './game';
 import { legalMoves, rc } from './game';
@@ -133,7 +133,7 @@ export function CheckersBoard({ G, ctx, moves, playerID }: BoardProps<CheckersSt
     return () => window.clearTimeout(t);
   }, [landPulse]);
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: {
       yourTurn: selected === null ? 'Your turn — tap a piece' : 'Tap a square to move',

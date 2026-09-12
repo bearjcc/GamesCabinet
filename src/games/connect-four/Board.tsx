@@ -1,13 +1,16 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
 import { controlA11y } from '../../lib/actions';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
+import { nInARowWinningIndices } from '../shared/grid';
 import { columnDropState } from './actions';
 import type { C4State } from './game';
 import { COLS, ROWS } from './game';
+
+const WIN_LENGTH = 4;
 
 function columnAtClientX(board: HTMLElement, clientX: number): number | null {
   const rect = board.getBoundingClientRect();
@@ -26,10 +29,16 @@ export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
   const currentPlayer = playerID ?? ctx.currentPlayer;
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn — tap a column' },
   });
+  const winningCells = useMemo(() => {
+    if (!ctx.gameover) return null;
+    const over = ctx.gameover as { draw?: boolean };
+    if (over.draw) return null;
+    return nInARowWinningIndices(G.cells, { rows: ROWS, cols: COLS, n: WIN_LENGTH });
+  }, [ctx.gameover, G.cells]);
 
   const updateHoverFromPointer = useCallback(
     (clientX: number) => {
@@ -144,7 +153,7 @@ export function ConnectFourBoard({ G, ctx, moves, playerID }: BoardProps<C4State
                   return (
                     <span
                       key={row}
-                      className={`c4-cell${cell === null ? ' pe' : ''}`}
+                      className={`c4-cell${cell === null ? ' pe' : ''}${winningCells?.includes(row * COLS + col) ? ' is-winning' : ''}`}
                       role="gridcell"
                       aria-hidden
                     >

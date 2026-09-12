@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { deriveMatchStatus } from './matchStatus';
+import { defaultSeatLabel, deriveMatchStatus } from './matchStatus';
+
+describe('defaultSeatLabel', () => {
+  it('formats zero-based player ids', () => {
+    expect(defaultSeatLabel('0')).toBe('Player 1');
+    expect(defaultSeatLabel('1')).toBe('Player 2');
+  });
+});
 
 describe('deriveMatchStatus', () => {
   it('reports waiting when explicitly waiting for players', () => {
@@ -133,5 +140,26 @@ describe('deriveMatchStatus', () => {
       text: 'Opponent wins',
       tone: 'done',
     });
+  });
+
+  it('uses named seats when seatLabel is provided', () => {
+    const seatLabel = (id: string) => (id === '0' ? 'Alice' : 'Bob');
+    expect(
+      deriveMatchStatus({ currentPlayer: '1' }, '1', {
+        seatLabel,
+        isYourTurn: true,
+      }),
+    ).toEqual({ text: "Bob's turn", tone: 'you' });
+    expect(
+      deriveMatchStatus({ currentPlayer: '0' }, '1', {
+        seatLabel,
+        isYourTurn: false,
+      }),
+    ).toEqual({ text: "Alice's turn", tone: 'wait' });
+    expect(
+      deriveMatchStatus({ currentPlayer: '0', gameover: { winner: '0' } }, '0', {
+        seatLabel,
+      }),
+    ).toEqual({ text: 'Alice wins', tone: 'done' });
   });
 });

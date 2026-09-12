@@ -226,8 +226,7 @@
 }
 
 .dom-end.snap {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--you) 55%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--you) 45%, transparent);
 }
 
 .dom-hand {

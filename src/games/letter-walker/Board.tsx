@@ -190,7 +190,7 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
     }
   }
 
-  // Solo puzzle chrome — not the multiplayer turn/win shape of deriveMatchStatus.
+  // Solo puzzle chrome — not the multiplayer turn/win shape of useMatchStatus.
   let status = `Score ${G.score} · Moves ${G.moves} · Puzzle ${G.puzzleNumber}`;
   let tone: StatusTone = 'you';
   if (G.completed) {

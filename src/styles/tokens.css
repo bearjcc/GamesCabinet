@@ -25,7 +25,7 @@
   --board-max: min(100%, 42rem);
   --play-gap: 0.65rem;
   --pew-pad: 0.55rem 0.35rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
-  --motion-duration: 140ms;
+  --motion-duration: 200ms;
   --motion-ease: ease-out;
 
   font-family: var(--font);
@@ -36,7 +36,7 @@
 }
 
 [data-motion="playful"] {
-  --motion-duration: 220ms;
+  --motion-duration: 280ms;
   --motion-ease: cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 

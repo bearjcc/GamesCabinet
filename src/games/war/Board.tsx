@@ -7,8 +7,8 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardFace, StockPile } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
-import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { kenneyPlayingCardAsset } from '../shared/cards';
 import { getWarActions } from './actions';
 import type { WarState } from './game';
@@ -18,7 +18,7 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
   let yourTurnLabel = 'Your turn - fight';
   if (G.lastWasWar) yourTurnLabel = 'Your turn - fight (war!)';
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: yourTurnLabel },
   });

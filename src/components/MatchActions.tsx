@@ -14,14 +14,21 @@ export function MatchActions({
   actions,
   busy = false,
   children,
+  overlay = false,
 }: {
   actions: MatchAction[];
   busy?: boolean;
   children?: ReactNode;
+  /** Layer on the board without claiming layout height (endgame). */
+  overlay?: boolean;
 }) {
   if (!actions.length && !children) return null;
   return (
-    <div className="action-row match-actions" role="group" aria-label="Match actions">
+    <div
+      className={`action-row match-actions${overlay ? ' match-actions--overlay' : ''}`}
+      role="group"
+      aria-label="Match actions"
+    >
       {actions.map((a) => {
         const className = `btn${a.variant === 'primary' ? ' primary' : a.variant === 'ghost' ? ' ghost' : ''}`;
         if (a.to) {

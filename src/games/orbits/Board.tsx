@@ -64,7 +64,7 @@ export function OrbitsBoard({ G, ctx, moves, isActive, playerID }: BoardProps<Or
     return { score: gameover.score, moves: G.turns, meta: { reason: gameover.reason } };
   }, [gameover, G.turns]);
 
-  // Solo programme chrome - not the multiplayer turn/win shape of deriveMatchStatus.
+  // Solo programme chrome - not the multiplayer turn/win shape of useMatchStatus.
   let status = G.drewThisTurn ? 'Play a card, declare the crawler, or discard' : 'Draw a card';
   let tone: StatusTone = 'you';
   if (gameover) {
