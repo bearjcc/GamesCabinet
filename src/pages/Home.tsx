@@ -10,8 +10,6 @@ export function Home() {
 
   return (
     <Shell>
-      <h1 className="page-heading">Games</h1>
-
       {groups.map((group) => (
         <section
           key={group.id}
