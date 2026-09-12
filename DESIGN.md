@@ -6,6 +6,16 @@ GamesCabinet is quiet application UI: a cabinet of games, not a marketing site. 
 
 Player-facing philosophy, verbs, and personas live in [`PRODUCT.md`](./PRODUCT.md). This file is how that philosophy shows up in chrome, motion, interaction, and copy.
 
+## Cabinet undertone
+
+The product is a **physical cabinet of games** opened on a small screen — quiet chrome; personality in boards, tokens, felt, and the motion of pieces. Bear at the desk, Mum on a tablet: same honest table, not a dashboard.
+
+**Whimsy** means tabletop handmade feel — felt, a held Connect Four disc, card flip, stone piles — never life-app celebration, confetti, or task-manager checkmarks.
+
+**Earn** every gap, colour, interrupt, and animation. If it has no job (distinction, hierarchy, state, evidence, recognition), remove it. Spacing is structure; feedback is not an interruption; motion is continuity (~200ms on objects), not decoration.
+
+**Explicit exclusions:** not a habit/task manager UI; not Prism-style extension chrome; not SaaS landing density. Cursor rules under `.cursor/rules/` (`intentionality.mdc`, `intentional-spacing.mdc`, and siblings) encode this for agents; this section is the player-facing design source of truth.
+
 ## Themes
 
 Four themes, cycled from the Shell topbar (`ThemeCycle`): **White -> Light -> Dark -> Black -> ...**

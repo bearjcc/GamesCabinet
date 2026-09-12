@@ -1,0 +1,45 @@
+---
+description: "Undertone is not an Easter egg. Whimsy with a job, specific to this cabinet. Break rules only with intention."
+alwaysApply: true
+---
+
+# Artistry and exceptions
+
+Read [`DESIGN.md`](../../DESIGN.md) → Cabinet undertone.
+
+## Undertone ≠ Easter egg
+
+The cabinet's personality is **continuous** — felt, held pieces, card flip, quiet chrome — not a hidden joke or one-off animation buried in settings.
+
+Players should feel they opened a **physical cabinet on a small screen**, every visit.
+
+## Whimsy with a job
+
+Whimsy must **help** play or recognition:
+
+| Whimsy with a job | Not whimsy |
+|---|---|
+| Connect Four disc held above the column before drop | Confetti on win in chrome |
+| Card flip / deal weight on shared tabletop kit | Random mascot on every empty state |
+| Stone piles, meeple snap, dice land | Life-app celebration checkmarks |
+| Brand stamp on wordmark | Sparkle / "AI" badges |
+
+One **specific** delight beats generic whimsy pasted on every surface.
+
+## Quiet ordinary makes exceptional visible
+
+Ordinary chrome stays calm so boards, tokens, and motion can carry character. If everything shouts, nothing reads.
+
+## Breaking rules
+
+You may break spacing, colour, or motion rules **only with intention**:
+
+- Name the player moment it serves.
+- Keep it local to that game or that interaction — do not fork the whole design system.
+- Document in `DESIGN.md` or a game override, not as a new global default.
+
+## Explicit exclusions (this product)
+
+Not a habit/task manager UI. Not Prism-style extension chrome. Not SaaS landing density. Not security-shop alarm red on every control.
+
+Conflicts: favour **intentionality.mdc** and **GamesCabinet undertone** over template polish.

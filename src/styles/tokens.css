@@ -17,6 +17,13 @@
 
   --radius: 5px;
   --radius-lg: 7px;
+
+  /* Spacing scale — padding inside, margin between (see intentional-spacing.mdc) */
+  --space-1: 0.25rem;
+  --space-2: 0.4rem;
+  --space-3: 0.55rem;
+  --space-4: 0.85rem;
+  --space-5: 1.1rem;
   --font: "Source Sans 3", system-ui, sans-serif;
   --font-brand: Fraunces, Georgia, "Times New Roman", serif;
 

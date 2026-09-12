@@ -1,0 +1,52 @@
+---
+description: "Feedback tells truth about state. Motion for continuity (~200ms), not decoration."
+alwaysApply: true
+---
+
+# Interaction feedback and motion
+
+Read [`DESIGN.md`](../../DESIGN.md) → Motion, Interaction guidelines, Board-first interaction law.
+
+## Principle
+
+Feedback must tell the **truth** about state. If it looks clickable, it is. If it looks loading, something is in flight. If it looks disabled, say why.
+
+## Required feedback channels
+
+| Phase | Must communicate |
+|---|---|
+| **Hover / focus** | Affordance on interactive chrome only — not hover-only essentials |
+| **Press / active** | Acknowledgement without fake depth (no universal lift) |
+| **Loading** | Real wait; no fake progress bars |
+| **Success / error** | Inline or status; not blocking celebration |
+| **Reduced motion** | `prefers-reduced-motion` and `data-motion="reduced"` win |
+
+Touch-first: generous targets; keyboard focus via `:focus-visible`.
+
+## Motion
+
+Motion explains **continuity** — a piece moved, a card flipped, a die landed.
+
+| Layer | Rule |
+|---|---|
+| **Chrome** | ~140ms ease-out on backgrounds; no entrance motion on shell surfaces |
+| **Game objects** | Shared tabletop primitives (lift, drop, deal, flip, fan, stack, roll, snap) |
+| **Playful** | Longer/bouncier via `data-motion="playful"` — opt-in, not default noise |
+
+Default duration band: **~200ms** for object motion; chrome stays shorter.
+
+## Forbidden motion tells
+
+- Fake progress or shimmer on instant actions
+- AI-default fade/lift/shimmer on every tile and button
+- Hover-lift on catalogue chrome
+- Motion that **gates** input — animate after honouring the move
+- Unskippable celebration sequences
+
+**Animation half-life:** first hour teaches; hundredth hour waits. Prefer skippable/summarisable effects.
+
+## Board-first
+
+Moves happen on the board. Pew buttons are shortcuts and confirmations, not a parallel move grid.
+
+Conflicts: favour **intentionality** and physical tabletop read over decorative motion.

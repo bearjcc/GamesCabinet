@@ -1,0 +1,55 @@
+---
+description: "Whitespace is structure, not decoration. Hierarchy through space; cards only for real groupings."
+alwaysApply: true
+---
+
+# Intentional spacing
+
+Read [`DESIGN.md`](../../DESIGN.md) before changing chrome, boards, or layout density.
+
+## Principle
+
+Whitespace is structure. Padding goes **inside** a control or region; margin goes **between** siblings. Borders are sparing — a hairline divider beats boxing every block.
+
+Hierarchy comes from **space and type**, not from nesting surfaces. More padding does not mean more premium.
+
+## Spacing scale
+
+Prefer the shared scale in `src/styles/tokens.css` (`--space-*`) over one-off rem values in shell CSS.
+
+| Token | Typical use |
+|---|---|
+| `--space-1` | Tight inline gaps (icon + label) |
+| `--space-2` | Related controls in one row |
+| `--space-3` | Section internals, grid gaps |
+| `--space-4` | Between catalogue groups, main sections |
+| `--space-5` | Rare outer breathing room only when content earns it |
+
+When a value is not on the scale, justify it in a comment or fold it into the nearest step.
+
+## Cards and surfaces
+
+Use a bordered or tinted surface only when it groups **related, interactive, or scannable** content:
+
+- Game tile = one link to one game (yes).
+- Join row under a divider (yes).
+- Status that must read at a glance in play (yes).
+- Decorative wrapper around a single heading (no).
+- Card-on-card nesting for chrome that could be a gap + hairline (no).
+
+## Small screens
+
+Reallocate space; do not shrink the desktop layout into illegibility.
+
+- Phone: tighten chrome gaps, collapse secondary info, keep tap targets.
+- Board-first: on height-constrained viewports, squeeze info/pew before the board (`play-table.css` patterns).
+- Do not solve small screens by adding more boxed regions.
+
+## GamesCabinet defaults
+
+- Shell ~42rem, compact — collection, not storefront.
+- Home: dense auto-fill grid; group labels are type + margin, not cards.
+- PlayTable: info / board / pew slots; board claims leftover height.
+- Join is a section under a divider, not a floating card.
+
+Conflicts: favour **intentionality** and **board-dominant** layout over decorative density. See also `.cursor/rules/anti-slop.mdc`.

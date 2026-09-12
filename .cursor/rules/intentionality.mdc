@@ -1,0 +1,50 @@
+---
+description: "Why is this here? Start from goals, reuse before inventing, correspondence of interface to problem."
+alwaysApply: true
+---
+
+# Intentionality
+
+This cabinet is a **handmade digital games cabinet** — whimsy with a job — for Bear then Mum on a tablet (`GamesCabi.net`). Not a life-manager app. Not extension-shop chrome.
+
+Read [`PRODUCT.md`](../../PRODUCT.md), [`DESIGN.md`](../../DESIGN.md), [`ARCHITECTURE.md`](../../ARCHITECTURE.md) before adding UI or rules helpers.
+
+## The question
+
+Before any addition: **Why is this here?** Name the player goal in table language.
+
+If the answer is "because other apps do it" or "to fill space", stop.
+
+## Prefer reuse over invention
+
+Run the shared mechanics gate (`.cursor/rules/shared-mechanics.mdc`):
+
+1. Does boardgame.io or the shell already own this?
+2. Has another game in the cabinet already done it?
+3. Will future games reuse it?
+
+Second use (or clear second use coming) → shared helper, shell slot, or genre kit first.
+
+## Start from goals, not components
+
+Design the flow (pick game → choose mode → play), then place the minimum chrome. Do not start from a card grid template and backfill copy.
+
+## Addition cheap, removal expensive
+
+Default to **less**. Every new surface, token, or interrupt is debt.
+
+**Uncertainty test:** If you are unsure it belongs, leave it out or make it collapsible. If veterans would disable it, do not ship it as mandatory.
+
+## Correspondence
+
+The interface should **correspond** to the problem:
+
+- Catalogue = shelves of games, not feature marketing.
+- Play = board dominates; hands and dice reachable.
+- Settings = nickname, colour, theme — not a control panel for the product pipeline.
+
+Player-facing artefacts speak to the **player**, not the prompter (`.cursor/rules/player-facing.mdc`).
+
+## Conflicts
+
+When rules disagree, favour **intentionality + GamesCabinet product truth** over generic app patterns. Visual tells: `anti-slop.mdc`. Whimsy bounds: `artistry-and-exceptions.mdc`.

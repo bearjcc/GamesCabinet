@@ -62,10 +62,8 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: var(--pew-pad);
-  margin: 0 -0.15rem;
   border-top: 1px solid var(--line);
-  background: var(--surface-2);
-  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--surface);
 }
 
 .play-table__pew-body {
