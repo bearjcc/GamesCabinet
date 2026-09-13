@@ -21,7 +21,7 @@ import {
   SLOTS_PER_BUILDING,
 } from './cards';
 
-type SelectMode = { kind: 'none' } | { kind: 'person'; cardId: string } | { kind: 'contribute' };
+type SelectMode = { kind: 'none' } | { kind: 'person'; cardId: string };
 
 function cardLabel(id: string): string {
   return cardDef(id)?.name ?? id;
@@ -33,6 +33,9 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
   const gameover = ctx.gameover as { winner?: string; eraScore?: number } | undefined;
 
   const need = useMemo(() => missionThreshold(G.mission, G.buildings), [G.mission, G.buildings]);
+
+  const canCommit =
+    playable && (G.funding > 0 || G.innovation > 0) && canContribute(G, G.funding, G.innovation);
 
   let status = 'Play cards, staff buildings, fund the mission, or buy from the row.';
   let tone: StatusTone = 'you';
@@ -47,6 +50,8 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
     status = 'Waiting…';
   } else if (select.kind === 'person') {
     status = 'Choose a building for this person.';
+  } else if (canCommit) {
+    status = 'Tap the mission to commit your Funding and Innovation.';
   }
 
   const pickCard = (cardId: string) => {
@@ -78,11 +83,9 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
     }
   };
 
-  const contributeAll = () => {
-    if (!playable) return;
-    if (canContribute(G, G.funding, G.innovation)) {
-      moves.contribute(G.funding, G.innovation);
-    }
+  const commitToMission = () => {
+    if (!canCommit) return;
+    moves.contribute(G.funding, G.innovation);
   };
 
   const info = (
@@ -104,29 +107,35 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
 
   const board = (
     <div className="agency-board" data-testid="agency-board">
-      <section className="agency-zone" aria-label="Mission">
+      <section className="agency-zone agency-zone--mission" aria-label="Mission">
         <h3 className="agency-zone__title">{EXPLORER_I.name}</h3>
         <p className="agency-mission__need">
           Needs {need.funding} Funding and {need.innovation} Innovation on the mission.
         </p>
-        <div className="agency-mission__track" data-testid="agency-mission">
-          <span>
-            Funding {G.mission.fundingPlaced}/{need.funding}
-          </span>
-          <span>
-            Innovation {G.mission.innovationPlaced}/{need.innovation}
-          </span>
-        </div>
-        {playable && (G.funding > 0 || G.innovation > 0) ? (
-          <button
-            type="button"
-            className="agency-chip"
-            data-testid="agency-contribute"
-            onClick={contributeAll}
-          >
-            Commit {G.funding} Funding and {G.innovation} Innovation
-          </button>
-        ) : null}
+        <button
+          type="button"
+          className={`agency-mission${canCommit ? ' is-legal' : ''}`}
+          data-testid="agency-mission"
+          disabled={!canCommit}
+          onClick={commitToMission}
+          aria-label={
+            canCommit
+              ? `Commit ${G.funding} Funding and ${G.innovation} Innovation to the mission`
+              : 'Mission progress'
+          }
+        >
+          <div className="agency-mission__track">
+            <span className="agency-mission__meter">
+              Funding {G.mission.fundingPlaced}/{need.funding}
+              {G.funding > 0 ? ` (+${G.funding} ready)` : ''}
+            </span>
+            <span className="agency-mission__meter">
+              Innovation {G.mission.innovationPlaced}/{need.innovation}
+              {G.innovation > 0 ? ` (+${G.innovation} ready)` : ''}
+            </span>
+          </div>
+          {canCommit ? <span className="agency-mission__hint">Tap to commit tokens</span> : null}
+        </button>
       </section>
 
       <section className="agency-zone" aria-label="Buildings">

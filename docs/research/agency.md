@@ -53,14 +53,47 @@ Each player begins with three locations (rulebook names):
 
 ### Mapping to Aang's Destiny (reserved allies / bending tokens)
 
-| Aang's Destiny | Agency |
-|----------------|--------|
-| Reserved ally on a location | Person assigned to a building |
-| Bending token committed to a spot | Funding/Innovation tokens left on a mission |
-| Persistent until scene/mission clears | Staff stay on buildings; astronauts return to discard when mission completes |
-| Board shows who is where | Cabinet slice: click person in hand → click building slot |
+**Recovery note:** Neither GamesCabinet nor `bearjcc/agency` uses the tabletop terms *reserved ally* or *bending token* verbatim. GitHub code search on `bearjcc/agency` returns no hits for those strings or for `Aang`. The binding intent is recovered from:
 
-This is the binding mechanic Bear called out: **people on buildings**, not only cards played from hand for a one-shot effect.
+| Source | What it says |
+|--------|----------------|
+| `docs/AGENCY-Card-System.md` § Critical Implementation Gaps | **People Assignment Persistence (Constructs/Powers)** — people stay assigned until replaced or mission complete; needs `assigned_to` on person cards |
+| Same doc, Mission System | **People Assignment**: assign astronauts/engineers to missions **(like constructs)**; success → era points + people return to discard |
+| `docs/FRANCHISE_DECK_BUILDING_GAMES_RESEARCH.md` | Lists *Avatar: The Last Airbender – Aang's Destiny* as a franchise-adventure relative; discusses element mastery and adventure scenarios, not token names |
+| `docs/RULEBOOK.md` | Assign people to **buildings** (administrators) or **astronauts to missions**; place Funding/Innovation **on missions** (tokens persist between turns) |
+
+#### Physical Aang's Destiny (tabletop, for cabinet translation)
+
+These terms come from The OP's physical game, not from GamesCabinet docs:
+
+| Aang's Destiny (table) | What it is |
+|------------------------|------------|
+| **Reserved ally** | Ally card played onto a **location** board; stays there across turns until removed or the scenario ends |
+| **Bending token** | Wooden token placed on a **mission** or challenge spot to pay element costs; often left on the board until the mission resolves |
+| **Location board** | Persistent staging area (like Hogwarts locations) |
+| **Adventure / mission card** | Scenario with token thresholds and assigned allies |
+
+#### Agency ↔ Aang ↔ Hogwarts (cabinet seam)
+
+| Aang's Destiny | Hogwarts Battle (cabinet) | Agency (rulebook + slice 1) |
+|----------------|---------------------------|-----------------------------|
+| Reserved ally on location | Ally played to a location (some persist) | **Person** assigned to a **building** slot (`assignPerson`) |
+| Bending token on mission | Influence / damage on villain (spent each fight) | **Funding / Innovation** placed on **mission** (`contribute`; persists until mission completes) |
+| Ally stays until scenario ends | Location allies until defeated / game end | Building staff persist; mission astronauts return to discard on success (rulebook; slice 1: buildings only) |
+| Element types (water, earth, …) | Spell types, house flavour | **Funding** vs **Innovation** (two resource tracks) |
+| Adventure deck progression | Game 1–7 campaign | Era missions (Explorer I in slice 1) |
+
+#### Old-repo data model (not yet ported)
+
+```text
+person card.assigned_to → building id | mission id | null
+mission.funding_placed, mission.innovation_placed  (persist)
+turn pool: funding, innovation  (ephemeral unless contributed)
+```
+
+Cabinet slice 1 implements buildings + mission token placement; astronaut-on-mission assignment is listed under open questions.
+
+This is the binding mechanic Bear called out: **people on buildings** and **tokens on missions**, not only one-shot cards from hand.
 
 ## Card types (old `cards.json` + docs)
 
@@ -113,7 +146,7 @@ Shared cabinet seam: `src/games/shared/deckbuilder/` (zones, ephemeral resources
 - Solo vs rival track, Era 1 mission **Explorer I**.
 - Three buildings with **assignPerson** (persistent slots).
 - Market row, Funding/Innovation tokens, play resource cards, buy cards, contribute to mission.
-- Board-first UI on PlayTable; access code `SPUTNIK`.
+- Board-first UI on PlayTable (hand → building, market row, tap mission to commit tokens); access code `SPUTNIK`.
 
 ## Open questions / later slices
 
