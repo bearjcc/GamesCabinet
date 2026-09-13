@@ -4,6 +4,7 @@ import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import type { StatusTone } from '../../lib/matchStatus';
+import { AgencyWordmark } from './AgencyWordmark';
 import {
   type AgencyState,
   canAssignPerson,
@@ -20,12 +21,11 @@ import {
   facilityStaffedPassive,
   facilityStaffSlots,
 } from './cards';
+import { PersonCard } from './PersonCard';
+import { PlayCard } from './PlayCard';
+import { isPersonCard } from './personData';
 
 type SelectMode = { kind: 'none' } | { kind: 'person'; cardId: string };
-
-function cardLabel(id: string): string {
-  return cardDef(id)?.name ?? id;
-}
 
 export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>) {
   const [select, setSelect] = useState<SelectMode>({ kind: 'none' });
@@ -96,6 +96,7 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
 
   const info = (
     <>
+      <AgencyWordmark variant="play" />
       <span data-testid="agency-status">
         <StatusBar text={status} tone={tone} />
       </span>
@@ -131,11 +132,11 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
           }
         >
           <div className="agency-mission__track">
-            <span className="agency-mission__meter">
+            <span className="agency-mission__meter agency-mission__meter--funding">
               Funding {G.mission.fundingPlaced}/{need.funding}
               {G.funding > 0 ? ` (+${G.funding} ready)` : ''}
             </span>
-            <span className="agency-mission__meter">
+            <span className="agency-mission__meter agency-mission__meter--innovation">
               Innovation {G.mission.innovationPlaced}/{need.innovation}
               {G.innovation > 0 ? ` (+${G.innovation} ready)` : ''}
             </span>
@@ -170,7 +171,7 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
                     const personId = facility.assigned[slot];
                     return (
                       <li key={slot} className="agency-slot">
-                        {personId ? cardLabel(personId) : 'Empty slot'}
+                        {personId ? <PersonCard cardId={personId} size="slot" /> : 'Empty slot'}
                       </li>
                     );
                   })}
@@ -192,21 +193,22 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
                 </li>
               );
             }
-            const def = cardDef(cardId);
             const affordable = canBuyCard(G, index);
+            const person = isPersonCard(cardId);
             return (
               <li key={`${cardId}-${index}`}>
                 <button
                   type="button"
-                  className={`agency-card agency-card--market${affordable && playable ? ' is-legal' : ''}`}
+                  className={`agency-card-btn agency-card-btn--market${affordable && playable ? ' is-legal' : ''}`}
                   data-testid={`agency-market-${index}`}
                   disabled={!playable || !affordable}
                   onClick={() => pickMarket(index)}
                 >
-                  <span className="agency-card__name">{def?.name ?? cardId}</span>
-                  <span className="agency-card__meta">
-                    {def?.marketCost ?? 0} Funding — {def?.blurb}
-                  </span>
+                  {person ? (
+                    <PersonCard cardId={cardId} size="market" />
+                  ) : (
+                    <PlayCard cardId={cardId} size="market" />
+                  )}
                 </button>
               </li>
             );
@@ -224,17 +226,21 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
         const canPlace = playable && canPlaceFacility(G, cardId);
         const canPlay = playable && canPlayCard(G, cardId);
         const interactive = canPlace || canPlay || def?.kind === 'person';
+        const person = isPersonCard(cardId);
         return (
           <li key={`${cardId}-${index}`}>
             <button
               type="button"
-              className={`agency-card agency-card--hand${selected ? ' is-selected' : ''}${interactive ? ' is-legal' : ''}`}
+              className={`agency-card-btn agency-card-btn--hand${selected ? ' is-selected' : ''}${interactive ? ' is-legal' : ''}`}
               data-testid={`agency-hand-${cardId}`}
               disabled={!interactive}
               onClick={() => pickCard(cardId)}
             >
-              <span className="agency-card__name">{def?.name ?? cardId}</span>
-              <span className="agency-card__meta">{def?.blurb}</span>
+              {person ? (
+                <PersonCard cardId={cardId} size="hand" />
+              ) : (
+                <PlayCard cardId={cardId} size="hand" />
+              )}
             </button>
           </li>
         );

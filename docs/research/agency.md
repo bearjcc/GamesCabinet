@@ -146,6 +146,10 @@ Not yet: Rockets/Items kinds, 6-pile market, World Order, Spies, team modes, ast
 - [ ] Astronaut assignment to missions + risk die
 - [ ] Multiplayer seats, bots
 
+## Visual language
+
+Card anatomy, ability colours, and wordmark: [`agency-card-art.md`](./agency-card-art.md). Logo: `public/games/agency/logo.jpg`.
+
 ## Cross-links
 
 - Queue: `docs/slices.md`

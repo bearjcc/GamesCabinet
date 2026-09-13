@@ -26,10 +26,13 @@ export function Home() {
             {group.games.map((g) => (
               <Link
                 key={g.id}
-                className="game-tile"
+                className={`game-tile${g.brandMark ? ' game-tile--branded' : ''}`}
                 to={isSoloOnly(g) ? soloPlayPath(g.id) : `/game/${g.id}`}
                 data-testid={`home-game-${g.id}`}
               >
+                {g.brandMark ? (
+                  <img src={g.brandMark} alt="" className="game-tile__mark" aria-hidden="true" />
+                ) : null}
                 <h3>{g.name}</h3>
                 <p>{g.blurb}</p>
               </Link>
