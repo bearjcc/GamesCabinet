@@ -18,6 +18,9 @@ How to add work: append a checkbox under the right section. Type, blocked-by, an
 
 ## Next (AFK, after Now)
 
+- [x] **AFK** Agency — first playable slice (solo, facilities/people, market row)  
+  Research: `docs/research/agency.md` (Vault + repo recovery). Rules: `src/games/agency/`. Starter facilities + placeFacility; access code `SPUTNIK`. Remaining: events, factions, campaign eras, co-op seats — see research doc open questions.
+
 - [ ] **AFK** Seat colours on boards  
   Occupied this-table / bot seats already pick a colour at launch. Boards that can show seats should read that colour instead of ignoring it. Skip Hogwarts (hero is identity).  
   Start from `SEAT_COLOUR_PALETTE` / `src/lib/storage.ts` and which boards already show seats.
@@ -32,7 +35,7 @@ How to add work: append a checkbox under the right section. Type, blocked-by, an
 ## Later (not next)
 
 - Hogwarts expansions (campaign years 8-15) - engine data exists; launch picker is years 1-7
-- Agency / other first-party titles - not a Phase 1 gate
+- Agency follow-ons (events, factions, campaign, online co-op) — slice 1 landed; see `docs/research/agency.md`
 - Offline PWA / IndexedDB continue - Phase 2
 
 Background map (stale in places): [GamesCabinet Phase 1 map](https://github.com/bearjcc/GamesCabinet/issues/1)

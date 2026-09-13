@@ -1,0 +1,703 @@
+/* Agency — board + dossier cards (see docs/research/agency-card-art.md) */
+
+.agency-board {
+  --agency-funding: #1e3a5f;
+  --agency-innovation: #3d7a4a;
+  --agency-leadership: #a83232;
+  --agency-engineering: #2a5f9e;
+  --agency-rocketry: #3d7a4a;
+  --agency-acceleration: #6b4f9e;
+  --agency-us-navy: #1a2f4d;
+  --agency-ussr-red: #8b1e1e;
+  --agency-international: #6b5a48;
+  --agency-dossier-cream: var(--tile);
+  --agency-dossier-ink: var(--tile-ink);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--play-gap, 0.75rem);
+  width: 100%;
+  max-width: var(--board-max, 36rem);
+  margin: 0 auto;
+}
+
+.agency-wordmark {
+  display: block;
+  object-fit: contain;
+  margin: 0 auto 0.35rem;
+}
+
+.agency-wordmark--play {
+  width: min(100%, 14rem);
+  max-height: 3.25rem;
+}
+
+.agency-wordmark--compact {
+  width: 100%;
+  max-height: 2.5rem;
+}
+
+.agency-zone__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.agency-zone {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.6rem;
+  background: var(--surface);
+}
+
+.agency-mission__need {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+.agency-mission {
+  display: block;
+  width: 100%;
+  margin: 0.35rem 0 0;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-2);
+  text-align: left;
+  min-height: var(--tap-min, 2.75rem);
+}
+
+.agency-mission.is-legal {
+  border-color: var(--you);
+  box-shadow: inset 0 0 0 1px var(--you);
+  cursor: pointer;
+}
+
+.agency-mission:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.agency-mission__track {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.agency-mission__meter--funding {
+  color: var(--agency-funding);
+}
+
+.agency-mission__meter--innovation {
+  color: var(--agency-innovation);
+}
+
+.agency-mission__hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.agency-facilities {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.agency-facility {
+  text-align: left;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.5rem;
+  background: var(--surface-2);
+  min-height: var(--tap-min, 2.75rem);
+}
+
+.agency-facility.is-legal {
+  border-color: var(--you);
+  box-shadow: inset 0 0 0 1px var(--you);
+}
+
+.agency-facility__name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.agency-facility__passive {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--you);
+  margin-top: 0.15rem;
+}
+
+.agency-facility__slots {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.agency-slot {
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.agency-market {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.agency-hand {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.agency-card-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: transparent;
+  text-align: left;
+  min-height: var(--tap-min, 2.75rem);
+}
+
+.agency-card-btn--hand {
+  flex: 1 1 9.5rem;
+  max-width: 12rem;
+}
+
+.agency-card-btn.is-selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.agency-card-btn.is-legal:not(:disabled) {
+  cursor: pointer;
+}
+
+.agency-card-btn:disabled {
+  opacity: 0.55;
+}
+
+.agency-market__empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 0.4rem;
+}
+
+/* —— Person dossier card —— */
+
+.agency-person {
+  position: relative;
+  background: var(--agency-dossier-cream);
+  color: var(--agency-dossier-ink);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.agency-person--hand,
+.agency-person--market {
+  border: 1px solid color-mix(in srgb, var(--agency-dossier-ink) 25%, transparent);
+}
+
+.agency-person__decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.agency-person__watermark {
+  position: absolute;
+  object-fit: contain;
+  opacity: 0.12;
+}
+
+.agency-person__watermark--orbit {
+  right: -0.5rem;
+  bottom: 2rem;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.agency-person__watermark--capsule {
+  left: -0.25rem;
+  top: 2.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  opacity: 0.08;
+}
+
+.agency-person__header,
+.agency-person__portrait,
+.agency-person__on-play,
+.agency-person__footer,
+.agency-person__era-tab {
+  position: relative;
+  z-index: 1;
+}
+
+.agency-person__header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.35rem;
+  align-items: start;
+  padding: 0.35rem 0.4rem 0.25rem;
+  background: color-mix(in srgb, var(--surface) 40%, var(--agency-dossier-cream));
+  border-bottom: 1px solid color-mix(in srgb, var(--agency-dossier-ink) 12%, transparent);
+}
+
+.agency-person__cost {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.1rem;
+  padding: 0.15rem 0.25rem;
+  background: var(--agency-funding);
+  color: #fff;
+  border-radius: 3px;
+  line-height: 1.1;
+  overflow: hidden;
+}
+
+.agency-person__cost-icon-img {
+  position: absolute;
+  right: 0.1rem;
+  bottom: 0.1rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+.agency-person__cost-icon-fallback {
+  position: absolute;
+  right: 0.15rem;
+  bottom: 0.12rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, #fff 35%, transparent);
+}
+
+.agency-person__cost-label {
+  font-size: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+.agency-person__cost-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.agency-person__identity {
+  min-width: 0;
+}
+
+.agency-person__name {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.agency-person--market .agency-person__name {
+  font-size: 0.65rem;
+}
+
+.agency-person__title {
+  margin: 0.1rem 0 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: var(--agency-funding);
+  text-transform: uppercase;
+}
+
+.agency-person__type {
+  display: inline-block;
+  margin-top: 0.15rem;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.agency-person__rare {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.48rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--agency-funding);
+}
+
+.agency-person__faction {
+  position: relative;
+  text-align: right;
+  padding: 0.15rem 0.25rem 0.15rem 1.1rem;
+  border-radius: 3px;
+  font-size: 0.48rem;
+  line-height: 1.2;
+  color: #fff;
+  min-width: 2.5rem;
+}
+
+.agency-person__faction-icon {
+  position: absolute;
+  left: 0.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.75rem;
+  height: 0.75rem;
+  object-fit: contain;
+}
+
+.agency-person__faction-icon-fallback {
+  position: absolute;
+  left: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, #fff 40%, transparent);
+}
+
+.agency-person__faction-icon-fallback--us {
+  background: color-mix(in srgb, #fff 50%, transparent);
+}
+
+.agency-person__faction-icon-fallback--ussr {
+  background: color-mix(in srgb, #ffd700 70%, transparent);
+}
+
+.agency-person__faction--us {
+  background: var(--agency-us-navy);
+}
+
+.agency-person__faction--ussr {
+  background: var(--agency-ussr-red);
+}
+
+.agency-person__faction--international,
+.agency-person__faction--world {
+  background: var(--agency-international);
+}
+
+.agency-person__faction-label {
+  display: block;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.agency-person__faction-name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.55rem;
+}
+
+.agency-person__portrait {
+  position: relative;
+  height: 3.25rem;
+  background: color-mix(in srgb, var(--agency-dossier-ink) 8%, var(--agency-dossier-cream));
+  border-bottom: 1px solid color-mix(in srgb, var(--agency-dossier-ink) 10%, transparent);
+}
+
+.agency-person--market .agency-person__portrait {
+  height: 2.5rem;
+}
+
+.agency-person__portrait-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.agency-person__portrait-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: color-mix(in srgb, var(--agency-dossier-ink) 10%, var(--agency-dossier-cream));
+}
+
+.agency-person__portrait-fallback--technician {
+  background:
+    radial-gradient(
+      circle at 70% 40%,
+      color-mix(in srgb, var(--agency-funding) 25%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--agency-dossier-ink) 10%, var(--agency-dossier-cream));
+}
+
+.agency-person__portrait-fallback--analyst {
+  background:
+    radial-gradient(
+      circle at 30% 50%,
+      color-mix(in srgb, var(--agency-innovation) 30%, transparent),
+      transparent 50%
+    ),
+    color-mix(in srgb, var(--agency-dossier-ink) 8%, var(--agency-dossier-cream));
+}
+
+.agency-person__portrait-fallback--engineer {
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      color-mix(in srgb, var(--agency-engineering) 28%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--agency-dossier-ink) 12%, var(--agency-dossier-cream));
+}
+
+.agency-person__portrait-meta {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.2rem;
+  font-size: 0.48rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: color-mix(in srgb, var(--agency-us-navy) 85%, transparent);
+  padding: 0.1rem 0.25rem;
+  border-radius: 2px;
+}
+
+.agency-person__on-play {
+  position: relative;
+  padding: 0.3rem 0.35rem 0.35rem 0.55rem;
+  background: color-mix(in srgb, var(--surface) 25%, var(--agency-dossier-cream));
+}
+
+.agency-person__on-play-label {
+  position: absolute;
+  left: 0;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 0.45rem;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.42rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--agency-funding);
+  border-right: 2px solid var(--agency-funding);
+  padding-right: 0.15rem;
+}
+
+.agency-person__abilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.agency-person__ability {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem;
+  align-items: center;
+  font-size: 0.55rem;
+  line-height: 1.2;
+}
+
+.agency-person__ability-icon-wrap {
+  position: relative;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+}
+
+.agency-person__ability-icon-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.agency-person__ability-icon-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.agency-person__ability-icon-fallback--funding,
+.agency-person__ability-icon-fallback--engineering,
+.agency-person__ability-icon-fallback--pilot {
+  background: var(--agency-funding);
+}
+
+.agency-person__ability-icon-fallback--innovation,
+.agency-person__ability-icon-fallback--rocketry {
+  background: var(--agency-innovation);
+}
+
+.agency-person__ability-icon-fallback--leadership {
+  background: var(--agency-leadership);
+}
+
+.agency-person__ability-icon-fallback--acceleration {
+  background: var(--agency-acceleration);
+}
+
+.agency-person__ability-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.58rem;
+  color: #fff;
+  text-shadow: 0 0 2px color-mix(in srgb, var(--agency-dossier-ink) 55%, transparent);
+  pointer-events: none;
+}
+
+.agency-person__ability-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.agency-person__ability-text strong {
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.agency-person__assign-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.48rem;
+  color: color-mix(in srgb, var(--agency-dossier-ink) 65%, transparent);
+  font-style: italic;
+}
+
+.agency-person__footer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.2rem;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.48rem;
+  border-top: 1px solid color-mix(in srgb, var(--agency-dossier-ink) 12%, transparent);
+  background: color-mix(in srgb, var(--agency-dossier-ink) 4%, var(--agency-dossier-cream));
+}
+
+.agency-person--market .agency-person__assign-hint,
+.agency-person--market .agency-person__footer {
+  display: none;
+}
+
+.agency-person__footer-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.agency-person__footer-key {
+  font-size: 0.42rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.agency-person__clearance {
+  color: var(--agency-leadership);
+  font-weight: 600;
+  font-size: 0.45rem;
+}
+
+.agency-person__era-tab {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0.12rem 0.35rem;
+  font-size: 0.45rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: var(--agency-funding);
+  border-top-left-radius: 4px;
+}
+
+.agency-person--slot {
+  padding: 0.2rem 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--agency-funding) 35%, transparent);
+  border-radius: 3px;
+  background: var(--agency-dossier-cream);
+}
+
+.agency-person__slot-name {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.agency-person__slot-title {
+  display: block;
+  font-size: 0.55rem;
+  color: var(--agency-funding);
+  text-transform: uppercase;
+}
+
+/* —— Non-person play cards —— */
+
+.agency-play-card {
+  background: var(--tile);
+  color: var(--tile-ink);
+  padding: 0.45rem 0.55rem;
+  width: 100%;
+}
+
+.agency-play-card__header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.agency-play-card__cost {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--agency-funding);
+  min-width: 1.25rem;
+}
+
+.agency-play-card__name {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.agency-play-card__blurb {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  opacity: 0.9;
+}

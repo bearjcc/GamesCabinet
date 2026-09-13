@@ -23,6 +23,8 @@ export default defineConfig({
         // Hogwarts Battle: large ported engine with its own Vitest suite (1300+ tests).
         // Kept out of the global 100% gate until Agency-driven deckbuilder kit owns more of it.
         'src/games/hogwarts-battle/**',
+        // Agency slice 1: own Vitest suite; global gate when deckbuilder kit absorbs shared branches.
+        'src/games/agency/**',
       ],
       thresholds: {
         lines: 100,

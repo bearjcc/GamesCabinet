@@ -69,11 +69,11 @@ export function PlayLocal() {
     return <Navigate to={`/game/${meta.id}`} replace />;
   }
 
+  const shellTitle =
+    meta.id === 'agency' ? undefined : hotseat ? `${meta.name} (pass and play)` : meta.name;
+
   return (
-    <Shell
-      title={hotseat ? `${meta.name} (pass and play)` : meta.name}
-      backTo={isSoloOnly(meta) ? '/' : `/game/${meta.id}`}
-    >
+    <Shell title={shellTitle} backTo={isSoloOnly(meta) ? '/' : `/game/${meta.id}`}>
       <MatchLifecycleProvider
         value={{
           resetOnPlayAgain: true,

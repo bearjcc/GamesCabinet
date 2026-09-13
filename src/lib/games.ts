@@ -15,6 +15,8 @@ export type GameMeta = {
   hasLeaderboard?: boolean;
   /** Hidden from the catalogue until this code is entered locally. */
   accessCode?: string;
+  /** Optional brand mark on catalogue tile (path under public/). */
+  brandMark?: string;
   /**
    * Online host/join. Defaults to on when maxPlayers >= 2.
    * Set false for local-only titles (e.g. private IP decks).
@@ -282,6 +284,18 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     accessCode: 'LUNALOVEGOOD',
+  },
+  {
+    id: 'agency',
+    name: 'Agency',
+    blurb: 'Staff facilities. Fund missions. Win the Space Race.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+    soloOnly: true,
+    accessCode: 'SPUTNIK',
+    brandMark: '/games/agency/logo.jpg',
   },
 ];
 
