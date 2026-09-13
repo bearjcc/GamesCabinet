@@ -148,7 +148,7 @@ Not yet: Rockets/Items kinds, 6-pile market, World Order, Spies, team modes, ast
 
 ## Visual language
 
-Card anatomy, ability colours, and wordmark: [`agency-card-art.md`](./agency-card-art.md). Logo: `public/games/agency/logo.jpg`.
+Layered Person cards (DOM text + `<img>` icon/portrait layers, not baked card PNGs): [`agency-card-art.md`](./agency-card-art.md). Logo: `public/games/agency/logo.jpg`. Asset paths: `cardAssets.ts`.
 
 ## Cross-links
 

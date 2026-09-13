@@ -1,3 +1,12 @@
+import { CardAsset } from './CardAsset';
+import {
+  abilityIconSrc,
+  blueprintWatermarkSrc,
+  factionIconSrc,
+  fundingCostIconSrc,
+  orbitWatermarkSrc,
+  portraitSrc,
+} from './cardAssets';
 import { cardDef } from './cards';
 import { abilitiesForPerson, type PersonDossier, personDossier } from './personData';
 
@@ -10,6 +19,12 @@ type PersonCardProps = {
 function FactionBadge({ dossier }: { dossier: PersonDossier }) {
   return (
     <div className={`agency-person__faction agency-person__faction--${dossier.faction}`}>
+      <CardAsset
+        src={factionIconSrc(dossier.faction)}
+        alt=""
+        className="agency-person__faction-icon"
+        fallbackClassName={`agency-person__faction-icon-fallback agency-person__faction-icon-fallback--${dossier.faction}`}
+      />
       <span className="agency-person__faction-label">Faction</span>
       <span className="agency-person__faction-name">{dossier.factionLabel}</span>
     </div>
@@ -24,6 +39,7 @@ export function PersonCard({ cardId, size = 'hand' }: PersonCardProps) {
   const abilities = abilitiesForPerson(def);
   const eras = dossier?.eras ?? [1];
   const eraLabel = eras.length === 1 ? `ERA ${eras[0]}` : `ERAS ${eras.join('+')}`;
+  const portraitSeed = dossier?.portraitSeed ?? 'default';
 
   if (size === 'slot') {
     return (
@@ -40,13 +56,29 @@ export function PersonCard({ cardId, size = 'hand' }: PersonCardProps) {
       data-testid={`agency-person-${cardId}`}
       aria-label={`${def.name}, ${dossier?.title ?? 'Person'}`}
     >
+      <div className="agency-person__decor" aria-hidden="true">
+        <CardAsset
+          src={orbitWatermarkSrc()}
+          alt=""
+          className="agency-person__watermark agency-person__watermark--orbit"
+        />
+        <CardAsset
+          src={blueprintWatermarkSrc()}
+          alt=""
+          className="agency-person__watermark agency-person__watermark--blueprint"
+        />
+      </div>
+
       <header className="agency-person__header">
         <div className="agency-person__cost">
+          <CardAsset
+            src={fundingCostIconSrc()}
+            alt=""
+            className="agency-person__cost-icon-img"
+            fallbackClassName="agency-person__cost-icon-fallback"
+          />
           <span className="agency-person__cost-label">Funding cost</span>
           <span className="agency-person__cost-value">{def.marketCost}</span>
-          <span className="agency-person__cost-icon" aria-hidden="true">
-            $
-          </span>
         </div>
 
         <div className="agency-person__identity">
@@ -59,9 +91,12 @@ export function PersonCard({ cardId, size = 'hand' }: PersonCardProps) {
         {dossier ? <FactionBadge dossier={dossier} /> : null}
       </header>
 
-      <div className="agency-person__portrait" aria-hidden="true">
-        <div
-          className={`agency-person__portrait-art agency-person__portrait-art--${dossier?.portraitSeed ?? 'default'}`}
+      <div className="agency-person__portrait">
+        <CardAsset
+          src={portraitSrc(portraitSeed)}
+          alt=""
+          className="agency-person__portrait-img"
+          fallbackClassName={`agency-person__portrait-fallback agency-person__portrait-fallback--${portraitSeed}`}
         />
         {dossier?.program ? (
           <span className="agency-person__portrait-meta">{dossier.program}</span>
@@ -73,11 +108,14 @@ export function PersonCard({ cardId, size = 'hand' }: PersonCardProps) {
         <ul className="agency-person__abilities">
           {abilities.map((row) => (
             <li key={`${row.track}-${row.label}`} className="agency-person__ability">
-              <span
-                className={`agency-person__ability-icon agency-person__ability-icon--${row.track}`}
-                aria-hidden="true"
-              >
-                {row.value}
+              <span className="agency-person__ability-icon-wrap">
+                <CardAsset
+                  src={abilityIconSrc(row.track)}
+                  alt=""
+                  className="agency-person__ability-icon-img"
+                  fallbackClassName={`agency-person__ability-icon-fallback agency-person__ability-icon-fallback--${row.track}`}
+                />
+                <span className="agency-person__ability-value">{row.value}</span>
               </span>
               <span className="agency-person__ability-text">
                 <strong>{row.label}</strong>
