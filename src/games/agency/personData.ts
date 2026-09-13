@@ -8,7 +8,8 @@ export type AbilityTrack =
   | 'leadership'
   | 'engineering'
   | 'rocketry'
-  | 'acceleration';
+  | 'acceleration'
+  | 'pilot';
 
 export type PersonFaction = 'us' | 'ussr' | 'international' | 'world';
 

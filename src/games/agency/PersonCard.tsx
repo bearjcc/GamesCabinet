@@ -1,7 +1,7 @@
 import { CardAsset } from './CardAsset';
 import {
   abilityIconSrc,
-  blueprintWatermarkSrc,
+  capsuleWatermarkSrc,
   factionIconSrc,
   fundingCostIconSrc,
   orbitWatermarkSrc,
@@ -17,14 +17,23 @@ type PersonCardProps = {
 };
 
 function FactionBadge({ dossier }: { dossier: PersonDossier }) {
+  const factionIcon = factionIconSrc(dossier.faction);
+
   return (
     <div className={`agency-person__faction agency-person__faction--${dossier.faction}`}>
-      <CardAsset
-        src={factionIconSrc(dossier.faction)}
-        alt=""
-        className="agency-person__faction-icon"
-        fallbackClassName={`agency-person__faction-icon-fallback agency-person__faction-icon-fallback--${dossier.faction}`}
-      />
+      {factionIcon ? (
+        <CardAsset
+          src={factionIcon}
+          alt=""
+          className="agency-person__faction-icon"
+          fallbackClassName={`agency-person__faction-icon-fallback agency-person__faction-icon-fallback--${dossier.faction}`}
+        />
+      ) : (
+        <span
+          className={`agency-person__faction-icon-fallback agency-person__faction-icon-fallback--${dossier.faction}`}
+          aria-hidden="true"
+        />
+      )}
       <span className="agency-person__faction-label">Faction</span>
       <span className="agency-person__faction-name">{dossier.factionLabel}</span>
     </div>
@@ -63,9 +72,9 @@ export function PersonCard({ cardId, size = 'hand' }: PersonCardProps) {
           className="agency-person__watermark agency-person__watermark--orbit"
         />
         <CardAsset
-          src={blueprintWatermarkSrc()}
+          src={capsuleWatermarkSrc()}
           alt=""
-          className="agency-person__watermark agency-person__watermark--blueprint"
+          className="agency-person__watermark agency-person__watermark--capsule"
         />
       </div>
 

@@ -3,25 +3,39 @@ import type { AbilityTrack, PersonFaction } from './personData';
 const ICON_BASE = '/games/agency/icons';
 const PORTRAIT_BASE = '/games/agency/portraits';
 
-/** Flat icon PNGs (ComfyUI + sdxl-simple-icons LoRA). */
+/** ComfyUI flat icons — track keys map to PNG basenames under icons/. */
+const TRACK_ICON: Record<AbilityTrack, string> = {
+  funding: 'funding',
+  innovation: 'science',
+  leadership: 'leadership',
+  engineering: 'engineering',
+  rocketry: 'rocketry',
+  acceleration: 'acceleration',
+  pilot: 'pilot',
+};
+
 export function abilityIconSrc(track: AbilityTrack): string {
-  return `${ICON_BASE}/ability-${track}.png`;
+  return `${ICON_BASE}/${TRACK_ICON[track]}.png`;
 }
 
-export function factionIconSrc(faction: PersonFaction): string {
-  return `${ICON_BASE}/faction-${faction}.png`;
+/** Globe icon for international / world factions only. */
+export function factionIconSrc(faction: PersonFaction): string | undefined {
+  if (faction === 'international' || faction === 'world') {
+    return `${ICON_BASE}/globe.png`;
+  }
+  return undefined;
 }
 
 export function fundingCostIconSrc(): string {
-  return `${ICON_BASE}/funding-cost.png`;
+  return `${ICON_BASE}/funding.png`;
 }
 
 export function orbitWatermarkSrc(): string {
-  return `${ICON_BASE}/orbit-watermark.png`;
+  return `${ICON_BASE}/orbit.png`;
 }
 
-export function blueprintWatermarkSrc(): string {
-  return `${ICON_BASE}/blueprint-watermark.png`;
+export function capsuleWatermarkSrc(): string {
+  return `${ICON_BASE}/capsule.png`;
 }
 
 /** Portrait plate per person seed (separate from icons). */

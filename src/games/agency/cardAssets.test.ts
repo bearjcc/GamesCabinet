@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   abilityIconSrc,
-  blueprintWatermarkSrc,
+  capsuleWatermarkSrc,
   factionIconSrc,
   fundingCostIconSrc,
   orbitWatermarkSrc,
@@ -9,12 +9,17 @@ import {
 } from './cardAssets';
 
 describe('cardAssets', () => {
-  it('resolves icon and portrait paths under public/games/agency', () => {
-    expect(abilityIconSrc('funding')).toBe('/games/agency/icons/ability-funding.png');
-    expect(factionIconSrc('us')).toBe('/games/agency/icons/faction-us.png');
-    expect(fundingCostIconSrc()).toBe('/games/agency/icons/funding-cost.png');
-    expect(orbitWatermarkSrc()).toBe('/games/agency/icons/orbit-watermark.png');
-    expect(blueprintWatermarkSrc()).toBe('/games/agency/icons/blueprint-watermark.png');
+  it('resolves ComfyUI icon paths under public/games/agency', () => {
+    expect(abilityIconSrc('funding')).toBe('/games/agency/icons/funding.png');
+    expect(abilityIconSrc('innovation')).toBe('/games/agency/icons/science.png');
+    expect(abilityIconSrc('engineering')).toBe('/games/agency/icons/engineering.png');
+    expect(abilityIconSrc('pilot')).toBe('/games/agency/icons/pilot.png');
+    expect(factionIconSrc('international')).toBe('/games/agency/icons/globe.png');
+    expect(factionIconSrc('world')).toBe('/games/agency/icons/globe.png');
+    expect(factionIconSrc('us')).toBeUndefined();
+    expect(fundingCostIconSrc()).toBe('/games/agency/icons/funding.png');
+    expect(orbitWatermarkSrc()).toBe('/games/agency/icons/orbit.png');
+    expect(capsuleWatermarkSrc()).toBe('/games/agency/icons/capsule.png');
     expect(portraitSrc('technician')).toBe('/games/agency/portraits/technician.png');
   });
 });

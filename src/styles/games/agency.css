@@ -237,7 +237,7 @@
   height: 4.5rem;
 }
 
-.agency-person__watermark--blueprint {
+.agency-person__watermark--capsule {
   left: -0.25rem;
   top: 2.5rem;
   width: 3.5rem;
@@ -531,8 +531,8 @@
 
 .agency-person__ability-icon-wrap {
   position: relative;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.75rem;
+  height: 1.75rem;
   flex-shrink: 0;
 }
 
@@ -551,7 +551,8 @@
 }
 
 .agency-person__ability-icon-fallback--funding,
-.agency-person__ability-icon-fallback--engineering {
+.agency-person__ability-icon-fallback--engineering,
+.agency-person__ability-icon-fallback--pilot {
   background: var(--agency-funding);
 }
 
