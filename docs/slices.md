@@ -18,8 +18,8 @@ How to add work: append a checkbox under the right section. Type, blocked-by, an
 
 ## Next (AFK, after Now)
 
-- [x] **AFK** Agency — first playable slice (solo, buildings/people, market row)  
-  Research: `docs/research/agency.md`. Rules: `src/games/agency/`. Access code `SPUTNIK`. Remaining: events, factions, campaign eras, co-op seats — see research doc open questions.
+- [x] **AFK** Agency — first playable slice (solo, facilities/people, market row)  
+  Research: `docs/research/agency.md` (Vault + repo recovery). Rules: `src/games/agency/`. Starter facilities + placeFacility; access code `SPUTNIK`. Remaining: events, factions, campaign eras, co-op seats — see research doc open questions.
 
 - [ ] **AFK** Seat colours on boards  
   Occupied this-table / bot seats already pick a colour at launch. Boards that can show seats should read that colour instead of ignoring it. Skip Hogwarts (hero is identity).  

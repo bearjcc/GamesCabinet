@@ -9,17 +9,11 @@ import {
   canAssignPerson,
   canBuyCard,
   canContribute,
+  canPlaceFacility,
   canPlayCard,
   missionThreshold,
 } from './actions';
-import {
-  BUILDING_LABELS,
-  type BuildingId,
-  cardDef,
-  ERA_TARGET_SOLO,
-  EXPLORER_I,
-  SLOTS_PER_BUILDING,
-} from './cards';
+import { cardDef, ERA_TARGET_SOLO, EXPLORER_I, facilityStaffSlots } from './cards';
 
 type SelectMode = { kind: 'none' } | { kind: 'person'; cardId: string };
 
@@ -32,12 +26,12 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
   const playable = Boolean(isActive && !ctx.gameover);
   const gameover = ctx.gameover as { winner?: string; eraScore?: number } | undefined;
 
-  const need = useMemo(() => missionThreshold(G.mission, G.buildings), [G.mission, G.buildings]);
+  const need = useMemo(() => missionThreshold(G.mission, G.facilities), [G.mission, G.facilities]);
 
   const canCommit =
     playable && (G.funding > 0 || G.innovation > 0) && canContribute(G, G.funding, G.innovation);
 
-  let status = 'Play cards, staff buildings, fund the mission, or buy from the row.';
+  let status = 'Play cards, place facilities, staff them, fund the mission, or buy from the row.';
   let tone: StatusTone = 'you';
   if (gameover) {
     tone = 'done';
@@ -49,7 +43,7 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
     tone = 'wait';
     status = 'Waiting…';
   } else if (select.kind === 'person') {
-    status = 'Choose a building for this person.';
+    status = 'Choose a facility for this person.';
   } else if (canCommit) {
     status = 'Tap the mission to commit your Funding and Innovation.';
   }
@@ -58,6 +52,12 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
     if (!playable) return;
     const def = cardDef(cardId);
     if (!def) return;
+    if (def.kind === 'facility') {
+      if (canPlaceFacility(G, cardId)) {
+        moves.placeFacility(cardId);
+      }
+      return;
+    }
     if (def.kind === 'person') {
       setSelect({ kind: 'person', cardId });
       return;
@@ -68,10 +68,10 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
     }
   };
 
-  const pickBuilding = (buildingId: BuildingId) => {
+  const pickFacility = (instanceId: string) => {
     if (!playable || select.kind !== 'person') return;
-    if (canAssignPerson(G, select.cardId, buildingId)) {
-      moves.assignPerson(select.cardId, buildingId);
+    if (canAssignPerson(G, select.cardId, instanceId)) {
+      moves.assignPerson(select.cardId, instanceId);
       setSelect({ kind: 'none' });
     }
   };
@@ -138,25 +138,27 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
         </button>
       </section>
 
-      <section className="agency-zone" aria-label="Buildings">
-        <h3 className="agency-zone__title">Buildings</h3>
-        <div className="agency-buildings">
-          {G.buildings.map((building) => {
+      <section className="agency-zone" aria-label="Facilities">
+        <h3 className="agency-zone__title">Facilities</h3>
+        <div className="agency-facilities">
+          {G.facilities.map((facility) => {
+            const def = cardDef(facility.cardId);
+            const slots = facilityStaffSlots(facility.cardId);
             const highlight =
-              select.kind === 'person' && canAssignPerson(G, select.cardId, building.id);
+              select.kind === 'person' && canAssignPerson(G, select.cardId, facility.instanceId);
             return (
               <button
-                key={building.id}
+                key={facility.instanceId}
                 type="button"
-                className={`agency-building${highlight ? ' is-legal' : ''}`}
-                data-testid={`agency-building-${building.id}`}
+                className={`agency-facility${highlight ? ' is-legal' : ''}`}
+                data-testid={`agency-facility-${facility.instanceId}`}
                 disabled={!highlight}
-                onClick={() => pickBuilding(building.id)}
+                onClick={() => pickFacility(facility.instanceId)}
               >
-                <span className="agency-building__name">{BUILDING_LABELS[building.id]}</span>
-                <ul className="agency-building__slots">
-                  {Array.from({ length: SLOTS_PER_BUILDING }, (_, slot) => {
-                    const personId = building.assigned[slot];
+                <span className="agency-facility__name">{def?.name ?? facility.cardId}</span>
+                <ul className="agency-facility__slots">
+                  {Array.from({ length: slots }, (_, slot) => {
+                    const personId = facility.assigned[slot];
                     return (
                       <li key={slot} className="agency-slot">
                         {personId ? cardLabel(personId) : 'Empty slot'}
@@ -210,14 +212,16 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
       {G.hand.map((cardId, index) => {
         const def = cardDef(cardId);
         const selected = select.kind === 'person' && select.cardId === cardId;
+        const canPlace = playable && canPlaceFacility(G, cardId);
         const canPlay = playable && canPlayCard(G, cardId);
+        const interactive = canPlace || canPlay || def?.kind === 'person';
         return (
           <li key={`${cardId}-${index}`}>
             <button
               type="button"
-              className={`agency-card agency-card--hand${selected ? ' is-selected' : ''}${canPlay ? ' is-legal' : ''}`}
+              className={`agency-card agency-card--hand${selected ? ' is-selected' : ''}${interactive ? ' is-legal' : ''}`}
               data-testid={`agency-hand-${cardId}`}
-              disabled={!canPlay}
+              disabled={!interactive}
               onClick={() => pickCard(cardId)}
             >
               <span className="agency-card__name">{def?.name ?? cardId}</span>

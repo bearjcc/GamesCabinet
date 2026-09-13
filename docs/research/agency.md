@@ -1,165 +1,177 @@
-# Agency (Space Race deck-builder) — recovered design
+# Agency (Space Race deck-builder) — design notes
 
-Source: private repo [`bearjcc/agency`](https://github.com/bearjcc/agency) (read via GitHub API, April 2026). Public cross-reference: [`bearjcc/deckforge-engine`](https://github.com/bearjcc/deckforge-engine) market-row example names AGENCY as the intended Ascension-pattern consumer.
+Encoded from Bear's **Vault** (`Projects\AGENCY\`), private repos [`bearjcc/agency`](https://github.com/bearjcc/agency) and [`bearjcc/deckforge-engine`](https://github.com/bearjcc/deckforge-engine), and GamesCabinet implementation in `src/games/agency/`.
 
-GamesCabinet implementation: `src/games/agency/`. First playable slice is solo co-op Era 1 with buildings/people assignment, market row, and one mission.
+## Vault hub (source of truth on Bear's machine)
+
+| Path (under `D:\Vault\My Vault`) | Contents |
+|-----------------------------------|----------|
+| `Projects\AGENCY\AGENCY - Knowledge Base MOC.md` | Active hub since 2025-10-23 |
+| `Projects\AGENCY\` | Research Plan, Implementation Guide, Evolution History (273 Cursor convos Sept–Oct 2025), Ideas Backlog |
+| `Areas\Gaming\Game Design\Space-Race-Card-Game.md` | Card types, era geography, People / Rockets / Facilities / Items |
+| `Areas\Gaming\Deck Building Mechanics\Hogwarts Battle Mechanics.md` | OP Games ally + control-token + location pattern (see below) |
+| `Archive\bear_voice_reference\` | 2021 origin pitch emails — Hogwarts mapping (see table) |
+| `Archive\AI Conversations\NotebookLM\Agency Era 1` … `Era 4` | Era design dumps |
+
+### Vault design summary
+
+- **Genre:** deck-building adventure, **1–4 players**, USA vs USSR Space Race
+- **Card types (Vault):** **People**, **Rockets**, **Facilities**, **Items**
+- **People:** astronauts, scientists, engineers, politicians, wilds
+- **Facilities:** launch sites, research centres, mission control (placeable locations)
+- **Eras (Space-Race-Card-Game.md):** Germany → Mediterranean → Asia → Africa → South America (campaign geography; cabinet Era 1 is 1950s US focus)
+- **Inspirations:** Slay the Spire board game; The OP franchise deck-builders (Hogwarts Battle, Toy Story Obstacles, Avatar / **Aang's Destiny**); Ascension; Dominion
+
+### 2021 Hogwarts pitch mapping (Vault emails)
+
+| Hogwarts Battle | Agency (pitch) |
+|-----------------|----------------|
+| Resources / science | Funding / Innovation |
+| Eras as movies | Eras as historical chapters |
+| Objectives | Missions (villains) |
+| Admin centres | Horcruxes → **Facilities** |
+| World Order deck | Dark Arts → headline events |
+| Spies | Detentions / clog |
+| Purchase decks | USA / USSR / Germany (later ESA, CNSA, World) |
+
+### Code locations (outside Vault)
+
+| Location | Role |
+|----------|------|
+| `C:\Users\bearj\Herd\agency\` | Laravel / Herd prototype |
+| [`bearjcc/agency`](https://github.com/bearjcc/agency) | Cards JSON, rulebook, React demos, Laravel services |
+| [`bearjcc/deckforge-engine`](https://github.com/bearjcc/deckforge-engine) | Ascension-style market row; names AGENCY as consumer |
 
 ## Theme
 
-Cold War **Space Race** deck-building adventure. Players run a national space agency (NASA, CCCP, ESA, CNSA), complete historical missions, buy cards from faction/world markets, and staff facilities with people. Educational flavour (Wingspan-style trivia) is a design goal in the old repo; not in the cabinet slice yet.
+Cold War **Space Race** deck-building adventure. Players run a national space agency (NASA, CCCP, ESA, CNSA), complete historical missions, buy cards from faction/world markets, and staff **Facilities** with **People**. Educational flavour (Wingspan-style trivia) is a design goal; not in the cabinet slice yet.
 
-Inspirations named in old docs: The OP adventure deck-builders (Hogwarts Battle, Avatar), Ascension, Slay the Spire board game, Wingspan.
+## Core loop (rulebook + Vault)
 
-## Core loop (from `docs/RULEBOOK.md` + `docs/GAME_DESIGN.md`)
+1. **Round:** reveal one headline Event.
+2. **Turn start:** resolve Facility / administrator passives; apply round events.
+3. **Action phase** (any order, no energy to play cards — Ascension-style):
+   - Play cards from hand (resources, programs, rockets, items).
+   - **Place Facility** cards onto your board (persistent locations).
+   - **Assign People** to Facilities (administrators) or astronauts to missions.
+   - Place Funding/Innovation tokens on missions (persist between turns).
+   - Buy from market row (US / USSR / World in full design).
+4. **Turn end:** mission check; era score; discard hand; lose unspent tokens; draw 5; advance rival track in solo.
 
-1. **Round**: reveal one headline Event (effects instant or for the round).
-2. **Turn start**: resolve building/administrator passives; apply round events.
-3. **Action phase** (any order, no energy cost to play cards — Ascension-style):
-   - Play cards from hand (resources, programs, etc.).
-   - **Assign people** to buildings (administrators) or astronauts to missions.
-   - Place Funding/Innovation tokens on missions (tokens persist on the mission between turns).
-   - Buy from market row (US / USSR / World decks in full design; cabinet slice uses one row).
-4. **Turn end**: check mission completion; tally era score; discard hand; lose unspent tokens; draw 5; advance rival track in solo.
-
-**Era target**: 10 era points (solo / 1v1 faction) or 20 (2-player faction). Solo opponent is a turn counter that gains 1 era point per your turn.
+**Era target:** 10 era points (solo / 1v1) or 20 (2-player faction).
 
 ## Zones and resources
 
 | Zone | Role |
 |------|------|
-| Deck / hand / discard | Standard deck-builder piles; reshuffle discard when deck empty |
+| Deck / hand / discard | Standard deck-builder piles |
 | Play area | Cards played this turn (non-persistent) |
-| Market row | Ascension-style face-up row; refill on purchase |
-| Buildings (3 locations) | Persistent staff slots — see below |
-| Mission area | Active mission(s) with placed Funding/Innovation + assigned astronauts |
-| Token pools | **Funding** and **Innovation** (ephemeral per turn unless placed on a mission) |
+| Market row | Ascension-style face-up row |
+| **Facilities row** | Placed Facility cards; People assigned here persist |
+| Mission area | Active mission(s) + placed Funding/Innovation + assigned astronauts |
+| Token pools | **Funding** and **Innovation** (ephemeral per turn unless on a mission) |
 
 Starting deck (rulebook): 4× Funding +1, 4× Innovation +1, 2× faction-unique cards.
 
-## Buildings and assigning people
+## Facilities and assigning People
 
-Each player begins with three locations (rulebook names):
+Rulebook: each player begins with three locations (Research Facility, Administration Building, Mission Control). Vault names these **Facilities** as a card type (launch sites, research centres, mission control).
 
-| Building | Rulebook role |
-|----------|----------------|
-| **Research Facility** | Innovation generation and card synergies |
-| **Administration Building** | Funding generation and economy |
-| **Mission Control** | Mission assignment; upgrades can skip/reveal next mission |
+Cabinet model:
 
-**Administrator / person assignment** (persistent):
+- **Starter facilities** — three pre-placed at setup (rulebook defaults).
+- **Place Facility** — play a Facility card from hand onto the facilities row (board-first).
+- **Assign Person** — tap person in hand, tap a facility with an open slot; staff persist until removed.
 
-- Play a Person card onto a building slot; they stay until removed by an effect or (for astronauts on missions) until the mission resolves.
-- Old repo `docs/AGENCY-Card-System.md` gap note: `assigned_to` field, persistent until replaced — same intent as **constructs / reserved allies** in franchise adventure deck-builders.
+### People on Facilities ↔ OP Games pattern (Bear's binding insight)
 
-### Mapping to Aang's Destiny (reserved allies / bending tokens)
+Vault names **People + Facilities**. It does **not** spell out Aang's Destiny *reserved allies* / *bending tokens* by name — that mapping is Bear's design intent for cabinet feel:
 
-**Recovery note:** Neither GamesCabinet nor `bearjcc/agency` uses the tabletop terms *reserved ally* or *bending token* verbatim. GitHub code search on `bearjcc/agency` returns no hits for those strings or for `Aang`. The binding intent is recovered from:
+| OP Games (physical) | Hogwarts Battle (cabinet) | Agency (intended) |
+|---------------------|---------------------------|-------------------|
+| Ally on location | Ally played; some stay on location | **Person** on **Facility** (`assignPerson`) |
+| Control / influence tokens on location | `controlTokens` vs `maxControl` on `currentLocation` | **Funding / Innovation** on **mission** (`contribute`) |
+| Persistent placement until scene ends | Location allies until defeated | Facility staff persist; mission tokens until mission completes |
+| Hex / horcrux spots | Location deck + control track | Facility row + mission meter |
 
-| Source | What it says |
-|--------|----------------|
-| `docs/AGENCY-Card-System.md` § Critical Implementation Gaps | **People Assignment Persistence (Constructs/Powers)** — people stay assigned until replaced or mission complete; needs `assigned_to` on person cards |
-| Same doc, Mission System | **People Assignment**: assign astronauts/engineers to missions **(like constructs)**; success → era points + people return to discard |
-| `docs/FRANCHISE_DECK_BUILDING_GAMES_RESEARCH.md` | Lists *Avatar: The Last Airbender – Aang's Destiny* as a franchise-adventure relative; discusses element mastery and adventure scenarios, not token names |
-| `docs/RULEBOOK.md` | Assign people to **buildings** (administrators) or **astronauts to missions**; place Funding/Innovation **on missions** (tokens persist between turns) |
+Hogwarts cabinet reference (`src/games/hogwarts-battle/engine/turnLogic.ts`): locations have `currentControl` / `maxControl`; allies played trigger horcrux hooks; locations revealed from a deck. Agency borrows the **persistent board placement** feel, not the villain-control math.
 
-#### Physical Aang's Destiny (tabletop, for cabinet translation)
+#### Physical Aang's Destiny (tabletop)
 
-These terms come from The OP's physical game, not from GamesCabinet docs:
+| Term | Meaning |
+|------|---------|
+| **Reserved ally** | Ally card on a location board until removed |
+| **Bending token** | Token committed to a mission spot until the mission resolves |
 
-| Aang's Destiny (table) | What it is |
-|------------------------|------------|
-| **Reserved ally** | Ally card played onto a **location** board; stays there across turns until removed or the scenario ends |
-| **Bending token** | Wooden token placed on a **mission** or challenge spot to pay element costs; often left on the board until the mission resolves |
-| **Location board** | Persistent staging area (like Hogwarts locations) |
-| **Adventure / mission card** | Scenario with token thresholds and assigned allies |
+#### Old-repo constructs mapping (`bearjcc/agency`)
 
-#### Agency ↔ Aang ↔ Hogwarts (cabinet seam)
-
-| Aang's Destiny | Hogwarts Battle (cabinet) | Agency (rulebook + slice 1) |
-|----------------|---------------------------|-----------------------------|
-| Reserved ally on location | Ally played to a location (some persist) | **Person** assigned to a **building** slot (`assignPerson`) |
-| Bending token on mission | Influence / damage on villain (spent each fight) | **Funding / Innovation** placed on **mission** (`contribute`; persists until mission completes) |
-| Ally stays until scenario ends | Location allies until defeated / game end | Building staff persist; mission astronauts return to discard on success (rulebook; slice 1: buildings only) |
-| Element types (water, earth, …) | Spell types, house flavour | **Funding** vs **Innovation** (two resource tracks) |
-| Adventure deck progression | Game 1–7 campaign | Era missions (Explorer I in slice 1) |
-
-#### Old-repo data model (not yet ported)
+`docs/AGENCY-Card-System.md` § People Assignment Persistence (**Constructs/Powers**): `assigned_to` on person cards; staff stay until replaced or mission ends.
 
 ```text
-person card.assigned_to → building id | mission id | null
-mission.funding_placed, mission.innovation_placed  (persist)
-turn pool: funding, innovation  (ephemeral unless contributed)
+person.assigned_to → facility instance id | mission id | null
+facility.cardId    → facility def (role, slots, passives)
+mission.funding_placed, mission.innovation_placed
 ```
 
-Cabinet slice 1 implements buildings + mission token placement; astronaut-on-mission assignment is listed under open questions.
+## Card types
 
-This is the binding mechanic Bear called out: **people on buildings** and **tokens on missions**, not only one-shot cards from hand.
+| Vault | `bearjcc/agency` `cards.json` | Cabinet slice |
+|-------|------------------------------|---------------|
+| People | PERSON | `person` |
+| Rockets | ENGINEERING / PROGRAM | `program` (stub) |
+| Facilities | FACILITY | `facility` |
+| Items | OPERATIONS / FUNDING | `resource`, `program` |
 
-## Card types (old `cards.json` + docs)
-
-- **PERSON** — astronauts, engineers, scientists, administrators (assign to buildings or missions).
-- **FACILITY** — Cape Canaveral, Baikonur, etc. (old data models facilities as cards; rulebook uses fixed locations + upgrades).
-- **PROGRAM** — Explorer I, Sputnik, Apollo 11, etc.
-- **FUNDING / ENGINEERING / OPERATIONS** — resource and progress cards.
-- **NEGATIVE** — Bureaucracy, clog cards.
-
-Effect opcodes documented in `docs/effect-system.md` and `docs/AGENCY-Card-System.md` (ADD_FUNDING, ADD_PROGRESS, TURN_START hooks, etc.). Full resolver not ported to GamesCabinet in slice 1.
+Examples from `cards.json`: Cape Canaveral, Baikonur, NASA HQ, Explorer I, Neil Armstrong. Opcode resolver not ported yet.
 
 ## Win / loss
 
 | Mode | Win | Loss / pressure |
 |------|-----|-----------------|
-| Solo | Faction reaches era target (10) | Rival track reaches 10 first |
-| 2p co-op | Faction 20 era points | Same with shared faction |
-| 1v1 / 2v2 | First faction to era target with turn parity | Opponent faction |
-
-Missions award era score; some cards grant era score directly.
+| Solo | Faction era target (10) | Rival track reaches 10 |
+| 2p co-op | Faction 20 | Same |
+| 1v1 / 2v2 | First faction to target | Opponent faction |
 
 ## Differences from Hogwarts Battle (cabinet)
 
 | | Hogwarts Battle | Agency |
 |---|-----------------|--------|
-| Market | Fixed stacks (Dominion/Hogwarts) | Market row (Ascension) per deckforge + old design |
-| Persistent pieces | Locations, some allies | **People on buildings** + tokens on missions |
-| Enemies | Villains + dark arts | Rival faction / turn counter + events |
-| Energy | Spell costs in full rules | **No energy** to play cards (rulebook) |
+| Market | Fixed stacks | Market row (Ascension) |
+| Persistent pieces | Locations, allies | **People on Facilities** + tokens on missions |
+| Enemies | Villains + dark arts | Rival track + events |
+| Energy | Spell costs | **No energy** to play cards |
 | Co-op | Yes | Yes (faction-based) |
 
-Shared cabinet seam: `src/games/shared/deckbuilder/` (zones, ephemeral resources, market refill).
+Shared seam: `src/games/shared/deckbuilder/`.
 
-## Old repo pointers
+## Repo pointers
 
 | Path | Contents |
 |------|----------|
-| `docs/RULEBOOK.md` | Player-facing rules (authoritative for mechanics) |
-| `docs/GAME_DESIGN.md` | Design doc, modes, archetypes |
-| `docs/AGENCY-Card-System.md` | Card types, effect opcodes, people-assignment gaps |
-| `docs/effect-system.md` | Opcode reference |
-| `cards.json` | Card database (US/USSR/WORLD) |
+| `docs/RULEBOOK.md` | Player-facing rules |
+| `docs/GAME_DESIGN.md` | Modes, archetypes |
+| `docs/AGENCY-Card-System.md` | Types, opcodes, assignment gaps |
+| `cards.json` | Card database |
 | `events.json` | Headline events |
-| `src/AgencyDemo.tsx` | React card/event demos (not boardgame.io) |
-| `AgencyGameDemo.tsx`, `CompetitiveMode.tsx` | UI prototypes |
-| `app/Services/` | Laravel game services (not explored in this pass) |
 
-## GamesCabinet slice 1 (implemented)
+## GamesCabinet implementation
 
 - Solo vs rival track, Era 1 mission **Explorer I**.
-- Three buildings with **assignPerson** (persistent slots).
-- Market row, Funding/Innovation tokens, play resource cards, buy cards, contribute to mission.
-- Board-first UI on PlayTable (hand → building, market row, tap mission to commit tokens); access code `SPUTNIK`.
+- **Starter facilities** + **placeFacility** from hand; **assignPerson** onto facility instances.
+- Market row, Funding/Innovation, board-first mission commit; access code `SPUTNIK`.
 
 ## Open questions / later slices
 
-- [ ] Full card import from `cards.json` + effect opcode resolver
-- [ ] Headline events (`events.json`) at round start
-- [ ] Faction decks (NASA / CCCP / ESA / CNSA / World) and asymmetric agencies
-- [ ] Multiplayer co-op and versus modes, online seats
-- [ ] Era campaign persistence (building upgrades between eras)
-- [ ] Astronaut assignment to missions (distinct from building staff) + risk die
-- [ ] Bot / enumerate for market-row deck-builder genre kit
+- [ ] Rockets and Items as distinct kinds; full `cards.json` import + opcode resolver
+- [ ] Headline events (`events.json`)
+- [ ] Faction decks (NASA / CCCP / ESA / CNSA / World)
+- [ ] Multiplayer co-op and versus, online seats
+- [ ] Era campaign persistence (facility upgrades between eras)
+- [ ] Astronaut assignment to missions + risk die
+- [ ] Bot / enumerate for market-row genre kit
 
 ## Cross-links
 
-- Queue: `docs/slices.md` (Agency slices)
-- Architecture: `ARCHITECTURE.md` (deckbuilder genre kit)
+- Queue: `docs/slices.md`
+- Architecture: `ARCHITECTURE.md`
 - Deckbuilder reference: `docs/research/boardgame-io-reference-games.md`

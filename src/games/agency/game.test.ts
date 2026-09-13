@@ -3,20 +3,23 @@ import { describe, expect, it, vi } from 'vitest';
 import { INVALID_MOVE } from '../invalidMove';
 import {
   type AgencyState,
-  applyBuildingPassives,
+  applyFacilityPassives,
   assignPerson,
   buyCard,
   canAssignPerson,
   canBuyCard,
   canContribute,
+  canPlaceFacility,
   canPlayCard,
   checkGameEnd,
   contributeMission,
   endTurnCleanup,
   missionComplete,
   missionThreshold,
+  placeFacility,
   playCard,
   resolveMissionIfReady,
+  starterFacilities,
 } from './actions';
 import { buildStartingDeck, ERA_TARGET_SOLO, EXPLORER_I, HAND_SIZE } from './cards';
 import { Agency } from './game';
@@ -39,11 +42,8 @@ function baseState(overrides: Partial<AgencyState> = {}): AgencyState {
     market: ['funding-1', 'innovation-1', 'person-engineer', 'test-rocket'],
     marketDeck: [],
     marketDiscard: [],
-    buildings: [
-      { id: 'research-facility', assigned: [] },
-      { id: 'administration-building', assigned: [] },
-      { id: 'mission-control', assigned: [] },
-    ],
+    facilities: starterFacilities(),
+    nextFacilityInstance: 0,
     mission: { defId: EXPLORER_I.id, fundingPlaced: 0, innovationPlaced: 0 },
     turns: 0,
     ...overrides,
@@ -76,25 +76,38 @@ describe('Agency actions', () => {
     expect(G.discard).toContain('funding-1');
   });
 
-  it('assigns person to building and keeps them there', () => {
+  it('assigns person to facility and keeps them there', () => {
     const G = baseState({ hand: ['person-technician'] });
-    expect(canAssignPerson(G, 'person-technician', 'research-facility')).toBe(true);
-    expect(assignPerson(G, 'person-technician', 'research-facility')).toBe(true);
+    expect(canAssignPerson(G, 'person-technician', 'starter-research')).toBe(true);
+    expect(assignPerson(G, 'person-technician', 'starter-research')).toBe(true);
     expect(G.hand).toEqual([]);
-    expect(G.buildings[0].assigned).toEqual(['person-technician']);
-    expect(canAssignPerson(G, 'person-analyst', 'research-facility')).toBe(false);
+    expect(G.facilities[0].assigned).toEqual(['person-technician']);
+    expect(canAssignPerson(G, 'person-analyst', 'starter-research')).toBe(false);
+  });
+
+  it('places facility card from hand onto the board', () => {
+    const G = baseState({ hand: ['facility-cape-canaveral'] });
+    expect(canPlaceFacility(G, 'facility-cape-canaveral')).toBe(true);
+    expect(placeFacility(G, 'facility-cape-canaveral')).toBe(true);
+    expect(G.hand).toEqual([]);
+    expect(G.facilities).toHaveLength(4);
+    expect(G.facilities[3].cardId).toBe('facility-cape-canaveral');
   });
 
   it('mission control reduces mission threshold', () => {
     const G = baseState({
-      buildings: [
-        { id: 'research-facility', assigned: [] },
-        { id: 'administration-building', assigned: [] },
-        { id: 'mission-control', assigned: ['person-technician', 'person-analyst'] },
+      facilities: [
+        { instanceId: 'starter-research', cardId: 'facility-research', assigned: [] },
+        { instanceId: 'starter-admin', cardId: 'facility-admin', assigned: [] },
+        {
+          instanceId: 'starter-mission-control',
+          cardId: 'facility-mission-control',
+          assigned: ['person-technician', 'person-analyst'],
+        },
       ],
       mission: { defId: EXPLORER_I.id, fundingPlaced: 2, innovationPlaced: 1 },
     });
-    const need = missionThreshold(G.mission, G.buildings);
+    const need = missionThreshold(G.mission, G.facilities);
     expect(need).toEqual({ funding: 2, innovation: 1 });
     expect(missionComplete(G)).toBe(true);
   });
@@ -115,12 +128,13 @@ describe('Agency actions', () => {
     expect(G.funding).toBe(0);
   });
 
-  it('rejects invalid play, assign, buy, and contribute', () => {
+  it('rejects invalid play, assign, place, buy, and contribute', () => {
     const G = baseState({ hand: ['funding-1'], funding: 0 });
     expect(canPlayCard(G, 'missing')).toBe(false);
     expect(playCard(G, 'missing', shuffle)).toBe(false);
-    expect(canAssignPerson(G, 'funding-1', 'research-facility')).toBe(false);
-    expect(assignPerson(G, 'funding-1', 'research-facility')).toBe(false);
+    expect(canAssignPerson(G, 'funding-1', 'starter-research')).toBe(false);
+    expect(assignPerson(G, 'funding-1', 'starter-research')).toBe(false);
+    expect(canPlaceFacility(G, 'funding-1')).toBe(false);
     expect(canBuyCard(G, 0)).toBe(false);
     expect(canContribute(G, 0, 0)).toBe(false);
     expect(contributeMission(G, 5, 0)).toBe(false);
@@ -138,12 +152,16 @@ describe('Agency actions', () => {
     expect(G.hand).toContain('funding-1');
   });
 
-  it('applies building passives and resolves mission on cleanup', () => {
+  it('applies facility passives and resolves mission on cleanup', () => {
     const G = baseState({
-      buildings: [
-        { id: 'research-facility', assigned: ['person-analyst'] },
-        { id: 'administration-building', assigned: ['person-technician'] },
-        { id: 'mission-control', assigned: [] },
+      facilities: [
+        {
+          instanceId: 'starter-research',
+          cardId: 'facility-research',
+          assigned: ['person-analyst'],
+        },
+        { instanceId: 'starter-admin', cardId: 'facility-admin', assigned: ['person-technician'] },
+        { instanceId: 'starter-mission-control', cardId: 'facility-mission-control', assigned: [] },
       ],
       funding: 0,
       innovation: 0,
@@ -163,7 +181,7 @@ describe('Agency actions', () => {
         'innovation-1',
       ],
     });
-    applyBuildingPassives(G);
+    applyFacilityPassives(G);
     expect(G.innovation).toBe(1);
     expect(G.funding).toBe(1);
     expect(resolveMissionIfReady(G)).toBe(true);
@@ -195,19 +213,33 @@ describe('Agency actions', () => {
     expect(G.market.filter(Boolean)).toHaveLength(0);
   });
 
-  it('rejects full building slots', () => {
+  it('rejects full facility slots', () => {
     const G = baseState({
       hand: ['person-analyst'],
-      buildings: [
+      facilities: [
         {
-          id: 'research-facility',
+          instanceId: 'starter-research',
+          cardId: 'facility-research',
           assigned: ['person-technician', 'person-engineer'],
         },
-        { id: 'administration-building', assigned: [] },
-        { id: 'mission-control', assigned: [] },
+        { instanceId: 'starter-admin', cardId: 'facility-admin', assigned: [] },
+        { instanceId: 'starter-mission-control', cardId: 'facility-mission-control', assigned: [] },
       ],
     });
-    expect(canAssignPerson(G, 'person-analyst', 'research-facility')).toBe(false);
+    expect(canAssignPerson(G, 'person-analyst', 'starter-research')).toBe(false);
+  });
+
+  it('rejects placing facility when row is full', () => {
+    const facilities = starterFacilities();
+    for (let i = 0; i < 2; i += 1) {
+      facilities.push({
+        instanceId: `extra-${i}`,
+        cardId: 'facility-jpl',
+        assigned: [],
+      });
+    }
+    const G = baseState({ hand: ['facility-cape-canaveral'], facilities });
+    expect(canPlaceFacility(G, 'facility-cape-canaveral')).toBe(false);
   });
 
   it('checkGameEnd detects rival win', () => {
@@ -227,21 +259,33 @@ describe('Agency actions', () => {
 });
 
 describe('Agency game', () => {
-  it('setups with hand and market', () => {
+  it('setups with hand, market, and starter facilities', () => {
     const client = startClient();
     const G = readG(client);
     expect(G.hand.length).toBe(HAND_SIZE);
     expect(G.market.length).toBe(4);
-    expect(G.buildings).toHaveLength(3);
+    expect(G.facilities).toHaveLength(3);
   });
 
-  it('applies staffed building passives when a turn begins', () => {
+  it('applies staffed facility passives when a turn begins', () => {
     const client = startClient(
       baseState({
-        buildings: [
-          { id: 'research-facility', assigned: ['person-analyst'] },
-          { id: 'administration-building', assigned: ['person-technician'] },
-          { id: 'mission-control', assigned: [] },
+        facilities: [
+          {
+            instanceId: 'starter-research',
+            cardId: 'facility-research',
+            assigned: ['person-analyst'],
+          },
+          {
+            instanceId: 'starter-admin',
+            cardId: 'facility-admin',
+            assigned: ['person-technician'],
+          },
+          {
+            instanceId: 'starter-mission-control',
+            cardId: 'facility-mission-control',
+            assigned: [],
+          },
         ],
         innovation: 0,
         funding: 0,
@@ -279,11 +323,24 @@ describe('Agency game', () => {
         deck: [],
       }),
     );
-    client.moves.assignPerson('person-technician', 'administration-building');
+    client.moves.assignPerson('person-technician', 'starter-admin');
     const G = readG(client);
-    expect(G.buildings.find((b) => b.id === 'administration-building')?.assigned).toEqual([
+    expect(G.facilities.find((f) => f.instanceId === 'starter-admin')?.assigned).toEqual([
       'person-technician',
     ]);
+  });
+
+  it('placeFacility move via client', () => {
+    const client = startClient(
+      baseState({
+        hand: ['facility-jpl'],
+        deck: [],
+      }),
+    );
+    client.moves.placeFacility('facility-jpl');
+    const G = readG(client);
+    expect(G.facilities).toHaveLength(4);
+    expect(G.facilities.some((f) => f.cardId === 'facility-jpl')).toBe(true);
   });
 
   it('endTurn fires endGame for rival and player wins', () => {
@@ -329,10 +386,12 @@ describe('Agency game', () => {
     const ctx = { currentPlayer: '0' };
     const play = Agency.moves!.playCard as (...args: unknown[]) => unknown;
     const assign = Agency.moves!.assignPerson as (...args: unknown[]) => unknown;
+    const place = Agency.moves!.placeFacility as (...args: unknown[]) => unknown;
     const buy = Agency.moves!.buyCard as (...args: unknown[]) => unknown;
     const contribute = Agency.moves!.contribute as (...args: unknown[]) => unknown;
     expect(play({ G, random, ctx }, 'missing')).toBe(INVALID_MOVE);
-    expect(assign({ G, ctx }, 'funding-1', 'research-facility')).toBe(INVALID_MOVE);
+    expect(assign({ G, ctx }, 'funding-1', 'starter-research')).toBe(INVALID_MOVE);
+    expect(place({ G, ctx }, 'funding-1')).toBe(INVALID_MOVE);
     expect(buy({ G, random, ctx }, 0)).toBe(INVALID_MOVE);
     expect(contribute({ G, ctx }, 9, 9)).toBe(INVALID_MOVE);
   });

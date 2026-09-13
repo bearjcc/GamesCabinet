@@ -7,19 +7,18 @@ import {
   trySpendResource,
 } from '../shared/deckbuilder';
 import {
-  BUILDING_IDS,
-  type BuildingId,
   cardDef,
   ERA_TARGET_SOLO,
   EXPLORER_I,
+  type FacilityState,
+  facilityRole,
+  facilityStaffSlots,
   HAND_SIZE,
-  SLOTS_PER_BUILDING,
+  MAX_FACILITIES,
+  starterFacilities,
 } from './cards';
 
-export type BuildingState = {
-  id: BuildingId;
-  assigned: string[];
-};
+export type { FacilityState } from './cards';
 
 export type MissionState = {
   defId: string;
@@ -39,20 +38,19 @@ export type AgencyState = {
   market: string[];
   marketDeck: string[];
   marketDiscard: string[];
-  buildings: BuildingState[];
+  facilities: FacilityState[];
+  nextFacilityInstance: number;
   mission: MissionState;
   turns: number;
 };
 
-export function emptyBuildings(): BuildingState[] {
-  return BUILDING_IDS.map((id) => ({ id, assigned: [] }));
-}
-
 export function missionThreshold(
   _mission: MissionState,
-  buildings: BuildingState[],
+  facilities: FacilityState[],
 ): { funding: number; innovation: number } {
-  const staffed = buildings.find((b) => b.id === 'mission-control')?.assigned.length ?? 0;
+  const staffed = facilities
+    .filter((f) => facilityRole(f.cardId) === 'mission-control')
+    .reduce((sum, f) => sum + f.assigned.length, 0);
   const reduction = Math.min(2, staffed);
   return {
     funding: Math.max(0, EXPLORER_I.fundingRequired - reduction),
@@ -61,33 +59,55 @@ export function missionThreshold(
 }
 
 export function missionComplete(G: AgencyState): boolean {
-  const need = missionThreshold(G.mission, G.buildings);
+  const need = missionThreshold(G.mission, G.facilities);
   return G.mission.fundingPlaced >= need.funding && G.mission.innovationPlaced >= need.innovation;
 }
 
-export function buildingHasSlot(building: BuildingState): boolean {
-  return building.assigned.length < SLOTS_PER_BUILDING;
+export function findFacility(G: AgencyState, instanceId: string): FacilityState | undefined {
+  return G.facilities.find((f) => f.instanceId === instanceId);
 }
 
-export function findBuilding(G: AgencyState, id: BuildingId): BuildingState | undefined {
-  return G.buildings.find((b) => b.id === id);
+export function facilityHasSlot(facility: FacilityState): boolean {
+  return facility.assigned.length < facilityStaffSlots(facility.cardId);
 }
 
-export function canAssignPerson(G: AgencyState, cardId: string, buildingId: BuildingId): boolean {
+export function canPlaceFacility(G: AgencyState, cardId: string): boolean {
   const def = cardDef(cardId);
-  if (def?.kind !== 'person') return false;
+  if (def?.kind !== 'facility') return false;
   if (!G.hand.includes(cardId)) return false;
-  const building = findBuilding(G, buildingId);
-  if (!building || !buildingHasSlot(building)) return false;
-  return true;
+  return G.facilities.length < MAX_FACILITIES;
 }
 
-export function assignPerson(G: AgencyState, cardId: string, buildingId: BuildingId): boolean {
-  if (!canAssignPerson(G, cardId, buildingId)) return false;
+export function placeFacility(G: AgencyState, cardId: string): boolean {
+  if (!canPlaceFacility(G, cardId)) return false;
   const handIdx = G.hand.indexOf(cardId);
   if (handIdx < 0) return false;
   G.hand.splice(handIdx, 1);
-  findBuilding(G, buildingId)!.assigned.push(cardId);
+  const instanceId = `fac-${G.nextFacilityInstance}`;
+  G.nextFacilityInstance += 1;
+  G.facilities.push({ instanceId, cardId, assigned: [] });
+  return true;
+}
+
+export function canAssignPerson(
+  G: AgencyState,
+  cardId: string,
+  facilityInstanceId: string,
+): boolean {
+  const def = cardDef(cardId);
+  if (def?.kind !== 'person') return false;
+  if (!G.hand.includes(cardId)) return false;
+  const facility = findFacility(G, facilityInstanceId);
+  if (!facility || !facilityHasSlot(facility)) return false;
+  return true;
+}
+
+export function assignPerson(G: AgencyState, cardId: string, facilityInstanceId: string): boolean {
+  if (!canAssignPerson(G, cardId, facilityInstanceId)) return false;
+  const handIdx = G.hand.indexOf(cardId);
+  if (handIdx < 0) return false;
+  G.hand.splice(handIdx, 1);
+  findFacility(G, facilityInstanceId)!.assigned.push(cardId);
   return true;
 }
 
@@ -95,6 +115,7 @@ export function canPlayCard(G: AgencyState, cardId: string): boolean {
   if (!G.hand.includes(cardId)) return false;
   const def = cardDef(cardId);
   if (!def) return false;
+  if (def.kind === 'facility') return false;
   if (def.kind === 'person') return true;
   return def.kind === 'resource' || def.kind === 'program';
 }
@@ -185,14 +206,15 @@ export function contributeMission(G: AgencyState, funding: number, innovation: n
   return true;
 }
 
-/** Turn-start passives from staffed buildings (rulebook: resolve passives). */
-export function applyBuildingPassives(G: AgencyState): void {
-  for (const building of G.buildings) {
-    const count = building.assigned.length;
+/** Turn-start passives from staffed facilities (rulebook: resolve passives). */
+export function applyFacilityPassives(G: AgencyState): void {
+  for (const facility of G.facilities) {
+    const count = facility.assigned.length;
     if (count === 0) continue;
-    if (building.id === 'research-facility') {
+    const role = facilityRole(facility.cardId);
+    if (role === 'research') {
       G.innovation = gainResource(G.innovation, count);
-    } else if (building.id === 'administration-building') {
+    } else if (role === 'administration') {
       G.funding = gainResource(G.funding, count);
     }
   }
@@ -222,3 +244,5 @@ export function checkGameEnd(G: AgencyState): { winner: 'player' } | { winner: '
   if (G.rivalScore >= ERA_TARGET_SOLO) return { winner: 'rival' };
   return null;
 }
+
+export { starterFacilities };

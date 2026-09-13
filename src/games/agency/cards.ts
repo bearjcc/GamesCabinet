@@ -1,6 +1,8 @@
 /** Card definitions for Agency slice 1 (Era 1 solo). */
 
-export type AgencyCardKind = 'resource' | 'person' | 'program';
+export type AgencyCardKind = 'resource' | 'person' | 'program' | 'facility';
+
+export type FacilityRole = 'research' | 'administration' | 'mission-control';
 
 export type AgencyCardDef = {
   id: string;
@@ -14,6 +16,9 @@ export type AgencyCardDef = {
   onPlayFunding?: number;
   onPlayInnovation?: number;
   draw?: number;
+  /** Placed facility: passive role and staff slots. */
+  facilityRole?: FacilityRole;
+  staffSlots?: number;
   blurb: string;
 };
 
@@ -21,21 +26,15 @@ export const ERA_TARGET_SOLO = 10;
 
 export const HAND_SIZE = 5;
 
-export const BUILDING_IDS = [
-  'research-facility',
-  'administration-building',
-  'mission-control',
+export const MAX_FACILITIES = 5;
+
+export const DEFAULT_STAFF_SLOTS = 2;
+
+export const STARTER_FACILITY_IDS = [
+  'facility-research',
+  'facility-admin',
+  'facility-mission-control',
 ] as const;
-
-export type BuildingId = (typeof BUILDING_IDS)[number];
-
-export const BUILDING_LABELS: Record<BuildingId, string> = {
-  'research-facility': 'Research Facility',
-  'administration-building': 'Administration Building',
-  'mission-control': 'Mission Control',
-};
-
-export const SLOTS_PER_BUILDING = 2;
 
 export const CARD_DEFS: Record<string, AgencyCardDef> = {
   'funding-1': {
@@ -60,7 +59,7 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     kind: 'person',
     marketCost: 3,
     onPlayFunding: 1,
-    blurb: 'Assign to a building, or play for 1 Funding.',
+    blurb: 'Assign to a facility, or play for 1 Funding.',
   },
   'person-analyst': {
     id: 'person-analyst',
@@ -68,7 +67,7 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     kind: 'person',
     marketCost: 3,
     onPlayInnovation: 1,
-    blurb: 'Assign to a building, or play for 1 Innovation.',
+    blurb: 'Assign to a facility, or play for 1 Innovation.',
   },
   'person-engineer': {
     id: 'person-engineer',
@@ -77,7 +76,7 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     marketCost: 4,
     onPlayFunding: 1,
     onPlayInnovation: 1,
-    blurb: 'Assign to a building, or play for 1 Funding and 1 Innovation.',
+    blurb: 'Assign to a facility, or play for 1 Funding and 1 Innovation.',
   },
   'operations-team': {
     id: 'operations-team',
@@ -96,10 +95,63 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     innovationGain: 1,
     blurb: 'Gain 1 Funding and 1 Innovation.',
   },
+  'facility-research': {
+    id: 'facility-research',
+    name: 'Research Facility',
+    kind: 'facility',
+    marketCost: 0,
+    facilityRole: 'research',
+    staffSlots: DEFAULT_STAFF_SLOTS,
+    blurb: 'Staff here grant Innovation each turn.',
+  },
+  'facility-admin': {
+    id: 'facility-admin',
+    name: 'Administration Building',
+    kind: 'facility',
+    marketCost: 0,
+    facilityRole: 'administration',
+    staffSlots: DEFAULT_STAFF_SLOTS,
+    blurb: 'Staff here grant Funding each turn.',
+  },
+  'facility-mission-control': {
+    id: 'facility-mission-control',
+    name: 'Mission Control',
+    kind: 'facility',
+    marketCost: 0,
+    facilityRole: 'mission-control',
+    staffSlots: DEFAULT_STAFF_SLOTS,
+    blurb: 'Staff here lower mission requirements.',
+  },
+  'facility-cape-canaveral': {
+    id: 'facility-cape-canaveral',
+    name: 'Cape Canaveral',
+    kind: 'facility',
+    marketCost: 4,
+    facilityRole: 'administration',
+    staffSlots: DEFAULT_STAFF_SLOTS,
+    blurb: 'Launch site. Staff grant Funding each turn.',
+  },
+  'facility-jpl': {
+    id: 'facility-jpl',
+    name: 'Jet Propulsion Laboratory',
+    kind: 'facility',
+    marketCost: 4,
+    facilityRole: 'research',
+    staffSlots: DEFAULT_STAFF_SLOTS,
+    blurb: 'Research centre. Staff grant Innovation each turn.',
+  },
 };
 
 export function cardDef(id: string): AgencyCardDef | undefined {
   return CARD_DEFS[id];
+}
+
+export function facilityStaffSlots(cardId: string): number {
+  return cardDef(cardId)?.staffSlots ?? DEFAULT_STAFF_SLOTS;
+}
+
+export function facilityRole(cardId: string): FacilityRole | undefined {
+  return cardDef(cardId)?.facilityRole;
 }
 
 export function buildStartingDeck(): string[] {
@@ -126,6 +178,7 @@ export function buildMarketDeck(): string[] {
   for (let i = 0; i < 2; i++) pool.push('person-engineer');
   for (let i = 0; i < 2; i++) pool.push('operations-team');
   for (let i = 0; i < 2; i++) pool.push('test-rocket');
+  pool.push('facility-cape-canaveral', 'facility-jpl');
   return pool;
 }
 
@@ -144,3 +197,17 @@ export const EXPLORER_I: MissionDef = {
   innovationRequired: 3,
   eraReward: 3,
 };
+
+export type FacilityState = {
+  instanceId: string;
+  cardId: string;
+  assigned: string[];
+};
+
+export function starterFacilities(): FacilityState[] {
+  return [
+    { instanceId: 'starter-research', cardId: 'facility-research', assigned: [] },
+    { instanceId: 'starter-admin', cardId: 'facility-admin', assigned: [] },
+    { instanceId: 'starter-mission-control', cardId: 'facility-mission-control', assigned: [] },
+  ];
+}

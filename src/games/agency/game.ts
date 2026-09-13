@@ -2,14 +2,15 @@ import type { Game } from 'boardgame.io';
 import { INVALID_MOVE } from '../invalidMove';
 import {
   type AgencyState,
-  applyBuildingPassives,
+  applyFacilityPassives,
   assignPerson,
   buyCard,
   checkGameEnd,
   contributeMission,
-  emptyBuildings,
   endTurnCleanup,
+  placeFacility,
   playCard,
+  starterFacilities,
 } from './actions';
 import { buildMarketDeck, buildStartingDeck, EXPLORER_I, HAND_SIZE } from './cards';
 
@@ -47,7 +48,8 @@ export const Agency: Game<AgencyState> = {
       market,
       marketDeck,
       marketDiscard: [],
-      buildings: emptyBuildings(),
+      facilities: starterFacilities(),
+      nextFacilityInstance: 0,
       mission: { defId: EXPLORER_I.id, fundingPlaced: 0, innovationPlaced: 0 },
       turns: 0,
     };
@@ -57,10 +59,11 @@ export const Agency: Game<AgencyState> = {
     playCard: ({ G, random }, cardId: string) => {
       if (!playCard(G, cardId, (arr) => shuffleInPlace(arr, random))) return INVALID_MOVE;
     },
-    assignPerson: ({ G }, cardId: string, buildingId: string) => {
-      if (!assignPerson(G, cardId, buildingId as AgencyState['buildings'][0]['id'])) {
-        return INVALID_MOVE;
-      }
+    placeFacility: ({ G }, cardId: string) => {
+      if (!placeFacility(G, cardId)) return INVALID_MOVE;
+    },
+    assignPerson: ({ G }, cardId: string, facilityInstanceId: string) => {
+      if (!assignPerson(G, cardId, facilityInstanceId)) return INVALID_MOVE;
     },
     buyCard: ({ G, random }, marketIndex: number) => {
       if (!buyCard(G, marketIndex, (arr) => shuffleInPlace(arr, random))) return INVALID_MOVE;
@@ -81,7 +84,7 @@ export const Agency: Game<AgencyState> = {
 
   turn: {
     onBegin: ({ G }) => {
-      applyBuildingPassives(G);
+      applyFacilityPassives(G);
     },
   },
 
