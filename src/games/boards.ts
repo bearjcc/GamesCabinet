@@ -1,4 +1,5 @@
 import { withMatchChrome } from '../components/MatchChrome';
+import { AgencyBoard } from './agency/Board';
 import { BackgammonBoard } from './backgammon/Board';
 import { BattleshipBoard } from './battleship/Board';
 import { CheckersBoard } from './checkers/Board';
@@ -56,4 +57,5 @@ export const boards = {
   orbits: withMatchChrome(OrbitsBoard),
   tracks: withMatchChrome(TracksBoard),
   'hogwarts-battle': withMatchChrome(HogwartsBattleBoard),
+  agency: withMatchChrome(AgencyBoard),
 } as const;

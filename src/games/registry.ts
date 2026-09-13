@@ -1,4 +1,5 @@
 import type { Game } from 'boardgame.io';
+import { Agency } from './agency/game';
 import { Backgammon } from './backgammon/game';
 import { Battleship } from './battleship/game';
 import { Checkers } from './checkers/game';
@@ -56,6 +57,7 @@ export const gameList: Game<any>[] = [
   Orbits,
   Tracks,
   HogwartsBattle,
+  Agency,
 ];
 
 export const gamesById = {
@@ -86,6 +88,7 @@ export const gamesById = {
   orbits: Orbits,
   tracks: Tracks,
   'hogwarts-battle': HogwartsBattle,
+  agency: Agency,
 } as const;
 
 export type GameId = keyof typeof gamesById;

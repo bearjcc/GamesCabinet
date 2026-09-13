@@ -283,6 +283,17 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     accessCode: 'LUNALOVEGOOD',
   },
+  {
+    id: 'agency',
+    name: 'Agency',
+    blurb: 'Staff buildings. Fund missions. Win the Space Race.',
+    minPlayers: 1,
+    maxPlayers: 1,
+    hasBot: false,
+    hasSolo: true,
+    soloOnly: true,
+    accessCode: 'SPUTNIK',
+  },
 ];
 
 export function getGameMeta(id: string): GameMeta | undefined {
