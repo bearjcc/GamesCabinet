@@ -18,7 +18,20 @@ Person cards are a **`<div>` stack**: CSS owns typography and numbers; **`<img>`
 | Orbit / capsule watermark | `<img>` | `icons/orbit.png`, `icons/capsule.png` |
 | Wordmark (play chrome) | `<img>` | `public/games/agency/logo.jpg` |
 
-**ComfyUI pipeline (Bear's desktop):** checkpoint `assets/playground-v2.5-1024px-aesthetic.fp16.safetensors` + LoRA `assets/sdxl-simple-icons.safetensors` for flat icon pieces at 1024px; export PNGs into the paths below. Person cards stay layered: icons and watermarks are `<img>` only — typography and numerals remain DOM/CSS.
+**ComfyUI pipeline (Bear's desktop):** workflow `C:\docker\comfyui\workflows\api-assets-icons.json`.
+
+| Setting | Value |
+|---------|-------|
+| Checkpoint | `assets/playground-v2.5-1024px-aesthetic.fp16.safetensors` |
+| LoRA | `assets/sdxl-simple-icons.safetensors` @ **0.8** strength |
+| VAE | `sdxl_vae` |
+| Size | **1024** px |
+| Sampler | **dpmpp_2m** / **karras** |
+| CFG | **5** |
+
+**Art direction:** prompts biased **1960s cartoon-inspired vector** — thick outlines, limited palette, mid-century aerospace / dossier motifs. Export flat PNGs into the paths below (no baked card frames). Person cards stay layered: icons and watermarks are `<img>` only; typography and numerals remain DOM/CSS.
+
+**v2 icon set (2026):** `funding`, `engineering`, `rocketry`, `acceleration`, `pilot`, `science`, `leadership`, `globe` — committed under `public/games/agency/icons/`. Watermarks (`capsule`, `orbit`) unchanged from v1.
 
 **Code:** `src/games/agency/PersonCard.tsx`, `CardAsset.tsx`, `cardAssets.ts`.
 
