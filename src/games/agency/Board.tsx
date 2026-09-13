@@ -13,7 +13,13 @@ import {
   canPlayCard,
   missionThreshold,
 } from './actions';
-import { cardDef, ERA_TARGET_SOLO, EXPLORER_I, facilityStaffSlots } from './cards';
+import {
+  cardDef,
+  ERA_TARGET_SOLO,
+  EXPLORER_I,
+  facilityStaffedPassive,
+  facilityStaffSlots,
+} from './cards';
 
 type SelectMode = { kind: 'none' } | { kind: 'person'; cardId: string };
 
@@ -43,7 +49,7 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
     tone = 'wait';
     status = 'Waiting…';
   } else if (select.kind === 'person') {
-    status = 'Choose a facility for this person.';
+    status = 'Tap a facility — assigned people stay and grant bonuses each turn.';
   } else if (canCommit) {
     status = 'Tap the mission to commit your Funding and Innovation.';
   }
@@ -144,18 +150,21 @@ export function AgencyBoard({ G, ctx, moves, isActive }: BoardProps<AgencyState>
           {G.facilities.map((facility) => {
             const def = cardDef(facility.cardId);
             const slots = facilityStaffSlots(facility.cardId);
+            const staffCount = facility.assigned.length;
+            const passive = facilityStaffedPassive(facility.cardId, staffCount);
             const highlight =
               select.kind === 'person' && canAssignPerson(G, select.cardId, facility.instanceId);
             return (
               <button
                 key={facility.instanceId}
                 type="button"
-                className={`agency-facility${highlight ? ' is-legal' : ''}`}
+                className={`agency-facility${highlight ? ' is-legal' : ''}${staffCount > 0 ? ' is-staffed' : ''}`}
                 data-testid={`agency-facility-${facility.instanceId}`}
                 disabled={!highlight}
                 onClick={() => pickFacility(facility.instanceId)}
               >
                 <span className="agency-facility__name">{def?.name ?? facility.cardId}</span>
+                {passive ? <span className="agency-facility__passive">{passive}</span> : null}
                 <ul className="agency-facility__slots">
                   {Array.from({ length: slots }, (_, slot) => {
                     const personId = facility.assigned[slot];

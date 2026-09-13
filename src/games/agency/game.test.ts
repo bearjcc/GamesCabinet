@@ -85,6 +85,19 @@ describe('Agency actions', () => {
     expect(canAssignPerson(G, 'person-analyst', 'starter-research')).toBe(false);
   });
 
+  it('keeps assigned people on facilities across end turn', () => {
+    const G = baseState({
+      hand: ['person-technician'],
+      deck: ['funding-1', 'innovation-1', 'funding-1', 'innovation-1', 'funding-1'],
+      discard: [],
+    });
+    assignPerson(G, 'person-technician', 'starter-admin');
+    endTurnCleanup(G, shuffle);
+    const admin = G.facilities.find((f) => f.instanceId === 'starter-admin');
+    expect(admin?.assigned).toEqual(['person-technician']);
+    expect(G.discard).not.toContain('person-technician');
+  });
+
   it('places facility card from hand onto the board', () => {
     const G = baseState({ hand: ['facility-cape-canaveral'] });
     expect(canPlaceFacility(G, 'facility-cape-canaveral')).toBe(true);

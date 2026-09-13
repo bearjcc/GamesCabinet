@@ -59,7 +59,7 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     kind: 'person',
     marketCost: 3,
     onPlayFunding: 1,
-    blurb: 'Assign to a facility, or play for 1 Funding.',
+    blurb: 'Assign to a facility for ongoing bonuses, or play once for 1 Funding.',
   },
   'person-analyst': {
     id: 'person-analyst',
@@ -67,7 +67,7 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     kind: 'person',
     marketCost: 3,
     onPlayInnovation: 1,
-    blurb: 'Assign to a facility, or play for 1 Innovation.',
+    blurb: 'Assign to a facility for ongoing bonuses, or play once for 1 Innovation.',
   },
   'person-engineer': {
     id: 'person-engineer',
@@ -76,7 +76,7 @@ export const CARD_DEFS: Record<string, AgencyCardDef> = {
     marketCost: 4,
     onPlayFunding: 1,
     onPlayInnovation: 1,
-    blurb: 'Assign to a facility, or play for 1 Funding and 1 Innovation.',
+    blurb: 'Assign to a facility for ongoing bonuses, or play once for 1 of each.',
   },
   'operations-team': {
     id: 'operations-team',
@@ -152,6 +152,22 @@ export function facilityStaffSlots(cardId: string): number {
 
 export function facilityRole(cardId: string): FacilityRole | undefined {
   return cardDef(cardId)?.facilityRole;
+}
+
+/** Turn-start passive label when facility has staff (shown on board). */
+export function facilityStaffedPassive(cardId: string, staffCount: number): string | null {
+  if (staffCount === 0) return null;
+  const role = facilityRole(cardId);
+  if (role === 'research') {
+    return `+${staffCount} Innovation each turn`;
+  }
+  if (role === 'administration') {
+    return `+${staffCount} Funding each turn`;
+  }
+  if (role === 'mission-control') {
+    return 'Lowers mission requirements';
+  }
+  return null;
 }
 
 export function buildStartingDeck(): string[] {
