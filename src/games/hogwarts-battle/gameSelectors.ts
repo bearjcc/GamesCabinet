@@ -26,6 +26,14 @@ export function canHeroAct(G: HogwartsGameState, playerId: string): ActionGate {
   return { allowed: true };
 }
 
+export function resolveHandCardTap(
+  G: HogwartsGameState,
+  playerId: string,
+  cardInstanceId: string,
+): 'play' | 'inspect' {
+  return canPlayCard(G, playerId, cardInstanceId).allowed ? 'play' : 'inspect';
+}
+
 export function canPlayCard(
   G: HogwartsGameState,
   playerId: string,

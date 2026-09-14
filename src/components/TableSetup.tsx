@@ -2,6 +2,7 @@ import { type ReactNode, useMemo } from 'react';
 import type { GameMeta } from '../lib/games';
 import { getSeatColour, SEAT_COLOUR_PALETTE } from '../lib/storage';
 import { deriveLaunch, getSeatKinds, type SeatKind, type TableSeat } from '../lib/tableSetup';
+import { SeatColourPicker } from './SeatColourPicker';
 
 type Props = {
   meta: GameMeta;
@@ -92,25 +93,12 @@ export function TableSetup({
               ))}
             </div>
             {seat.kind !== 'empty' && showColours && seat.kind !== 'online' ? (
-              <div
-                className="table-seat-colours"
-                role="radiogroup"
-                aria-label={`Seat ${index + 1} colour`}
-              >
-                {SEAT_COLOUR_PALETTE.map((colour) => (
-                  <button
-                    aria-checked={seat.colour === colour}
-                    aria-label={`Seat ${index + 1} colour ${colour}`}
-                    className={seat.colour === colour ? 'table-colour selected' : 'table-colour'}
-                    data-testid={`table-seat-${index}-colour-${colour}`}
-                    key={colour}
-                    onClick={() => updateSeat(index, { colour })}
-                    role="radio"
-                    style={{ backgroundColor: colour }}
-                    type="button"
-                  />
-                ))}
-              </div>
+              <SeatColourPicker
+                value={seat.colour}
+                ariaLabel={`Seat ${index + 1} colour`}
+                testIdFor={(colour) => `table-seat-${index}-colour-${colour}`}
+                onChange={(colour) => updateSeat(index, { colour })}
+              />
             ) : null}
             {seat.kind !== 'empty' ? seatDetails?.(seat, index) : null}
           </article>

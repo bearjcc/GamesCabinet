@@ -5,6 +5,7 @@ import { Roll } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { DieFace, Token } from '../../components/tabletop';
+import { relativeSeatLabel } from '../../lib/matchSeats';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { asDieFaceValue } from '../shared/dice';
 import { KENNEY_LADDER, KENNEY_SNAKE } from '../shared/tokens';
@@ -69,10 +70,10 @@ export function SnakesAndLaddersBoard({
           <div className="sal-meta">
             <div className="sal-positions" role="group" aria-label="Pawn positions">
               <span data-testid="sal-pos-0">
-                P1: {G.positions[0] === 0 ? 'start' : G.positions[0]}
+                {relativeSeatLabel(0, playerID)}: {G.positions[0] === 0 ? 'start' : G.positions[0]}
               </span>
               <span data-testid="sal-pos-1">
-                P2: {G.positions[1] === 0 ? 'start' : G.positions[1]}
+                {relativeSeatLabel(1, playerID)}: {G.positions[1] === 0 ? 'start' : G.positions[1]}
               </span>
               <span className="sal-goal">Goal: {FINAL_SQUARE}</span>
             </div>

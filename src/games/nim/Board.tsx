@@ -34,21 +34,9 @@ export function NimBoard({ G, ctx, moves, playerID, isActive }: BoardProps<NimSt
       board={
         <div className="nim-table" data-testid="nim-board">
           <Counter value={G.heap} label="Stones left" emphasize testId="nim-count" />
-          <div
-            className="nim-pile"
-            role="group"
-            aria-label={`${G.heap} stones in the heap`}
-            data-testid="nim-pile"
-          >
+          <div className="nim-pile" aria-hidden data-testid="nim-pile">
             {Array.from({ length: tokenCount }, (_, i) => (
-              <Token
-                key={i}
-                player="0"
-                variant="chip"
-                size="sm"
-                label={`Stone ${i + 1}`}
-                testId={`nim-stone-${i}`}
-              />
+              <Token key={i} player="0" variant="chip" size="sm" testId={`nim-stone-${i}`} />
             ))}
           </div>
         </div>

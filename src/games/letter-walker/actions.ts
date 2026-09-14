@@ -10,9 +10,7 @@ export type LetterWalkerActionInput = {
 /**
  * Pure pew intents for Letter Walker.
  *
- * Row/column slides are 32 microscopic arrow intents plus per-cell selection;
- * those stay on the board (drag/tap/arrow buttons). The pew exposes the
- * high-value intents the existing toolbar already offered: submit, clear,
+ * Row/column slides are drag on the board. The pew exposes submit, clear,
  * and new puzzle. The shell hides this surface on the scores tab.
  */
 export function getLetterWalkerActions({

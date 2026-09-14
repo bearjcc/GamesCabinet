@@ -5,6 +5,7 @@ import { Drop, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
+import { pewChromeActions } from '../../lib/actions';
 import { primitiveProfile } from '../../lib/cinematic';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
@@ -123,16 +124,11 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
     },
   });
 
-  const pewActions = getReversiActions({ G, player, yourTurn });
+  const pewActions = pewChromeActions(getReversiActions({ G, player, yourTurn }));
   const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const match = /^place-(\d+)$/.exec(action.id);
-      if (match) moves.place(Number(match[1]));
+      if (action.id === 'pass') moves.pass();
     },
   }));
 
@@ -184,7 +180,11 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
           })}
         </div>
       }
-      actions={<ActionSurface label="Reversi actions" actions={surfaceActions} />}
+      actions={
+        surfaceActions.length ? (
+          <ActionSurface label="Reversi actions" actions={surfaceActions} />
+        ) : undefined
+      }
     />
   );
 }

@@ -20,6 +20,14 @@ export function summariseSeats(matchData: FilteredMetadata | undefined): SeatSum
   };
 }
 
+/** Viewer-relative 2-seat labels. The other chair is Them. */
+export function relativeSeatLabel(
+  seatIndex: number,
+  viewerId: string | null | undefined,
+): 'You' | 'Them' {
+  return viewerId != null && String(seatIndex) === String(viewerId) ? 'You' : 'Them';
+}
+
 export function roomShareUrl(
   gameId: string,
   matchID: string,

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SeatColourPicker } from '../components/SeatColourPicker';
 import { Shell } from '../components/Shell';
 import { UnlockPanel } from '../components/UnlockPanel';
 import { GAMES, isAccessGated } from '../lib/games';
@@ -6,7 +7,6 @@ import {
   getNickname,
   getSeatColour,
   getUnlockedGames,
-  SEAT_COLOUR_PALETTE,
   type SeatColour,
   setNickname,
   setSeatColour,
@@ -39,27 +39,15 @@ export function Settings() {
 
       <section aria-label="Default seat colour">
         <p className="launch-blurb">Default seat colour</p>
-        <div className="launch-actions" role="radiogroup" aria-label="Seat colour">
-          {SEAT_COLOUR_PALETTE.map((colour) => {
-            const selected = colour === seatColour;
-            return (
-              <button
-                key={colour}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                className={selected ? 'btn primary' : 'btn'}
-                style={{ backgroundColor: colour, borderColor: colour, minWidth: '2.5rem' }}
-                data-testid={`settings-seat-colour-${colour}`}
-                aria-label={`Seat colour ${colour}`}
-                onClick={() => {
-                  setSeatColourState(colour);
-                  setSeatColour(colour);
-                }}
-              />
-            );
-          })}
-        </div>
+        <SeatColourPicker
+          value={seatColour}
+          ariaLabel="Seat colour"
+          testIdFor={(colour) => `settings-seat-colour-${colour}`}
+          onChange={(colour) => {
+            setSeatColourState(colour);
+            setSeatColour(colour);
+          }}
+        />
       </section>
 
       <section aria-label="Access codes">

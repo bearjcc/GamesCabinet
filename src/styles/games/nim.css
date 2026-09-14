@@ -15,4 +15,5 @@
   gap: 0.35rem;
   max-width: 16rem;
   min-height: 2.5rem;
+  pointer-events: none;
 }

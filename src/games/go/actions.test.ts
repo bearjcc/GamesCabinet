@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { pewChromeActions } from '../../lib/actions';
 import { getGoActions } from './actions';
 import { type GoState, legalPlaces, SIZE } from './game';
 
@@ -30,6 +31,7 @@ describe('getGoActions', () => {
       testId: `go-action-${places[0]}`,
     });
     expect(place?.label).toMatch(/^Place at [a-i][1-9]$/);
+    expect(pewChromeActions(actions).map((a) => a.id)).toEqual(['pass']);
 
     const pass = actions[actions.length - 1];
     expect(pass).toMatchObject({

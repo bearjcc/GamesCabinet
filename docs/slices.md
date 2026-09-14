@@ -35,4 +35,28 @@ How to add work: append a checkbox under the right section. Type, blocked-by, an
 - Agency / other first-party titles - not a Phase 1 gate
 - Offline PWA / IndexedDB continue - Phase 2
 
+### Intentionality audit (do not jump the Now queue)
+
+Full report: [`docs/audits/intentionality.md`](./audits/intentionality.md). DESIGN now records the decisions that were already true.
+
+- [x] **AFK** Strip pew move-menu ActionSurfaces  
+  Keep `get*Actions()` for bots/tests. Stop mounting coordinate lists on `ActionSurface`. Pew only for Pass / Roll / Undo / Draw / Ready / Play all / Submit / Clear.  
+  Games: Go (Pass only), Memory (none), Mancala (none), Reversi (Pass only), Nine Men's Morris (none), Chinese Checkers (End hop only), Dots and Boxes (none), Backgammon (Roll / Pass only).  
+  Files: `src/games/*/Board.tsx`, existing action tests stay; add a board-click test where the pew was the only path.
+
+- [x] **AFK** `.main` must not stretch Settings / launch  
+  `align-content: start` (or stop making `.main` a filling grid). Seat colour swatches meet `--tap-min` and are not colour-only.  
+  Files: `src/styles/base.css`, `src/styles/catalogue.css`, `src/pages/Settings.tsx`, `src/components/TableSetup.tsx`
+
+- [x] **AFK** Player-facing seat labels  
+  Replace on-site `P0` / `P1` / `P2` (Mancala, Memory, Dots and Boxes, War, Snakes, Backgammon) with You / Them or the nickname. Orbits status must not say `countermeasure only`.  
+  Files: those `Board.tsx` files, `src/games/orbits/Board.tsx`
+
+- [x] **AFK** Hogwarts click-to-play  
+  Tap a hand card plays it (deck-builder law). Keep Play all. Selection-to-read can stay as a non-blocking inspect.  
+  Files: `src/games/hogwarts-battle/Board.tsx`
+
+- [ ] **HITL** Tuck Settings / Motion / Theme during play  
+  Tension: knobs reachable vs platform disappears. Needs a Bear vibe check before changing Shell.
+
 Background map (stale in places): [GamesCabinet Phase 1 map](https://github.com/bearjcc/GamesCabinet/issues/1)

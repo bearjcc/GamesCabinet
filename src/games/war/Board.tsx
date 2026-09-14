@@ -7,6 +7,7 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardFace, StockPile } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
+import { relativeSeatLabel } from '../../lib/matchSeats';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
 import { kenneyPlayingCardAsset } from '../shared/cards';
@@ -52,8 +53,8 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
 
   const metaBits: string[] = [];
   if (G.lastWinner != null) {
-    const seat = Number(G.lastWinner) + 1;
-    metaBits.push(G.lastWasWar ? `War won by P${seat}` : `P${seat} took the trick`);
+    const who = relativeSeatLabel(Number(G.lastWinner), playerID);
+    metaBits.push(G.lastWasWar ? `War won by ${who}` : `${who} took the trick`);
   }
 
   return (
@@ -63,8 +64,8 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
           <StatusBar text={status} tone={tone} />
           <MatchScoreboard
             scores={[
-              { label: 'P1', value: G.decks[0].length },
-              { label: 'P2', value: G.decks[1].length },
+              { label: relativeSeatLabel(0, playerID), value: G.decks[0].length },
+              { label: relativeSeatLabel(1, playerID), value: G.decks[1].length },
               ...metaBits.map((bit) => ({ label: 'Last', value: bit })),
             ]}
             testId="war-meta"
@@ -75,7 +76,7 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
         <div className="war-table" data-testid="war-board">
           <div className="war-seat">
             <StockPile count={G.decks[0].length} testId="war-pile-0" />
-            <span className="war-seat__label">P1</span>
+            <span className="war-seat__label">{relativeSeatLabel(0, playerID)}</span>
           </div>
 
           <div className="war-battle" aria-live="polite">
@@ -116,7 +117,7 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
 
           <div className="war-seat">
             <StockPile count={G.decks[1].length} testId="war-pile-1" />
-            <span className="war-seat__label">P2</span>
+            <span className="war-seat__label">{relativeSeatLabel(1, playerID)}</span>
           </div>
         </div>
       }

@@ -25,6 +25,7 @@ import {
   cardTitle,
   heroDisplayName,
   pendingChoicePlayerId,
+  resolveHandCardTap,
   turnHeadline,
   unassignedAttack,
 } from './gameSelectors';
@@ -458,7 +459,9 @@ export function HogwartsBattleBoard({
               ) : null}
             </aside>
           ) : (
-            <p className="hb-selection-hint">Select a card to read its rules.</p>
+            <p className="hb-selection-hint">
+              Tap a card to play it. Unplayable cards open to read.
+            </p>
           )}
           <div className="hb-card-row hb-hand" data-testid="hb-hand">
             {(player?.hand ?? []).map((id) =>
@@ -471,10 +474,17 @@ export function HogwartsBattleBoard({
                     title={cardTitle(G, id)}
                     subtitle={card?.type}
                     selected={selectedHand === id}
-                    disabled={!isMyTurn}
-                    onClick={() => setSelectedHand(id === selectedHand ? null : id)}
+                    onClick={() => {
+                      if (resolveHandCardTap(G, seat, id) === 'play') {
+                        moves.playCard?.(id);
+                        setSelectedHand(null);
+                        return;
+                      }
+                      setSelectedHand(id === selectedHand ? null : id);
+                    }}
                     testId={`hb-hand-${id}`}
                     spriteId={card?.id}
+                    titleHint={canPlayCard(G, seat, id).reason}
                   />
                 );
               })(),
@@ -492,19 +502,6 @@ export function HogwartsBattleBoard({
             ))}
           </div>
           <div className="hb-actions">
-            <button
-              type="button"
-              className="btn"
-              disabled={!isMyTurn || !selectedHand || !canPlayCard(G, seat, selectedHand).allowed}
-              onClick={() => {
-                if (!selectedHand) return;
-                moves.playCard?.(selectedHand);
-                setSelectedHand(null);
-              }}
-              data-testid="hb-play-card"
-            >
-              Play selected
-            </button>
             <button
               type="button"
               className="btn"

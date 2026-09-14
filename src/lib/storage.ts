@@ -16,7 +16,20 @@ export const SEAT_COLOUR_PALETTE = [
 
 export type SeatColour = (typeof SEAT_COLOUR_PALETTE)[number];
 
+export const SEAT_COLOUR_LABELS: Record<SeatColour, string> = {
+  '#c0392b': 'Red',
+  '#e67e22': 'Orange',
+  '#f1c40f': 'Yellow',
+  '#27ae60': 'Green',
+  '#2980b9': 'Blue',
+  '#8e44ad': 'Purple',
+};
+
 export const DEFAULT_SEAT_COLOUR: SeatColour = SEAT_COLOUR_PALETTE[4];
+
+export function seatColourLabel(colour: SeatColour): string {
+  return SEAT_COLOUR_LABELS[colour];
+}
 
 export function isSeatColour(value: string | null | undefined): value is SeatColour {
   return !!value && (SEAT_COLOUR_PALETTE as readonly string[]).includes(value);

@@ -101,7 +101,7 @@ Public visitors see only the open cabinet. Codes unlock visibility locally (and 
 
 ## Settings (early)
 
-A simple Settings surface is fine: nickname, default pawn / seat colour, theme (already available). Growth later - not a SaaS settings sprawl.
+A simple Settings surface is fine: nickname, default pawn / seat colour, access codes. Theme and motion cycle from the Shell topbar. Growth later - not a SaaS settings sprawl.
 
 ## Phase 1 definition of done
 

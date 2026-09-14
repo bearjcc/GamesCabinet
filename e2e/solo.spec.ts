@@ -6,7 +6,14 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-letter-walker').click();
     await expect(page).toHaveURL(/\/play\/letter-walker/);
     await expect(page.getByTestId('lw-board')).toBeVisible();
-    await page.getByTestId('lw-row-left-0').click();
+    await expect(page.getByTestId('lw-row-left-0')).toHaveCount(0);
+    const cell = page.getByTestId('lw-cell-0-0');
+    const box = await cell.boundingBox();
+    if (!box) throw new Error('Letter Walker cell has no box');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 2.5, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
     await expect(page.getByRole('status')).toBeVisible();
     await page.getByTestId('lw-tab-scores').click();
     await expect(page.getByTestId('lw-scores')).toBeVisible();

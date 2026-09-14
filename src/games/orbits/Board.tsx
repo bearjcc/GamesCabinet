@@ -79,7 +79,7 @@ export function OrbitsBoard({ G, ctx, moves, isActive, playerID }: BoardProps<Or
     tone = 'wait';
     status = launch.pending
       ? `Hazard: ${HAZARD_LABELS[launch.pending.hazard]}${
-          launch.pending.countermeasureOnly ? ' (countermeasure only)' : ''
+          launch.pending.countermeasureOnly ? ' - matching countermeasure needed' : ''
         }`
       : `Launch round ${launch.round + 1} of ${HAZARD_ROUNDS.length}: ${
           HAZARD_ROUNDS[launch.round] ? HAZARD_LABELS[HAZARD_ROUNDS[launch.round]] : 'clear'

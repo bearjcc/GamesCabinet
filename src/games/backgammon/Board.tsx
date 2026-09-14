@@ -3,6 +3,8 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray, Token } from '../../components/tabletop';
+import { pewChromeActions } from '../../lib/actions';
+import { relativeSeatLabel } from '../../lib/matchSeats';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getBackgammonActions } from './actions';
 import { BAR, type BackgammonState, checkerCount, legalPlays, pointOwner } from './game';
@@ -33,11 +35,13 @@ export function BackgammonBoard({
     },
   });
 
-  const pewActions = getBackgammonActions({
-    G,
-    player: ctx.currentPlayer,
-    yourTurn,
-  });
+  const pewActions = pewChromeActions(
+    getBackgammonActions({
+      G,
+      player: ctx.currentPlayer,
+      yourTurn,
+    }),
+  );
   const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
@@ -45,12 +49,7 @@ export function BackgammonBoard({
         moves.roll();
         return;
       }
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const match = /^play-(\d+)-(\d+)$/.exec(action.id);
-      if (match) moves.play(Number(match[1]), Number(match[2]));
+      if (action.id === 'pass') moves.pass();
     },
   }));
 
@@ -109,9 +108,9 @@ export function BackgammonBoard({
               className="bg-bear"
               data-testid="backgammon-bear-1"
               role="status"
-              aria-label={`P1 borne ${G.borne[1]}`}
+              aria-label={`${relativeSeatLabel(1, playerID)} borne ${G.borne[1]}`}
             >
-              <span className="bg-tray-label">P1 off</span>
+              <span className="bg-tray-label">{relativeSeatLabel(1, playerID)} off</span>
               <span className="bg-tray-count">{G.borne[1]}</span>
             </div>
 
@@ -124,10 +123,14 @@ export function BackgammonBoard({
                   data-testid="backgammon-bar"
                   disabled={!barOpen}
                   onClick={() => onPoint(BAR)}
-                  aria-label={`Bar, P0 ${G.bar[0]}, P1 ${G.bar[1]}`}
+                  aria-label={`Bar, ${relativeSeatLabel(0, playerID)} ${G.bar[0]}, ${relativeSeatLabel(1, playerID)} ${G.bar[1]}`}
                 >
-                  <span data-testid="backgammon-bar-0">P0:{G.bar[0]}</span>
-                  <span data-testid="backgammon-bar-1">P1:{G.bar[1]}</span>
+                  <span data-testid="backgammon-bar-0">
+                    {relativeSeatLabel(0, playerID)}:{G.bar[0]}
+                  </span>
+                  <span data-testid="backgammon-bar-1">
+                    {relativeSeatLabel(1, playerID)}:{G.bar[1]}
+                  </span>
                 </button>
                 {G.hasRolled && G.dice.length > 0 ? (
                   <DiceTray dice={G.dice} disabled testId="backgammon-dice" />
@@ -144,9 +147,9 @@ export function BackgammonBoard({
               className="bg-bear"
               data-testid="backgammon-bear-0"
               role="status"
-              aria-label={`P0 borne ${G.borne[0]}`}
+              aria-label={`${relativeSeatLabel(0, playerID)} borne ${G.borne[0]}`}
             >
-              <span className="bg-tray-label">P0 off</span>
+              <span className="bg-tray-label">{relativeSeatLabel(0, playerID)} off</span>
               <span className="bg-tray-count">{G.borne[0]}</span>
             </div>
           </div>

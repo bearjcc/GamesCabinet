@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { roomShareUrl, summariseSeats } from './matchSeats';
+import { relativeSeatLabel, roomShareUrl, summariseSeats } from './matchSeats';
 
 describe('matchSeats', () => {
   it('summarises filled and open seats', () => {
@@ -12,6 +12,13 @@ describe('matchSeats', () => {
       full: false,
       labels: ['Bear', 'Seat 2 open', 'Alex'],
     });
+  });
+
+  it('labels the viewer You and the other chair Them', () => {
+    expect(relativeSeatLabel(0, '0')).toBe('You');
+    expect(relativeSeatLabel(1, '0')).toBe('Them');
+    expect(relativeSeatLabel(1, '1')).toBe('You');
+    expect(relativeSeatLabel(0, null)).toBe('Them');
   });
 
   it('builds a share URL for a room', () => {

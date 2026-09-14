@@ -10,7 +10,6 @@ import { getNickname } from '../../lib/storage';
 import { getLetterWalkerActions } from './actions';
 import { dictionarySize, parseDictionaryText, setLetterWalkerDictionary } from './dictionary';
 import type { LetterWalkerState, ShiftDir } from './game';
-import { GRID_SIZE } from './game';
 import { type CellPos, extendSelection, wordFromGrid } from './selection';
 
 type PointerMode = 'auto' | 'slide' | 'select';
@@ -270,118 +269,52 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
             </div>
 
             <div className="lw-board-wrap">
-              <div className="lw-col-arrows lw-col-arrows--top">
-                {Array.from({ length: GRID_SIZE }, (_, c) => (
-                  <button
-                    key={`up-${c}`}
-                    type="button"
-                    className="btn lw-arrow"
-                    disabled={!playable}
-                    data-testid={`lw-col-up-${c}`}
-                    aria-label={`Slide column ${c + 1} up`}
-                    onClick={() => onShift(c, 'up')}
-                  >
-                    U
-                  </button>
-                ))}
-              </div>
-
-              <div className="lw-mid">
-                <div className="lw-row-arrows">
-                  {Array.from({ length: GRID_SIZE }, (_, r) => (
-                    <button
-                      key={`left-${r}`}
-                      type="button"
-                      className="btn lw-arrow"
-                      disabled={!playable}
-                      data-testid={`lw-row-left-${r}`}
-                      aria-label={`Slide row ${r + 1} left`}
-                      onClick={() => onShift(r, 'left')}
-                    >
-                      L
-                    </button>
-                  ))}
-                </div>
-
-                <div
-                  ref={boardRef}
-                  className="lw-board"
-                  role="grid"
-                  aria-label="Letter Walker board"
-                  data-testid="lw-board"
-                >
-                  {G.grid.map((row, r) =>
-                    row.map((letter, c) => {
-                      const isSel = selected.some((s) => s.row === r && s.col === c);
-                      return (
-                        <div
-                          key={`${r}-${c}`}
-                          className={`lw-cell${isSel ? ' is-selected' : ''}`}
-                          role="gridcell"
-                          data-row={r}
-                          data-col={c}
-                          data-testid={`lw-cell-${r}-${c}`}
-                          onPointerDown={(e) => {
-                            if (!playable) return;
-                            if (e.pointerType === 'touch' && e.cancelable) e.preventDefault();
-                            if (mode === 'select') {
-                              selectPointerRef.current = e.pointerId;
-                              setSelected([{ row: r, col: c }]);
-                              (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-                              return;
-                            }
-                            beginSlide(e, r, c);
-                          }}
-                          onPointerMove={(e) => {
-                            if (mode === 'select') {
-                              if (selectPointerRef.current !== e.pointerId) return;
-                              if (e.cancelable) e.preventDefault();
-                              onSelectMove(e.clientX, e.clientY);
-                              return;
-                            }
-                            updateSlide(e);
-                          }}
-                          onPointerUp={(e) => endPointer(e, r, c)}
-                          onPointerCancel={(e) => endPointer(e, r, c)}
-                        >
-                          {letter}
-                        </div>
-                      );
-                    }),
-                  )}
-                </div>
-
-                <div className="lw-row-arrows">
-                  {Array.from({ length: GRID_SIZE }, (_, r) => (
-                    <button
-                      key={`right-${r}`}
-                      type="button"
-                      className="btn lw-arrow"
-                      disabled={!playable}
-                      data-testid={`lw-row-right-${r}`}
-                      aria-label={`Slide row ${r + 1} right`}
-                      onClick={() => onShift(r, 'right')}
-                    >
-                      R
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="lw-col-arrows lw-col-arrows--bottom">
-                {Array.from({ length: GRID_SIZE }, (_, c) => (
-                  <button
-                    key={`down-${c}`}
-                    type="button"
-                    className="btn lw-arrow"
-                    disabled={!playable}
-                    data-testid={`lw-col-down-${c}`}
-                    aria-label={`Slide column ${c + 1} down`}
-                    onClick={() => onShift(c, 'down')}
-                  >
-                    D
-                  </button>
-                ))}
+              <div
+                ref={boardRef}
+                className="lw-board"
+                role="grid"
+                aria-label="Letter Walker board"
+                data-testid="lw-board"
+              >
+                {G.grid.map((row, r) =>
+                  row.map((letter, c) => {
+                    const isSel = selected.some((s) => s.row === r && s.col === c);
+                    return (
+                      <div
+                        key={`${r}-${c}`}
+                        className={`lw-cell${isSel ? ' is-selected' : ''}`}
+                        role="gridcell"
+                        data-row={r}
+                        data-col={c}
+                        data-testid={`lw-cell-${r}-${c}`}
+                        onPointerDown={(e) => {
+                          if (!playable) return;
+                          if (e.pointerType === 'touch' && e.cancelable) e.preventDefault();
+                          if (mode === 'select') {
+                            selectPointerRef.current = e.pointerId;
+                            setSelected([{ row: r, col: c }]);
+                            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+                            return;
+                          }
+                          beginSlide(e, r, c);
+                        }}
+                        onPointerMove={(e) => {
+                          if (mode === 'select') {
+                            if (selectPointerRef.current !== e.pointerId) return;
+                            if (e.cancelable) e.preventDefault();
+                            onSelectMove(e.clientX, e.clientY);
+                            return;
+                          }
+                          updateSlide(e);
+                        }}
+                        onPointerUp={(e) => endPointer(e, r, c)}
+                        onPointerCancel={(e) => endPointer(e, r, c)}
+                      >
+                        {letter}
+                      </div>
+                    );
+                  }),
+                )}
               </div>
             </div>
           </div>
