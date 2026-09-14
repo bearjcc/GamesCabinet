@@ -72,7 +72,7 @@ Orbits status can append `(countermeasure only)`: engine flag in the status bar.
 ### 5. Copy and instruction that should be demonstration
 
 - 2048 status: `Swipe, arrow keys, or WASD`. Touch-first boards should not advertise WASD. Swipe can be discovered; a short status on first move is enough.
-- Letter Walker U / D / L / R ring: 32 labelled buttons around a grid that already supports drag. The file comment treats this as board chrome, not pew. It is still a move-button grid. Keep as a documented exception (keyboard / no-drag fallback) or drop once drag is reliable.
+- Letter Walker U / D / L / R ring: removed. Swipe only.
 - Catalogue blurb `Concept by Luke Walker` spends a tile line on credit. Fine if Luke wants it; it is not a play verb.
 - Status strings use em dashes (`Your turn — tap a square`). House punctuation for product files is ASCII hyphen or a new sentence.
 
@@ -100,9 +100,7 @@ Record these in DESIGN so the next change does not rediscover them. Short form h
 
 | Exception | What the rule usually does | Why it might stay |
 |---|---|---|
-| Letter Walker UDLR ring | Moves happen on the board / drag | Backup when drag is undiscovered or keyboard-only |
-| Nim Take 1/2/3 | Board-first | Intent-first: taking N stones is the verb; dragging tokens adds no meaning |
-| Hogwarts Play selected | Click card to play | Selection reveals the card text first (knowledge layer 1–2) |
+| Nim Take 1/2/3 | Board-first | Intent-first: taking N stones is the verb; the pile is display-only |
 | Table well min-height | Spacing is hierarchy, not theatre | Makes the launch page feel like seats around a table |
 | Small board, large well | Board dominates | Stretching TTT/2048 lies about scale |
 | Always-on Motion/Theme | Platform disappears in play | Hundredth-hour knob without Settings archaeology |

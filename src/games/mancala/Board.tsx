@@ -1,10 +1,9 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter, Token } from '../../components/tabletop';
+import { relativeSeatLabel } from '../../lib/matchSeats';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getMancalaActions } from './actions';
 import type { MancalaState } from './game';
 import { ownPits, P0_STORE, P1_STORE } from './game';
 
@@ -13,22 +12,12 @@ const VISUAL_STONE_CAP = 8;
 
 export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaState>) {
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
-  const player = playerID ?? ctx.currentPlayer;
   const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - tap a pit' },
   });
 
   const playable = new Set(yourTurn ? ownPits(ctx.currentPlayer) : []);
-
-  const pewActions = getMancalaActions({ G, player, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^sow-(\d+)$/.exec(action.id);
-      if (match) moves.sow(Number(match[1]));
-    },
-  }));
 
   const pitButton = (i: number) => {
     const canSow = playable.has(i) && G.pits[i] > 0;
@@ -75,15 +64,14 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
           role="group"
           aria-label="Mancala board"
         >
-          {store(P1_STORE, 'P1')}
+          {store(P1_STORE, relativeSeatLabel(1, playerID))}
           <div className="mancala-rows">
             <div className="mancala-row mancala-row-p1">{[12, 11, 10, 9, 8, 7].map(pitButton)}</div>
             <div className="mancala-row mancala-row-p0">{[0, 1, 2, 3, 4, 5].map(pitButton)}</div>
           </div>
-          {store(P0_STORE, 'P0')}
+          {store(P0_STORE, relativeSeatLabel(0, playerID))}
         </div>
       }
-      actions={<ActionSurface label="Mancala actions" actions={surfaceActions} />}
     />
   );
 }

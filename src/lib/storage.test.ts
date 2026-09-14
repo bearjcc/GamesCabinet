@@ -8,8 +8,10 @@ import {
   getSoloBestScore,
   getUnlockedGames,
   loadSeat,
+  SEAT_COLOUR_LABELS,
   SEAT_COLOUR_PALETTE,
   saveSeat,
+  seatColourLabel,
   setNickname,
   setSeatColour,
   setSoloBestScore,
@@ -90,6 +92,13 @@ describe('storage', () => {
   it('defaults seat colour when unset', () => {
     stubLocalStorage();
     expect(getSeatColour()).toBe(DEFAULT_SEAT_COLOUR);
+  });
+
+  it('names every palette colour so swatches are not colour-only', () => {
+    for (const colour of SEAT_COLOUR_PALETTE) {
+      expect(SEAT_COLOUR_LABELS[colour].length).toBeGreaterThan(0);
+      expect(seatColourLabel(colour)).toBe(SEAT_COLOUR_LABELS[colour]);
+    }
   });
 
   it('persists seat colour from the palette', () => {

@@ -75,3 +75,12 @@ export function actionAriaLabel(action: SemanticAction): string {
     disabledReason: action.disabledReason,
   }).ariaLabel;
 }
+
+/** Board coordinates stay off ActionSurface. Pass, roll, draw, and confirms stay. */
+export function isPewChromeAction(action: SemanticAction): boolean {
+  return action.kind !== 'move' && action.kind !== 'select';
+}
+
+export function pewChromeActions(actions: readonly SemanticAction[]): SemanticAction[] {
+  return actions.filter(isPewChromeAction);
+}

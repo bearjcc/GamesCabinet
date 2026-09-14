@@ -109,7 +109,7 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
     };
   }, [moves, playable]);
 
-  let status = 'Swipe, arrow keys, or WASD';
+  let status = 'Swipe the tiles';
   let tone: StatusTone = 'you';
   if (ctx.gameover) {
     tone = 'done';

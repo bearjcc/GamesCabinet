@@ -107,6 +107,8 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page).toHaveURL(/\/play\/hogwarts-battle/);
     await expect(page.getByTestId('hb-board')).toBeVisible();
     await expect(page.getByTestId('hb-hand')).toBeVisible();
+    await expect(page.getByTestId('hb-play-card')).toHaveCount(0);
+    await page.locator('[data-testid^="hb-hand-"]').first().click();
     await expect(page.getByTestId('hb-meta')).toContainText('Game 7');
     await expect(page.getByTestId('hb-horcruxes')).toBeVisible();
   });

@@ -165,7 +165,7 @@ These are already true in the shipped UI. Write them here so they are not redisc
 - **Seat palette is object colour.** The six hexes in `SEAT_COLOUR_PALETTE` may include hues chrome forbids (a violet pawn is fine; a violet accent is not). Colour is never the only seat signal: pair it with You / Them, a nickname, or a name once boards show seats. Launch swatches must meet `--tap-min` and must not be colour-only.
 - **Solo scores.** Play / Scores tabs only on leaderboard solos. `ScoreSubmitter` posts when a pending score appears; no submit modal. Failure is a quiet message on the scores tab.
 - **Match end is a row.** Play again / Game modes / Home via `MatchActions`. Waiting for a room is a dashed status panel, not a dialog.
-- **Letter Walker.** Default Auto is drag to slide and tap to select. Slide and Select are explicit modes. Help is an opt-in dialog. Pew: Submit, Clear, New puzzle. The U/D/L/R ring is a documented fallback, not a model for other games.
+- **Letter Walker.** Default Auto is drag to slide and tap to select. Slide and Select are explicit modes. Help is an opt-in dialog. Pew: Submit, Clear, New puzzle. No arrow ring: swipe only.
 
 ## Copy and knowledge layers
 

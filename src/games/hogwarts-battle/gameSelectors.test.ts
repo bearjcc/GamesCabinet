@@ -13,6 +13,7 @@ import {
   cardTitle,
   heroDisplayName,
   pendingChoicePlayerId,
+  resolveHandCardTap,
   turnHeadline,
   unassignedAttack,
 } from './gameSelectors';
@@ -53,7 +54,10 @@ describe('hogwarts gameSelectors', () => {
     const G = game1State();
     const handId = G.players['0']!.hand[0]!;
     expect(canPlayCard(G, '0', handId).allowed).toBe(true);
+    expect(resolveHandCardTap(G, '0', handId)).toBe('play');
     expect(canPlayCard(G, '0', 'nope').allowed).toBe(false);
+    expect(resolveHandCardTap(G, '0', 'nope')).toBe('inspect');
+    expect(resolveHandCardTap(G, '1', handId)).toBe('inspect');
     expect(canEndTurn(G, '0').allowed).toBe(true);
 
     G.players['0']!.moneyTokens = 10;

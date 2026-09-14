@@ -4,6 +4,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
+import { pewChromeActions } from '../../lib/actions';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { getChineseCheckersActions } from './actions';
 import {
@@ -101,24 +102,21 @@ export function ChineseCheckersBoard({
     },
   });
 
-  const pewActions = getChineseCheckersActions({
-    G,
-    player,
-    yourTurn,
-    selected: effectiveSelected,
-  });
+  const pewActions = pewChromeActions(
+    getChineseCheckersActions({
+      G,
+      player,
+      yourTurn,
+      selected: effectiveSelected,
+    }),
+  );
   const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
       if (action.id === 'end-hop') {
         moves.endHop();
         setSelected(null);
-        return;
       }
-      const match = /^move-to-(\d+)$/.exec(action.id);
-      if (!match || effectiveSelected === null) return;
-      moves.movePeg(effectiveSelected, Number(match[1]));
-      setSelected(null);
     },
   }));
 
@@ -166,7 +164,11 @@ export function ChineseCheckersBoard({
           })}
         </div>
       }
-      actions={<ActionSurface label="Chinese Checkers actions" actions={surfaceActions} />}
+      actions={
+        surfaceActions.length ? (
+          <ActionSurface label="Chinese Checkers actions" actions={surfaceActions} />
+        ) : undefined
+      }
     />
   );
 }

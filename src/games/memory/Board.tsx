@@ -1,16 +1,15 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { Flip } from '../../components/cinematic';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { primitiveProfile } from '../../lib/cinematic';
+import { relativeSeatLabel } from '../../lib/matchSeats';
 import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
 import { type Card, kenneyPlayingCardAsset, makeCard, type Rank } from '../shared/cards';
-import { getMemoryActions } from './actions';
 import { GRID, type MemoryCard, type MemoryState, PAIR_COUNT } from './game';
 
 const PAIR_RANKS: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8'];
@@ -76,15 +75,6 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - flip a card' },
   });
-  const pewActions = getMemoryActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^flip-(\d+)$/.exec(action.id);
-      if (match) moves.flip(Number(match[1]));
-    },
-  }));
-
   return (
     <PlayTable
       info={
@@ -92,8 +82,8 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
           <StatusBar text={status} tone={tone} />
           <MatchScoreboard
             scores={[
-              { label: 'P1', value: G.scores[0] },
-              { label: 'P2', value: G.scores[1] },
+              { label: relativeSeatLabel(0, playerID), value: G.scores[0] },
+              { label: relativeSeatLabel(1, playerID), value: G.scores[1] },
             ]}
             testId="memory-scores"
           />
@@ -115,7 +105,6 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
           })}
         </div>
       }
-      actions={<ActionSurface label="Memory actions" actions={surfaceActions} />}
     />
   );
 }

@@ -6,6 +6,7 @@ import {
   controlA11y,
   isActionInteractive,
   isActionKind,
+  pewChromeActions,
   resolveActionState,
   type SemanticAction,
 } from './actions';
@@ -79,5 +80,16 @@ describe('semantic actions', () => {
       title: undefined,
       ariaLabel: 'Drop',
     });
+  });
+
+  it('keeps pew chrome and drops board-coordinate move menus', () => {
+    const actions: SemanticAction[] = [
+      { id: 'place-3', kind: 'move', label: 'Place at d3' },
+      { id: 'select-1', kind: 'select', label: 'Select point 1' },
+      { id: 'pass', kind: 'dismiss', label: 'Pass' },
+      { id: 'roll', kind: 'roll', label: 'Roll' },
+      { id: 'end-hop', kind: 'confirm', label: 'End hop' },
+    ];
+    expect(pewChromeActions(actions).map((a) => a.id)).toEqual(['pass', 'roll', 'end-hop']);
   });
 });

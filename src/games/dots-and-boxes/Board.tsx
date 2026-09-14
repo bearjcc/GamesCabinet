@@ -1,10 +1,9 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter } from '../../components/tabletop';
+import { relativeSeatLabel } from '../../lib/matchSeats';
 import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getDotsAndBoxesActions } from './actions';
 import {
   allLineKeys,
   BOX_COLS,
@@ -52,15 +51,6 @@ export function DotsAndBoxesBoard({
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - claim a line' },
   });
-  const pewActions = getDotsAndBoxesActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^claim-(.+)$/.exec(action.id);
-      if (match) moves.claimLine(match[1]);
-    },
-  }));
-
   const width = PAD * 2 + BOX_COLS * CELL;
   const height = PAD * 2 + BOX_ROWS * CELL;
 
@@ -70,11 +60,21 @@ export function DotsAndBoxesBoard({
         <>
           <StatusBar text={status} tone={tone} />
           <div className="dab-scores" data-testid="dab-scores">
-            <Counter value={G.scores[0]} label="P1" emphasize testId="dab-score-0" />
+            <Counter
+              value={G.scores[0]}
+              label={relativeSeatLabel(0, playerID)}
+              emphasize
+              testId="dab-score-0"
+            />
             <span className="dab-scores__sep" aria-hidden="true">
               -
             </span>
-            <Counter value={G.scores[1]} label="P2" emphasize testId="dab-score-1" />
+            <Counter
+              value={G.scores[1]}
+              label={relativeSeatLabel(1, playerID)}
+              emphasize
+              testId="dab-score-1"
+            />
           </div>
         </>
       }
@@ -186,7 +186,6 @@ export function DotsAndBoxesBoard({
           </svg>
         </div>
       }
-      actions={<ActionSurface label="Dots and Boxes actions" actions={surfaceActions} />}
     />
   );
 }
