@@ -55,8 +55,9 @@ Strategy: **restrained**. Theme neutrals carry the shell; brand (or pastel/night
 
 - Shell ~42rem, tight padding.
 - Header: brand (+ title) left; trailing controls + theme cycle right; hairline rule.
-- Home: dense auto-fill game grid, then join row under a divider. Several games should fit in one viewport - collection, not storefront.
-- Navigation stays minimal (no large sidebar). Settings (nickname, default pawn colour, theme) is enough early chrome. Mode choice lives on the game launch page.
+- Home: dense auto-fill game grid, then join row under a divider. Several games should fit in one viewport - collection, not storefront. The grid is partitioned into **Solo** (`soloOnly` titles, which skip `/game/:id` and open `/play/:id`) and **With others**. Each title appears once.
+- `.main` is a compact stack (`align-content: start` if it is a grid). Do not stretch catalogue, Settings, or launch sections to fill leftover viewport height. The around-the-table launch well may be tall because seats sit around it; Settings nickname / colour / codes must not.
+- Navigation stays minimal (no large sidebar). Settings holds nickname, default seat colour, and access codes. Theme and motion intensity are cycle controls in the Shell topbar on every page (including play). That keeps the knobs reachable; whether to tuck them during play is still open (see Agency). There is no Save: nickname, colour, theme, and motion persist on change. Mode choice lives on the game launch page.
 - **Small-screen first.** Design for phone / high-magnification tablet: tap and drag. Wider screens adapt; click/drag is secondary.
 - In play: board dominates. Hand and actions stay reachable; secondary info collapses. Generous hit targets; no hover-only essentials.
 - **PlayTable** (`src/components/PlayTable.tsx`): every in-play board uses three slots - **info** (top status/HUD), **board** (fills remaining height, centered), **pew** (optional bottom hand + primary actions). Tokens: `--tap-min`, `--board-max`, `--play-gap`.
@@ -112,6 +113,10 @@ Rationale for the object/chrome split: `docs/adr/0001-ui-operating-system-layer.
 
 When keyboard or screen-reader paths need explicit intents, expose them without duplicating the primary board UX as a button grid.
 
+**Pew `ActionSurface` is optional chrome, not a required slot.** `SemanticAction` data stays outside JSX (ADR 0001) for bots, tests, and a later keyboard path. Mount `ActionSurface` only for intents that have no board object: Pass, Roll, Undo, New game, Draw, Ready, Play all, Submit, Clear. Do not enumerate coordinates (`Place at e4`, `Flip card 12`, `Sow pit 3`, `Claim line h0-0`). Chess, Connect Four, Tic-tac-toe, Checkers, and Battleship battle already follow this. Go, Memory, Mancala, Reversi, Nine Men's Morris, Chinese Checkers, Dots and Boxes, and Backgammon mid-turn currently dump move lists into the pew; that is drift, not a pattern to copy.
+
+**Intrinsic board size.** PlayTable's board slot fills leftover height and centres the board. Do not stretch a 3x3 or 2048 grid to fill a monitor, and do not invent pew buttons to occupy the empty well. The well is rest.
+
 ## Interaction guidelines
 
 These are the day-to-day rules for boards and shell. They implement the product principles without waiting for the full UI OS.
@@ -150,6 +155,17 @@ Do not ship a separate "beginner mode". Design so guidance can thin out:
 | **Hundredth** | Instant / skip available; chain effects summarise unless expanded; repetitive confirms become undo |
 
 Until the shell can infer familiarity, expose the knobs players already reach for (motion intensity, and later skip / instant). Never trap veterans in the first-hour presentation.
+
+## Recorded cabinet decisions
+
+These are already true in the shipped UI. Write them here so they are not rediscovered as accidents.
+
+- **Around-the-table launch.** Seats are spatial (north / east / south / west), not a form. Kind labels: Empty, This table, Online, Bot. The well holds the title, occupancy, the invalid reason, and Start / Host.
+- **Hidden shelves.** Access-gated titles stay out of the grid until a local code. Copy is shelf / cabinet, not entitlement or DLC.
+- **Seat palette is object colour.** The six hexes in `SEAT_COLOUR_PALETTE` may include hues chrome forbids (a violet pawn is fine; a violet accent is not). Colour is never the only seat signal: pair it with You / Them, a nickname, or a name once boards show seats. Launch swatches must meet `--tap-min` and must not be colour-only.
+- **Solo scores.** Play / Scores tabs only on leaderboard solos. `ScoreSubmitter` posts when a pending score appears; no submit modal. Failure is a quiet message on the scores tab.
+- **Match end is a row.** Play again / Game modes / Home via `MatchActions`. Waiting for a room is a dashed status panel, not a dialog.
+- **Letter Walker.** Default Auto is drag to slide and tap to select. Slide and Select are explicit modes. Help is an opt-in dialog. Pew: Submit, Clear, New puzzle. The U/D/L/R ring is a documented fallback, not a model for other games.
 
 ## Copy and knowledge layers
 
