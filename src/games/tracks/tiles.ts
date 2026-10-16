@@ -2,9 +2,9 @@
  * TRACKS tile model and deck content.
  * Rules source: 2021-05-18 "Rail Co. TRACKS Rules" email (verbatim in the vault).
  * The per-type 55-card manifest exists nowhere in readable text (it lives in the
- * unreadable 2021-07-03 docx); DECK_MANIFEST below is rules-as-data tuned to the
- * written hints: straight most common, curve second, middle bridge/tunnel rare.
+ * unreadable 2021-07-03 docx); DECK_MANIFEST is a PLACEHOLDER in placeholders.ts.
  */
+import { PLACEHOLDER_DECK_MANIFEST } from './placeholders';
 
 export type EdgeMat = 'rail' | 'bridge' | 'tunnel';
 /** One cell edge: a materialised connection or nothing. Edges are N,E,S,W order. */
@@ -108,19 +108,8 @@ export function tilePoints(tile: Tile, baseKind?: TileKind): number {
   }
 }
 
-/** Rules-as-data: per-type counts summing to one 55-card deck. */
-export const DECK_MANIFEST: { kind: TileKind; count: number; variants?: ObstacleVariant[] }[] = [
-  { kind: 'straight', count: 20 },
-  { kind: 'curve', count: 14 },
-  { kind: 'junction', count: 6 },
-  { kind: 'bridge-start', count: 2 },
-  { kind: 'bridge-mid', count: 1 },
-  { kind: 'tunnel-arch', count: 2 },
-  { kind: 'tunnel-mid', count: 1 },
-  { kind: 'town', count: 4 },
-  { kind: 'whistlestop', count: 2 },
-  { kind: 'obstacle', count: 3, variants: ['river', 'mountain', 'river'] },
-];
+/** PLACEHOLDER counts — see placeholders.ts. */
+export const DECK_MANIFEST = PLACEHOLDER_DECK_MANIFEST;
 
 export const DECK_SIZE = 55;
 

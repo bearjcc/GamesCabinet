@@ -3,7 +3,7 @@ import { type ReactNode, useState } from 'react';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import type { TracksState } from './game';
+import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
 import { type Cell, cellAt, HEIGHT, placeError, START_ROW, WIDTH } from './grid';
 import { objectiveDef } from './objectives';
 import { TileGlyph } from './TileGlyph';
@@ -13,6 +13,32 @@ function seatLabel(matchData: BoardProps['matchData'], i: number): string {
   const name = matchData?.[i]?.name;
   return name?.trim() || `P${i + 1}`;
 }
+
+/** Plain-language reasons for an illegal drop (placeError keys). */
+export const HINTS: Record<string, string> = {
+  'off-grid': 'That slot is off the board.',
+  'foreign-end-column': "You can't play in the first or last column of someone else's board.",
+  'bad-overlay': "That card can't go on top of what's there.",
+  'off-grid-connection': 'Track may only leave the board at the start or destination.',
+  'material-mismatch': 'Rail meets rail, bridge meets bridge, tunnel meets tunnel.',
+  'not-connected': 'Track must connect to the start or to track already laid.',
+  occupied: 'That slot is taken.',
+  'river-before-tunnel': "You can't put a river in front of a middle tunnel.",
+  'mountain-before-bridge': "You can't put a mountain in front of a middle bridge.",
+};
+
+const KIND_LABEL: Record<string, string> = {
+  straight: 'Straight',
+  curve: 'Curve',
+  junction: 'Junction',
+  'bridge-start': 'Land to bridge',
+  'bridge-mid': 'Middle bridge',
+  'tunnel-arch': 'Tunnel arch',
+  'tunnel-mid': 'Middle tunnel',
+  town: 'Town',
+  whistlestop: 'Whistlestop',
+  obstacle: 'Obstacle',
+};
 
 function CellView({ cell }: { cell: Cell }) {
   if (!cell) return null;
@@ -34,6 +60,7 @@ export function TracksBoard({
   moves,
   playerID,
   matchData,
+  matchID,
   isActive,
 }: BoardProps<TracksState>) {
   const pid = playerID === null || playerID === undefined ? ctx.currentPlayer : playerID;
@@ -42,23 +69,48 @@ export function TracksBoard({
   const [selected, setSelected] = useState<string | null>(null);
   const [rot, setRot] = useState(0);
   const [hint, setHint] = useState<string | null>(null);
+  // Hot-seat hand-off: hide hands until the next seat says they're ready.
+  const turnKey = `${ctx.phase}-${ctx.turn}-${ctx.currentPlayer}`;
+  const [readyFor, setReadyFor] = useState<string | null>(null);
+  // Pass-and-play matches are local-* ids; online seats never hand off.
+  const hotSeat = ctx.numPlayers > 1 && (matchID ?? '').startsWith('local-');
+  const handOff = hotSeat && !ctx.gameover && readyFor !== turnKey;
 
   const myTurn = Boolean(isActive && !ctx.gameover) && ctx.currentPlayer === pid;
   const view = G.players[viewBoard] ? viewBoard : me;
   const player = G.players[me];
   const viewed = G.players[view];
-  const selectedTile = player?.hand.find((t) => t.id === selected) ?? null;
+  const discardTopNow = G.discard[G.discard.length - 1];
+  const drawnFromDiscard =
+    G.drewFromDiscard && discardTopNow?.id === G.drawnId ? discardTopNow : null;
+  const selectedTile =
+    player?.hand.find((t) => t.id === selected) ??
+    (drawnFromDiscard && drawnFromDiscard.id === selected ? drawnFromDiscard : null);
 
+  /** Tap a card to pick it up; tap it again to turn it. */
   const pick = (id: string) => {
-    setSelected(selected === id ? null : id);
-    setRot(0);
     setHint(null);
+    if (selected === id && selectedTile) {
+      const allowed = allowedRotations(selectedTile.kind);
+      setRot(allowed[(allowed.indexOf(rot) + 1) % allowed.length]);
+      return;
+    }
+    setSelected(id);
+    setRot(0);
   };
 
-  const rotate = () => {
-    if (!selectedTile) return;
-    const allowed = allowedRotations(selectedTile.kind);
-    setRot(allowed[(allowed.indexOf(rot) + 1) % allowed.length]);
+  /** Tap the discard pile: draw from it, or (after drawing) discard the held card. */
+  const tapDiscard = () => {
+    if (!myTurn) return;
+    if (G.drawnId === null) {
+      moves.drawTile('discard');
+      return;
+    }
+    if (selectedTile && !G.drewFromDiscard) {
+      moves.discardTile(selectedTile.id);
+      setSelected(null);
+      setRot(0);
+    }
   };
 
   const tryPlace = (row: number, col: number) => {
@@ -66,7 +118,7 @@ export function TracksBoard({
     const foreign = view !== me;
     const error = placeError(viewed.board, selectedTile, row, col, rot, { foreign });
     if (error) {
-      setHint(error);
+      setHint(HINTS[error] ?? error);
       return;
     }
     moves.playTile(selectedTile.id, view, row, col, rot);
@@ -79,6 +131,7 @@ export function TracksBoard({
   let status: string;
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
   const over = ctx.gameover as { winners?: string[] } | undefined;
+  const who = seatLabel(matchData, Number(ctx.currentPlayer));
   if (over) {
     tone = 'done';
     status = over.winners?.length
@@ -87,18 +140,16 @@ export function TracksBoard({
         : `${seatLabel(matchData, Number(over.winners[0]))} wins`
       : 'Game over';
   } else if (ctx.phase === 'draft') {
-    status = myTurn
-      ? 'Choose one objective to keep'
-      : `${seatLabel(matchData, Number(ctx.currentPlayer))} is drafting…`;
+    status = myTurn ? `${who}: keep one objective` : `${who} is drafting`;
     if (myTurn) tone = 'you';
   } else if (myTurn) {
     tone = 'you';
     status =
       G.drawnId === null
-        ? 'Your turn — draw from the deck or the discard pile'
+        ? `${who}: draw from the deck${ctx.numPlayers > 1 ? ' or the discard pile' : ''}`
         : G.drewFromDiscard
-          ? 'Play the card you drew from the discard'
-          : 'Play a card or discard';
+          ? `${who}: play the card you took from the discard`
+          : `${who}: play a card, or tap the discard pile to discard it`;
   } else {
     status = `${seatLabel(matchData, Number(ctx.currentPlayer))}'s turn`;
   }
@@ -119,13 +170,40 @@ export function TracksBoard({
           })),
         ]}
       />
-      {player && player.objectives.length > 0 ? (
+      {G.players.length === 1 ? (
+        <span data-testid="tracks-solo-discards">
+          Discards {G.soloDiscards ?? 0}/{SOLO_DISCARD_LIMIT}
+        </span>
+      ) : null}
+      {!handOff && player && player.objectives.length > 0 ? (
         <ul className="tracks-objectives" data-testid="tracks-objectives">
           {player.objectives.map((id, i) => (
             <li key={`${id}-${i}`}>{objectiveDef(id).name}</li>
           ))}
         </ul>
       ) : null}
+      <details className="tracks-rules" data-testid="tracks-scoring-rules">
+        <summary>Scoring</summary>
+        <ul>
+          <li>Connected start to destination: 10.</li>
+          <li>Not connected: the column number of your furthest connected track (1–8).</li>
+          <li>Cards off your route are removed and score nothing.</li>
+          <li>
+            Straight, town, obstacle 0 · curve, junction 1 · land to bridge, tunnel arch,
+            whistlestop 2 · middle bridge or tunnel 3. A junction on a curve scores 1.
+          </li>
+          <li>Completed objectives score and are discarded; others carry over.</li>
+          {G.players.length >= 4 ? (
+            <li>
+              Bonus (4+ players): Speed Layer +5 first to connect, Land Baron +5 most filled slots.
+            </li>
+          ) : null}
+          {G.players.length === 1 ? (
+            <li>Solo: no discard draws or reshuffle; the round ends on your 5th discard.</li>
+          ) : null}
+          <li>Five rounds. Highest total wins.</li>
+        </ul>
+      </details>
     </>
   );
 
@@ -136,7 +214,7 @@ export function TracksBoard({
     board = (
       <div className="tracks-draft" data-testid="tracks-draft">
         <h3>Round {G.round} — draft an objective</h3>
-        {myTurn ? (
+        {myTurn && !handOff ? (
           <div className="tracks-draft__cards">
             {drafter.draft.map((id) => {
               const def = objectiveDef(id);
@@ -160,12 +238,11 @@ export function TracksBoard({
             })}
           </div>
         ) : (
-          <p>Waiting for {seatLabel(matchData, Number(ctx.currentPlayer))}…</p>
+          <p>Waiting for {who}</p>
         )}
       </div>
     );
   } else {
-    const discardTop = G.discard[G.discard.length - 1];
     board = (
       <div className="tracks-play">
         <div className="tracks-boardswitch" role="tablist" aria-label="Boards">
@@ -223,23 +300,30 @@ export function TracksBoard({
           </p>
         ) : null}
         <div className="tracks-hand" data-testid="tracks-hand">
-          {player?.hand.map((t) => (
+          {(handOff ? [] : (player?.hand ?? [])).map((t) => (
             <button
               key={t.id}
               type="button"
               className={`tracks-hand__card${selected === t.id ? ' is-selected' : ''}`}
               data-testid={`tracks-hand-${t.id}`}
               onClick={() => pick(t.id)}
-              disabled={!myTurn}
+              disabled={!myTurn || G.drewFromDiscard}
             >
               <TileGlyph tile={t} rot={selected === t.id ? rot : 0} />
-              <span>{t.kind}</span>
+              <span>{KIND_LABEL[t.kind]}</span>
             </button>
           ))}
-          {G.drewFromDiscard && discardTop ? (
-            <span className="tracks-hand__drawn">
-              drawn: <TileGlyph tile={discardTop} rot={0} />
-            </span>
+          {drawnFromDiscard && !handOff ? (
+            <button
+              type="button"
+              className={`tracks-hand__card tracks-hand__card--drawn${selected === drawnFromDiscard.id ? ' is-selected' : ''}`}
+              data-testid="tracks-hand-drawn"
+              onClick={() => pick(drawnFromDiscard.id)}
+              disabled={!myTurn}
+            >
+              <TileGlyph tile={drawnFromDiscard} rot={selected === drawnFromDiscard.id ? rot : 0} />
+              <span>{KIND_LABEL[drawnFromDiscard.kind]}</span>
+            </button>
           ) : null}
         </div>
       </div>
@@ -256,7 +340,7 @@ export function TracksBoard({
           className="tracks-pile"
           data-testid="tracks-draw-deck"
           onClick={() => moves.drawTile('deck')}
-          disabled={!myTurn || G.drawnId !== null}
+          disabled={handOff || !myTurn || G.drawnId !== null}
         >
           <span className="tracks-pile__deck" />
           Deck ({G.deck.length})
@@ -265,8 +349,14 @@ export function TracksBoard({
           type="button"
           className="tracks-pile"
           data-testid="tracks-draw-discard"
-          onClick={() => moves.drawTile('discard')}
-          disabled={!myTurn || G.drawnId !== null || !discardTop}
+          onClick={tapDiscard}
+          disabled={
+            handOff ||
+            !myTurn ||
+            (G.drawnId === null
+              ? !discardTop || ctx.numPlayers === 1
+              : G.drewFromDiscard || !selectedTile)
+          }
         >
           {discardTop ? (
             <TileGlyph tile={discardTop} rot={0} />
@@ -275,30 +365,25 @@ export function TracksBoard({
           )}
           Discard
         </button>
-        <button
-          type="button"
-          data-testid="tracks-rotate"
-          onClick={rotate}
-          disabled={!myTurn || !selectedTile || allowedRotations(selectedTile.kind).length < 2}
-        >
-          Rotate
-        </button>
-        <button
-          type="button"
-          data-testid="tracks-discard"
-          onClick={() => {
-            if (selectedTile) {
-              moves.discardTile(selectedTile.id);
-              setSelected(null);
-              setRot(0);
-            }
-          }}
-          disabled={!myTurn || G.drawnId === null || G.drewFromDiscard || !selectedTile}
-        >
-          Discard card
-        </button>
       </div>
     ) : null;
 
-  return <PlayTable info={info} board={board} pew={pew} />;
+  const shownBoard = handOff ? (
+    <div className="tracks-handoff" data-testid="tracks-handoff">
+      <p>Pass the device to</p>
+      <strong>{who}</strong>
+      <button
+        type="button"
+        className="tracks-handoff__ready"
+        data-testid="tracks-handoff-ready"
+        onClick={() => setReadyFor(turnKey)}
+      >
+        I'm {who}
+      </button>
+    </div>
+  ) : (
+    board
+  );
+
+  return <PlayTable info={info} board={shownBoard} pew={pew} />;
 }

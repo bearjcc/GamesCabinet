@@ -10,12 +10,14 @@ import {
   type Board,
   cellPoints,
   emptyBoard,
+  HEIGHT,
   isConnected,
   keptCells,
   placeError,
   placeTile,
   reachableFromStart,
   rightmostConnectedColumn,
+  WIDTH,
 } from './grid';
 import {
   boardMetrics,
@@ -24,7 +26,7 @@ import {
   objectiveDef,
   scoreObjective,
 } from './objectives';
-import { buildPlayerDeck, type Tile } from './tiles';
+import { allowedRotations, buildPlayerDeck, type Tile } from './tiles';
 
 export const ROUNDS = 5;
 export const HAND_SIZE = 4;
@@ -56,7 +58,14 @@ export type TracksState = {
   prepared: boolean;
   /** Distinguishes "draft not dealt yet" from "all choices made". */
   draftsDealt: boolean;
+  /** 1-player variant: cards discarded this round (round ends on the 5th). */
+  soloDiscards?: number;
 };
+
+/** 1-player variant: the round ends once you discard your 5th card. */
+export const SOLO_DISCARD_LIMIT = 5;
+
+const isSolo = (G: TracksState) => G.players.length === 1;
 
 function freshPlayer(): TracksPlayer {
   return { board: emptyBoard(), hand: [], objectives: [], draft: [] };
@@ -92,6 +101,7 @@ export function dealRound(G: TracksState, numPlayers: number, shuffle: <T>(xs: T
   G.drawnId = null;
   G.drewFromDiscard = false;
   G.draftsDealt = true;
+  G.soloDiscards = 0;
 }
 
 /** Round scoring: connection, kept card values, held objectives, bonuses. */
@@ -138,6 +148,22 @@ function endPlayTurn(
     G.lastTurns = G.lastTurns.filter((id) => id !== ctx.currentPlayer);
   }
   events.endTurn();
+}
+
+/** True when `tile` fits somewhere on any board the player may play on. */
+export function hasLegalPlacement(G: TracksState, tile: Tile, me: number): boolean {
+  return G.players.some((p, target) => {
+    for (let row = 0; row < HEIGHT; row++) {
+      for (let col = 0; col < WIDTH; col++) {
+        for (const rot of allowedRotations(tile.kind)) {
+          if (placeError(p.board, tile, row, col, rot, { foreign: target !== me }) === null) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  });
 }
 
 export const Tracks: Game<TracksState> = {
@@ -218,8 +244,19 @@ export const Tracks: Game<TracksState> = {
         drawTile: ({ G, ctx, random }, source: 'deck' | 'discard') => {
           if (G.drawnId !== null) return INVALID_MOVE;
           if (source === 'discard') {
+            // 1-player variant: "You may not draw from the discard pile."
+            if (isSolo(G)) return INVALID_MOVE;
             const top = G.discard.pop();
             if (!top) return INVALID_MOVE;
+            // TODO(Bear): the 2021 rules let you draw the discard freely; the 2023
+            // rewrite (and a 2021-06-28 note cited by earlier code) says a discard
+            // draw must be played immediately. We follow
+            // the stricter 2023 line, and only allow it when the card has a
+            // legal spot somewhere so a turn can never get stuck.
+            if (!hasLegalPlacement(G, top, Number(ctx.currentPlayer))) {
+              G.discard.push(top);
+              return INVALID_MOVE;
+            }
             G.drawnId = top.id;
             G.drewFromDiscard = true;
             // The card is in limbo until played; track it on the pile top.
@@ -227,7 +264,8 @@ export const Tracks: Game<TracksState> = {
             return;
           }
           if (G.deck.length === 0) {
-            if (G.discard.length === 0) return INVALID_MOVE;
+            // 1-player variant: "You may not shuffle the discard pile."
+            if (isSolo(G) || G.discard.length === 0) return INVALID_MOVE;
             G.deck = random.Shuffle(G.discard);
             G.discard = [];
           }
@@ -269,7 +307,9 @@ export const Tracks: Game<TracksState> = {
           placeTile(board, card, row, col, rot);
 
           const targetId = String(target);
-          if (isConnected(board) && !G.connectedOrder.includes(targetId)) {
+          // 1-player variant: connecting does not end the round; only the 5th
+          // discard does. TODO(Bear): should solo connecting end the round?
+          if (isConnected(board) && !G.connectedOrder.includes(targetId) && !isSolo(G)) {
             G.connectedOrder.push(targetId);
             if (
               G.connectedOrder.length === connectedThreshold(G.players.length) &&
@@ -289,10 +329,21 @@ export const Tracks: Game<TracksState> = {
           const idx = p.hand.findIndex((t) => t.id === cardId);
           if (idx < 0) return INVALID_MOVE;
           G.discard.push(p.hand.splice(idx, 1)[0]);
+          if (isSolo(G)) G.soloDiscards = (G.soloDiscards ?? 0) + 1;
           endPlayTurn(G, ctx, events);
         },
       },
-      endIf: ({ G }) => G.lastTurns !== null && G.lastTurns.length === 0,
+      endIf: ({ G }) => {
+        if (isSolo(G)) {
+          // TODO(Bear): rules are silent on an empty solo deck; the round ends
+          // when no card can be drawn (no reshuffle allowed in solo).
+          return (
+            (G.soloDiscards ?? 0) >= SOLO_DISCARD_LIMIT ||
+            (G.deck.length === 0 && G.drawnId === null)
+          );
+        }
+        return G.lastTurns !== null && G.lastTurns.length === 0;
+      },
       onEnd: ({ G }) => {
         scoreRound(G);
         G.round += 1;
@@ -301,6 +352,7 @@ export const Tracks: Game<TracksState> = {
         // on stale round state.
         G.lastTurns = null;
         G.draftsDealt = false;
+        G.soloDiscards = 0;
       },
     },
   },

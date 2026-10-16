@@ -135,16 +135,36 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('unlock-submit').click();
     await expect(page.getByTestId('play-start')).toBeVisible();
 
+    await page.getByTestId('table-seat-1-kind-local').click();
     await page.getByTestId('play-start').click();
     await expect(page).toHaveURL(/\/play\/tracks/);
+    // Hot-seat hand-off hides each seat's secret cards until they are ready.
+    await page.getByTestId('tracks-handoff-ready').click();
     await expect(page.getByTestId('tracks-draft')).toBeVisible();
-    // Both seats draft an objective, then the table appears.
     await page.getByTestId('tracks-draft').locator('button').first().click();
+    await page.getByTestId('tracks-handoff-ready').click();
     await page.getByTestId('tracks-draft').locator('button').first().click();
+    await page.getByTestId('tracks-handoff-ready').click();
     await expect(page.getByTestId('tracks-board')).toBeVisible();
     await expect(page.getByTestId('tracks-draw-deck')).toBeVisible();
     await page.getByTestId('tracks-draw-deck').click();
-    await expect(page.getByTestId('tracks-status')).toContainText(/play a card or discard/i);
+    await expect(page.getByTestId('tracks-status')).toContainText(/play a card/i);
+  });
+
+  test('TRACKS solo variant skips the hand-off and forbids discard draws', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('gamescabinet.unlockedGames', '["tracks"]');
+    });
+    await page.goto('/game/tracks');
+    await page.getByTestId('play-start').click();
+    await expect(page.getByTestId('tracks-handoff')).toHaveCount(0);
+    await page.getByTestId('tracks-draft').locator('button').first().click();
+    await expect(page.getByTestId('tracks-solo-discards')).toContainText('0/5');
+    await expect(page.getByTestId('tracks-draw-discard')).toBeDisabled();
+    await page.getByTestId('tracks-draw-deck').click();
+    await page.getByTestId('tracks-hand').locator('button').first().click();
+    await page.getByTestId('tracks-draw-discard').click();
+    await expect(page.getByTestId('tracks-solo-discards')).toContainText('1/5');
   });
 
   test('bad room code shows a clear error', async ({ page }) => {

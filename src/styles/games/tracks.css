@@ -248,3 +248,33 @@
   text-align: center;
   margin: 0.4rem 0 0;
 }
+
+/* Hot-seat hand-off: same footprint as the board so nothing resizes. */
+.tracks-handoff {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  min-height: 18rem;
+  text-align: center;
+}
+.tracks-handoff strong {
+  font-size: 2rem;
+}
+.tracks-handoff__ready {
+  min-height: 3rem;
+  padding: 0 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 999px;
+}
+.tracks-hand__card--drawn {
+  outline: 2px dashed var(--accent, #2f9e44);
+}
+.tracks-rules summary {
+  cursor: pointer;
+}
+.tracks-rules ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}

@@ -445,3 +445,66 @@ describe('scoreRound', () => {
     expect(g.scores).toEqual([3, 3, 1, 1]);
   });
 });
+
+describe('1-player variant', () => {
+  function solo(customize?: (G: TracksState) => void) {
+    const client = makeClient(1, customize);
+    client.moves.chooseObjective('mayor');
+    return client;
+  }
+
+  it('forbids discard draws and reshuffles', () => {
+    const client = solo((g) => {
+      g.deck = [tile('town')];
+      g.discard = [tile('straight')];
+    });
+    client.moves.drawTile('discard');
+    expect(G(client).drawnId).toBeNull();
+    expect(G(client).discard).toHaveLength(1);
+  });
+
+  it('ends the round on the 5th discard, not on connecting', () => {
+    const client = solo((g) => {
+      g.deck = Array.from({ length: 12 }, () => tile('town'));
+      g.players[0].hand = [];
+      rowRun(g.players[0].board, WIDTH - 1);
+      g.players[0].hand = [tile('straight')];
+    });
+    client.moves.drawTile('deck');
+    client.moves.playTile(G(client).players[0].hand[0].id, 0, START_ROW, WIDTH - 1, 1);
+    expect(G(client).connectedOrder).toEqual([]);
+    expect(G(client).round).toBe(1);
+    for (let i = 0; i < 4; i++) {
+      client.moves.drawTile('deck');
+      client.moves.discardTile(G(client).players[0].hand[0].id);
+    }
+    expect(G(client).soloDiscards).toBe(4);
+    expect(G(client).round).toBe(1);
+    client.moves.drawTile('deck');
+    client.moves.discardTile(G(client).players[0].hand[0].id);
+    expect(G(client).round).toBe(2);
+  });
+
+  it('ends the round when the solo deck is empty', () => {
+    const client = solo((g) => {
+      g.deck = [tile('town')];
+      g.players[0].hand = [];
+    });
+    client.moves.drawTile('deck');
+    client.moves.discardTile(G(client).players[0].hand[0].id);
+    expect(G(client).round).toBe(2);
+  });
+});
+
+describe('discard draws never strand a turn', () => {
+  it('refuses a discard draw that fits nowhere', () => {
+    const client = makeClient(2, (g) => {
+      g.discard = [tile('bridge-mid')];
+    });
+    client.moves.chooseObjective('mayor');
+    client.moves.chooseObjective('mayor');
+    client.moves.drawTile('discard');
+    expect(G(client).drawnId).toBeNull();
+    expect(G(client).discard).toHaveLength(1);
+  });
+});
