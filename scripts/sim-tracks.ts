@@ -83,8 +83,12 @@ function snapshotRound(g: TracksState): RoundSnapshot {
   return { round: g.round, connectedOrder: [...g.connectedOrder] };
 }
 
-function playGame(config: SimConfig): GameStats {
-  const client = Client({ game: makeGame(config), numPlayers: config.numPlayers, debug: false });
+function playGame(config: SimConfig, gameIndex: number): GameStats {
+  const client = Client({
+    game: { ...makeGame(config), seed: `${config.label}-${gameIndex}` },
+    numPlayers: config.numPlayers,
+    debug: false,
+  });
   client.start();
   finishDraft(client);
 
@@ -92,7 +96,7 @@ function playGame(config: SimConfig): GameStats {
   let connectionEnds = 0;
   let turnsThisRound = 0;
   let guard = 0;
-  const maxSteps = 50_000;
+  const maxSteps = config.numPlayers >= 6 ? 50_000 : 15_000;
 
   while (!client.getState()?.ctx.gameover && guard < maxSteps) {
     guard++;
@@ -204,7 +208,7 @@ for (const numPlayers of playerList) {
         discardDrawRule: '2023',
       };
       const results: GameStats[] = [];
-      for (let i = 0; i < games; i++) results.push(playGame(config));
+      for (let i = 0; i < games; i++) results.push(playGame(config, i));
       const row = aggregate(config, results);
       console.log(
         `${row.label} | ${row.completed}/${row.games} | ${row.avgFinalScore.toFixed(1)} | ${row.avgSpread.toFixed(1)} | ${row.pctRoundsViaConnection.toFixed(1)}% | ${row.avgTurnsPerRound.toFixed(1)}`,
