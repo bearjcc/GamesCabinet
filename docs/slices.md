@@ -18,7 +18,7 @@ How to add work: append a checkbox under the right section. Type, blocked-by, an
 
 ## Next (AFK, after Now)
 
-- [ ] **AFK** Seat colours on boards  
+- [x] **AFK** Seat colours on boards  
   Occupied this-table / bot seats already pick a colour at launch. Boards that can show seats should read that colour instead of ignoring it. Skip Hogwarts (hero is identity).  
   Start from `SEAT_COLOUR_PALETTE` / `src/lib/storage.ts` and which boards already show seats.
 

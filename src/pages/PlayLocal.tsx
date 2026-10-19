@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
+import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { parseHogwartsSetup } from '../games/hogwarts-battle/setup';
@@ -8,6 +9,7 @@ import { type GameId, gamesById } from '../games/registry';
 import { getGameMeta, isAccessGated, isSoloOnly, supportsLocalPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
+import { parseSeatColoursQuery } from '../lib/seatColours';
 import { getUnlockedGames } from '../lib/storage';
 
 /** Offline local match (solo or hotseat) without the lobby server. */
@@ -19,6 +21,7 @@ export function PlayLocal() {
   const [seat, setSeat] = useState('0');
 
   const seatsParam = Number(params.get('seats') || '');
+  const coloursParam = params.get('colours');
   const setupData = useMemo(
     () =>
       gameId === 'hogwarts-battle'
@@ -35,6 +38,11 @@ export function PlayLocal() {
     const requested = Number.isFinite(seatsParam) && seatsParam > 0 ? seatsParam : floor;
     return Math.min(meta.maxPlayers, Math.max(floor, requested));
   }, [meta, seatsParam]);
+
+  const seatColours = useMemo(
+    () => parseSeatColoursQuery(coloursParam, numPlayers),
+    [coloursParam, numPlayers],
+  );
 
   const Board = boards[gameId as GameId];
   const hotseat = numPlayers >= 2;
@@ -82,10 +90,12 @@ export function PlayLocal() {
           homeTo: '/',
         }}
       >
-        <LocalClient
-          playerID={hotseat ? seat : '0'}
-          matchID={`local-${gameId}-${numPlayers}-${setupData?.gameNumber ?? 0}`}
-        />
+        <SeatColoursProvider colours={seatColours}>
+          <LocalClient
+            playerID={hotseat ? seat : '0'}
+            matchID={`local-${gameId}-${numPlayers}-${setupData?.gameNumber ?? 0}`}
+          />
+        </SeatColoursProvider>
       </MatchLifecycleProvider>
     </Shell>
   );
