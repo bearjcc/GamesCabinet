@@ -1,15 +1,21 @@
+.checkers-stage {
+  position: relative;
+  width: min(100%, calc(var(--board-max) + 6rem), calc(100dvh - 8rem));
+  max-width: min(100%, calc(100dvh - 8rem));
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
 .checkers-board {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   grid-template-rows: repeat(8, minmax(0, 1fr));
-  width: min(100%, var(--board-max));
-  max-width: min(100%, calc(100dvh - 12rem));
-  aspect-ratio: 1;
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 .ck-sq {
@@ -18,7 +24,7 @@
   width: 100%;
   height: 100%;
   border: 0;
-  padding: 8%;
+  padding: 6%;
   display: grid;
   place-items: center;
   touch-action: manipulation;
@@ -44,6 +50,17 @@
   box-shadow: inset 0 0 0 3px var(--you);
 }
 
+.ck-piece {
+  width: 78%;
+  height: 78%;
+  display: grid;
+  place-items: center;
+}
+
+.ck-piece.is-dragging {
+  opacity: 0.25;
+}
+
 .ck-sq .tt-token--p0 {
   background: #c44949;
 }
@@ -52,14 +69,13 @@
   background: #2b2b2b;
 }
 
-.ck-sq .tt-token {
-  width: 72%;
-  height: 72%;
+.ck-sq .tt-token,
+.ck-piece__cinematic {
+  width: 100%;
+  height: 100%;
 }
 
 .ck-piece__cinematic {
-  width: 72%;
-  height: 72%;
   display: grid;
   place-items: center;
 }
@@ -67,4 +83,47 @@
 .ck-piece__cinematic .tt-token {
   width: 100%;
   height: 100%;
+}
+
+.ck-drag-ghost {
+  position: fixed;
+  z-index: 20;
+  width: calc(min(100vw, calc(100dvh - 8rem)) / 8 * 0.72);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgb(0 0 0 / 35%));
+}
+
+.ck-drag-ghost .tt-token {
+  width: 100%;
+  height: 100%;
+}
+
+.ck-drag-ghost .tt-token--p0 {
+  background: #c44949;
+}
+
+.ck-drag-ghost .tt-token--p1 {
+  background: #2b2b2b;
+}
+
+.play-table:has([data-testid="checkers-board"]) .play-table__info {
+  min-height: 2.75rem;
+}
+
+.match-chrome:has([data-testid="checkers-board"]) {
+  position: relative;
+}
+
+.match-chrome:has([data-testid="checkers-board"]) .match-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  margin: 0;
+  padding: 0.45rem 0.15rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border-top: 1px solid var(--line);
 }
