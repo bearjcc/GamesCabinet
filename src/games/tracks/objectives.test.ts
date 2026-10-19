@@ -7,6 +7,7 @@ import {
   comparativeIdsForState,
   initComparativeRaces,
   objectiveDef,
+  publicObjectivesForPlayers,
   recordComparativeRace,
   scoreObjective,
   scorePublicObjectives,
@@ -110,6 +111,16 @@ describe('scoreObjective', () => {
     expect(scoreObjective('inner-city', 1, boards)).toBe(0);
   });
 
+  it('adds Speed Layer and Land Baron to the public row at 4+ players', () => {
+    expect(publicObjectivesForPlayers(3)).toEqual(['longest-track', 'most-tracks']);
+    expect(publicObjectivesForPlayers(4)).toEqual([
+      'longest-track',
+      'most-tracks',
+      'speed-layer',
+      'land-baron',
+    ]);
+  });
+
   it('includes Land Baron races only at 4+ players', () => {
     expect(comparativeIdsForState([], 3)).not.toContain('land-baron');
     expect(comparativeIdsForState([], 4)).toContain('land-baron');
@@ -122,6 +133,16 @@ describe('scoreObjective', () => {
     const scores = [0, 0];
     scorePublicObjectives(['longest-track'], boards, scores, races);
     expect(scores).toEqual([5, 0]);
+  });
+
+  it('scores public Speed Layer to the first connector', () => {
+    const boards = [metrics(), metrics()];
+    const scores = [0, 0];
+    scorePublicObjectives(['speed-layer'], boards, scores, {}, 1);
+    const noConnect: number[] = [0, 0];
+    scorePublicObjectives(['speed-layer'], boards, noConnect, {}, undefined);
+    expect(noConnect).toEqual([0, 0]);
+    expect(scores).toEqual([0, 5]);
   });
 
   it('reinitialises a missing race bucket', () => {

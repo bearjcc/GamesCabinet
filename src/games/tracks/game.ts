@@ -24,8 +24,7 @@ import {
   comparativeIdsForState,
   initComparativeRaces,
   type ObjectiveId,
-  objectiveDef,
-  PUBLIC_OBJECTIVES,
+  publicObjectivesForPlayers,
   recordComparativeRace,
   scoreObjective,
   scorePublicObjectives,
@@ -105,7 +104,7 @@ export function dealRound(
     p.draft = objectiveDeck.splice(0, 2);
   }
 
-  G.publicObjectives = [...PUBLIC_OBJECTIVES];
+  G.publicObjectives = publicObjectivesForPlayers(numPlayers);
   G.objectiveRaces = initComparativeRaces(comparativeIdsForState(G.publicObjectives, numPlayers));
   G.connectedOrder = [];
   G.lastTurns = null;
@@ -143,19 +142,13 @@ export function scoreRound(G: TracksState): void {
     G.scores[i] += pts;
   });
 
-  scorePublicObjectives(G.publicObjectives, metrics, G.scores, G.objectiveRaces);
-
-  if (G.players.length >= 4) {
-    const first = G.connectedOrder[0];
-    if (first !== undefined) G.scores[Number(first)] += objectiveDef('speed-layer').points;
-    for (let i = 0; i < G.players.length; i++) {
-      const bonus = scoreObjective('land-baron', i, metrics, { races: G.objectiveRaces });
-      if (bonus > 0) G.scores[i] += bonus;
-    }
-  }
+  const connectedFirst = G.connectedOrder[0] ? Number(G.connectedOrder[0]) : undefined;
+  scorePublicObjectives(G.publicObjectives, metrics, G.scores, G.objectiveRaces, connectedFirst);
 }
 
+/** Connections needed before non-connectors take their final turns (2p: one connect). */
 function connectedThreshold(numPlayers: number): number {
+  if (numPlayers <= 2) return 1;
   return Math.min(2, numPlayers);
 }
 
@@ -211,9 +204,9 @@ export const Tracks: Game<TracksState> = {
       lastTurns: null,
       prepared: false,
       draftsDealt: false,
-      publicObjectives: [...PUBLIC_OBJECTIVES],
+      publicObjectives: publicObjectivesForPlayers(ctx.numPlayers),
       objectiveRaces: initComparativeRaces(
-        comparativeIdsForState([...PUBLIC_OBJECTIVES], ctx.numPlayers),
+        comparativeIdsForState(publicObjectivesForPlayers(ctx.numPlayers), ctx.numPlayers),
       ),
     };
   },
@@ -228,7 +221,7 @@ export const Tracks: Game<TracksState> = {
           G.connectedOrder = [];
           G.lastTurns = null;
           G.draftsDealt = true;
-          G.publicObjectives = [...PUBLIC_OBJECTIVES];
+          G.publicObjectives = publicObjectivesForPlayers(ctx.numPlayers);
           G.objectiveRaces = initComparativeRaces(
             comparativeIdsForState(G.publicObjectives, ctx.numPlayers),
           );

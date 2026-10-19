@@ -64,6 +64,12 @@ describe('placement legality', () => {
     expect(placeError(emptyBoard(), tile('whistlestop'), START_ROW, 0, 0, own)).toBeNull();
   });
 
+  it('scores a whistlestop with only the start anchor (no four-neighbour rule)', () => {
+    const board = emptyBoard();
+    placeTile(board, tile('whistlestop'), START_ROW, 0, 0);
+    expect(cellPoints(cellAt(board, START_ROW, 0))).toBe(2);
+  });
+
   it('allows a standalone whistlestop on the destination slot', () => {
     expect(placeError(emptyBoard(), tile('whistlestop'), START_ROW, WIDTH - 1, 0, own)).toBeNull();
   });

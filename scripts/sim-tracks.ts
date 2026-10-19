@@ -1,6 +1,6 @@
 /**
- * Headless TRACKS balance sim — random/greedy bots on the real rules engine.
- * Usage: npm run sim:tracks [--games=300] [--players=3]
+ * Headless TRACKS balance sim — greedy bots on the real rules engine.
+ * Usage: npm run sim:tracks [--games=500] [--players=2,3,4,6]
  */
 import { createRequire } from 'node:module';
 
@@ -8,16 +8,15 @@ const require = createRequire(import.meta.url);
 const { Client } =
   require('boardgame.io/dist/cjs/client.js') as typeof import('boardgame.io/client');
 
+import { finishDraft, playBotTurn } from '../src/games/tracks/bot';
 import { dealRound, Tracks, type TracksState } from '../src/games/tracks/game';
-import { placeError, START_ROW, WIDTH } from '../src/games/tracks/grid';
-import type { ObjectiveId } from '../src/games/tracks/objectives';
 import {
   type DeckManifestEntry,
   PLACEHOLDER_DECK_MANIFEST,
   PLACEHOLDER_DECK_MANIFEST_55,
 } from '../src/games/tracks/placeholders';
 import type { TracksSetupData } from '../src/games/tracks/setup';
-import { allowedRotations, buildPlayerDeck, type Tile } from '../src/games/tracks/tiles';
+import { buildPlayerDeck } from '../src/games/tracks/tiles';
 
 type SimConfig = TracksSetupData & {
   numPlayers: number;
@@ -26,52 +25,17 @@ type SimConfig = TracksSetupData & {
   label: string;
 };
 
-function mulberry32(seed: number) {
-  let t = seed;
-  return () => {
-    t += 0x6d2b79f5;
-    let r = Math.imul(t ^ (t >>> 15), 1 | t);
-    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-  };
-}
+type RoundSnapshot = {
+  round: number;
+  connectedOrder: string[];
+};
 
-type Placement = { target: number; row: number; col: number; rot: number; cardId: string };
-
-function legalPlacements(G: TracksState, player: number, card: Tile): Placement[] {
-  const out: Placement[] = [];
-  G.players.forEach((p, target) => {
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < WIDTH; col++) {
-        for (const rot of allowedRotations(card.kind)) {
-          if (placeError(p.board, card, row, col, rot, { foreign: target !== player }) === null) {
-            out.push({ target, row, col, rot, cardId: card.id });
-          }
-        }
-      }
-    }
-  });
-  return out;
-}
-
-function pickPlacement(rng: () => number, spots: Placement[]): Placement {
-  const greedy = spots.filter((s) => s.row === START_ROW && s.col > 0);
-  const pool = greedy.length > 0 ? greedy : spots;
-  return pool[Math.floor(rng() * pool.length)];
-}
-
-function throughDraft(client: ReturnType<typeof Client>) {
-  const g = client.getState()?.G as TracksState;
-  const n = g.players.length;
-  for (let p = 0; p < n; p++) {
-    const state = client.getState();
-    if (!state) return;
-    const me = Number(state.ctx.currentPlayer ?? 0);
-    const draft = (state.G as TracksState).players[me]?.draft[0] as ObjectiveId | undefined;
-    if (!draft) return;
-    client.moves.chooseObjective(draft);
-  }
-}
+type GameStats = {
+  scores: number[];
+  completed: boolean;
+  turnsPerRound: number[];
+  connectionEnds: number;
+};
 
 function makeGame(config: SimConfig) {
   const manifest = config.deckManifest;
@@ -105,138 +69,146 @@ function makeGame(config: SimConfig) {
   };
 }
 
-function playGames(config: SimConfig, baseSeed: number): number[][] {
-  const rows: number[][] = [];
-  const totals: number[][] = [];
-  let completed = 0;
-  const game = makeGame(config);
-  for (let i = 0; i < config.games; i++) {
-    const rng = mulberry32(baseSeed + i * 997);
-    const client = Client({ game, numPlayers: config.numPlayers, debug: false });
-    client.start();
-    throughDraft(client);
-    let guard = 0;
-    while (!client.getState()?.ctx.gameover && guard < 12000) {
-      guard++;
-      const state = client.getState();
-      if (!state) break;
-      const g = state.G as TracksState;
-      if (state.ctx.phase === 'draft') {
-        throughDraft(client);
-        continue;
-      }
-      const me = Number(state.ctx.currentPlayer);
-      const hand = g.players[me]?.hand;
-      if (!hand) break;
-      if (g.drawnId === null) {
-        if (g.deck.length > 0) {
-          client.moves.drawTile('deck');
-        } else if (g.discard.length > 0 && config.numPlayers > 1) {
-          const top = g.discard[g.discard.length - 1];
-          const spots = top ? legalPlacements(g, me, top) : [];
-          if (spots.length > 0) client.moves.drawTile('discard');
-          else break;
-        } else {
-          break;
-        }
-        continue;
-      }
-      const drawn =
-        g.drewFromDiscard && g.discard[g.discard.length - 1]?.id === g.drawnId
-          ? g.discard[g.discard.length - 1]
-          : (hand.find((t) => t.id === g.drawnId) ?? hand[0]);
-      if (!drawn) break;
-      const spots = legalPlacements(g, me, drawn);
-      if (spots.length > 0) {
-        const spot = pickPlacement(rng, spots);
-        client.moves.playTile(spot.cardId, spot.target, spot.row, spot.col, spot.rot);
-      } else if (!g.drewFromDiscard) client.moves.discardTile(drawn.id);
-      else break;
+function connectionThreshold(numPlayers: number): number {
+  if (numPlayers <= 2) return 1;
+  return Math.min(2, numPlayers);
+}
+
+function roundEndedViaConnection(snap: RoundSnapshot, numPlayers: number): boolean {
+  if (numPlayers === 1) return snap.connectedOrder.length > 0;
+  return snap.connectedOrder.length >= connectionThreshold(numPlayers);
+}
+
+function snapshotRound(g: TracksState): RoundSnapshot {
+  return { round: g.round, connectedOrder: [...g.connectedOrder] };
+}
+
+function playGame(config: SimConfig): GameStats {
+  const client = Client({ game: makeGame(config), numPlayers: config.numPlayers, debug: false });
+  client.start();
+  finishDraft(client);
+
+  const turnsPerRound: number[] = [];
+  let connectionEnds = 0;
+  let turnsThisRound = 0;
+  let guard = 0;
+  const maxSteps = 50_000;
+
+  while (!client.getState()?.ctx.gameover && guard < maxSteps) {
+    guard++;
+    const before = client.getState();
+    if (!before) break;
+    const snap = snapshotRound(before.G);
+    const phase = before.ctx.phase;
+
+    const outcome = playBotTurn(client, config.numPlayers);
+    if (outcome === 'over') break;
+    if (outcome === 'stuck') break;
+
+    const after = client.getState();
+    if (!after) break;
+    const gAfter = after.G;
+
+    if (phase === 'play') turnsThisRound++;
+
+    if (gAfter.round > snap.round) {
+      turnsPerRound.push(turnsThisRound);
+      turnsThisRound = 0;
+      if (roundEndedViaConnection(snap, config.numPlayers)) connectionEnds++;
     }
-    const final = client.getState();
-    const g = final?.G as TracksState;
-    rows.push(g.scores);
-    totals.push(g.scores);
-    if (final?.ctx.gameover) completed++;
   }
-  return { rows, totals, completed };
+
+  const final = client.getState();
+  const g = final?.G;
+  return {
+    scores: g?.scores ?? [],
+    completed: Boolean(final?.ctx.gameover),
+    turnsPerRound,
+    connectionEnds,
+  };
 }
 
-function summarise(label: string, scores: number[][], completed: number, totals: number[][]): void {
-  const spreads = scores.map((row) => Math.max(...row) - Math.min(...row));
-  const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
-  const winCounts = new Array(scores[0]?.length ?? 0).fill(0);
-  for (const row of scores) {
-    const best = Math.max(...row);
-    const winners = row.map((s, i) => (s === best ? i : -1)).filter((i) => i >= 0);
-    if (winners.length === 1) winCounts[winners[0]]++;
+type Aggregate = {
+  label: string;
+  games: number;
+  completed: number;
+  avgFinalScore: number;
+  avgSpread: number;
+  pctRoundsViaConnection: number;
+  avgTurnsPerRound: number;
+};
+
+function aggregate(config: SimConfig, results: GameStats[]): Aggregate {
+  const completed = results.filter((r) => r.completed);
+  const totals = completed.map((r) => r.scores.reduce((a, b) => a + b, 0));
+  const spreads = completed.map((r) => Math.max(...r.scores) - Math.min(...r.scores));
+  const avgFinalScore = totals.length > 0 ? totals.reduce((a, b) => a + b, 0) / totals.length : 0;
+  const avgSpread = spreads.length > 0 ? spreads.reduce((a, b) => a + b, 0) / spreads.length : 0;
+
+  let connectionRounds = 0;
+  let scoredRounds = 0;
+  let turnSum = 0;
+  for (const r of completed) {
+    connectionRounds += r.connectionEnds;
+    scoredRounds += r.turnsPerRound.length;
+    turnSum += r.turnsPerRound.reduce((a, b) => a + b, 0);
   }
-  const flatTotals = totals.flat();
-  const avgTotal = flatTotals.reduce((a, b) => a + b, 0) / flatTotals.length;
-  const std =
-    Math.sqrt(flatTotals.reduce((sum, x) => sum + (x - avgTotal) ** 2, 0) / flatTotals.length) || 0;
-  console.log(`\n${label}`);
-  console.log(`  games: ${scores.length} (${completed} reached match end)`);
-  console.log(`  avg in-game score spread (max-min): ${avgSpread.toFixed(2)}`);
-  console.log(`  avg points per seat at stop: ${avgTotal.toFixed(1)} (σ ${std.toFixed(1)})`);
-  console.log(`  seat win counts at stop: ${winCounts.join(', ')}`);
+  const pctRoundsViaConnection = scoredRounds > 0 ? (100 * connectionRounds) / scoredRounds : 0;
+  const avgTurnsPerRound = scoredRounds > 0 ? turnSum / scoredRounds : 0;
+
+  return {
+    label: config.label,
+    games: results.length,
+    completed: completed.length,
+    avgFinalScore,
+    avgSpread,
+    pctRoundsViaConnection,
+    avgTurnsPerRound,
+  };
 }
 
-function parseArg(name: string, fallback: number): number {
+function parseArg(name: string, fallback: string): string {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
-  if (!hit) return fallback;
-  const n = Number(hit.split('=')[1]);
-  return Number.isFinite(n) ? n : fallback;
+  return hit ? hit.split('=')[1] : fallback;
 }
 
-const games = parseArg('games', 300);
-const numPlayers = parseArg('players', 3);
+const games = Number(parseArg('games', '500'));
+const playerList = parseArg('players', '2,3,4,6')
+  .split(',')
+  .map((s) => Number(s.trim()))
+  .filter((n) => n >= 1);
 
-const configs: SimConfig[] = [
-  {
-    label: 'deck50 junction2',
-    numPlayers,
-    games,
-    deckManifest: PLACEHOLDER_DECK_MANIFEST,
-    junctionPoints: 2,
-    discardDrawRule: '2023',
-  },
-  {
-    label: 'deck50 junction1',
-    numPlayers,
-    games,
-    deckManifest: PLACEHOLDER_DECK_MANIFEST,
-    junctionPoints: 1,
-    discardDrawRule: '2023',
-  },
-  {
-    label: 'deck55 junction2',
-    numPlayers,
-    games,
-    deckManifest: PLACEHOLDER_DECK_MANIFEST_55,
-    junctionPoints: 2,
-    discardDrawRule: '2023',
-  },
-  {
-    label: 'deck55 junction1',
-    numPlayers,
-    games,
-    deckManifest: PLACEHOLDER_DECK_MANIFEST_55,
-    junctionPoints: 1,
-    discardDrawRule: '2023',
-  },
+const deckManifests: { label: string; manifest: DeckManifestEntry[] }[] = [
+  { label: 'deck50', manifest: PLACEHOLDER_DECK_MANIFEST },
+  { label: 'deck55', manifest: PLACEHOLDER_DECK_MANIFEST_55 },
 ];
+const junctions: (1 | 2)[] = [1, 2];
 
-console.log(`TRACKS sim — ${games} games × ${numPlayers} players per config`);
+console.log(`TRACKS sim — ${games} games × [${playerList.join(',')}] players × deck/junction grid`);
 console.log(
-  `Deck sizes: ${buildPlayerDeck(PLACEHOLDER_DECK_MANIFEST).length} vs ${buildPlayerDeck(PLACEHOLDER_DECK_MANIFEST_55).length} cards/player`,
+  `Deck sizes: ${buildPlayerDeck(PLACEHOLDER_DECK_MANIFEST).length} vs ${buildPlayerDeck(PLACEHOLDER_DECK_MANIFEST_55).length} cards/player\n`,
 );
 
-for (const config of configs) {
-  const { rows, totals, completed } = playGames(config, 42_001);
-  summarise(config.label, rows, completed, totals);
+console.log('label | completed | avgFinalScore | avgSpread | %roundsViaConnect | avgTurns/round');
+console.log('--- | --- | --- | --- | --- | ---');
+
+for (const numPlayers of playerList) {
+  for (const deck of deckManifests) {
+    for (const junctionPoints of junctions) {
+      const config: SimConfig = {
+        label: `p${numPlayers} ${deck.label} j${junctionPoints}`,
+        numPlayers,
+        games,
+        deckManifest: deck.manifest,
+        junctionPoints,
+        discardDrawRule: '2023',
+      };
+      const results: GameStats[] = [];
+      for (let i = 0; i < games; i++) results.push(playGame(config));
+      const row = aggregate(config, results);
+      console.log(
+        `${row.label} | ${row.completed}/${row.games} | ${row.avgFinalScore.toFixed(1)} | ${row.avgSpread.toFixed(1)} | ${row.pctRoundsViaConnection.toFixed(1)}% | ${row.avgTurnsPerRound.toFixed(1)}`,
+      );
+    }
+  }
 }
-
-console.log(
-  '\nManufacturing note: 55-card decks often print as one 54-card sheet + 1; 50-card mixes may need a custom sheet or a 54+ spare tray.',
-);

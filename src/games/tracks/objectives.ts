@@ -134,6 +134,13 @@ export const OBJECTIVES: ObjectiveDef[] = [
 
 export const PUBLIC_OBJECTIVES: readonly ObjectiveId[] = PUBLIC_OBJECTIVE_IDS;
 
+/** Face-up objectives for the table (Speed Layer + Land Baron join at 4+ players). */
+export function publicObjectivesForPlayers(numPlayers: number): ObjectiveId[] {
+  const ids: ObjectiveId[] = [...PUBLIC_OBJECTIVE_IDS];
+  if (numPlayers >= 4) ids.push('speed-layer', 'land-baron');
+  return ids;
+}
+
 export function buildObjectiveDeck(): ObjectiveId[] {
   const deck: ObjectiveId[] = [];
   for (const def of OBJECTIVES) {
@@ -308,8 +315,13 @@ export function scorePublicObjectives(
   metrics: BoardMetrics[],
   scores: number[],
   races: Partial<Record<ComparativeId, ComparativeRace>>,
+  connectedFirst?: number,
 ): void {
   for (const id of publicIds) {
+    if (id === 'speed-layer') {
+      if (connectedFirst !== undefined) scores[connectedFirst] += objectiveDef(id).points;
+      continue;
+    }
     const winner = winnerAmongTied(id as ComparativeId, metrics, races);
     if (winner === null) continue;
     scores[winner] += objectiveDef(id).points;

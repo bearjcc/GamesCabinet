@@ -286,13 +286,11 @@ describe('round flow and scoring', () => {
     throughDraft(client, 2);
     client.moves.drawTile('deck');
     client.moves.playTile(G(client).players[0].hand[0].id, 0, START_ROW, WIDTH - 1, 1);
-    // Player 1 cannot connect; the round only ends when both do in 2p, so
-    // player 1 connects by force of a straight run... not possible here.
-    // Instead player 1 plays their town and the wind-down never starts:
+    // Player 1 cannot connect; once player 0 connects, player 1 still gets a last turn.
     client.moves.drawTile('deck');
     client.moves.discardTile(G(client).players[1].hand[0].id);
-    expect(G(client).round).toBe(1);
-    expect(phase(client)).toBe('play');
+    expect(G(client).round).toBe(2);
+    expect(phase(client)).toBe('draft');
   });
 
   it('winds down final turns for non-connected players, skipping connectors (3p)', () => {
@@ -420,17 +418,18 @@ describe('scoreRound', () => {
     expect(g.players[0].draft.length).toBeLessThanOrEqual(2);
   });
 
-  it('awards bonus objectives only at 4+ players', () => {
+  it('awards public objectives at 4+ players', () => {
     const boards = Array.from({ length: 4 }, () => emptyBoard());
     rowRun(boards[0], WIDTH);
     rowRun(boards[1], 5);
     rowRun(boards[2], 3);
     const g = stateFor(boards, (s) => {
       s.connectedOrder = ['0'];
+      s.publicObjectives = ['longest-track', 'most-tracks', 'speed-layer', 'land-baron'];
     });
     scoreRound(g);
-    // P0: 10 + speed layer 5 + land baron (8 filled) 5 = 20.
-    expect(g.scores[0]).toBe(20);
+    // P0: 10 + four public cards (longest, most tracks, speed, land baron).
+    expect(g.scores[0]).toBe(30);
     expect(g.scores[1]).toBe(5);
     expect(g.scores[2]).toBe(3);
 

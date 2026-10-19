@@ -207,12 +207,9 @@ export function TracksBoard({
             Straight, obstacle 0 · curve 1 · junction {G.junctionPoints} · land to bridge, tunnel
             arch, whistlestop 2 · middle bridge or tunnel 3.
           </li>
+          <li>Whistlestop: 2 when legally placed (one connection is enough).</li>
           <li>Completed objectives score and are discarded; others carry over.</li>
-          {G.players.length >= 4 ? (
-            <li>
-              Bonus (4+ players): Speed Layer +5 first to connect, Land Baron +5 most filled slots.
-            </li>
-          ) : null}
+          <li>Public objectives are scored each round to the table leader.</li>
           {G.players.length === 1 ? (
             <li>
               Solo: no discard draws or reshuffle; the round ends when you connect or on your 5th
