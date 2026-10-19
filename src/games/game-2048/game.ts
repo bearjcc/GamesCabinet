@@ -19,6 +19,8 @@ export type Game2048State = {
   winPaused: boolean;
   /** Previous successful swipe states; oldest first. */
   history: Game2048Snapshot[];
+  /** States undone and available for redo; oldest first. */
+  future: Game2048Snapshot[];
 };
 
 export const HISTORY_LIMIT = 10;
@@ -127,13 +129,26 @@ export function canUndo(G: Game2048State, gameover: unknown): boolean {
   return !gameover && G.history.length > 0;
 }
 
+export function canRedo(G: Game2048State, gameover: unknown): boolean {
+  return !gameover && G.future.length > 0;
+}
+
+function snapshot(G: Game2048State): Game2048Snapshot {
+  return {
+    cells: G.cells.slice(),
+    score: G.score,
+    won: G.won,
+    winPaused: G.winPaused,
+  };
+}
+
 export const Game2048: Game<Game2048State> = {
   name: '2048',
   setup: ({ random }) => {
     const cells: (number | null)[] = Array(LEN).fill(null);
     spawn(cells, random);
     spawn(cells, random);
-    return { cells, score: 0, won: false, winPaused: false, history: [] };
+    return { cells, score: 0, won: false, winPaused: false, history: [], future: [] };
   },
   turn: { minMoves: 1, maxMoves: 1 },
   moves: {
@@ -144,6 +159,7 @@ export const Game2048: Game<Game2048State> = {
       }
       const { cells, gained, changed } = applySwipe(G.cells, dir);
       if (!changed) return INVALID_MOVE;
+      G.future = [];
       pushUndoSnapshot(G);
       G.cells = cells;
       G.score += gained;
@@ -162,11 +178,21 @@ export const Game2048: Game<Game2048State> = {
     },
     undo: ({ G, ctx }) => {
       if (ctx.gameover || G.history.length === 0) return INVALID_MOVE;
+      G.future.push(snapshot(G));
       const prev = G.history.pop()!;
       G.cells = prev.cells;
       G.score = prev.score;
       G.won = prev.won;
       G.winPaused = prev.winPaused;
+    },
+    redo: ({ G, ctx }) => {
+      if (ctx.gameover || G.future.length === 0) return INVALID_MOVE;
+      G.history.push(snapshot(G));
+      const next = G.future.pop()!;
+      G.cells = next.cells;
+      G.score = next.score;
+      G.won = next.won;
+      G.winPaused = next.winPaused;
     },
   },
   endIf: ({ G }) => {

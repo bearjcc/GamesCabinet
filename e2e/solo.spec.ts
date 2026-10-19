@@ -18,9 +18,17 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page).toHaveURL(/\/play\/2048/);
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('g2048-best')).toBeVisible();
+
+    const before = await page.getByTestId('g2048-board').innerText();
     await page.keyboard.press('ArrowLeft');
+    await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
+    await expect(page.getByTestId('g2048-score')).toBeVisible();
+
+    await page.getByTestId('g2048-help-toggle').click();
+    await expect(page.getByTestId('g2048-help')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
-    await page.getByTestId('g2048-tab-scores').click();
+
+    await page.getByTestId('g2048-scores-link').click();
     await expect(page.getByTestId('g2048-scores')).toBeVisible();
   });
 
