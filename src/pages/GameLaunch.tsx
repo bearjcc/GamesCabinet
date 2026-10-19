@@ -10,6 +10,7 @@ import {
   HOGWARTS_CAMPAIGNS,
   hogwartsPlayQuery,
 } from '../games/hogwarts-battle/setup';
+import { DEFAULT_TRACKS_SETUP, type TracksSetupData, tracksPlayQuery } from '../games/tracks/setup';
 import { getGameMeta, isAccessGated, isSoloOnly, soloPlayPath } from '../lib/games';
 import { hostRoom } from '../lib/lobby';
 import { getNickname, getUnlockedGames, setNickname } from '../lib/storage';
@@ -28,6 +29,7 @@ export function GameLaunch() {
   const [error, setError] = useState('');
   const [justUnlocked, setJustUnlocked] = useState(false);
   const [hogwartsYear, setHogwartsYear] = useState(1);
+  const [tracksSetup, setTracksSetup] = useState<TracksSetupData>(DEFAULT_TRACKS_SETUP);
   const maxSeats =
     meta?.id === 'hogwarts-battle'
       ? getHogwartsHeroIdsForYear(hogwartsYear).length
@@ -36,6 +38,7 @@ export function GameLaunch() {
 
   useEffect(() => {
     setHogwartsYear(1);
+    setTracksSetup(DEFAULT_TRACKS_SETUP);
     setTableSeats(createTableSeats(meta, 1));
   }, [meta]);
 
@@ -116,7 +119,9 @@ export function GameLaunch() {
     const query =
       meta.id === 'hogwarts-battle' && hogwartsSetup
         ? hogwartsPlayQuery(hogwartsSetup, launchPlan.seats)
-        : `?seats=${launchPlan.seats}`;
+        : meta.id === 'tracks'
+          ? tracksPlayQuery(tracksSetup, launchPlan.seats)
+          : `?seats=${launchPlan.seats}`;
     navigate(`/play/${meta.id}${query}`);
   }
 
@@ -184,6 +189,41 @@ export function GameLaunch() {
                 ))}
               </select>
             </label>
+          ) : meta.id === 'tracks' ? (
+            <div className="table-year tracks-launch-variants">
+              <label>
+                <span>Discard draw</span>
+                <select
+                  data-testid="tracks-discard-rule"
+                  value={tracksSetup.discardDrawRule}
+                  onChange={(event) =>
+                    setTracksSetup((prev) => ({
+                      ...prev,
+                      discardDrawRule: event.target.value as TracksSetupData['discardDrawRule'],
+                    }))
+                  }
+                >
+                  <option value="2023">2023 — must play immediately</option>
+                  <option value="2021">2021 — take freely</option>
+                </select>
+              </label>
+              <label>
+                <span>Junction points</span>
+                <select
+                  data-testid="tracks-junction-points"
+                  value={tracksSetup.junctionPoints}
+                  onChange={(event) =>
+                    setTracksSetup((prev) => ({
+                      ...prev,
+                      junctionPoints: Number(event.target.value) as 1 | 2,
+                    }))
+                  }
+                >
+                  <option value="2">2 (default)</option>
+                  <option value="1">1</option>
+                </select>
+              </label>
+            </div>
           ) : null
         }
         maxSeats={maxSeats}

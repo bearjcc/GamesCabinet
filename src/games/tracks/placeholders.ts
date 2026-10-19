@@ -2,24 +2,31 @@
  * TRACKS PLACEHOLDERS — values the rules never pin down.
  *
  * Every constant in this file is a stand-in until Bear supplies the real
- * number. The canonical rules (2021-05-18 "Rail Co. TRACKS Rules") only say:
- * - one 55-card deck per player; straight is "most common", curve "second
- *   most common", middle bridge / middle tunnel are "rare";
- * - objective cards: "a total of 36+ including duplicates" (no per-type count);
- * - the advanced board side has "2 obstacles" and start/destination on
- *   different rows (positions never given);
- * - "I have not yet designed the boards, or the scoring sheets";
- * - no card art survives (straight/curve art was commissioned, not in vault).
- * Change values here only; nothing else hard-codes them.
+ * number. Change values here only; nothing else hard-codes them.
  */
 import type { ObstacleVariant, TileKind } from './tiles';
 
-/** PLACEHOLDER: per-type counts in one 55-card deck (sums to 55). */
-export const PLACEHOLDER_DECK_MANIFEST: {
+export type DeckManifestEntry = {
   kind: TileKind;
   count: number;
   variants?: ObstacleVariant[];
-}[] = [
+};
+
+/** PLACEHOLDER: ~50-card deck (sim compares against PLACEHOLDER_DECK_MANIFEST_55). */
+export const PLACEHOLDER_DECK_MANIFEST: DeckManifestEntry[] = [
+  { kind: 'straight', count: 17 },
+  { kind: 'curve', count: 14 },
+  { kind: 'junction', count: 5 },
+  { kind: 'bridge-start', count: 2 },
+  { kind: 'bridge-mid', count: 1 },
+  { kind: 'tunnel-arch', count: 2 },
+  { kind: 'tunnel-mid', count: 1 },
+  { kind: 'whistlestop', count: 5 },
+  { kind: 'obstacle', count: 3, variants: ['river', 'mountain', 'river'] },
+];
+
+/** PLACEHOLDER: alternate 55-card mix for manufacturing / balance sims. */
+export const PLACEHOLDER_DECK_MANIFEST_55: DeckManifestEntry[] = [
   { kind: 'straight', count: 20 },
   { kind: 'curve', count: 14 },
   { kind: 'junction', count: 6 },
@@ -27,8 +34,7 @@ export const PLACEHOLDER_DECK_MANIFEST: {
   { kind: 'bridge-mid', count: 1 },
   { kind: 'tunnel-arch', count: 2 },
   { kind: 'tunnel-mid', count: 1 },
-  { kind: 'town', count: 4 },
-  { kind: 'whistlestop', count: 2 },
+  { kind: 'whistlestop', count: 6 },
   { kind: 'obstacle', count: 3, variants: ['river', 'mountain', 'river'] },
 ];
 
@@ -50,6 +56,9 @@ export const PLACEHOLDER_OBJECTIVE_COUNTS = {
   'speed-layer': 1,
   'land-baron': 1,
 } as const;
+
+/** Face-up comparative objectives scored each round (ticket-style public goals). */
+export const PUBLIC_OBJECTIVE_IDS = ['longest-track', 'most-tracks'] as const;
 
 /**
  * PLACEHOLDER: advanced board side. Not playable in milestone 1 — the

@@ -1,10 +1,11 @@
 /**
  * TRACKS tile model and deck content.
- * Rules source: 2021-05-18 "Rail Co. TRACKS Rules" email (verbatim in the vault).
- * The per-type 55-card manifest exists nowhere in readable text (it lives in the
- * unreadable 2021-07-03 docx); DECK_MANIFEST is a PLACEHOLDER in placeholders.ts.
  */
-import { PLACEHOLDER_DECK_MANIFEST } from './placeholders';
+import {
+  type DeckManifestEntry,
+  PLACEHOLDER_DECK_MANIFEST,
+  PLACEHOLDER_DECK_MANIFEST_55,
+} from './placeholders';
 
 export type EdgeMat = 'rail' | 'bridge' | 'tunnel';
 /** One cell edge: a materialised connection or nothing. Edges are N,E,S,W order. */
@@ -18,7 +19,6 @@ export type TileKind =
   | 'bridge-mid'
   | 'tunnel-arch'
   | 'tunnel-mid'
-  | 'town'
   | 'whistlestop'
   | 'obstacle';
 
@@ -40,8 +40,6 @@ const TILE_EDGES: Record<TileKind, [Edge, Edge, Edge, Edge]> = {
   'bridge-mid': [null, 'bridge', null, 'bridge'],
   'tunnel-arch': [null, 'tunnel', null, 'rail'],
   'tunnel-mid': [null, 'tunnel', null, 'tunnel'],
-  town: [null, null, null, null],
-  // House ruling (Bear, 2026-08): a whistlestop on a town opens all four ends.
   whistlestop: ['rail', 'rail', 'rail', 'rail'],
   obstacle: [null, null, null, null],
 };
@@ -58,7 +56,6 @@ const TILE_ROTATIONS: Record<TileKind, number[]> = {
   'bridge-mid': [0],
   'tunnel-arch': [0, 1, 2, 3],
   'tunnel-mid': [0],
-  town: [0],
   whistlestop: [0],
   obstacle: [0],
 };
@@ -78,24 +75,22 @@ export function isTrackTile(kind: TileKind): boolean {
   return TILE_EDGES[kind].some((e) => e !== null);
 }
 
-/** Overlay targets: junction on straight/curve (rule 7), middles on obstacles (rule 8). */
+/** Optional overlay targets (middles may still stack on obstacles). */
 export function overlayBaseKinds(kind: TileKind): TileKind[] | null {
-  if (kind === 'junction') return ['straight', 'curve'];
-  if (kind === 'whistlestop') return ['town'];
   if (kind === 'bridge-mid' || kind === 'tunnel-mid') return ['obstacle'];
   return null;
 }
 
-/** Card points per the scoring list; junction-on-curve is handled at scoring time. */
-export function tilePoints(tile: Tile, baseKind?: TileKind): number {
+export type TilePointOptions = { junctionPoints?: 1 | 2 };
+
+/** Card points per the scoring list; junction value is a playtest variant. */
+export function tilePoints(tile: Tile, opts: TilePointOptions = {}): number {
+  const junctionPts = opts.junctionPoints ?? 2;
   switch (tile.kind) {
     case 'curve':
       return 1;
     case 'junction':
-      // Rules contradict themselves: the scoring list says junction 1, but rule 7
-      // says "1 point for a junction on top of a curve, not 2". The specific
-      // placement rule wins: 2 on a straight, 1 on a curve.
-      return baseKind === 'curve' ? 1 : 2;
+      return junctionPts;
     case 'bridge-start':
     case 'tunnel-arch':
     case 'whistlestop':
@@ -111,12 +106,14 @@ export function tilePoints(tile: Tile, baseKind?: TileKind): number {
 /** PLACEHOLDER counts — see placeholders.ts. */
 export const DECK_MANIFEST = PLACEHOLDER_DECK_MANIFEST;
 
-export const DECK_SIZE = 55;
+export const DECK_SIZE = PLACEHOLDER_DECK_MANIFEST.reduce((n, m) => n + m.count, 0);
 
-/** One player's 55-card deck with unique ids. */
-export function buildPlayerDeck(): Tile[] {
+export const DECK_SIZE_55 = PLACEHOLDER_DECK_MANIFEST_55.reduce((n, m) => n + m.count, 0);
+
+/** One player's deck with unique ids. */
+export function buildPlayerDeck(manifest: DeckManifestEntry[] = DECK_MANIFEST): Tile[] {
   const deck: Tile[] = [];
-  for (const { kind, count, variants } of DECK_MANIFEST) {
+  for (const { kind, count, variants } of manifest) {
     for (let i = 0; i < count; i++) {
       deck.push({ id: `${kind}-${i}`, kind, variant: variants?.[i] });
     }

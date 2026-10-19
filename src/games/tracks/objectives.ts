@@ -1,8 +1,5 @@
 /**
- * TRACKS objective deck. Manifest from the 2021-07-16 "Rail Co Objectives"
- * spreadsheet image (newest; supersedes the "36+" note in the May rules).
- * Tie handling is per the sheet; Longest Track has no tie note, so it follows
- * the majority convention (no one scores on a tie).
+ * TRACKS objective deck and scoring.
  */
 import {
   type Board,
@@ -12,7 +9,7 @@ import {
   longestMaterialRun,
   reachableFromStart,
 } from './grid';
-import { PLACEHOLDER_OBJECTIVE_COUNTS } from './placeholders';
+import { PLACEHOLDER_OBJECTIVE_COUNTS, PUBLIC_OBJECTIVE_IDS } from './placeholders';
 
 export type ObjectiveId =
   | 'most-tracks'
@@ -24,11 +21,10 @@ export type ObjectiveId =
   | 'gorge-ous'
   | 'non-stop'
   | 'longest-track'
-  // Bonus objectives (4+ players, face up, one scorer per round).
   | 'speed-layer'
   | 'land-baron';
 
-export type TieRule = 'nobody' | 'both';
+export type TieRule = 'first' | 'nobody';
 
 export type ObjectiveDef = {
   id: ObjectiveId;
@@ -38,6 +34,7 @@ export type ObjectiveDef = {
   tie: TieRule;
   text: string;
   bonus?: boolean;
+  public?: boolean;
 };
 
 export const OBJECTIVES: ObjectiveDef[] = [
@@ -46,15 +43,16 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Most Tracks',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['most-tracks'],
-    tie: 'nobody',
+    tie: 'first',
     text: 'Most track cards played',
+    public: true,
   },
   {
     id: 'inner-city',
     name: 'Inner City',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['inner-city'],
-    tie: 'nobody',
+    tie: 'first',
     text: 'Most whistlestops',
   },
   {
@@ -62,15 +60,15 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Mayor',
     points: 2,
     count: PLACEHOLDER_OBJECTIVE_COUNTS.mayor,
-    tie: 'both',
-    text: '+2 per whistlestop or town',
+    tie: 'first',
+    text: '+2 per whistlestop',
   },
   {
     id: 'mountain-express',
     name: 'Mountain Express',
     points: 2,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['mountain-express'],
-    tie: 'both',
+    tie: 'first',
     text: '+2 per tunnel or bridge',
   },
   {
@@ -78,7 +76,7 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Subway',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS.subway,
-    tie: 'nobody',
+    tie: 'first',
     text: 'Most tunnel cards',
   },
   {
@@ -86,7 +84,7 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Rock Blaster',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['rock-blaster'],
-    tie: 'both',
+    tie: 'first',
     text: 'Longest tunnel',
   },
   {
@@ -94,7 +92,7 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Gorge-ous',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['gorge-ous'],
-    tie: 'both',
+    tie: 'first',
     text: 'Longest bridge',
   },
   {
@@ -102,7 +100,7 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Non-Stop',
     points: 3,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['non-stop'],
-    tie: 'both',
+    tie: 'first',
     text: 'No whistlestops',
   },
   {
@@ -110,15 +108,16 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Longest Track',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['longest-track'],
-    tie: 'nobody',
+    tie: 'first',
     text: 'Most cards in route',
+    public: true,
   },
   {
     id: 'speed-layer',
     name: 'Speed Layer',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['speed-layer'],
-    tie: 'nobody',
+    tie: 'first',
     text: 'First to connect start to destination',
     bonus: true,
   },
@@ -127,16 +126,18 @@ export const OBJECTIVES: ObjectiveDef[] = [
     name: 'Land Baron',
     points: 5,
     count: PLACEHOLDER_OBJECTIVE_COUNTS['land-baron'],
-    tie: 'nobody',
+    tie: 'first',
     text: 'Most grid slots filled',
     bonus: true,
   },
 ];
 
+export const PUBLIC_OBJECTIVES: readonly ObjectiveId[] = PUBLIC_OBJECTIVE_IDS;
+
 export function buildObjectiveDeck(): ObjectiveId[] {
   const deck: ObjectiveId[] = [];
   for (const def of OBJECTIVES) {
-    if (def.bonus) continue;
+    if (def.bonus || def.public) continue;
     for (let i = 0; i < def.count; i++) deck.push(def.id);
   }
   return deck;
@@ -152,7 +153,6 @@ export function objectiveDef(id: ObjectiveId): ObjectiveDef {
 export type BoardMetrics = {
   trackCards: number;
   whistlestops: number;
-  whistlestopsAndTowns: number;
   tunnelsAndBridges: number;
   tunnelCards: number;
   longestTunnel: number;
@@ -168,7 +168,6 @@ export function boardMetrics(board: Board): BoardMetrics {
   return {
     trackCards: counts.trackCards,
     whistlestops: counts.whistlestops,
-    whistlestopsAndTowns: counts.whistlestops + counts.towns,
     tunnelsAndBridges: counts.tunnelCards + counts.bridgeCards,
     tunnelCards: counts.tunnelCards,
     longestTunnel: longestMaterialRun(board, kept, 'tunnel'),
@@ -179,7 +178,7 @@ export function boardMetrics(board: Board): BoardMetrics {
 }
 
 /** Objectives that compare boards across players. */
-type ComparativeId =
+export type ComparativeId =
   | 'most-tracks'
   | 'inner-city'
   | 'subway'
@@ -188,7 +187,7 @@ type ComparativeId =
   | 'longest-track'
   | 'land-baron';
 
-function metricOf(id: ComparativeId, m: BoardMetrics): number {
+export function metricOf(id: ComparativeId, m: BoardMetrics): number {
   switch (id) {
     case 'most-tracks':
       return m.trackCards;
@@ -207,35 +206,112 @@ function metricOf(id: ComparativeId, m: BoardMetrics): number {
   }
 }
 
+export type ComparativeRace = { value: number; order: string[] };
+
+/** Update first-to-the-lead tracking after a board changes. */
+export function recordComparativeRace(
+  races: Partial<Record<ComparativeId, ComparativeRace>>,
+  metrics: BoardMetrics[],
+  playerId: string,
+): void {
+  const p = Number(playerId);
+  for (const id of Object.keys(races) as ComparativeId[]) {
+    const value = metricOf(id, metrics[p]);
+    if (value <= 0) continue;
+    const state = races[id] ?? { value: 0, order: [] };
+    if (value > state.value) {
+      races[id] = { value, order: [playerId] };
+    } else if (value === state.value && !state.order.includes(playerId)) {
+      state.order.push(playerId);
+      races[id] = state;
+    }
+  }
+}
+
+export function initComparativeRaces(
+  ids: ComparativeId[],
+): Partial<Record<ComparativeId, ComparativeRace>> {
+  const races: Partial<Record<ComparativeId, ComparativeRace>> = {};
+  for (const id of ids) races[id] = { value: 0, order: [] };
+  return races;
+}
+
+const ALL_COMPARATIVE: ComparativeId[] = [
+  'most-tracks',
+  'inner-city',
+  'subway',
+  'rock-blaster',
+  'gorge-ous',
+  'longest-track',
+  'land-baron',
+];
+
+export function comparativeIdsForState(
+  _publicObjectives: ObjectiveId[],
+  numPlayers: number,
+): ComparativeId[] {
+  const ids = ALL_COMPARATIVE.filter((id) => id !== 'land-baron' || numPlayers >= 4);
+  return ids;
+}
+
+function winnerAmongTied(
+  id: ComparativeId,
+  metrics: BoardMetrics[],
+  races: Partial<Record<ComparativeId, ComparativeRace>> | undefined,
+): number | null {
+  const mine = metrics.map((m) => metricOf(id, m));
+  const best = Math.max(...mine);
+  if (best <= 0) return null;
+  const tied = mine.map((v, i) => (v === best ? i : -1)).filter((i) => i >= 0);
+  if (tied.length === 1) return tied[0];
+  const order = races?.[id]?.order ?? [];
+  for (const pid of order) {
+    const i = Number(pid);
+    if (tied.includes(i)) return i;
+  }
+  return null;
+}
+
 /**
  * Score one held objective for a player given everyone's board metrics.
- * `connectedFirst` marks the Speed Layer winner (connection order recorded in
- * play). Returns 0 when the objective is not completed (it is kept instead).
+ * Returns 0 when the objective is not completed (it is kept instead).
  */
 export function scoreObjective(
   id: ObjectiveId,
   player: number,
   metrics: BoardMetrics[],
-  connectedFirst?: number,
+  opts?: {
+    connectedFirst?: number;
+    races?: Partial<Record<ComparativeId, ComparativeRace>>;
+  },
 ): number {
   const def = objectiveDef(id);
   switch (id) {
     case 'mayor':
-      return 2 * metrics[player].whistlestopsAndTowns;
+      return metrics[player].whistlestops > 0 ? 2 * metrics[player].whistlestops : 0;
     case 'mountain-express':
-      return 2 * metrics[player].tunnelsAndBridges;
+      return metrics[player].tunnelsAndBridges > 0 ? 2 * metrics[player].tunnelsAndBridges : 0;
     case 'non-stop':
       return metrics[player].whistlestops === 0 ? def.points : 0;
     case 'speed-layer':
-      return connectedFirst === player ? def.points : 0;
+      return opts?.connectedFirst === player ? def.points : 0;
     default: {
-      const mine = metricOf(id, metrics[player]);
-      if (mine === 0) return 0;
-      const best = Math.max(...metrics.map((m) => metricOf(id, m)));
-      if (mine < best) return 0;
-      const tied = metrics.filter((m) => metricOf(id, m) === best).length > 1;
-      if (tied && def.tie === 'nobody') return 0;
-      return def.points;
+      const winner = winnerAmongTied(id as ComparativeId, metrics, opts?.races);
+      return winner === player ? def.points : 0;
     }
+  }
+}
+
+/** Award public objectives to the round winner(s) of each face-up card. */
+export function scorePublicObjectives(
+  publicIds: ObjectiveId[],
+  metrics: BoardMetrics[],
+  scores: number[],
+  races: Partial<Record<ComparativeId, ComparativeRace>>,
+): void {
+  for (const id of publicIds) {
+    const winner = winnerAmongTied(id as ComparativeId, metrics, races);
+    if (winner === null) continue;
+    scores[winner] += objectiveDef(id).points;
   }
 }

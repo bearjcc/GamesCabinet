@@ -1,8 +1,5 @@
 /**
- * TRACKS (Rail Co.) - boardgame.io game. Multiplayer rules per the 2021-05-18
- * rules email with Zoe's 2021-06-28 discard-draw clarification and the
- * 2021-07-16 objective manifest. Rounds cycle draft -> play; boards reset each
- * round and all track cards reshuffle (per the end-of-round rule).
+ * TRACKS (Rail Co.) - boardgame.io game.
  */
 import type { Game } from 'boardgame.io';
 import { INVALID_MOVE } from '../invalidMove';
@@ -22,10 +19,19 @@ import {
 import {
   boardMetrics,
   buildObjectiveDeck,
+  type ComparativeId,
+  type ComparativeRace,
+  comparativeIdsForState,
+  initComparativeRaces,
   type ObjectiveId,
   objectiveDef,
+  PUBLIC_OBJECTIVES,
+  recordComparativeRace,
   scoreObjective,
+  scorePublicObjectives,
 } from './objectives';
+import type { DeckManifestEntry } from './placeholders';
+import { DEFAULT_TRACKS_SETUP, type TracksSetupData } from './setup';
 import { allowedRotations, buildPlayerDeck, type Tile } from './tiles';
 
 export const ROUNDS = 5;
@@ -34,7 +40,7 @@ export const HAND_SIZE = 4;
 export type TracksPlayer = {
   board: Board;
   hand: Tile[];
-  /** Held objectives (kept across rounds until completed). */
+  /** Secret objectives (kept across rounds until completed). */
   objectives: ObjectiveId[];
   /** This round's two-card draft, pre-choice. */
   draft: ObjectiveId[];
@@ -42,27 +48,25 @@ export type TracksPlayer = {
 
 export type TracksState = {
   deck: Tile[];
-  /** Face-up pile; only the top (last) card may be drawn. */
   discard: Tile[];
   players: TracksPlayer[];
   scores: number[];
   round: number;
-  /** Card drawn this turn; from-discard draws must be played immediately. */
   drawnId: string | null;
   drewFromDiscard: boolean;
-  /** Player ids in the order they connected this round (Speed Layer input). */
+  discardDrawRule: '2021' | '2023';
+  junctionPoints: 1 | 2;
   connectedOrder: string[];
-  /** Ids still owed a final turn once two players have connected. */
   lastTurns: string[] | null;
-  /** Test/puzzle seam: skip the round re-deal once when a board was pre-set. */
   prepared: boolean;
-  /** Distinguishes "draft not dealt yet" from "all choices made". */
   draftsDealt: boolean;
-  /** 1-player variant: cards discarded this round (round ends on the 5th). */
   soloDiscards?: number;
+  /** Face-up objectives scored each round (ticket-style public goals). */
+  publicObjectives: ObjectiveId[];
+  /** First-to-the-lead order for comparative objectives this round. */
+  objectiveRaces: Partial<Record<ComparativeId, ComparativeRace>>;
 };
 
-/** 1-player variant: the round ends once you discard your 5th card. */
 export const SOLO_DISCARD_LIMIT = 5;
 
 const isSolo = (G: TracksState) => G.players.length === 1;
@@ -72,10 +76,15 @@ function freshPlayer(): TracksPlayer {
 }
 
 /** Round setup: fresh shuffled decks, new boards, deal hands and the draft. */
-export function dealRound(G: TracksState, numPlayers: number, shuffle: <T>(xs: T[]) => T[]): void {
+export function dealRound(
+  G: TracksState,
+  numPlayers: number,
+  shuffle: <T>(xs: T[]) => T[],
+  deckManifest?: DeckManifestEntry[],
+): void {
   const all: Tile[] = [];
   for (let d = 0; d < numPlayers; d++) {
-    for (const t of buildPlayerDeck()) all.push({ ...t, id: `d${d}-${t.id}` });
+    for (const t of buildPlayerDeck(deckManifest)) all.push({ ...t, id: `d${d}-${t.id}` });
   }
   const deck = shuffle(all);
   for (const p of G.players) {
@@ -96,6 +105,8 @@ export function dealRound(G: TracksState, numPlayers: number, shuffle: <T>(xs: T
     p.draft = objectiveDeck.splice(0, 2);
   }
 
+  G.publicObjectives = [...PUBLIC_OBJECTIVES];
+  G.objectiveRaces = initComparativeRaces(comparativeIdsForState(G.publicObjectives, numPlayers));
   G.connectedOrder = [];
   G.lastTurns = null;
   G.drawnId = null;
@@ -104,17 +115,27 @@ export function dealRound(G: TracksState, numPlayers: number, shuffle: <T>(xs: T
   G.soloDiscards = 0;
 }
 
+function noteBoardChange(G: TracksState, playerIndex: number): void {
+  const metrics = G.players.map((p) => boardMetrics(p.board));
+  recordComparativeRace(G.objectiveRaces, metrics, String(playerIndex));
+}
+
 /** Round scoring: connection, kept card values, held objectives, bonuses. */
 export function scoreRound(G: TracksState): void {
   const metrics = G.players.map((p) => boardMetrics(p.board));
+  const pointOpts = { junctionPoints: G.junctionPoints };
+
   G.players.forEach((p, i) => {
     const reachable = reachableFromStart(p.board);
     const kept = keptCells(p.board, reachable);
     let pts = isConnected(p.board, reachable) ? 10 : rightmostConnectedColumn(reachable);
-    for (const k of kept) pts += cellPoints(p.board[k]);
+    for (const k of kept) pts += cellPoints(p.board[k], pointOpts);
     const remaining: ObjectiveId[] = [];
     for (const obj of p.objectives) {
-      const s = scoreObjective(obj, i, metrics);
+      const s = scoreObjective(obj, i, metrics, {
+        connectedFirst: G.connectedOrder[0] ? Number(G.connectedOrder[0]) : undefined,
+        races: G.objectiveRaces,
+      });
       if (s > 0) pts += s;
       else remaining.push(obj);
     }
@@ -122,14 +143,14 @@ export function scoreRound(G: TracksState): void {
     G.scores[i] += pts;
   });
 
-  // Bonus objectives are only used with 4 or more players.
+  scorePublicObjectives(G.publicObjectives, metrics, G.scores, G.objectiveRaces);
+
   if (G.players.length >= 4) {
     const first = G.connectedOrder[0];
     if (first !== undefined) G.scores[Number(first)] += objectiveDef('speed-layer').points;
-    const filled = metrics.map((m) => m.filled);
-    const best = Math.max(...filled);
-    if (filled.filter((f) => f === best).length === 1) {
-      G.scores[filled.indexOf(best)] += objectiveDef('land-baron').points;
+    for (let i = 0; i < G.players.length; i++) {
+      const bonus = scoreObjective('land-baron', i, metrics, { races: G.objectiveRaces });
+      if (bonus > 0) G.scores[i] += bonus;
     }
   }
 }
@@ -138,7 +159,6 @@ function connectedThreshold(numPlayers: number): number {
   return Math.min(2, numPlayers);
 }
 
-/** After a turn action: consume final turns and end the turn. */
 function endPlayTurn(
   G: TracksState,
   ctx: { currentPlayer: string },
@@ -150,7 +170,6 @@ function endPlayTurn(
   events.endTurn();
 }
 
-/** True when `tile` fits somewhere on any board the player may play on. */
 export function hasLegalPlacement(G: TracksState, tile: Tile, me: number): boolean {
   return G.players.some((p, target) => {
     for (let row = 0; row < HEIGHT; row++) {
@@ -166,22 +185,38 @@ export function hasLegalPlacement(G: TracksState, tile: Tile, me: number): boole
   });
 }
 
+function soloRoundOver(G: TracksState): boolean {
+  if ((G.soloDiscards ?? 0) >= SOLO_DISCARD_LIMIT) return true;
+  const board = G.players[0]?.board;
+  if (board && isConnected(board)) return true;
+  return G.deck.length === 0 && G.drawnId === null;
+}
+
 export const Tracks: Game<TracksState> = {
   name: 'tracks',
 
-  setup: ({ ctx }) => ({
-    deck: [],
-    discard: [],
-    players: Array.from({ length: ctx.numPlayers }, freshPlayer),
-    scores: Array(ctx.numPlayers).fill(0),
-    round: 1,
-    drawnId: null,
-    drewFromDiscard: false,
-    connectedOrder: [],
-    lastTurns: null,
-    prepared: false,
-    draftsDealt: false,
-  }),
+  setup: ({ ctx }, setupData?: TracksSetupData) => {
+    const rules = setupData ?? DEFAULT_TRACKS_SETUP;
+    return {
+      deck: [],
+      discard: [],
+      players: Array.from({ length: ctx.numPlayers }, freshPlayer),
+      scores: Array(ctx.numPlayers).fill(0),
+      round: 1,
+      drawnId: null,
+      drewFromDiscard: false,
+      discardDrawRule: rules.discardDrawRule,
+      junctionPoints: rules.junctionPoints,
+      connectedOrder: [],
+      lastTurns: null,
+      prepared: false,
+      draftsDealt: false,
+      publicObjectives: [...PUBLIC_OBJECTIVES],
+      objectiveRaces: initComparativeRaces(
+        comparativeIdsForState([...PUBLIC_OBJECTIVES], ctx.numPlayers),
+      ),
+    };
+  },
 
   phases: {
     draft: {
@@ -193,12 +228,15 @@ export const Tracks: Game<TracksState> = {
           G.connectedOrder = [];
           G.lastTurns = null;
           G.draftsDealt = true;
+          G.publicObjectives = [...PUBLIC_OBJECTIVES];
+          G.objectiveRaces = initComparativeRaces(
+            comparativeIdsForState(G.publicObjectives, ctx.numPlayers),
+          );
           return;
         }
         dealRound(G, ctx.numPlayers, (xs) => random.Shuffle(xs));
       },
       turn: {
-        // Sequential pass-and-play draft: same first player as the round.
         moveLimit: 1,
         order: {
           first: ({ G, ctx }) => (G.round - 1) % ctx.numPlayers,
@@ -211,8 +249,6 @@ export const Tracks: Game<TracksState> = {
           const i = p.draft.indexOf(id);
           if (i < 0) return INVALID_MOVE;
           p.objectives.push(id);
-          // The unchosen card is discarded into next round's objective deck
-          // (dealRound rebuilds that deck from the manifest minus held cards).
           p.draft = [];
         },
       },
@@ -223,7 +259,6 @@ export const Tracks: Game<TracksState> = {
       next: 'draft',
       turn: {
         order: {
-          // First player rotates clockwise each round.
           first: ({ G, ctx }) => (G.round - 1) % ctx.numPlayers,
           next: ({ G, ctx }) => {
             if (G.lastTurns && G.lastTurns.length > 0) {
@@ -244,27 +279,27 @@ export const Tracks: Game<TracksState> = {
         drawTile: ({ G, ctx, random }, source: 'deck' | 'discard') => {
           if (G.drawnId !== null) return INVALID_MOVE;
           if (source === 'discard') {
-            // 1-player variant: "You may not draw from the discard pile."
             if (isSolo(G)) return INVALID_MOVE;
             const top = G.discard.pop();
             if (!top) return INVALID_MOVE;
-            // TODO(Bear): the 2021 rules let you draw the discard freely; the 2023
-            // rewrite (and a 2021-06-28 note cited by earlier code) says a discard
-            // draw must be played immediately. We follow
-            // the stricter 2023 line, and only allow it when the card has a
-            // legal spot somewhere so a turn can never get stuck.
-            if (!hasLegalPlacement(G, top, Number(ctx.currentPlayer))) {
+            const strictDiscard = G.discardDrawRule === '2023';
+            if (strictDiscard && !hasLegalPlacement(G, top, Number(ctx.currentPlayer))) {
               G.discard.push(top);
               return INVALID_MOVE;
             }
+            if (strictDiscard) {
+              G.drawnId = top.id;
+              G.drewFromDiscard = true;
+              G.discard.push(top);
+              return;
+            }
+            const p = G.players[Number(ctx.currentPlayer)];
+            p.hand.push(top);
             G.drawnId = top.id;
-            G.drewFromDiscard = true;
-            // The card is in limbo until played; track it on the pile top.
-            G.discard.push(top);
+            G.drewFromDiscard = false;
             return;
           }
           if (G.deck.length === 0) {
-            // 1-player variant: "You may not shuffle the discard pile."
             if (isSolo(G) || G.discard.length === 0) return INVALID_MOVE;
             G.deck = random.Shuffle(G.discard);
             G.discard = [];
@@ -305,18 +340,18 @@ export const Tracks: Game<TracksState> = {
           if (fromDiscard) G.discard.pop();
           else p.hand.splice(idx, 1);
           placeTile(board, card, row, col, rot);
+          noteBoardChange(G, target);
 
           const targetId = String(target);
-          // 1-player variant: connecting does not end the round; only the 5th
-          // discard does. TODO(Bear): should solo connecting end the round?
-          if (isConnected(board) && !G.connectedOrder.includes(targetId) && !isSolo(G)) {
+          if (isConnected(board) && !G.connectedOrder.includes(targetId)) {
             G.connectedOrder.push(targetId);
-            if (
-              G.connectedOrder.length === connectedThreshold(G.players.length) &&
-              G.lastTurns === null
-            ) {
-              // The other players take one last turn in turn order.
-              G.lastTurns = ctx.playOrder.filter((id) => !G.connectedOrder.includes(id));
+            if (!isSolo(G)) {
+              if (
+                G.connectedOrder.length === connectedThreshold(G.players.length) &&
+                G.lastTurns === null
+              ) {
+                G.lastTurns = ctx.playOrder.filter((id) => !G.connectedOrder.includes(id));
+              }
             }
           }
           endPlayTurn(G, ctx, events);
@@ -334,22 +369,12 @@ export const Tracks: Game<TracksState> = {
         },
       },
       endIf: ({ G }) => {
-        if (isSolo(G)) {
-          // TODO(Bear): rules are silent on an empty solo deck; the round ends
-          // when no card can be drawn (no reshuffle allowed in solo).
-          return (
-            (G.soloDiscards ?? 0) >= SOLO_DISCARD_LIMIT ||
-            (G.deck.length === 0 && G.drawnId === null)
-          );
-        }
+        if (isSolo(G)) return soloRoundOver(G);
         return G.lastTurns !== null && G.lastTurns.length === 0;
       },
       onEnd: ({ G }) => {
         scoreRound(G);
         G.round += 1;
-        // boardgame.io checks a phase's endIf before its onBegin: leave both
-        // flags in their "not done" state so the next phases cannot auto-end
-        // on stale round state.
         G.lastTurns = null;
         G.draftsDealt = false;
         G.soloDiscards = 0;
@@ -360,7 +385,6 @@ export const Tracks: Game<TracksState> = {
   endIf: ({ G }) => {
     if (G.round <= ROUNDS) return;
     const best = Math.max(...G.scores);
-    // Physical tiebreak is "best train noise"; a digital tie stands shared.
     return { winners: G.scores.flatMap((s, i) => (s === best ? [String(i)] : [])) };
   },
 };

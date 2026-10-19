@@ -145,6 +145,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('tracks-handoff-ready').click();
     await page.getByTestId('tracks-draft').locator('button').first().click();
     await page.getByTestId('tracks-handoff-ready').click();
+    await expect(page.getByTestId('tracks-public-objectives')).toBeVisible();
     await expect(page.getByTestId('tracks-board')).toBeVisible();
     await expect(page.getByTestId('tracks-draw-deck')).toBeVisible();
     await page.getByTestId('tracks-draw-deck').click();
@@ -165,6 +166,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('tracks-hand').locator('button').first().click();
     await page.getByTestId('tracks-draw-discard').click();
     await expect(page.getByTestId('tracks-solo-discards')).toContainText('1/5');
+    await expect(page.getByTestId('tracks-scoring-rules')).toBeVisible();
   });
 
   test('bad room code shows a clear error', async ({ page }) => {

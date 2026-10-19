@@ -19,7 +19,6 @@ export function TileGlyph({ tile, rot = 0 }: { tile: Tile; rot?: number }) {
   return (
     <svg viewBox="0 0 40 40" className={`tracks-tile tracks-tile--${tile.kind}`} aria-hidden="true">
       <rect x="1" y="1" width="38" height="38" rx="4" className="tracks-tile__bg" />
-      {tile.kind === 'town' && <TownArt />}
       {tile.kind === 'obstacle' && <ObstacleArt variant={tile.variant} />}
       {edges.map((edge, i) =>
         edge ? (

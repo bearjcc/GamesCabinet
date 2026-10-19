@@ -52,7 +52,7 @@ describe('allowedRotations', () => {
     expect(allowedRotations('tunnel-mid')).toEqual([0]);
     expect(allowedRotations('straight')).toEqual([0, 1]);
     expect(allowedRotations('curve')).toEqual([0, 1, 2, 3]);
-    expect(allowedRotations('town')).toEqual([0]);
+    expect(allowedRotations('whistlestop')).toEqual([0]);
   });
 });
 
@@ -60,15 +60,15 @@ describe('isTrackTile', () => {
   it('separates track-bearing tiles from terrain', () => {
     expect(isTrackTile('straight')).toBe(true);
     expect(isTrackTile('bridge-mid')).toBe(true);
-    expect(isTrackTile('town')).toBe(false);
+    expect(isTrackTile('whistlestop')).toBe(true);
     expect(isTrackTile('obstacle')).toBe(false);
   });
 });
 
 describe('overlayBaseKinds', () => {
-  it('targets overlays per placement rules 7-8', () => {
-    expect(overlayBaseKinds('junction')).toEqual(['straight', 'curve']);
-    expect(overlayBaseKinds('whistlestop')).toEqual(['town']);
+  it('only stacks middles on obstacles', () => {
+    expect(overlayBaseKinds('junction')).toBeNull();
+    expect(overlayBaseKinds('whistlestop')).toBeNull();
     expect(overlayBaseKinds('bridge-mid')).toEqual(['obstacle']);
     expect(overlayBaseKinds('tunnel-mid')).toEqual(['obstacle']);
     expect(overlayBaseKinds('straight')).toBeNull();
@@ -78,7 +78,6 @@ describe('overlayBaseKinds', () => {
 describe('tilePoints', () => {
   it('scores per the printed card values', () => {
     expect(tilePoints(tile('straight'))).toBe(0);
-    expect(tilePoints(tile('town'))).toBe(0);
     expect(tilePoints(tile('obstacle'))).toBe(0);
     expect(tilePoints(tile('curve'))).toBe(1);
     expect(tilePoints(tile('bridge-start'))).toBe(2);
@@ -88,14 +87,14 @@ describe('tilePoints', () => {
     expect(tilePoints(tile('tunnel-mid'))).toBe(3);
   });
 
-  it('scores a junction by what it sits on (rule 7 wins over the scoring list)', () => {
-    expect(tilePoints(tile('junction'), 'straight')).toBe(2);
-    expect(tilePoints(tile('junction'), 'curve')).toBe(1);
+  it('scores junctions from the playtest variant', () => {
+    expect(tilePoints(tile('junction'), { junctionPoints: 2 })).toBe(2);
+    expect(tilePoints(tile('junction'), { junctionPoints: 1 })).toBe(1);
   });
 });
 
 describe('buildPlayerDeck', () => {
-  it('builds a 55-card deck with unique ids', () => {
+  it('builds a placeholder deck with unique ids', () => {
     const deck = buildPlayerDeck();
     expect(deck).toHaveLength(DECK_SIZE);
     expect(new Set(deck.map((t) => t.id)).size).toBe(DECK_SIZE);
@@ -105,11 +104,11 @@ describe('buildPlayerDeck', () => {
   it('keeps straight most common, curve second, and middles rare', () => {
     const deck = buildPlayerDeck();
     const count = (kind: Tile['kind']) => deck.filter((t) => t.kind === kind).length;
-    expect(count('straight')).toBe(20);
-    expect(count('curve')).toBe(14);
+    expect(count('straight')).toBeGreaterThan(count('curve'));
     expect(count('bridge-mid')).toBe(1);
     expect(count('tunnel-mid')).toBe(1);
     expect(count('obstacle')).toBe(3);
+    expect(count('whistlestop')).toBeGreaterThan(0);
   });
 
   it('marks obstacle variants for advanced-mode anchoring', () => {

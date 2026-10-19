@@ -38,11 +38,13 @@ function runBoard(cols: number) {
 describe('placement legality', () => {
   it('rejects off-grid slots and foreign end columns', () => {
     const board = emptyBoard();
-    expect(placeError(board, tile('town'), -1, 0, 0, own)).toBe('off-grid');
-    expect(placeError(board, tile('town'), HEIGHT, 0, 0, own)).toBe('off-grid');
-    expect(placeError(board, tile('town'), 0, WIDTH, 0, own)).toBe('off-grid');
-    expect(placeError(board, tile('town'), 0, 0, 0, foreign)).toBe('foreign-end-column');
-    expect(placeError(board, tile('town'), 0, WIDTH - 1, 0, foreign)).toBe('foreign-end-column');
+    expect(placeError(board, tile('obstacle'), -1, 0, 0, own)).toBe('off-grid');
+    expect(placeError(board, tile('obstacle'), HEIGHT, 0, 0, own)).toBe('off-grid');
+    expect(placeError(board, tile('obstacle'), 0, WIDTH, 0, own)).toBe('off-grid');
+    expect(placeError(board, tile('obstacle'), 0, 0, 0, foreign)).toBe('foreign-end-column');
+    expect(placeError(board, tile('obstacle'), 0, WIDTH - 1, 0, foreign)).toBe(
+      'foreign-end-column',
+    );
   });
 
   it('rejects stacking on non-overlay tiles', () => {
@@ -50,55 +52,58 @@ describe('placement legality', () => {
     expect(placeError(board, tile('curve'), START_ROW, 0, 0, own)).toBe('occupied');
   });
 
-  it('enforces overlay targets for junctions, whistlestops, and middles', () => {
+  it('enforces overlay targets for middles on obstacles', () => {
     const board = emptyBoard();
-    placeTile(board, tile('town'), START_ROW, 3, 0);
-    expect(placeError(board, tile('whistlestop'), START_ROW, 3, 0, own)).toBeNull();
-    expect(placeError(board, tile('junction'), START_ROW, 3, 0, own)).toBe('bad-overlay');
     placeTile(board, tile('obstacle', 'mountain'), 2, 4, 0);
     expect(placeError(board, tile('tunnel-mid'), 2, 4, 0, own)).toBe('not-connected');
-    expect(placeError(board, tile('junction'), 2, 4, 0, own)).toBe('bad-overlay');
-    expect(placeError(board, tile('whistlestop'), 2, 4, 0, own)).toBe('bad-overlay');
-    expect(placeError(board, tile('tunnel-mid'), 0, 0, 0, own)).toBe('bad-overlay');
+    const straight = runBoard(1);
+    expect(placeError(straight, tile('bridge-mid'), START_ROW, 0, 0, own)).toBe('bad-overlay');
   });
 
-  it('applies the off-grid rule to whistlestop overlays on border towns', () => {
-    const board = emptyBoard();
-    placeTile(board, tile('town'), 0, 3, 0);
-    expect(placeError(board, tile('whistlestop'), 0, 3, 0, own)).toBe('off-grid-connection');
+  it('allows a standalone whistlestop on the start slot', () => {
+    expect(placeError(emptyBoard(), tile('whistlestop'), START_ROW, 0, 0, own)).toBeNull();
   });
 
-  it('allows a whistlestop on a start-slot town (terminal edge)', () => {
-    const board = emptyBoard();
-    placeTile(board, tile('town'), START_ROW, 0, 0);
-    expect(placeError(board, tile('whistlestop'), START_ROW, 0, 0, own)).toBeNull();
+  it('allows a standalone whistlestop on the destination slot', () => {
+    expect(placeError(emptyBoard(), tile('whistlestop'), START_ROW, WIDTH - 1, 0, own)).toBeNull();
   });
 
-  it('allows a whistlestop on a destination-slot town', () => {
-    const board = emptyBoard();
-    placeTile(board, tile('town'), START_ROW, WIDTH - 1, 0);
-    expect(placeError(board, tile('whistlestop'), START_ROW, WIDTH - 1, 0, own)).toBeNull();
+  it('rejects mismatched materials at shared edges (rule 5)', () => {
+    const board = runBoard(1);
+    placeTile(board, tile('bridge-start'), START_ROW, 1, 0);
+    expect(placeError(board, tile('straight'), START_ROW, 2, 1, own)).toBe('material-mismatch');
   });
 
-  it('rejects overlays whose new edges clash with a neighbour (rule 5)', () => {
+  it('rejects a second overlay on a stacked obstacle', () => {
     const board = emptyBoard();
-    placeTile(board, tile('straight'), START_ROW, 0, 1);
-    // Bridge-start rot 1 opens a bridge edge south, facing the junction's rail.
-    placeTile(board, tile('bridge-start'), 0, 0, 1);
-    expect(placeError(board, tile('junction'), START_ROW, 0, 0, own)).toBe('material-mismatch');
+    placeTile(board, tile('obstacle', 'river'), 0, 3, 0);
+    placeTile(board, tile('tunnel-mid'), 0, 3, 0);
+    expect(placeError(board, tile('bridge-mid'), 0, 3, 0, own)).toBe('bad-overlay');
   });
 
-  it('rejects a second overlay on a stacked cell', () => {
+  it('lets obstacles land anywhere empty', () => {
     const board = emptyBoard();
-    placeTile(board, tile('town'), 0, 3, 0);
-    placeTile(board, tile('whistlestop'), 0, 3, 0);
-    expect(placeError(board, tile('junction'), 0, 3, 0, own)).toBe('bad-overlay');
+    expect(placeError(board, tile('obstacle'), 0, 4, 0, own)).toBeNull();
+    expect(placeError(board, tile('obstacle'), 0, 0, 0, foreign)).toBe('foreign-end-column');
   });
 
-  it('lets towns land anywhere empty (rule 1 applies to track cards only)', () => {
+  it('skips off-board overlay edges when the middle is anchored west', () => {
     const board = emptyBoard();
-    expect(placeError(board, tile('town'), 0, 4, 0, own)).toBeNull();
-    expect(placeError(board, tile('town'), 0, 0, 0, foreign)).toBe('foreign-end-column');
+    placeTile(board, tile('bridge-start'), START_ROW, WIDTH - 2, 0);
+    placeTile(board, tile('obstacle', 'river'), START_ROW, WIDTH - 1, 0);
+    expect(placeError(board, tile('bridge-mid'), START_ROW, WIDTH - 1, 0, own)).toBeNull();
+  });
+
+  it('rejects overlay material mismatches', () => {
+    const board = runBoard(2);
+    placeTile(board, tile('obstacle', 'river'), START_ROW, 2, 0);
+    expect(placeError(board, tile('bridge-mid'), START_ROW, 2, 0, own)).toBe('material-mismatch');
+  });
+
+  it('allows middle bridges on empty cells when they connect', () => {
+    const board = emptyBoard();
+    placeTile(board, tile('bridge-start'), START_ROW, 2, 0);
+    expect(placeError(board, tile('bridge-mid'), START_ROW, 3, 0, own)).toBeNull();
   });
 
   it('requires track cards to connect to the rail or a terminal (rule 1)', () => {
@@ -135,7 +140,7 @@ describe('placement legality', () => {
   it('allows track edges to face empty slots and blank edges', () => {
     const board = runBoard(1);
     expect(placeError(board, tile('curve'), START_ROW, 1, 2, own)).toBeNull();
-    placeTile(board, tile('town'), 0, 1, 0);
+    placeTile(board, tile('obstacle'), 0, 1, 0);
     expect(placeError(board, tile('curve'), START_ROW, 1, 3, own)).toBeNull();
     expect(cellAt(board, START_ROW, 1)).toBeNull();
   });
@@ -193,7 +198,6 @@ describe('connectivity', () => {
 
   it('routes through whistlestops and junctions', () => {
     const board = emptyBoard();
-    placeTile(board, tile('town'), START_ROW, 0, 0);
     placeTile(board, tile('whistlestop'), START_ROW, 0, 0);
     placeTile(board, tile('straight'), START_ROW, 1, 1);
     const seen = reachableFromStart(board);
@@ -245,23 +249,19 @@ describe('keptCells pruning', () => {
 });
 
 describe('scoring helpers', () => {
-  it('scores kept cells with overlay values and junction-on-curve', () => {
-    const town = cellAt(buildTown(), 0, 0);
-    expect(cellPoints(town)).toBe(2);
+  it('scores the visible card with junction variant points', () => {
     const board = emptyBoard();
-    placeTile(board, tile('curve'), 0, 0, 0);
-    placeTile(board, tile('junction'), 0, 0, 0);
-    expect(cellPoints(cellAt(board, 0, 0))).toBe(2); // curve 1 + junction-on-curve 1
-    const straightJ = emptyBoard();
-    placeTile(straightJ, tile('straight'), 0, 0, 0);
-    placeTile(straightJ, tile('junction'), 0, 0, 0);
-    expect(cellPoints(cellAt(straightJ, 0, 0))).toBe(2); // straight 0 + junction 2
+    placeTile(board, tile('whistlestop'), START_ROW, 0, 0);
+    expect(cellPoints(cellAt(board, START_ROW, 0))).toBe(2);
+    const run = runBoard(1);
+    placeTile(run, tile('junction'), START_ROW, 1, 0);
+    expect(cellPoints(cellAt(run, START_ROW, 1), { junctionPoints: 1 })).toBe(1);
+    expect(cellPoints(cellAt(run, START_ROW, 1), { junctionPoints: 2 })).toBe(2);
     expect(cellPoints(null)).toBe(0);
   });
 
-  it('counts whistlestops, towns, tunnels, bridges, and track cards over kept cells', () => {
+  it('counts whistlestops, tunnels, bridges, and track cards over kept cells', () => {
     const board = emptyBoard();
-    placeTile(board, tile('town'), START_ROW, 0, 0);
     placeTile(board, tile('whistlestop'), START_ROW, 0, 0);
     placeTile(board, tile('bridge-start'), START_ROW, 1, 0);
     placeTile(board, tile('obstacle', 'river'), START_ROW, 2, 0);
@@ -270,7 +270,6 @@ describe('scoring helpers', () => {
     const counts = boardCounts(board, kept);
     expect(counts).toEqual({
       whistlestops: 1,
-      towns: 1,
       tunnelCards: 0,
       bridgeCards: 2,
       trackCards: 3,
@@ -291,7 +290,6 @@ describe('scoring helpers', () => {
   it('counts filled slots for Land Baron', () => {
     const board = emptyBoard();
     expect(filledSlots(board)).toBe(0);
-    placeTile(board, tile('town'), 0, 0, 0);
     placeTile(board, tile('whistlestop'), 0, 0, 0);
     expect(filledSlots(board)).toBe(1);
   });
@@ -312,10 +310,3 @@ describe('scoring helpers', () => {
     expect(longestMaterialRun(board, kept, 'bridge')).toBe(1);
   });
 });
-
-function buildTown() {
-  const board = emptyBoard();
-  placeTile(board, tile('town'), 0, 0, 0);
-  placeTile(board, tile('whistlestop'), 0, 0, 0);
-  return board;
-}

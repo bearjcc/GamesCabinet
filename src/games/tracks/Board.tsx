@@ -35,7 +35,6 @@ const KIND_LABEL: Record<string, string> = {
   'bridge-mid': 'Middle bridge',
   'tunnel-arch': 'Tunnel arch',
   'tunnel-mid': 'Middle tunnel',
-  town: 'Town',
   whistlestop: 'Whistlestop',
   obstacle: 'Obstacle',
 };
@@ -175,10 +174,26 @@ export function TracksBoard({
           Discards {G.soloDiscards ?? 0}/{SOLO_DISCARD_LIMIT}
         </span>
       ) : null}
+      {G.publicObjectives.length > 0 ? (
+        <ul
+          className="tracks-objectives tracks-objectives--public"
+          data-testid="tracks-public-objectives"
+        >
+          {G.publicObjectives.map((id) => (
+            <li key={id}>
+              <span className="tracks-objectives__tag">Public</span>
+              {objectiveDef(id).name}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {!handOff && player && player.objectives.length > 0 ? (
-        <ul className="tracks-objectives" data-testid="tracks-objectives">
+        <ul className="tracks-objectives tracks-objectives--secret" data-testid="tracks-objectives">
           {player.objectives.map((id, i) => (
-            <li key={`${id}-${i}`}>{objectiveDef(id).name}</li>
+            <li key={`${id}-${i}`}>
+              <span className="tracks-objectives__tag">Secret</span>
+              {objectiveDef(id).name}
+            </li>
           ))}
         </ul>
       ) : null}
@@ -189,8 +204,8 @@ export function TracksBoard({
           <li>Not connected: the column number of your furthest connected track (1–8).</li>
           <li>Cards off your route are removed and score nothing.</li>
           <li>
-            Straight, town, obstacle 0 · curve, junction 1 · land to bridge, tunnel arch,
-            whistlestop 2 · middle bridge or tunnel 3. A junction on a curve scores 1.
+            Straight, obstacle 0 · curve 1 · junction {G.junctionPoints} · land to bridge, tunnel
+            arch, whistlestop 2 · middle bridge or tunnel 3.
           </li>
           <li>Completed objectives score and are discarded; others carry over.</li>
           {G.players.length >= 4 ? (
@@ -199,8 +214,16 @@ export function TracksBoard({
             </li>
           ) : null}
           {G.players.length === 1 ? (
-            <li>Solo: no discard draws or reshuffle; the round ends on your 5th discard.</li>
+            <li>
+              Solo: no discard draws or reshuffle; the round ends when you connect or on your 5th
+              discard.
+            </li>
           ) : null}
+          {G.discardDrawRule === '2021' ? (
+            <li>Discard draw (2021): take the top discard freely; play or discard any card.</li>
+          ) : (
+            <li>Discard draw (2023): a discard draw must be played immediately.</li>
+          )}
           <li>Five rounds. Highest total wins.</li>
         </ul>
       </details>
@@ -244,7 +267,7 @@ export function TracksBoard({
     );
   } else {
     board = (
-      <div className="tracks-play">
+      <div className="tracks-play" data-testid="tracks-play-surface">
         <div className="tracks-boardswitch" role="tablist" aria-label="Boards">
           {G.players.map((_, i) => (
             <button

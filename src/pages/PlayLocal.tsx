@@ -5,6 +5,7 @@ import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { parseHogwartsSetup } from '../games/hogwarts-battle/setup';
 import { type GameId, gamesById } from '../games/registry';
+import { parseTracksSetup } from '../games/tracks/setup';
 import { getGameMeta, isAccessGated, isSoloOnly, supportsLocalPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
@@ -19,13 +20,15 @@ export function PlayLocal() {
   const [seat, setSeat] = useState('0');
 
   const seatsParam = Number(params.get('seats') || '');
-  const setupData = useMemo(
-    () =>
-      gameId === 'hogwarts-battle'
-        ? parseHogwartsSetup(params.get('year'), params.get('heroes'))
-        : undefined,
-    [gameId, params],
-  );
+  const setupData = useMemo(() => {
+    if (gameId === 'hogwarts-battle') {
+      return parseHogwartsSetup(params.get('year'), params.get('heroes'));
+    }
+    if (gameId === 'tracks') {
+      return parseTracksSetup(params.get('discard'), params.get('junction'));
+    }
+    return undefined;
+  }, [gameId, params]);
   const numPlayers = useMemo(() => {
     if (!meta) return 1;
     if (isSoloOnly(meta)) return 1;
@@ -84,7 +87,11 @@ export function PlayLocal() {
       >
         <LocalClient
           playerID={hotseat ? seat : '0'}
-          matchID={`local-${gameId}-${numPlayers}-${setupData?.gameNumber ?? 0}`}
+          matchID={`local-${gameId}-${numPlayers}-${
+            gameId === 'hogwarts-battle' && setupData && 'gameNumber' in setupData
+              ? setupData.gameNumber
+              : 0
+          }`}
         />
       </MatchLifecycleProvider>
     </Shell>
