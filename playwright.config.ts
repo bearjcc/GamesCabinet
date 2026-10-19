@@ -1,7 +1,18 @@
+import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 const port = Number(process.env.PORT) || 8000;
 const baseURL = `http://127.0.0.1:${port}`;
+
+const systemChrome = [
+  process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+  '/usr/bin/google-chrome-stable',
+  '/usr/bin/google-chrome',
+].find((path) => path && existsSync(path));
+
+const chromiumUse = systemChrome
+  ? { ...devices['Desktop Chrome'], channel: 'chrome' as const }
+  : { ...devices['Desktop Chrome'] };
 
 export default defineConfig({
   testDir: 'e2e',
@@ -14,7 +25,7 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [{ name: 'chromium', use: chromiumUse }],
   webServer: {
     command: 'npx tsx server/index.ts',
     url: baseURL,

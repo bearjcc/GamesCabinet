@@ -58,7 +58,7 @@ export function withHotseatSeatSync(
       prevPlayerRef.current = current;
       const timer = window.setTimeout(() => onSeat(current), HOTSEAT_TURN_HOLD_MS);
       return () => window.clearTimeout(timer);
-    }, [takeSeat, playerID, ctx.currentPlayer, onSeat]);
+    }, [takeSeat, playerID, ctx.currentPlayer]);
 
     const isActive = !ctx.gameover && effectivePlayerID === ctx.currentPlayer;
 

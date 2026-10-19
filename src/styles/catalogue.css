@@ -119,6 +119,7 @@
   border-radius: var(--radius-lg);
   background: var(--surface-2);
   text-align: center;
+  pointer-events: none;
 }
 
 .table-spot-0 {
@@ -175,6 +176,13 @@
 
 .table-spot:nth-child(n + 5) {
   grid-column: 1 / -1;
+}
+
+.table-spot-piece,
+.table-spot-kind,
+.table-spot-hero,
+.table-spot-kind-hook {
+  pointer-events: auto;
 }
 
 .table-spot-piece {

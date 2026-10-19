@@ -25,6 +25,24 @@ export async function readRoomCode(page: Page): Promise<string> {
   return (await page.getByTestId('room-code').innerText()).trim();
 }
 
+export async function setTableSeatKind(
+  page: Page,
+  index: number,
+  kind: 'local' | 'bot' | 'online',
+): Promise<void> {
+  const spot = page.getByTestId(`table-seat-${index}`);
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const current = await spot.getAttribute('data-seat-kind');
+    if (current === kind) return;
+    if (current === 'empty') {
+      await page.getByTestId(`table-seat-${index}-piece`).click();
+      continue;
+    }
+    await page.getByTestId(`table-seat-${index}-kind`).click();
+  }
+  throw new Error(`Could not set seat ${index} to ${kind}`);
+}
+
 export async function pickHogwartsHero(
   page: Page,
   seatIndex: number,

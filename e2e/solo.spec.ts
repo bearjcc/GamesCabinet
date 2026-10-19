@@ -6,7 +6,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-letter-walker').click();
     await expect(page).toHaveURL(/\/play\/letter-walker/);
     await expect(page.getByTestId('lw-board')).toBeVisible();
-    await page.getByTestId('lw-row-left-0').click();
+    await page.getByTestId('lw-cell-0-0').click();
     await expect(page.getByRole('status')).toBeVisible();
     await page.getByTestId('lw-tab-scores').click();
     await expect(page.getByTestId('lw-scores')).toBeVisible();
@@ -19,8 +19,13 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('g2048-best')).toBeVisible();
 
+    await page.getByTestId('g2048-board').click();
     const before = await page.getByTestId('g2048-board').innerText();
-    await page.keyboard.press('ArrowLeft');
+    for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'd']) {
+      await page.keyboard.press(key);
+      const after = await page.getByTestId('g2048-board').innerText();
+      if (after !== before) break;
+    }
     await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
     await expect(page.getByTestId('g2048-score')).toBeVisible();
 

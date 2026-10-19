@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('tic-tac-toe pass and play reaches a local board', async ({ page }) => {
@@ -24,10 +25,10 @@ test.describe('GamesCabinet smokes', () => {
     await page.goto('/game/hogwarts-battle');
     await expect(page.getByTestId('table-seat-0')).toBeVisible();
 
-    await page.getByTestId('table-seat-1-kind-local').click();
-    await page.getByTestId('hogwarts-year').selectOption('7');
-    await page.getByTestId('hogwarts-hero-0').selectOption('neville');
-    await page.getByTestId('hogwarts-hero-1').selectOption('harry');
+    await setTableSeatKind(page, 1, 'local');
+    await page.getByTestId('hogwarts-year-7').click();
+    await pickHogwartsHero(page, 0, 'Neville Longbottom');
+    await pickHogwartsHero(page, 1, 'Harry Potter');
     await page.getByTestId('play-start').click();
 
     await expect(page.getByTestId('hb-meta')).toContainText('Game 7');

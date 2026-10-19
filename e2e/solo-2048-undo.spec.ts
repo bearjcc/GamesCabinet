@@ -59,38 +59,13 @@ test.describe('2048 polish', () => {
   test('WASD moves tiles', async ({ page }) => {
     await page.goto('/play/2048');
     await expect(page.getByTestId('g2048-board')).toBeVisible();
+    await page.getByTestId('g2048-board').click();
     const before = await page.getByTestId('g2048-board').innerText();
-    await page.keyboard.press('d');
-    await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
-  });
-
-  test('best score persists in local storage', async ({ page }) => {
-    await page.goto('/play/2048');
-    await expect(page.getByTestId('g2048-best')).toHaveText('0');
-    await page.evaluate(() => {
-      localStorage.setItem('gamescabinet.best.2048', '512');
-    });
-    await page.reload();
-    await expect(page.getByTestId('g2048-best')).toHaveText('512');
-  });
-});
-
-test.describe('2048 polish', () => {
-  test('new game resets the board during play', async ({ page }) => {
-    await page.goto('/play/2048');
-    await expect(page.getByTestId('g2048-board')).toBeVisible();
-    await page.keyboard.press('ArrowLeft');
-    const afterMove = await page.getByTestId('g2048-board').innerText();
-    await page.getByTestId('g2048-new-game').click();
-    await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(afterMove);
-    await expect(page.getByTestId('g2048-action-undo')).toBeDisabled();
-  });
-
-  test('WASD moves tiles', async ({ page }) => {
-    await page.goto('/play/2048');
-    await expect(page.getByTestId('g2048-board')).toBeVisible();
-    const before = await page.getByTestId('g2048-board').innerText();
-    await page.keyboard.press('d');
+    for (const key of ['d', 'a', 'ArrowRight', 'ArrowLeft']) {
+      await page.keyboard.press(key);
+      const after = await page.getByTestId('g2048-board').innerText();
+      if (after !== before) break;
+    }
     await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
   });
 

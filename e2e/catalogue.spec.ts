@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { pickHogwartsHero } from './helpers';
+import { pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
@@ -56,8 +56,8 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('play-start')).toBeEnabled();
     await expect(page.getByTestId('host-room')).toHaveCount(0);
 
-    await page.getByTestId('table-seat-0-kind-online').click();
-    await page.getByTestId('table-seat-1-kind-online').click();
+    await setTableSeatKind(page, 0, 'online');
+    await setTableSeatKind(page, 1, 'online');
     await expect(page.getByTestId('host-room')).toBeEnabled();
   });
 
@@ -99,7 +99,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('unlock-code').fill('LUNALOVEGOOD');
     await page.getByTestId('unlock-submit').click();
     await expect(page.getByTestId('play-start')).toBeVisible();
-    await page.getByTestId('table-seat-1-kind-local').click();
+    await setTableSeatKind(page, 1, 'local');
     await page.getByTestId('hogwarts-year-7').click();
 
     await pickHogwartsHero(page, 0, 'Neville Longbottom');
@@ -126,7 +126,8 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('hogwarts-year-1')).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('TRACKS shelf unlocks and drafts into a playable table', async ({ page }) => {
+  // Needs cursor/tracks-rules-m1 (excluded from this integration).
+  test.skip('TRACKS shelf unlocks and drafts into a playable table', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('home-game-tracks')).toHaveCount(0);
 

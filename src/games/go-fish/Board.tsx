@@ -4,7 +4,7 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, StockPile } from '../../components/tabletop';
 import { useMatchStatus } from '../../lib/useMatchStatus';
-import { kenneyPlayingCardAsset, type Rank } from '../shared/cards';
+import { kenneyPlayingCardAsset } from '../shared/cards';
 import { canAsk, canDraw, type GoFishState, opponentOf } from './game';
 
 export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoFishState>) {
