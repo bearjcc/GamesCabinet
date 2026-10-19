@@ -83,6 +83,11 @@ a:focus-visible {
 
 .topbar-start {
   justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
 }
 
 .topbar-center {
@@ -125,6 +130,13 @@ a:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.shell-back {
+  flex-shrink: 0;
+  min-height: var(--tap-min);
+  padding-inline: 0.55rem;
+  font-size: 0.88rem;
 }
 
 .topbar-right {

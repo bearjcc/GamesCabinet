@@ -43,6 +43,7 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
@@ -56,6 +57,18 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
                 ? [{ label: 'Fishing', value: G.pendingFishRank }]
                 : []),
             ]}
+            rules={{
+              summary: 'How points work',
+              body: (
+                <>
+                  <p>Collect four-of-a-kind books by asking opponents for ranks you hold.</p>
+                  <p>
+                    When the stock runs out, the most books wins. Book counts above are sets
+                    completed.
+                  </p>
+                </>
+              ),
+            }}
             testId="go-fish-meta"
           />
         </>

@@ -10,11 +10,12 @@ const APP_TITLE = 'GamesCabinet';
 export function Shell({
   title,
   children,
-  backTo = '/',
+  backTo,
   trailing,
 }: {
   title?: string;
   children: ReactNode;
+  /** Separate back control — the brand mark always navigates home. */
   backTo?: string;
   trailing?: ReactNode;
 }) {
@@ -25,18 +26,25 @@ export function Shell({
   return (
     <div className="shell">
       <header className="topbar">
-        <Link to={backTo} className="brand topbar-start" aria-label="GamesCabinet home">
-          <img
-            className="brand-mark"
-            src="/brand/gamescabinet-mark.png"
-            width={24}
-            height={24}
-            alt=""
-          />
-          {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
-        </Link>
+        <div className="topbar-start">
+          <Link to="/" className="brand" data-testid="shell-home" aria-label="GamesCabinet home">
+            <img
+              className="brand-mark"
+              src="/brand/gamescabinet-mark.png"
+              width={24}
+              height={24}
+              alt=""
+            />
+            {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
+          </Link>
+          {backTo ? (
+            <Link to={backTo} className="btn ghost shell-back" data-testid="shell-back">
+              Back
+            </Link>
+          ) : null}
+        </div>
         {title ? (
-          <h1 className="page-title">{title}</h1>
+          <h1 className="page-title topbar-center">{title}</h1>
         ) : (
           <div className="topbar-center" aria-hidden="true" />
         )}

@@ -109,7 +109,7 @@ test.describe('GamesCabinet smokes', () => {
     await expect(hostPage.getByTestId('ce-board')).toBeVisible();
 
     await playCrazyEightsTurn(hostPage);
-    await expect(guestPage.locator('.status')).toContainText(/Your turn/i, { timeout: 30_000 });
+    await expect(guestPage.locator('.status')).toContainText(/'s turn/i, { timeout: 30_000 });
 
     await close();
   });

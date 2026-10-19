@@ -18,6 +18,8 @@ export function SoloLeaderboardShell({
   actions,
   onSubmitted,
   onError,
+  felt = false,
+  reservePew = false,
 }: {
   gameId: string;
   pendingSubmit?: SubmitScoreInput | null;
@@ -28,6 +30,8 @@ export function SoloLeaderboardShell({
   board: ReactNode;
   pew?: ReactNode;
   actions?: ReactNode;
+  felt?: boolean;
+  reservePew?: boolean;
   onSubmitted?: () => void;
   onError?: (message: string) => void;
 }) {
@@ -42,6 +46,8 @@ export function SoloLeaderboardShell({
         onError={onError}
       />
       <PlayTable
+        felt={felt}
+        reservePew={reservePew}
         info={
           <>
             {info}

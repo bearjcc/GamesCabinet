@@ -164,7 +164,7 @@ export function PlayOnline() {
   }
 
   return (
-    <Shell title={meta.name} backTo="/">
+    <Shell title={meta.name} backTo={`/game/${gameId}`}>
       <RoomBar gameId={gameId} matchID={seat.matchID} onLeave={() => void exitHome()} busy={busy} />
       {error ? (
         <p className="error" role="alert">

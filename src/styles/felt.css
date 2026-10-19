@@ -1,0 +1,34 @@
+:root {
+  --felt-green: #1f6b3a;
+  --felt-green-deep: #174f2b;
+  --felt-bg:
+    radial-gradient(circle at 18% 12%, rgb(255 255 255 / 6%), transparent 38%),
+    radial-gradient(circle at 82% 88%, rgb(0 0 0 / 14%), transparent 42%),
+    linear-gradient(160deg, var(--felt-green), var(--felt-green-deep));
+}
+
+.shell:has(.play-table--felt) {
+  background: var(--felt-bg);
+}
+
+.shell:has(.play-table--felt) .main {
+  background: transparent;
+}
+
+.play-table--felt .play-table__board {
+  background: transparent;
+}
+
+.play-table--felt .play-table__pew {
+  background: color-mix(in srgb, var(--surface-2) 88%, rgb(0 0 0 / 18%));
+  border-top-color: color-mix(in srgb, var(--line) 70%, rgb(0 0 0 / 25%));
+}
+
+.play-table--felt .status {
+  background: color-mix(in srgb, var(--surface-2) 90%, rgb(0 0 0 / 12%));
+}
+
+.play-table--felt .score-rules__toggle,
+.play-table--felt .score-rules__body {
+  background: color-mix(in srgb, var(--surface) 92%, rgb(0 0 0 / 10%));
+}

@@ -6,6 +6,7 @@ export function PlayTable({
   board,
   pew,
   actions,
+  felt = false,
   reservePew = false,
 }: {
   info: ReactNode;
@@ -13,13 +14,19 @@ export function PlayTable({
   pew?: ReactNode;
   /** Sticky thumb-zone for shared ActionSurface (or equivalent). */
   actions?: ReactNode;
+  /** Page background is the felt table; no inner panel behind cards/tiles. */
+  felt?: boolean;
   /** Reserve pew height so actions appearing never shrink the board. */
   reservePew?: boolean;
 }) {
   const showPewBody = pew != null;
   const reserveActions = reservePew || actions != null;
   const showPew = showPewBody || reserveActions;
-  const className = ['play-table', reservePew ? 'play-table--reserve-pew' : '']
+  const className = [
+    'play-table',
+    felt ? 'play-table--felt' : '',
+    reservePew ? 'play-table--reserve-pew' : '',
+  ]
     .filter(Boolean)
     .join(' ');
 

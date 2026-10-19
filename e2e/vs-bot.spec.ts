@@ -63,13 +63,12 @@ test.describe('GamesCabinet smokes', () => {
     await expect(again).toBeVisible({ timeout: 15_000 });
     await again.click();
     await expect(page.getByTestId('ttt-board')).toBeVisible();
-    await expect(page.getByRole('status')).toContainText(/Your turn/i);
-
+    await expect(page.getByRole('status')).toContainText(/X's turn/i);
     await page.getByTestId('ttt-cell-4').click();
-    await expect(page.getByRole('status')).toContainText(/Their turn/i);
+    await expect(page.getByRole('status')).toContainText(/O's turn/i);
     // While the bot thinks, human must not be able to fill every square.
     await expect(page.getByTestId('ttt-cell-0')).toBeDisabled();
-    await expect(page.getByRole('status')).toContainText(/Your turn/i, { timeout: 15_000 });
+    await expect(page.getByRole('status')).toContainText(/X's turn/i, { timeout: 15_000 });
     const botMarks = page.locator('[data-testid^="ttt-cell-"]', { hasText: 'O' });
     await expect(botMarks).toHaveCount(1);
   });
