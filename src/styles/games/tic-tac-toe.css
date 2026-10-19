@@ -34,3 +34,8 @@
 .ttt-cell:disabled:not(.is-open) {
   cursor: default;
 }
+
+.ttt-cell.is-winning {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
+}

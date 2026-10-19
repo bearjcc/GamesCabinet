@@ -3,7 +3,7 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getGoActions } from './actions';
 import { type GoState, legalPlaces, SIZE } from './game';
 
@@ -15,7 +15,7 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
 
   const black = G.cells.filter((c) => c === '0').length + G.captures[0];
   const white = G.cells.filter((c) => c === '1').length + G.captures[1];
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: {
       yourTurn: `Your turn (${black}-${white})`,

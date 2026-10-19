@@ -11,7 +11,7 @@ import { Snap } from '../../components/cinematic';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
 import { placementForEnd, playableEndIndexes } from './game';
@@ -83,7 +83,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
 
   const litEnds = drag ? dragChoices : endChoices;
 
-  const { text: baseStatus, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: baseStatus, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
   });
   let status = baseStatus;

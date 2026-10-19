@@ -7,8 +7,8 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { primitiveProfile } from '../../lib/cinematic';
-import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { type Card, kenneyPlayingCardAsset, makeCard, type Rank } from '../shared/cards';
 import { getMemoryActions } from './actions';
 import { GRID, type MemoryCard, type MemoryState, PAIR_COUNT } from './game';
@@ -72,7 +72,7 @@ function MemoryCell({ index, card, can, onFlip }: MemoryCellProps) {
 
 export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<MemoryState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - flip a card' },
   });

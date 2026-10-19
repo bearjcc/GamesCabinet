@@ -13,17 +13,19 @@
   display: grid;
   place-items: center;
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
   pointer-events: none;
 }
 
 .g2048-win-title {
   margin: 0;
-  padding: 0.5rem 1rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--brand-yellow) 85%, var(--surface));
-  color: var(--brand-umber);
-  font-weight: 700;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .g2048-scores {
@@ -66,10 +68,7 @@
 
 @keyframes g2048-pop {
   0% {
-    transform: scale(0.82);
-  }
-  45% {
-    transform: scale(1.06);
+    transform: scale(0.92);
   }
   100% {
     transform: scale(1);

@@ -5,7 +5,7 @@ import { Roll } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { DieFace, Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { asDieFaceValue } from '../shared/dice';
 import { KENNEY_LADDER, KENNEY_SNAKE } from '../shared/tokens';
 import { getSnakesAndLaddersActions } from './actions';
@@ -31,7 +31,7 @@ export function SnakesAndLaddersBoard({
   isActive,
 }: BoardProps<SnakesAndLaddersState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - roll the die' },
   });

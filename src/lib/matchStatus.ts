@@ -29,7 +29,16 @@ export type DeriveMatchStatusOptions = {
   isYourTurn?: boolean;
   /** Lobby / seat-fill gate before play starts. */
   waiting?: boolean;
+  /**
+   * Named seats (pass-and-play): "{name}'s turn" / "{name} wins" instead of you/their.
+   */
+  seatLabel?: (playerId: string) => string;
 };
+
+/** Default pass-and-play seat label when matchData has no nickname. */
+export function defaultSeatLabel(playerId: string): string {
+  return `Player ${Number(playerId) + 1}`;
+}
 
 const DEFAULT_LABELS: MatchStatusLabels = {
   waiting: 'Waiting…',
@@ -58,6 +67,9 @@ export function deriveMatchStatus(
       return { text: labels.draw, tone: 'done' };
     }
     const winner = typeof over.winner === 'string' ? over.winner : undefined;
+    if (options?.seatLabel && winner != null) {
+      return { text: `${options.seatLabel(winner)} wins`, tone: 'done' };
+    }
     if (playerID != null && winner === playerID) {
       return { text: labels.youWin, tone: 'done' };
     }
@@ -69,6 +81,14 @@ export function deriveMatchStatus(
   }
 
   const yourTurn = options?.isYourTurn ?? (playerID != null && playerID === ctx.currentPlayer);
+
+  if (options?.seatLabel) {
+    const name = options.seatLabel(ctx.currentPlayer);
+    return {
+      text: `${name}'s turn`,
+      tone: yourTurn ? 'you' : 'wait',
+    };
+  }
 
   if (yourTurn) {
     return { text: labels.yourTurn, tone: 'you' };

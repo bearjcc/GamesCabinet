@@ -4,7 +4,7 @@ import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, StockPile } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { kenneyPlayingCardAsset, type Rank } from '../shared/cards';
 import { getGoFishActions } from './actions';
 import { canDraw, type GoFishState, opponentOf } from './game';
@@ -21,7 +21,7 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
   if (G.pendingFishRank != null) yourTurnLabel = 'Go fish - draw from the stock';
   else if (hand.length === 0 && G.stock.length > 0) yourTurnLabel = 'Your turn - draw a card';
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: yourTurnLabel },
   });

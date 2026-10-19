@@ -1,19 +1,28 @@
 import type { BoardProps } from 'boardgame.io/react';
+import { useMemo } from 'react';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { controlA11y } from '../../lib/actions';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
+import { nInARowWinningIndices } from '../shared/grid';
 import { squareMarkState } from './actions';
 import type { TTTState } from './game';
 
 const marks = ['X', 'O'] as const;
+const SIZE = 3;
 
 export function TicTacToeBoard({ G, ctx, moves, playerID, isActive }: BoardProps<TTTState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn — tap a square' },
   });
+  const winningCells = useMemo(() => {
+    if (!ctx.gameover) return null;
+    const over = ctx.gameover as { draw?: boolean };
+    if (over.draw) return null;
+    return nInARowWinningIndices(G.cells, { rows: SIZE, cols: SIZE, n: SIZE });
+  }, [ctx.gameover, G.cells]);
 
   return (
     <PlayTable
@@ -39,7 +48,7 @@ export function TicTacToeBoard({ G, ctx, moves, playerID, isActive }: BoardProps
               <button
                 key={i}
                 type="button"
-                className={`ttt-cell${enabled ? ' is-open' : ''}`}
+                className={`ttt-cell${enabled ? ' is-open' : ''}${winningCells?.includes(i) ? ' is-winning' : ''}`}
                 disabled={!enabled}
                 data-testid={`ttt-cell-${i}`}
                 data-disabled-reason={a11y.title}

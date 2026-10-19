@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { KENNEY_HIT, KENNEY_MISS, KENNEY_SUNK } from '../shared/tokens';
 import { getBattleshipActions } from './actions';
 import {
@@ -50,7 +50,7 @@ export function BattleshipBoard({
   const ownShipCells = new Set(own.ships.flatMap((s) => s.cells));
   const nextId = phase === 'setup' ? nextShipId(own) : null;
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: {
       yourTurn:

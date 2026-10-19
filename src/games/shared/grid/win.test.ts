@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { idx } from './coords';
-import { nInARowWinner } from './win';
+import { nInARowWinner, nInARowWinningIndices } from './win';
 
 describe('nInARowWinner', () => {
   it('finds three-in-a-row on a 3x3 board (tic-tac-toe lines)', () => {
@@ -46,5 +46,11 @@ describe('nInARowWinner', () => {
     const cells = Array(9).fill(null) as (string | null)[];
     cells[0] = cells[1] = '0';
     expect(nInARowWinner(cells, { rows: 3, cols: 3, n: 3 })).toBeNull();
+  });
+
+  it('returns winning cell indices for overlays', () => {
+    const row = Array(9).fill(null) as (string | null)[];
+    row[0] = row[1] = row[2] = '0';
+    expect(nInARowWinningIndices(row, { rows: 3, cols: 3, n: 3 })).toEqual([0, 1, 2]);
   });
 });
