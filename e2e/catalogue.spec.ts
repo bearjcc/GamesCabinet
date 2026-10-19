@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('GamesCabinet smokes', () => {
   test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Games', level: 1 })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'GamesCabinet home' })).toBeVisible();
     await expect(page.getByTestId('catalogue-group-solo')).toBeVisible();
     await expect(page.getByTestId('catalogue-group-with-others')).toBeVisible();
     await expect(
@@ -42,9 +42,9 @@ test.describe('GamesCabinet smokes', () => {
     await page.goto('/');
     const motion = page.getByTestId('motion-cycle');
     await expect(motion).toBeVisible();
-    const before = await motion.innerText();
+    const before = await motion.getAttribute('aria-label');
     await motion.click();
-    await expect(motion).not.toHaveText(before);
+    await expect(motion).not.toHaveAttribute('aria-label', before ?? '');
   });
 
   test('game launch arranges seats around one start action', async ({ page }) => {
@@ -99,7 +99,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('unlock-submit').click();
     await expect(page.getByTestId('play-start')).toBeVisible();
     await page.getByTestId('table-seat-1-kind-local').click();
-    await page.getByTestId('hogwarts-year').selectOption('7');
+    await page.getByTestId('hogwarts-year-7').click();
 
     await page.getByTestId('hogwarts-hero-0').selectOption('neville');
     await page.getByTestId('hogwarts-hero-1').selectOption('harry');
@@ -115,14 +115,14 @@ test.describe('GamesCabinet smokes', () => {
     await page.goto('/game/hogwarts-battle');
     await page.getByTestId('unlock-code').fill('LUNALOVEGOOD');
     await page.getByTestId('unlock-submit').click();
-    await page.getByTestId('hogwarts-year').selectOption('7');
-    await expect(page.getByTestId('hogwarts-year')).toHaveValue('7');
+    await page.getByTestId('hogwarts-year-7').click();
+    await expect(page.getByTestId('hogwarts-year-7')).toHaveAttribute('aria-checked', 'true');
 
     await page.goto('/game/dominoes');
     await expect(page.getByTestId('launch-modes')).toBeVisible();
 
     await page.goto('/game/hogwarts-battle');
-    await expect(page.getByTestId('hogwarts-year')).toHaveValue('1');
+    await expect(page.getByTestId('hogwarts-year-1')).toHaveAttribute('aria-checked', 'true');
   });
 
   test('TRACKS shelf unlocks and drafts into a playable table', async ({ page }) => {

@@ -170,20 +170,31 @@ export function GameLaunch() {
         }
         centreContent={
           meta.id === 'hogwarts-battle' ? (
-            <label className="table-year">
-              <span>Year</span>
-              <select
-                data-testid="hogwarts-year"
-                onChange={(event) => changeHogwartsYear(Number(event.target.value))}
-                value={hogwartsYear}
-              >
+            <div className="table-year-strip">
+              <span className="table-year-label">Year</span>
+              <div className="table-year-chips" role="radiogroup" aria-label="Campaign year">
                 {HOGWARTS_CAMPAIGNS.map((campaign) => (
-                  <option key={campaign.number} value={campaign.number}>
-                    Year {campaign.number}: {campaign.name}
-                  </option>
+                  <button
+                    aria-checked={hogwartsYear === campaign.number}
+                    className={
+                      hogwartsYear === campaign.number
+                        ? 'table-year-chip selected'
+                        : 'table-year-chip'
+                    }
+                    data-testid={`hogwarts-year-${campaign.number}`}
+                    key={campaign.number}
+                    onClick={() => changeHogwartsYear(campaign.number)}
+                    role="radio"
+                    type="button"
+                  >
+                    {campaign.number}
+                  </button>
                 ))}
-              </select>
-            </label>
+              </div>
+              <p className="table-year-name">
+                {HOGWARTS_CAMPAIGNS.find((c) => c.number === hogwartsYear)?.name}
+              </p>
+            </div>
           ) : null
         }
         maxSeats={maxSeats}
@@ -192,25 +203,22 @@ export function GameLaunch() {
         seatDetails={
           meta.id === 'hogwarts-battle'
             ? (seat, index) => (
-                <label className="table-seat-detail">
-                  <span>Hero</span>
-                  <select
-                    data-testid={`hogwarts-hero-${index}`}
-                    onChange={(event) => changeHogwartsHero(index, event.target.value)}
-                    value={seat.role ?? getHogwartsHeroIdsForYear(hogwartsYear)[index]}
-                  >
-                    {getHogwartsHeroesForYear(hogwartsYear).map((hero) => (
-                      <option key={hero.id} value={hero.id}>
-                        {hero.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <select
+                  className="table-spot-hero"
+                  data-testid={`hogwarts-hero-${index}`}
+                  onChange={(event) => changeHogwartsHero(index, event.target.value)}
+                  value={seat.role ?? getHogwartsHeroIdsForYear(hogwartsYear)[index]}
+                >
+                  {getHogwartsHeroesForYear(hogwartsYear).map((hero) => (
+                    <option key={hero.id} value={hero.id}>
+                      {hero.name}
+                    </option>
+                  ))}
+                </select>
               )
             : undefined
         }
         seats={boundedSeats}
-        showColours={meta.id !== 'hogwarts-battle'}
       />
       {error ? (
         <p className="error" role="alert">
