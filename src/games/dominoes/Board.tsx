@@ -11,6 +11,7 @@ import { Snap } from '../../components/cinematic';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { boardFirstChromeActions } from '../../lib/actions';
 import { turnStatusText } from '../../lib/matchPlayers';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getDominoesActions } from './actions';
@@ -35,12 +36,6 @@ function kenneySrc(tile: Tile): string {
 
 function remToPx(rem: number): number {
   return rem * Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
-}
-
-function endIndexFromPlayActionId(id: string): number | null {
-  if (id === 'play-starter') return -1;
-  const match = /^play-end-(\d+)$/.exec(id);
-  return match ? Number(match[1]) : null;
 }
 
 export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesState>) {
@@ -183,22 +178,16 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       ? placementForEnd(G.ends[hoverEnd], dragTile)
       : null;
 
-  const pewActions = getDominoesActions({ G, player: pid, yourTurn, handIndex });
-  const surfaceActions = pewActions.map((action) => ({
+  const chromeActions = boardFirstChromeActions(
+    getDominoesActions({ G, player: pid, yourTurn, handIndex }),
+  ).map((action) => ({
     ...action,
     onAction: () => {
       if (action.id === 'draw') {
         moves.drawTile();
         return;
       }
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const endIndex = endIndexFromPlayActionId(action.id);
-      if (endIndex === null || handIndex === null) return;
-      moves.playTile(handIndex, endIndex);
-      setHandIndex(null);
+      if (action.id === 'pass') moves.pass();
     },
   }));
 
@@ -356,7 +345,11 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
           ))}
         </div>
       }
-      actions={<ActionSurface label="Dominoes actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Dominoes actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }
