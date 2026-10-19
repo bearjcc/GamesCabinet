@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { pickHogwartsHero } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
@@ -101,8 +102,8 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('table-seat-1-kind-local').click();
     await page.getByTestId('hogwarts-year-7').click();
 
-    await page.getByTestId('hogwarts-hero-0').selectOption('neville');
-    await page.getByTestId('hogwarts-hero-1').selectOption('harry');
+    await pickHogwartsHero(page, 0, 'Neville Longbottom');
+    await pickHogwartsHero(page, 1, 'Harry Potter');
     await page.getByTestId('play-start').click();
     await expect(page).toHaveURL(/\/play\/hogwarts-battle/);
     await expect(page.getByTestId('hb-board')).toBeVisible();

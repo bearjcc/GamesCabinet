@@ -190,7 +190,7 @@ describe('table setup', () => {
     });
   });
 
-  it('cycles seat kinds for token launch spots', () => {
+  it('cycles seat kinds in tabletop order when claiming and advancing', () => {
     expect(seatKindCycle(twoPlayerGame)).toEqual(['local', 'bot', 'online', 'empty']);
     expect(defaultClaimKind(twoPlayerGame)).toBe('local');
     expect(nextSeatKind(twoPlayerGame, 'empty', { claim: true })).toBe('local');
@@ -199,7 +199,7 @@ describe('table setup', () => {
     expect(nextSeatKind(twoPlayerGame, 'online')).toBe('empty');
   });
 
-  it('falls back when a game exposes no claimable seat kinds', () => {
+  it('falls back when no claimable seat kinds are configured', () => {
     const emptyOnly = {
       ...twoPlayerGame,
       hasBot: false,

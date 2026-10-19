@@ -24,3 +24,16 @@ export async function openOnlinePair(browser: Browser): Promise<OnlinePair> {
 export async function readRoomCode(page: Page): Promise<string> {
   return (await page.getByTestId('room-code').innerText()).trim();
 }
+
+export async function pickHogwartsHero(
+  page: Page,
+  seatIndex: number,
+  heroName: string,
+): Promise<void> {
+  const button = page.getByTestId(`hogwarts-hero-${seatIndex}`);
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    if ((await button.innerText()) === heroName) return;
+    await button.click();
+  }
+  throw new Error(`Could not select ${heroName} for seat ${seatIndex}`);
+}

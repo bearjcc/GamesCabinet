@@ -235,7 +235,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  color: var(--ink);
+  color: var(--accent-ink);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -253,14 +253,15 @@
 
 .table-spot-hero {
   max-width: 100%;
-  min-height: 1.75rem;
   padding: 0.15rem 0.35rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border: 0;
+  background: transparent;
   color: var(--ink);
   font-size: 0.82rem;
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  text-underline-offset: 0.15rem;
   cursor: pointer;
 }
 
