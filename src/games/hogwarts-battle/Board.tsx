@@ -69,32 +69,39 @@ function TextCard({
   subtitle,
   selected,
   disabled,
+  playable,
   onClick,
   testId,
   spriteId,
   titleHint,
+  variant = 'default',
 }: {
   title: string;
   subtitle?: string;
   selected?: boolean;
   disabled?: boolean;
+  playable?: boolean;
   onClick?: () => void;
   testId?: string;
   spriteId?: string;
   titleHint?: string;
+  variant?: 'default' | 'market' | 'hand' | 'played';
 }) {
   return (
     <button
       type="button"
-      className={`hb-card${selected ? ' is-selected' : ''}${disabled ? ' is-disabled' : ''}`}
+      className={`hb-card hb-card--${variant}${selected ? ' is-selected' : ''}${disabled ? ' is-disabled' : ''}${playable ? ' is-playable' : ''}`}
       disabled={disabled}
       onClick={onClick}
       data-testid={testId}
-      title={titleHint}
+      title={titleHint ?? (subtitle ? `${title} — ${subtitle}` : title)}
+      aria-label={titleHint ?? title}
     >
       {spriteId ? <SpriteBadge category="cards" id={spriteId} label={title} /> : null}
-      <span className="hb-card__title">{title}</span>
-      {subtitle ? <span className="hb-card__sub">{subtitle}</span> : null}
+      <span className="hb-card__copy">
+        <span className="hb-card__title">{title}</span>
+        {subtitle ? <span className="hb-card__sub">{subtitle}</span> : null}
+      </span>
     </button>
   );
 }
@@ -183,19 +190,19 @@ export function HogwartsBattleBoard({
                     label={locDef?.name ?? loc.locationId}
                   />
                 ) : null}
-                <div>
-                  <h3>{locDef?.name ?? loc?.locationId ?? 'No location'}</h3>
+                <div className="hb-location__copy">
+                  <strong>{locDef?.name ?? loc?.locationId ?? 'No location'}</strong>
                   {loc ? (
-                    <p>
-                      Control {loc.currentControl}/{loc.maxControl} - {loc.darkArtsToReveal} Dark
-                      Arts
-                    </p>
+                    <span>
+                      {loc.currentControl}/{loc.maxControl} control - {loc.darkArtsToReveal} to
+                      reveal
+                    </span>
                   ) : null}
                 </div>
               </div>
             </div>
             <div className="hb-dark-arts">
-              <h3>Dark Arts</h3>
+              <span className="hb-zone-label">Dark Arts</span>
               <ul>
                 {G.darkArtsPlayedThisTurn.map((id) => (
                   <li key={id}>
@@ -209,7 +216,6 @@ export function HogwartsBattleBoard({
               </ul>
             </div>
             <div className="hb-villains" data-testid="hb-villains">
-              <h3>Villains</h3>
               <div className="hb-villain-row">
                 {G.activeVillains.map((v, index) => {
                   if (!v.isActive) return null;
@@ -273,11 +279,15 @@ export function HogwartsBattleBoard({
           </section>
 
           <section className="hb-market" data-testid="hb-market">
-            <h3>Hogwarts market</h3>
-            <div className="hb-card-row">
+            <div className="hb-market__row">
               {G.market.availableCards.map((slot, index) => {
                 if (!slot) {
-                  return <div key={`empty-${index}`} className="hb-card hb-card--empty" />;
+                  return (
+                    <div
+                      key={`empty-${index}`}
+                      className="hb-card hb-card--empty hb-card--market"
+                    />
+                  );
                 }
                 const card = getCard(getCardInstance(G, slot)?.cardId ?? '');
                 const gate = canBuyAtIndex(G, seat, index);
@@ -285,8 +295,9 @@ export function HogwartsBattleBoard({
                 return (
                   <TextCard
                     key={slot}
+                    variant="market"
                     title={card?.name ?? slot}
-                    subtitle={`Cost ${cost}${card && cost !== card.cost ? ` (was ${card.cost})` : ''}`}
+                    subtitle={`${cost}${card && cost !== card.cost ? ` (${card.cost})` : ''}`}
                     disabled={!gate.allowed}
                     onClick={() => moves.buyCard?.(index)}
                     testId={`hb-market-${index}`}
@@ -299,45 +310,36 @@ export function HogwartsBattleBoard({
           </section>
 
           <section className="hb-allies" data-testid="hb-allies">
-            <h3>Heroes</h3>
-            <div className="hb-ally-row">
-              {Object.entries(G.players).map(([id, p]) => (
-                <div
-                  key={id}
-                  className={`hb-ally${id === ctx.currentPlayer ? ' is-active' : ''}`}
-                  data-testid={`hb-hero-${id}`}
-                >
-                  <strong>{heroDisplayName(p.characterId)}</strong>
-                  <span>
-                    {p.health} HP - hand {p.hand.length} - deck {p.deck.length}
-                  </span>
-                  {G.gameNumber >= 6 && p.proficiencyId ? (
-                    <div className="hb-proficiency" data-testid={`hb-proficiency-${id}`}>
-                      <strong>{getProficiency(p.proficiencyId)?.name ?? p.proficiencyId}</strong>
-                      <span>
-                        {getProficiency(p.proficiencyId)?.description ?? 'No rules text.'}
-                      </span>
-                      {id === seat && getProficiency(p.proficiencyId)?.trigger === 'manual' ? (
-                        <>
-                          <button
-                            type="button"
-                            className="btn"
-                            disabled={!proficiencyGate?.allowed}
-                            onClick={() => proficiencyAction?.()}
-                            data-testid="hb-use-proficiency"
-                          >
-                            Use proficiency
-                          </button>
-                          {!proficiencyGate?.allowed ? (
-                            <small className="hb-action-reason">{proficiencyGate?.reason}</small>
-                          ) : null}
-                        </>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
+            {Object.entries(G.players).map(([id, p]) => (
+              <div
+                key={id}
+                className={`hb-ally${id === ctx.currentPlayer ? ' is-active' : ''}`}
+                data-testid={`hb-hero-${id}`}
+              >
+                <strong>{heroDisplayName(p.characterId)}</strong>
+                <span>{p.health} HP</span>
+                {G.gameNumber >= 6 && p.proficiencyId ? (
+                  <div className="hb-proficiency" data-testid={`hb-proficiency-${id}`}>
+                    {id === seat && getProficiency(p.proficiencyId)?.trigger === 'manual' ? (
+                      <button
+                        type="button"
+                        className="btn"
+                        disabled={!proficiencyGate?.allowed}
+                        onClick={() => proficiencyAction?.()}
+                        data-testid="hb-use-proficiency"
+                        title={
+                          proficiencyGate?.reason ?? getProficiency(p.proficiencyId)?.description
+                        }
+                      >
+                        {getProficiency(p.proficiencyId)?.name ?? p.proficiencyId}
+                      </button>
+                    ) : (
+                      <span>{getProficiency(p.proficiencyId)?.name ?? p.proficiencyId}</span>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </section>
 
           {G.horcruxState ? (
@@ -442,48 +444,52 @@ export function HogwartsBattleBoard({
           </div>
           {selectedCard ? (
             <aside className="hb-card-detail" data-testid="hb-card-detail" aria-live="polite">
-              <div className="hb-card-detail__heading">
-                <SpriteBadge category="cards" id={selectedCard.id} label={selectedCard.name} />
-                <div>
-                  <h3>{selectedCard.name}</h3>
-                  <p>
-                    {selectedCard.type} - Cost {selectedCard.cost}
-                    {selectedCard.keywords?.length ? ` - ${selectedCard.keywords.join(', ')}` : ''}
-                  </p>
-                </div>
-              </div>
-              <p>{selectedCard.description ?? 'No rules text.'}</p>
-              {selectedCard.passive_effect?.description ? (
-                <p className="hb-card-detail__passive">{selectedCard.passive_effect.description}</p>
-              ) : null}
+              <strong>{selectedCard.name}</strong>
+              <span>
+                {selectedCard.description ?? 'No rules text.'}
+                {selectedCard.passive_effect?.description
+                  ? ` ${selectedCard.passive_effect.description}`
+                  : ''}
+              </span>
             </aside>
-          ) : (
-            <p className="hb-selection-hint">Select a card to read its rules.</p>
-          )}
-          <div className="hb-card-row hb-hand" data-testid="hb-hand">
+          ) : null}
+          <div className="hb-hand" data-testid="hb-hand">
             {(player?.hand ?? []).map((id) =>
               (() => {
                 const cardId = getCardInstance(G, id)?.cardId ?? id;
                 const card = getCard(cardId);
+                const playGate = canPlayCard(G, seat, id);
+                const canPlayNow = isMyTurn && playGate.allowed;
                 return (
                   <TextCard
                     key={id}
+                    variant="hand"
                     title={cardTitle(G, id)}
                     subtitle={card?.type}
                     selected={selectedHand === id}
+                    playable={canPlayNow}
                     disabled={!isMyTurn}
-                    onClick={() => setSelectedHand(id === selectedHand ? null : id)}
+                    onClick={() => {
+                      if (canPlayNow) {
+                        moves.playCard?.(id);
+                        setSelectedHand(null);
+                        return;
+                      }
+                      setSelectedHand(id === selectedHand ? null : id);
+                    }}
                     testId={`hb-hand-${id}`}
                     spriteId={card?.id}
+                    titleHint={playGate.reason ?? card?.description}
                   />
                 );
               })(),
             )}
           </div>
-          <div className="hb-card-row hb-play" data-testid="hb-play-area">
+          <div className="hb-play" data-testid="hb-play-area">
             {(player?.playArea ?? []).map((id) => (
               <TextCard
                 key={id}
+                variant="played"
                 title={cardTitle(G, id)}
                 disabled
                 testId={`hb-played-${id}`}
@@ -492,19 +498,6 @@ export function HogwartsBattleBoard({
             ))}
           </div>
           <div className="hb-actions">
-            <button
-              type="button"
-              className="btn"
-              disabled={!isMyTurn || !selectedHand || !canPlayCard(G, seat, selectedHand).allowed}
-              onClick={() => {
-                if (!selectedHand) return;
-                moves.playCard?.(selectedHand);
-                setSelectedHand(null);
-              }}
-              data-testid="hb-play-card"
-            >
-              Play selected
-            </button>
             <button
               type="button"
               className="btn"

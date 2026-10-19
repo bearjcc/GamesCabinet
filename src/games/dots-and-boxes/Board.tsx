@@ -1,10 +1,10 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
+import type { CSSProperties } from 'react';
 import { PlayTable } from '../../components/PlayTable';
+import { useSeatColour } from '../../components/SeatColours';
 import { StatusBar } from '../../components/StatusBar';
 import { Counter } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getDotsAndBoxesActions } from './actions';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import {
   allLineKeys,
   BOX_COLS,
@@ -48,19 +48,16 @@ export function DotsAndBoxesBoard({
   isActive,
 }: BoardProps<DotsAndBoxesState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const p0Colour = useSeatColour('0');
+  const p1Colour = useSeatColour('1');
+  const boardStyle = {
+    ...(p0Colour ? { '--dab-p0': p0Colour } : {}),
+    ...(p1Colour ? { '--dab-p1': p1Colour } : {}),
+  } as CSSProperties;
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: 'Your turn - claim a line' },
   });
-  const pewActions = getDotsAndBoxesActions({ G, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const match = /^claim-(.+)$/.exec(action.id);
-      if (match) moves.claimLine(match[1]);
-    },
-  }));
-
   const width = PAD * 2 + BOX_COLS * CELL;
   const height = PAD * 2 + BOX_ROWS * CELL;
 
@@ -84,6 +81,7 @@ export function DotsAndBoxesBoard({
           data-testid="dab-board"
           role="group"
           aria-label="Dots and Boxes board"
+          style={boardStyle}
         >
           <svg
             className="dab-svg"
@@ -186,7 +184,6 @@ export function DotsAndBoxesBoard({
           </svg>
         </div>
       }
-      actions={<ActionSurface label="Dots and Boxes actions" actions={surfaceActions} />}
     />
   );
 }

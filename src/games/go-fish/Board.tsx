@@ -1,13 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, StockPile } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
-import { kenneyPlayingCardAsset, type Rank } from '../shared/cards';
-import { getGoFishActions } from './actions';
-import { canDraw, type GoFishState, opponentOf } from './game';
+import { useMatchStatus } from '../../lib/useMatchStatus';
+import { kenneyPlayingCardAsset } from '../shared/cards';
+import { canAsk, canDraw, type GoFishState, opponentOf } from './game';
 
 export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoFishState>) {
   const pid = playerID === null || playerID === undefined ? -1 : Number(playerID);
@@ -21,28 +19,21 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
   if (G.pendingFishRank != null) yourTurnLabel = 'Go fish - draw from the stock';
   else if (hand.length === 0 && G.stock.length > 0) yourTurnLabel = 'Your turn - draw a card';
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
     labels: { yourTurn: yourTurnLabel },
   });
 
-  const pewActions = getGoFishActions({ G, player: pid, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'draw') {
-        moves.draw();
-        return;
-      }
-      if (action.id.startsWith('ask-')) {
-        const rank = action.id.slice('ask-'.length) as Rank;
-        moves.ask(rank);
-      }
-    },
-  }));
+  const onCardSelect = (index: number) => {
+    if (!yourTurn || pid < 0 || G.pendingFishRank != null) return;
+    const card = hand[index];
+    if (!card || !canAsk(G, pid, card.rank)) return;
+    moves.ask(card.rank);
+  };
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
@@ -56,6 +47,18 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
                 ? [{ label: 'Fishing', value: G.pendingFishRank }]
                 : []),
             ]}
+            rules={{
+              summary: 'How points work',
+              body: (
+                <>
+                  <p>Collect four-of-a-kind books by asking opponents for ranks you hold.</p>
+                  <p>
+                    When the stock runs out, the most books wins. Book counts above are sets
+                    completed.
+                  </p>
+                </>
+              ),
+            }}
             testId="go-fish-meta"
           />
         </>
@@ -81,12 +84,16 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
       pew={
         <CardHand
           cards={hand}
-          disabled
+          disabled={!yourTurn || G.pendingFishRank != null}
+          isPlayable={(_, i) => {
+            const card = hand[i];
+            return Boolean(card && yourTurn && pid >= 0 && canAsk(G, pid, card.rank));
+          }}
+          onSelect={onCardSelect}
           assetFor={kenneyPlayingCardAsset}
           testIdPrefix="go-fish-hand"
         />
       }
-      actions={<ActionSurface label="Go Fish actions" actions={surfaceActions} />}
     />
   );
 }

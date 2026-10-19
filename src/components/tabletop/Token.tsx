@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { kenneyTokenGlyph } from '../../games/shared/tokens';
+import { useSeatColourStyle } from '../SeatColours';
 
 export type TokenPlayer = '0' | '1' | string;
 export type TokenVariant = 'disc' | 'chip' | 'pawn';
@@ -38,6 +39,7 @@ export function Token({
   assetSrc,
   badgeSrc,
 }: TokenProps) {
+  const seatStyle = useSeatColourStyle(player);
   const glyphSrc = assetSrc ? null : kenneyTokenGlyph(variant);
   const className = [
     'tt-token',
@@ -51,9 +53,10 @@ export function Token({
     .filter(Boolean)
     .join(' ');
 
-  const style = glyphSrc
-    ? ({ '--tt-token-glyph': `url("${glyphSrc}")` } as CSSProperties)
-    : undefined;
+  const style = {
+    ...(seatStyle ?? {}),
+    ...(glyphSrc ? { '--tt-token-glyph': `url("${glyphSrc}")` } : {}),
+  } as CSSProperties;
 
   const inner = (
     <>

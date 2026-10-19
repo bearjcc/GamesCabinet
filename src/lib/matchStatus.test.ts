@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { deriveMatchStatus } from './matchStatus';
+import { defaultSeatLabel, deriveMatchStatus } from './matchStatus';
+
+describe('defaultSeatLabel', () => {
+  it('formats zero-based player ids', () => {
+    expect(defaultSeatLabel('0')).toBe('Player 1');
+    expect(defaultSeatLabel('1')).toBe('Player 2');
+  });
+});
 
 describe('deriveMatchStatus', () => {
   it('reports waiting when explicitly waiting for players', () => {
@@ -9,46 +16,55 @@ describe('deriveMatchStatus', () => {
     });
   });
 
-  it('reports your turn when seat matches current player', () => {
+  it('names the active seat on your turn instead of generic copy', () => {
     expect(deriveMatchStatus({ currentPlayer: '0' }, '0')).toEqual({
-      text: 'Your turn',
+      text: "Player 1's turn",
       tone: 'you',
     });
   });
 
-  it('reports their turn when seat does not match', () => {
+  it('names the active seat while waiting on another seat', () => {
     expect(deriveMatchStatus({ currentPlayer: '1' }, '0')).toEqual({
-      text: 'Their turn',
+      text: "Player 2's turn",
       tone: 'wait',
     });
   });
 
-  it('uses custom turn labels', () => {
+  it('uses turn hints and lobby names', () => {
+    expect(
+      deriveMatchStatus({ currentPlayer: '0' }, '0', {
+        turnHint: 'tap a square',
+        matchData: [{ id: 0, name: 'Bear' }],
+      }),
+    ).toEqual({ text: "Bear's turn — tap a square", tone: 'you' });
+  });
+
+  it('maps legacy your-turn labels to hints', () => {
     expect(
       deriveMatchStatus({ currentPlayer: '0' }, '0', {
         labels: { yourTurn: 'Your turn — tap a square' },
       }),
-    ).toEqual({ text: 'Your turn — tap a square', tone: 'you' });
+    ).toEqual({ text: "Player 1's turn — tap a square", tone: 'you' });
   });
 
   it('honours isYourTurn override over seat comparison', () => {
     expect(deriveMatchStatus({ currentPlayer: '1' }, '0', { isYourTurn: true })).toEqual({
-      text: 'Your turn',
+      text: "Player 2's turn",
       tone: 'you',
     });
     expect(deriveMatchStatus({ currentPlayer: '0' }, '0', { isYourTurn: false })).toEqual({
-      text: 'Their turn',
+      text: "Player 1's turn",
       tone: 'wait',
     });
   });
 
-  it('treats null or undefined playerID as not your seat (their turn)', () => {
+  it('treats null or undefined playerID as not your seat (named wait)', () => {
     expect(deriveMatchStatus({ currentPlayer: '0' }, null)).toEqual({
-      text: 'Their turn',
+      text: "Player 1's turn",
       tone: 'wait',
     });
     expect(deriveMatchStatus({ currentPlayer: '0' }, undefined)).toEqual({
-      text: 'Their turn',
+      text: "Player 1's turn",
       tone: 'wait',
     });
   });
@@ -133,5 +149,26 @@ describe('deriveMatchStatus', () => {
       text: 'Opponent wins',
       tone: 'done',
     });
+  });
+
+  it('uses named seats when seatLabel is provided', () => {
+    const seatLabel = (id: string) => (id === '0' ? 'Alice' : 'Bob');
+    expect(
+      deriveMatchStatus({ currentPlayer: '1' }, '1', {
+        seatLabel,
+        isYourTurn: true,
+      }),
+    ).toEqual({ text: "Bob's turn", tone: 'you' });
+    expect(
+      deriveMatchStatus({ currentPlayer: '0' }, '1', {
+        seatLabel,
+        isYourTurn: false,
+      }),
+    ).toEqual({ text: "Alice's turn", tone: 'wait' });
+    expect(
+      deriveMatchStatus({ currentPlayer: '0', gameover: { winner: '0' } }, '0', {
+        seatLabel,
+      }),
+    ).toEqual({ text: 'Alice wins', tone: 'done' });
   });
 });

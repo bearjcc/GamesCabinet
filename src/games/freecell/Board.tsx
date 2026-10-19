@@ -1,24 +1,49 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { useMemo, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
+import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useState } from 'react';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { CardFace } from '../../components/tabletop/CardFace';
+import { SolitaireDragGhost } from '../../components/tabletop/SolitaireDragGhost';
 import type { SubmitScoreInput } from '../../lib/scores';
+import { findFoundationIndex } from '../klondike/game';
 import { type Card, kenneyPlayingCardAsset } from '../shared/cards';
-import { type FreeCellSelection, getFreeCellActions } from './actions';
-import type { FreeCellState } from './game';
+import { findSolDropTarget } from '../shared/solitaire/drag';
+import { preloadKenneyPlayingCards } from '../shared/solitaire/kenneyPreload';
+import { type FreeCellState, isLegalCascadeRun } from './game';
 
-type Selection = FreeCellSelection | null;
+const DRAG_THRESHOLD_PX = 4;
+
+type FreeCellDragSource =
+  | { source: 'cascade'; col: number; startIndex: number; count: number }
+  | { source: 'freecell'; index: number };
+
+type DragState = {
+  source: FreeCellDragSource;
+  cards: Card[];
+  assetSrcs: string[];
+  x: number;
+  y: number;
+  ghostWidthRem: number;
+};
 
 function topCard(pile: readonly Card[]): Card | undefined {
   return pile[pile.length - 1];
 }
 
+function cardWidthRemFromElement(el: HTMLElement | null): number {
+  if (!el) return 4.5;
+  const rect = el.getBoundingClientRect();
+  const fs = Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
+  return rect.width / fs || 4.5;
+}
+
 export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellState>) {
   const playable = Boolean(isActive && !ctx.gameover);
-  const [selection, setSelection] = useState<Selection>(null);
   const [tab, setTab] = useState<'play' | 'scores'>('play');
+  const [drag, setDrag] = useState<DragState | null>(null);
+  useEffect(() => {
+    preloadKenneyPlayingCards();
+  }, []);
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
     if (!ctx.gameover) return null;
@@ -27,117 +52,116 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
   }, [ctx.gameover]);
 
   const over = ctx.gameover as { won?: boolean; score?: number } | undefined;
-  let status = 'Select a card, then a destination';
+  let status = 'Drag cards. Double-click to send home.';
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'you';
   if (over?.won) {
     status = 'You win';
     tone = 'done';
   } else if (!playable) {
     tone = 'wait';
+  } else if (drag) {
+    status = 'Drop on a foundation, freecell, or cascade';
   }
 
-  const clear = () => setSelection(null);
+  const executeDrop = (source: FreeCellDragSource, target: string) => {
+    const [kind, indexStr] = target.split(':');
+    const index = Number(indexStr);
+    if (!Number.isInteger(index)) return;
 
-  const pewActions = getFreeCellActions({ G, playable, selection });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'clear') {
-        clear();
-        return;
-      }
-      if (!selection) return;
-      if (action.id === 'to-foundation') {
-        if (selection.source === 'cascade' && selection.count === 1) {
-          moves.cascadeToFoundation(selection.col);
-          clear();
-          return;
-        }
-        if (selection.source === 'freecell') {
-          moves.freecellToFoundation(selection.index);
-          clear();
-        }
-        return;
-      }
-      const freecellMatch = /^to-freecell-(\d+)$/.exec(action.id);
-      if (freecellMatch && selection.source === 'cascade' && selection.count === 1) {
-        moves.cascadeToFreecell(selection.col, Number(freecellMatch[1]));
-        clear();
-      }
-    },
-  }));
+    if (source.source === 'freecell') {
+      if (kind === 'foundation') moves.freecellToFoundation(source.index);
+      else if (kind === 'cascade') moves.freecellToCascade(source.index, index);
+      return;
+    }
 
-  const onFreecell = (index: number) => {
+    if (source.source === 'cascade') {
+      if (kind === 'foundation' && source.count === 1) moves.cascadeToFoundation(source.col);
+      else if (kind === 'freecell' && source.count === 1)
+        moves.cascadeToFreecell(source.col, index);
+      else if (kind === 'cascade') moves.cascadeToCascade(source.col, index, source.count);
+    }
+  };
+
+  const startDrag = (
+    source: FreeCellDragSource,
+    cards: Card[],
+    assetSrcs: string[],
+    widthEl: HTMLElement | null,
+    e: ReactPointerEvent,
+  ) => {
+    if (!playable || e.button !== 0) return;
+    e.preventDefault();
+    const originX = e.clientX;
+    const originY = e.clientY;
+    const ghostWidthRem = cardWidthRemFromElement(widthEl);
+    let active = false;
+
+    const onMove = (ev: PointerEvent) => {
+      const dx = ev.clientX - originX;
+      const dy = ev.clientY - originY;
+      if (!active && Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
+      active = true;
+      setDrag({ source, cards, assetSrcs, x: ev.clientX, y: ev.clientY, ghostWidthRem });
+    };
+
+    const onUp = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      if (active) {
+        const target = findSolDropTarget(ev.clientX, ev.clientY);
+        if (target) executeDrop(source, target);
+      }
+      setDrag(null);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  const onFreecellPointerDown = (index: number, e: ReactPointerEvent<HTMLButtonElement>) => {
+    const card = G.freecells[index];
+    if (!card) return;
+    const slotEl = e.currentTarget.closest('.freecell-slot') ?? e.currentTarget;
+    startDrag(
+      { source: 'freecell', index },
+      [card],
+      [kenneyPlayingCardAsset(card)],
+      slotEl as HTMLElement,
+      e,
+    );
+  };
+
+  const onFreecellDoubleClick = (index: number) => {
     if (!playable) return;
-    const parked = G.freecells[index];
-
-    if (selection?.source === 'freecell' && selection.index === index) {
-      clear();
-      return;
-    }
-
-    if (selection?.source === 'cascade' && selection.count === 1) {
-      moves.cascadeToFreecell(selection.col, index);
-      clear();
-      return;
-    }
-
-    if (!parked) return;
-    setSelection({ source: 'freecell', index });
-  };
-
-  const onFoundation = (_index: number) => {
-    if (!playable || !selection) return;
-    if (selection.source === 'cascade' && selection.count === 1) {
-      moves.cascadeToFoundation(selection.col);
-      clear();
-      return;
-    }
-    if (selection.source === 'freecell') {
-      moves.freecellToFoundation(selection.index);
-      clear();
+    const card = G.freecells[index];
+    if (card && findFoundationIndex(G.foundations, card) >= 0) {
+      moves.freecellToFoundation(index);
     }
   };
 
-  const onCascadeCard = (col: number, index: number) => {
+  const onCascadePointerDown = (
+    col: number,
+    index: number,
+    e: ReactPointerEvent<HTMLButtonElement>,
+  ) => {
+    const run = G.cascades[col].slice(index);
+    if (!isLegalCascadeRun(run)) return;
+    const assetSrcs = run.map((c) => kenneyPlayingCardAsset(c));
+    const columnEl = e.currentTarget.closest('.freecell-column');
+    startDrag(
+      { source: 'cascade', col, startIndex: index, count: run.length },
+      run,
+      assetSrcs,
+      columnEl as HTMLElement | null,
+      e,
+    );
+  };
+
+  const onCascadeDoubleClick = (col: number) => {
     if (!playable) return;
-
-    if (
-      selection?.source === 'cascade' &&
-      selection.col === col &&
-      selection.startIndex === index
-    ) {
-      clear();
-      return;
-    }
-
-    if (selection?.source === 'freecell') {
-      moves.freecellToCascade(selection.index, col);
-      clear();
-      return;
-    }
-
-    if (selection?.source === 'cascade' && selection.col !== col) {
-      moves.cascadeToCascade(selection.col, col, selection.count);
-      clear();
-      return;
-    }
-
-    const count = G.cascades[col].length - index;
-    setSelection({ source: 'cascade', col, startIndex: index, count });
-  };
-
-  const onCascadeEmpty = (col: number) => {
-    if (!playable || !selection) return;
-    if (selection.source === 'freecell') {
-      moves.freecellToCascade(selection.index, col);
-      clear();
-      return;
-    }
-    if (selection.source === 'cascade' && selection.col !== col) {
-      moves.cascadeToCascade(selection.col, col, selection.count);
-      clear();
-    }
+    const column = G.cascades[col];
+    const top = column[column.length - 1];
+    if (top && findFoundationIndex(G.foundations, top) >= 0) moves.cascadeToFoundation(col);
   };
 
   return (
@@ -149,50 +173,49 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
       testIdPrefix="freecell"
       info={<StatusBar text={status} tone={tone} />}
       board={
-        <div className="freecell-board" data-testid="freecell-board">
+        <div className="sol-board freecell-board" data-testid="freecell-board">
           <div className="freecell-top">
             <div className="freecell-freecells" data-testid="freecell-freecells">
-              {G.freecells.map((card, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className="freecell-slot"
-                  data-testid={`freecell-freecell-${i}`}
-                  disabled={!playable}
-                  onClick={() => onFreecell(i)}
-                  aria-label={`Freecell ${i + 1}${card ? `, ${card.rank} of ${card.suit}` : ', empty'}`}
-                >
-                  {card ? (
-                    <CardFace
-                      card={card}
-                      assetSrc={kenneyPlayingCardAsset(card)}
-                      selected={selection?.source === 'freecell' && selection.index === i}
-                      playable={playable}
-                      testId={`freecell-freecell-${i}-card`}
-                    />
-                  ) : (
-                    <div
-                      className="tt-card tt-card--empty"
-                      data-testid={`freecell-freecell-${i}-empty`}
-                    >
-                      Free
-                    </div>
-                  )}
-                </button>
-              ))}
+              {G.freecells.map((card, i) => {
+                const dragging = drag?.source.source === 'freecell' && drag.source.index === i;
+                return (
+                  <div
+                    key={i}
+                    className="freecell-slot sol-drop"
+                    data-sol-drop={`freecell:${i}`}
+                    data-testid={`freecell-freecell-${i}`}
+                  >
+                    {card ? (
+                      <CardFace
+                        card={card}
+                        assetSrc={kenneyPlayingCardAsset(card)}
+                        playable={playable}
+                        className={dragging ? 'is-dragging' : ''}
+                        onPointerDown={playable ? (e) => onFreecellPointerDown(i, e) : undefined}
+                        onDoubleClick={playable ? () => onFreecellDoubleClick(i) : undefined}
+                        testId={`freecell-freecell-${i}-card`}
+                      />
+                    ) : (
+                      <div
+                        className="tt-card tt-card--empty"
+                        data-testid={`freecell-freecell-${i}-empty`}
+                      >
+                        Free
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <div className="freecell-foundations" data-testid="freecell-foundations">
               {G.foundations.map((pile, i) => {
                 const top = topCard(pile);
                 return (
-                  <button
+                  <div
                     key={i}
-                    type="button"
-                    className="freecell-foundation"
+                    className="freecell-foundation sol-drop"
+                    data-sol-drop={`foundation:${i}`}
                     data-testid={`freecell-foundation-${i}`}
-                    disabled={!playable || !selection}
-                    onClick={() => onFoundation(i)}
-                    aria-label={`Foundation ${i + 1}${top ? `, ${top.rank} of ${top.suit}` : ', empty'}`}
                   >
                     {top ? (
                       <CardFace
@@ -208,7 +231,7 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
                         A
                       </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -216,36 +239,43 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
 
           <div className="freecell-cascades" data-testid="freecell-cascades">
             {G.cascades.map((column, col) => (
-              <div key={col} className="freecell-column" data-testid={`freecell-cascade-${col}`}>
+              <div
+                key={col}
+                className="freecell-column sol-drop"
+                data-sol-drop={`cascade:${col}`}
+                data-testid={`freecell-cascade-${col}`}
+              >
                 {column.length === 0 ? (
-                  <button
-                    type="button"
+                  <div
                     className="tt-card tt-card--empty freecell-column__empty"
                     data-testid={`freecell-cascade-${col}-empty`}
-                    disabled={!playable || !selection}
-                    onClick={() => onCascadeEmpty(col)}
-                    aria-label={`Empty cascade ${col + 1}`}
                   >
                     Any
-                  </button>
+                  </div>
                 ) : (
                   column.map((card, index) => {
-                    const selected =
-                      selection?.source === 'cascade' &&
-                      selection.col === col &&
-                      index >= selection.startIndex;
+                    const dragging =
+                      drag?.source.source === 'cascade' &&
+                      drag.source.col === col &&
+                      index >= drag.source.startIndex;
+                    const isTop = index === column.length - 1;
                     return (
                       <div
                         key={card.id}
                         className="freecell-slot-card"
-                        style={{ top: `${index * 1.35}rem` }}
+                        style={{ top: `calc(${index} * var(--sol-stack-step))` }}
                       >
                         <CardFace
                           card={card}
                           assetSrc={kenneyPlayingCardAsset(card)}
-                          selected={selected}
                           playable={playable}
-                          onSelect={playable ? () => onCascadeCard(col, index) : undefined}
+                          className={dragging ? 'is-dragging' : ''}
+                          onPointerDown={
+                            playable ? (e) => onCascadePointerDown(col, index, e) : undefined
+                          }
+                          onDoubleClick={
+                            playable && isTop ? () => onCascadeDoubleClick(col) : undefined
+                          }
                           testId={`freecell-cascade-${col}-card-${index}`}
                         />
                       </div>
@@ -255,9 +285,18 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
               </div>
             ))}
           </div>
+
+          {drag ? (
+            <SolitaireDragGhost
+              x={drag.x}
+              y={drag.y}
+              cards={drag.cards}
+              assetSrcs={drag.assetSrcs}
+              cardWidthRem={drag.ghostWidthRem}
+            />
+          ) : null}
         </div>
       }
-      actions={<ActionSurface label="FreeCell actions" actions={surfaceActions} />}
     />
   );
 }

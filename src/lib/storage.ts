@@ -61,6 +61,8 @@ export type SeatSession = {
   gameName: string;
   setupData?: unknown;
   localSeats?: DeviceSeat[];
+  /** Palette-index query for launch seat colours (same format as the play URL). */
+  seatColourQuery?: string;
 };
 
 export function deviceSeats(

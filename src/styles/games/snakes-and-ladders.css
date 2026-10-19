@@ -30,10 +30,26 @@
 }
 
 .sal-die-slot {
-  min-height: 3.25rem;
-  min-width: 3.25rem;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
   display: grid;
   place-items: center;
+  border: none;
+  background: transparent;
+  padding: 0.25rem;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.sal-die-slot.is-open {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.sal-die-slot:disabled {
+  cursor: default;
+  opacity: 0.85;
 }
 
 .sal-die-empty {

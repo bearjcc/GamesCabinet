@@ -1,6 +1,8 @@
-/* Dominoes are a dense tabletop, so the board gets the flexible height. */
+/* Dominoes: felt table fills the play area; no inset panel. */
 .play-table:has(.dom-scroll) {
   gap: 0.3rem;
+  background: #1a4d32;
+  border-radius: var(--radius-lg);
 }
 
 .play-table:has(.dom-scroll) .play-table__info {
@@ -20,6 +22,8 @@
 .play-table:has(.dom-scroll) .play-table__pew {
   gap: 0.25rem;
   padding: 0.3rem 0.2rem calc(0.3rem + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, #1a4d32 88%, var(--surface-2));
+  border-top-color: rgb(255 255 255 / 12%);
 }
 
 .dom-scroll {
@@ -28,12 +32,10 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 0.2rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
-  border-radius: var(--radius);
-  background:
-    radial-gradient(circle at 20% 10%, rgb(89 164 213 / 12%), transparent 34%),
-    linear-gradient(135deg, #123b68, #0d2d52);
+  padding: 0.35rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   touch-action: pan-x pan-y;
   overscroll-behavior: contain;
 }
@@ -53,10 +55,12 @@
   overflow: visible;
 }
 
-.dom-tile-orient {
-  width: var(--dom-width);
-  height: var(--dom-length);
-  flex-shrink: 0;
+.dom-tile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  transform-origin: center center;
 }
 
 .dom-starter {
@@ -67,17 +71,17 @@
   min-width: 10rem;
   min-height: var(--tap-min);
   padding: 0.65rem 1rem;
-  border: 2px dashed var(--line);
+  border: 2px dashed rgb(255 255 255 / 35%);
   border-radius: var(--radius-lg);
-  background: var(--surface-2);
-  color: var(--muted);
+  background: rgb(0 0 0 / 18%);
+  color: #f4f0e6;
   font-weight: 600;
   cursor: default;
 }
 
 .dom-starter.lit {
   border-color: var(--you);
-  color: var(--ink);
+  color: var(--ink-contrast);
   cursor: pointer;
 }
 
@@ -116,11 +120,6 @@
   pointer-events: none;
 }
 
-.dom-tile.selected {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
 .dom-hand-slot.is-dragging .dom-tile {
   opacity: 0.35;
 }
@@ -147,87 +146,30 @@
   filter: drop-shadow(0 0 0.35rem color-mix(in srgb, var(--you) 80%, transparent));
 }
 
-.dom-divider {
-  width: 2px;
-  height: 80%;
-  background: #cbbba4;
-}
-
-.pip-face {
-  width: 100%;
-  height: 1.7rem;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 70%;
-}
-
-.pip-0 {
-  background-image: none;
-}
-.pip-1 {
-  background-image: radial-gradient(circle, #2a2420 18%, transparent 19%);
-}
-.pip-2 {
-  background-image:
-    radial-gradient(circle at 30% 30%, #2a2420 14%, transparent 15%),
-    radial-gradient(circle at 70% 70%, #2a2420 14%, transparent 15%);
-}
-.pip-3 {
-  background-image:
-    radial-gradient(circle at 30% 30%, #2a2420 12%, transparent 13%),
-    radial-gradient(circle at 50% 50%, #2a2420 12%, transparent 13%),
-    radial-gradient(circle at 70% 70%, #2a2420 12%, transparent 13%);
-}
-.pip-4 {
-  background-image:
-    radial-gradient(circle at 28% 28%, #2a2420 12%, transparent 13%),
-    radial-gradient(circle at 72% 28%, #2a2420 12%, transparent 13%),
-    radial-gradient(circle at 28% 72%, #2a2420 12%, transparent 13%),
-    radial-gradient(circle at 72% 72%, #2a2420 12%, transparent 13%);
-}
-.pip-5 {
-  background-image:
-    radial-gradient(circle at 28% 28%, #2a2420 11%, transparent 12%),
-    radial-gradient(circle at 72% 28%, #2a2420 11%, transparent 12%),
-    radial-gradient(circle at 50% 50%, #2a2420 11%, transparent 12%),
-    radial-gradient(circle at 30% 72%, #2a2420 11%, transparent 12%),
-    radial-gradient(circle at 72% 72%, #2a2420 11%, transparent 12%);
-}
-.pip-6 {
-  background-image:
-    radial-gradient(circle at 30% 22%, #2a2420 10%, transparent 11%),
-    radial-gradient(circle at 70% 22%, #2a2420 10%, transparent 11%),
-    radial-gradient(circle at 30% 50%, #2a2420 10%, transparent 11%),
-    radial-gradient(circle at 70% 50%, #2a2420 10%, transparent 11%),
-    radial-gradient(circle at 30% 78%, #2a2420 10%, transparent 11%),
-    radial-gradient(circle at 70% 78%, #2a2420 10%, transparent 11%);
-}
-
 .dom-end {
   position: absolute;
   margin: 0;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: var(--line);
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 1rem;
+  border-radius: 0;
+  background: transparent;
+  color: transparent;
+  font-size: 0;
   min-width: var(--tap-min);
   min-height: var(--tap-min);
   display: grid;
   place-items: center;
   touch-action: manipulation;
+  opacity: 0;
 }
 
 .dom-end.lit {
-  background: var(--you);
-  color: var(--ink-contrast);
   cursor: pointer;
 }
 
 .dom-end.snap {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--you) 55%, transparent);
+  transform: none;
+  box-shadow: none;
 }
 
 .dom-hand {

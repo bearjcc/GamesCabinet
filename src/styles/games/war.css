@@ -28,6 +28,25 @@
   min-width: 0;
 }
 
+.war-fight {
+  border: none;
+  background: transparent;
+  padding: 0.35rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.war-fight.is-open {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.war-fight:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
 .war-battle__down {
   font-size: 0.8rem;
   opacity: 0.9;

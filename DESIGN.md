@@ -6,6 +6,16 @@ GamesCabinet is quiet application UI: a cabinet of games, not a marketing site. 
 
 Player-facing philosophy, verbs, and personas live in [`PRODUCT.md`](./PRODUCT.md). This file is how that philosophy shows up in chrome, motion, interaction, and copy.
 
+## Cabinet undertone
+
+The product is a **physical cabinet of games** opened on a small screen — quiet chrome; personality in boards, tokens, felt, and the motion of pieces. Bear at the desk, Mum on a tablet: same honest table, not a dashboard.
+
+**Whimsy** means tabletop handmade feel — felt, a held Connect Four disc, card flip, stone piles — never life-app celebration, confetti, or task-manager checkmarks.
+
+**Earn** every gap, colour, interrupt, and animation. If it has no job (distinction, hierarchy, state, evidence, recognition), remove it. Spacing is structure; feedback is not an interruption; motion is continuity (~200ms on objects), not decoration.
+
+**Explicit exclusions:** not a habit/task manager UI; not Prism-style extension chrome; not SaaS landing density. Cursor rules under `.cursor/rules/` (`intentionality.mdc`, `intentional-spacing.mdc`, and siblings) encode this for agents; this section is the player-facing design source of truth.
+
 ## Themes
 
 Four themes, cycled from the Shell topbar (`ThemeCycle`): **White -> Light -> Dark -> Black -> ...**
@@ -97,6 +107,21 @@ Prefer simulated weight over full physics: squash, ease-out rotate, soft land, c
 **Animation half-life:** the first hour teaches; the hundredth hour waits. Prefer skippable, speedable, and summarisable effects (e.g. "7 abilities resolved - expand") over forced spectacle. Room or player preference beats designer theatre.
 
 Rationale for the object/chrome split: `docs/adr/0001-ui-operating-system-layer.md`.
+
+## Play chrome laws
+
+In-play shell and `PlayTable` enforce these rules so every game inherits the same table behaviour. Game boards supply content; shared chrome owns navigation, turn copy, layout stability, scoring help, and felt treatment.
+
+| Law | Rule |
+|---|---|
+| **Home mark** | The brand in the top-left always opens `/`. When play needs a back path, `Shell` renders a separate Back control — never hijack the logo. |
+| **Stable board frame** | Once the board is drawn, its size does not change. Status, pew actions, endgame buttons, win lines, and rules sit in reserved chrome or overlay the board — no layout shift when commands appear. `PlayTable` reserves pew height when actions are present; `MatchChrome` endgame actions overlay the board. |
+| **Named turns** | Turn status names the active seat (lobby name, colour, symbol, or `Player N`). Never flash generic "Your turn" / "you". Use `deriveMatchStatus` + `turnStatusText`; append action hints after an em dash. |
+| **Hot-seat hold** | Pass-and-play waits `HOTSEAT_TURN_HOLD_MS` (~1.6s) before switching the active seat so humans can read whose turn it is. Bots keep moving; the banner names the next human seat during the hold. |
+| **Scoring help** | Games with points expose how scoring works via `MatchScoreboard` + `ScoreRulesPanel`: collapsed by default, compact toggle, body overlays without stealing board space. |
+| **Felt tables** | Felt and card games set `PlayTable felt`. The page background is the table (`--felt-bg` in `felt.css`) — no arbitrary coloured panel behind cards or tiles. |
+
+Implementation homes: `Shell.tsx`, `PlayTable.tsx`, `MatchChrome.tsx`, `MatchScoreboard.tsx`, `ScoreRulesPanel.tsx`, `deriveMatchStatus`, `withHotseatSeatSync`, `felt.css`, `play-table.css`.
 
 ## Board-first interaction law
 
@@ -206,3 +231,11 @@ This cabinet is a quiet app, not a marketing site or a vibecoded demo. Personali
 **Do:** denser grids; short descriptive copy; board-native controls; colourful boards; demonstrate before explaining; reversible or clearly safe actions; shared tabletop language across games; Kenney CC0 art by default with per-game override when identity needs it.
 
 **Don't:** heroes, eyebrows, pill CTAs, marketing parchment aesthetics (Light theme warmth is chrome, not a landing page), glassmorphism, nested cards, promotional badges, giant type, fake nostalgia, forced tutorials, unskippable celebration, beginner-mode walls, storefront chrome in play, pipeline notes on the site (WIP chapter numbers, engine enum names, unimplemented tiebreaks), vibecode accent colours, move-menu button strips, AI-slop typography defaults.
+
+## Table setup (launch screen)
+
+Research: Tabletop Simulator ties **seat colour to table position** (tap a spot, see the piece move); Board Game Arena assigns colours automatically and shows them on **player pieces**, not a separate palette; Ascension digital skips colour picking and uses **fixed player positions** with avatars.
+
+**Borrowed:** seats arranged around a central well; each spot shows a **disc token** (or open ring) as the player's piece colour; tap the spot to claim or cycle seat type; Hogwarts uses **hero names** on the spot instead of a generic colour grid; campaign year is a **compact chip row** (years 1-7 only).
+
+**Refused:** per-seat dropdowns and swatch grids; a separate colour puzzle decoupled from pieces; settings-form button strips for Empty / Local / Online / Bot; Ascension-style hidden colour assignment without showing whose piece is whose at the table.

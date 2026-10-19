@@ -1,0 +1,43 @@
+---
+description: "Interruptions are scarce. Feedback is not an interruption. Prefer undo over confirm."
+alwaysApply: true
+---
+
+# Interruptions and notifications
+
+Player-facing copy rules: `.cursor/rules/player-facing.mdc`. Agency patterns: [`DESIGN.md`](../../DESIGN.md) → Agency guidelines.
+
+## Principle
+
+The player's attention is for the **game**, not the shell. Interruptions are **scarce** and must earn their moment.
+
+**Feedback ≠ interruption.** A border tint on status, inline error under a field, or disabled control with a reason is feedback. A modal that blocks the board is an interruption.
+
+## Escalation ladder
+
+Use the **lightest** layer that still communicates:
+
+1. **Toast** — transient, non-blocking acknowledgement (rare in this cabinet; prefer inline).
+2. **Banner** — persistent but dismissible context (room waiting, connection).
+3. **Notification** — out-of-band or async (not primary in Phase 1 shell).
+4. **Modal** — blocks interaction; only when the player must choose before play can continue (suit picker, placement confirm with no board target).
+5. **Alert** — hard stop for data loss or irreversible harm (almost never for tabletop moves).
+
+Do **not** use a modal just to ensure something was seen. Do not use marketing urgency (countdowns, "Don't miss", confetti CTAs).
+
+## Prefer undo over confirm
+
+| Prefer | Avoid |
+|---|---|
+| Undo after a harmless act | "Are you sure?" for reversible moves |
+| Inline explanation on illegal tap | Blocking dialog explaining rules |
+| Status bar + quiet cues | Coach-mark tours in play |
+| Optional room timers | Mandatory play clocks baked into UX |
+
+Evaluate new flows on **agency** (speed, skip, undo, inspect) from `DESIGN.md`.
+
+## GamesCabinet tone
+
+Whimsy belongs in **board motion** (disc drop, card flip), not life-app celebration or task-manager nagging. No confetti for opening the catalogue.
+
+Conflicts: favour **intentionality** and table fidelity over attention theft.

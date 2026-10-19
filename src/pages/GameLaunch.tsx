@@ -12,6 +12,7 @@ import {
 } from '../games/hogwarts-battle/setup';
 import { getGameMeta, isAccessGated, isSoloOnly, soloPlayPath } from '../lib/games';
 import { hostRoom } from '../lib/lobby';
+import { ensureSeatColours, seatColoursQuery } from '../lib/seatColours';
 import { getNickname, getUnlockedGames, setNickname } from '../lib/storage';
 import {
   deriveLaunch,
@@ -92,12 +93,14 @@ export function GameLaunch() {
     const name = getNickname() || 'Player';
     setNickname(name);
     try {
+      const colouredSeats = ensureSeatColours(boundedSeats);
       const room = await hostRoom(
         meta.id,
         launchPlan.seats,
         name,
         hogwartsSetup,
-        ownedDeviceJoins(boundedSeats),
+        ownedDeviceJoins(colouredSeats),
+        seatColoursQuery(colouredSeats) ?? undefined,
       );
       navigate(`/g/${room.gameName}/${room.matchID}`);
     } catch (e) {
@@ -109,14 +112,22 @@ export function GameLaunch() {
 
   function onStart() {
     if (!meta || launchPlan.status !== 'ready' || launchPlan.mode === 'online') return;
+    const colouredSeats = ensureSeatColours(boundedSeats);
+    const colourQuery = seatColoursQuery(colouredSeats);
     if (launchPlan.mode === 'bot') {
-      navigate(`/vs-bot/${meta.id}?kinds=${occupiedKindsQuery(boundedSeats)}`);
+      const params = new URLSearchParams({ kinds: occupiedKindsQuery(colouredSeats) });
+      if (colourQuery) params.set('colours', colourQuery);
+      navigate(`/vs-bot/${meta.id}?${params.toString()}`);
       return;
     }
     const query =
       meta.id === 'hogwarts-battle' && hogwartsSetup
         ? hogwartsPlayQuery(hogwartsSetup, launchPlan.seats)
-        : `?seats=${launchPlan.seats}`;
+        : (() => {
+            const params = new URLSearchParams({ seats: String(launchPlan.seats) });
+            if (colourQuery) params.set('colours', colourQuery);
+            return `?${params.toString()}`;
+          })();
     navigate(`/play/${meta.id}${query}`);
   }
 
@@ -170,20 +181,31 @@ export function GameLaunch() {
         }
         centreContent={
           meta.id === 'hogwarts-battle' ? (
-            <label className="table-year">
-              <span>Year</span>
-              <select
-                data-testid="hogwarts-year"
-                onChange={(event) => changeHogwartsYear(Number(event.target.value))}
-                value={hogwartsYear}
-              >
+            <div className="table-year-strip" data-testid="hogwarts-year-strip">
+              <span className="table-year-label">Year</span>
+              <div className="table-year-chips" role="radiogroup" aria-label="Campaign year">
                 {HOGWARTS_CAMPAIGNS.map((campaign) => (
-                  <option key={campaign.number} value={campaign.number}>
-                    Year {campaign.number}: {campaign.name}
-                  </option>
+                  <button
+                    aria-checked={hogwartsYear === campaign.number}
+                    className={
+                      hogwartsYear === campaign.number
+                        ? 'table-year-chip selected'
+                        : 'table-year-chip'
+                    }
+                    data-testid={`hogwarts-year-${campaign.number}`}
+                    key={campaign.number}
+                    onClick={() => changeHogwartsYear(campaign.number)}
+                    role="radio"
+                    type="button"
+                  >
+                    {campaign.number}
+                  </button>
                 ))}
-              </select>
-            </label>
+              </div>
+              <p className="table-year-name">
+                {HOGWARTS_CAMPAIGNS.find((campaign) => campaign.number === hogwartsYear)?.name}
+              </p>
+            </div>
           ) : null
         }
         maxSeats={maxSeats}
@@ -191,26 +213,29 @@ export function GameLaunch() {
         onChange={updateSeats}
         seatDetails={
           meta.id === 'hogwarts-battle'
-            ? (seat, index) => (
-                <label className="table-seat-detail">
-                  <span>Hero</span>
-                  <select
+            ? (seat, index) => {
+                const heroes = getHogwartsHeroesForYear(hogwartsYear);
+                const heroId = seat.role ?? heroes[index]?.id ?? heroes[0]?.id ?? '';
+                const hero = heroes.find((entry) => entry.id === heroId) ?? heroes[0];
+                if (!hero) return null;
+                return (
+                  <button
+                    className="table-spot-hero"
                     data-testid={`hogwarts-hero-${index}`}
-                    onChange={(event) => changeHogwartsHero(index, event.target.value)}
-                    value={seat.role ?? getHogwartsHeroIdsForYear(hogwartsYear)[index]}
+                    onClick={() => {
+                      const nextIndex =
+                        (heroes.findIndex((entry) => entry.id === hero.id) + 1) % heroes.length;
+                      changeHogwartsHero(index, heroes[nextIndex]!.id);
+                    }}
+                    type="button"
                   >
-                    {getHogwartsHeroesForYear(hogwartsYear).map((hero) => (
-                      <option key={hero.id} value={hero.id}>
-                        {hero.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )
+                    {hero.name}
+                  </button>
+                );
+              }
             : undefined
         }
         seats={boundedSeats}
-        showColours={meta.id !== 'hogwarts-battle'}
       />
       {error ? (
         <p className="error" role="alert">
@@ -228,8 +253,9 @@ function createTableSeats(meta: ReturnType<typeof getGameMeta>, year: number): T
       : (meta?.maxPlayers ?? 1);
   const defaultCount = Math.min(maxSeats, meta && meta.minPlayers >= 2 ? meta.minPlayers : 1);
   const heroes = meta?.id === 'hogwarts-battle' ? getHogwartsHeroIdsForYear(year) : [];
-  return Array.from({ length: maxSeats }, (_, index) => ({
+  const initial = Array.from({ length: maxSeats }, (_, index) => ({
     kind: index < defaultCount ? ('local' as const) : ('empty' as const),
     ...(heroes[index] ? { role: heroes[index] } : {}),
   }));
+  return meta?.id === 'hogwarts-battle' ? initial : ensureSeatColours(initial);
 }

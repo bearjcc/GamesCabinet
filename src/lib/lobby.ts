@@ -12,7 +12,11 @@ export type RoomInfo = {
   setupData?: unknown;
 };
 
-export type SeatedRoom = RoomInfo & DeviceSeat & { localSeats?: DeviceSeat[] };
+export type SeatedRoom = RoomInfo &
+  DeviceSeat & {
+    localSeats?: DeviceSeat[];
+    seatColourQuery?: string;
+  };
 
 export const BOT_SEAT_NAME = 'Bot';
 
@@ -48,6 +52,7 @@ function seatedFromJoins(
   matchID: string,
   seats: DeviceSeat[],
   setupData?: unknown,
+  seatColourQuery?: string,
 ): SeatedRoom {
   const first = seats[0]!;
   return {
@@ -57,6 +62,7 @@ function seatedFromJoins(
     credentials: first.credentials,
     ...(seats.length > 1 ? { localSeats: seats } : {}),
     ...(setupData === undefined ? {} : { setupData }),
+    ...(seatColourQuery ? { seatColourQuery } : {}),
   };
 }
 
@@ -99,6 +105,7 @@ export async function hostRoom(
   playerName: string,
   setupData?: unknown,
   deviceJoins?: readonly DeviceJoin[] | readonly string[],
+  seatColourQuery?: string,
 ): Promise<SeatedRoom> {
   const { matchID } = await lobby.createMatch(gameName, {
     numPlayers,
@@ -106,7 +113,7 @@ export async function hostRoom(
     ...(setupData === undefined ? {} : { setupData }),
   });
   const seats = await joinDeviceSeats(gameName, matchID, playerName, deviceJoins);
-  const room = seatedFromJoins(gameName, matchID, seats, setupData);
+  const room = seatedFromJoins(gameName, matchID, seats, setupData, seatColourQuery);
   saveSeat(room);
   return room;
 }
@@ -196,7 +203,13 @@ export async function rematchRoom(session: SeatSession, playerName: string): Pro
       kind: seat.kind === 'bot' ? ('bot' as const) : ('local' as const),
     })),
   );
-  const next = seatedFromJoins(session.gameName, nextMatchID, joined, session.setupData);
+  const next = seatedFromJoins(
+    session.gameName,
+    nextMatchID,
+    joined,
+    session.setupData,
+    session.seatColourQuery,
+  );
   saveSeat(next);
   return next;
 }

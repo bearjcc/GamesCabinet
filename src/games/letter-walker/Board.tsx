@@ -10,10 +10,7 @@ import { getNickname } from '../../lib/storage';
 import { getLetterWalkerActions } from './actions';
 import { dictionarySize, parseDictionaryText, setLetterWalkerDictionary } from './dictionary';
 import type { LetterWalkerState, ShiftDir } from './game';
-import { GRID_SIZE } from './game';
 import { type CellPos, extendSelection, wordFromGrid } from './selection';
-
-type PointerMode = 'auto' | 'slide' | 'select';
 
 type SlideGesture = {
   pointerId: number;
@@ -36,7 +33,6 @@ function cellSizePx(board: HTMLElement | null): number {
 
 export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalkerState>) {
   const boardRef = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<PointerMode>('auto');
   const [selected, setSelected] = useState<CellPos[]>([]);
   const [dictReady, setDictReady] = useState(dictionarySize() > 0);
   const [dictError, setDictError] = useState(false);
@@ -92,7 +88,7 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
   }
 
   function onTapCell(row: number, col: number) {
-    if (!playable || mode === 'slide') return;
+    if (!playable) return;
     setSelected((prev) => extendSelection(prev, row, col));
   }
 
@@ -158,12 +154,7 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
     const wasSlide = Boolean(slide?.axis);
     if (slide && slide.pointerId === e.pointerId) slideRef.current = null;
 
-    if (mode === 'select') {
-      selectPointerRef.current = null;
-      return;
-    }
-
-    if (mode === 'auto' && !wasSlide && playable) {
+    if (!wasSlide && playable) {
       onTapCell(row, col);
     }
   }
@@ -190,7 +181,6 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
     }
   }
 
-  // Solo puzzle chrome — not the multiplayer turn/win shape of deriveMatchStatus.
   let status = `Score ${G.score} · Moves ${G.moves} · Puzzle ${G.puzzleNumber}`;
   let tone: StatusTone = 'you';
   if (G.completed) {
@@ -240,22 +230,6 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
         info={
           <>
             <StatusBar text={status} tone={tone} />
-            <div className="lw-toolbar" role="group" aria-label="Letter Walker controls">
-              <div className="lw-modes" role="radiogroup" aria-label="Pointer mode">
-                {(['auto', 'slide', 'select'] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className={`btn lw-mode${mode === m ? ' is-active' : ''}`}
-                    aria-pressed={mode === m}
-                    data-testid={`lw-mode-${m}`}
-                    onClick={() => setMode(m)}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
             {message ? (
               <p className="lw-message" role="status" data-testid="lw-message">
                 {message}
@@ -269,120 +243,63 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
               {selectedWord || '—'}
             </div>
 
-            <div className="lw-board-wrap">
-              <div className="lw-col-arrows lw-col-arrows--top">
-                {Array.from({ length: GRID_SIZE }, (_, c) => (
-                  <button
-                    key={`up-${c}`}
-                    type="button"
-                    className="btn lw-arrow"
-                    disabled={!playable}
-                    data-testid={`lw-col-up-${c}`}
-                    aria-label={`Slide column ${c + 1} up`}
-                    onClick={() => onShift(c, 'up')}
-                  >
-                    U
-                  </button>
-                ))}
-              </div>
-
-              <div className="lw-mid">
-                <div className="lw-row-arrows">
-                  {Array.from({ length: GRID_SIZE }, (_, r) => (
-                    <button
-                      key={`left-${r}`}
-                      type="button"
-                      className="btn lw-arrow"
-                      disabled={!playable}
-                      data-testid={`lw-row-left-${r}`}
-                      aria-label={`Slide row ${r + 1} left`}
-                      onClick={() => onShift(r, 'left')}
+            <div
+              ref={boardRef}
+              className="lw-board"
+              role="grid"
+              aria-label="Letter Walker board"
+              data-testid="lw-board"
+            >
+              {G.grid.map((row, r) =>
+                row.map((letter, c) => {
+                  const isSel = selected.some((s) => s.row === r && s.col === c);
+                  return (
+                    <div
+                      key={`${r}-${c}`}
+                      className={`lw-cell${isSel ? ' is-selected' : ''}`}
+                      role="gridcell"
+                      data-row={r}
+                      data-col={c}
+                      data-testid={`lw-cell-${r}-${c}`}
+                      onPointerDown={(e) => {
+                        if (!playable) return;
+                        if (e.pointerType === 'touch' && e.cancelable) e.preventDefault();
+                        if (e.shiftKey) {
+                          selectPointerRef.current = e.pointerId;
+                          setSelected([{ row: r, col: c }]);
+                          (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+                          return;
+                        }
+                        beginSlide(e, r, c);
+                      }}
+                      onPointerMove={(e) => {
+                        if (selectPointerRef.current === e.pointerId) {
+                          if (e.cancelable) e.preventDefault();
+                          onSelectMove(e.clientX, e.clientY);
+                          return;
+                        }
+                        updateSlide(e);
+                      }}
+                      onPointerUp={(e) => {
+                        if (selectPointerRef.current === e.pointerId) {
+                          selectPointerRef.current = null;
+                          return;
+                        }
+                        endPointer(e, r, c);
+                      }}
+                      onPointerCancel={(e) => {
+                        if (selectPointerRef.current === e.pointerId) {
+                          selectPointerRef.current = null;
+                          return;
+                        }
+                        endPointer(e, r, c);
+                      }}
                     >
-                      L
-                    </button>
-                  ))}
-                </div>
-
-                <div
-                  ref={boardRef}
-                  className="lw-board"
-                  role="grid"
-                  aria-label="Letter Walker board"
-                  data-testid="lw-board"
-                >
-                  {G.grid.map((row, r) =>
-                    row.map((letter, c) => {
-                      const isSel = selected.some((s) => s.row === r && s.col === c);
-                      return (
-                        <div
-                          key={`${r}-${c}`}
-                          className={`lw-cell${isSel ? ' is-selected' : ''}`}
-                          role="gridcell"
-                          data-row={r}
-                          data-col={c}
-                          data-testid={`lw-cell-${r}-${c}`}
-                          onPointerDown={(e) => {
-                            if (!playable) return;
-                            if (e.pointerType === 'touch' && e.cancelable) e.preventDefault();
-                            if (mode === 'select') {
-                              selectPointerRef.current = e.pointerId;
-                              setSelected([{ row: r, col: c }]);
-                              (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-                              return;
-                            }
-                            beginSlide(e, r, c);
-                          }}
-                          onPointerMove={(e) => {
-                            if (mode === 'select') {
-                              if (selectPointerRef.current !== e.pointerId) return;
-                              if (e.cancelable) e.preventDefault();
-                              onSelectMove(e.clientX, e.clientY);
-                              return;
-                            }
-                            updateSlide(e);
-                          }}
-                          onPointerUp={(e) => endPointer(e, r, c)}
-                          onPointerCancel={(e) => endPointer(e, r, c)}
-                        >
-                          {letter}
-                        </div>
-                      );
-                    }),
-                  )}
-                </div>
-
-                <div className="lw-row-arrows">
-                  {Array.from({ length: GRID_SIZE }, (_, r) => (
-                    <button
-                      key={`right-${r}`}
-                      type="button"
-                      className="btn lw-arrow"
-                      disabled={!playable}
-                      data-testid={`lw-row-right-${r}`}
-                      aria-label={`Slide row ${r + 1} right`}
-                      onClick={() => onShift(r, 'right')}
-                    >
-                      R
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="lw-col-arrows lw-col-arrows--bottom">
-                {Array.from({ length: GRID_SIZE }, (_, c) => (
-                  <button
-                    key={`down-${c}`}
-                    type="button"
-                    className="btn lw-arrow"
-                    disabled={!playable}
-                    data-testid={`lw-col-down-${c}`}
-                    aria-label={`Slide column ${c + 1} down`}
-                    onClick={() => onShift(c, 'down')}
-                  >
-                    D
-                  </button>
-                ))}
-              </div>
+                      {letter}
+                    </div>
+                  );
+                }),
+              )}
             </div>
           </div>
         }
@@ -414,19 +331,8 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
           onEscape={() => setHelpOpen(false)}
         >
           <h2 id="lw-help-title">Letter Walker</h2>
-          <p>Slide rows and columns to line up a word, then submit it.</p>
-          <ul>
-            <li>
-              <strong>Auto</strong> (default): drag slides a row or column; tap cells to build a
-              word.
-            </li>
-            <li>
-              <strong>Slide</strong>: drag only; taps do not select.
-            </li>
-            <li>
-              <strong>Select</strong>: drag to select a straight word (classic).
-            </li>
-          </ul>
+          <p>Drag a row or column to slide letters. Tap cells to build a word, then submit it.</p>
+          <p>Hold Shift while dragging to select a straight word instead.</p>
           <p>
             Score: 10 per letter, minus moves; 8-letter words score double. Concept by Luke Walker.
           </p>

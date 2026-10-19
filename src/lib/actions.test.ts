@@ -3,6 +3,7 @@ import {
   ACTION_KINDS,
   actionAriaLabel,
   actionTitle,
+  boardFirstChromeActions,
   controlA11y,
   isActionInteractive,
   isActionKind,
@@ -58,6 +59,17 @@ describe('semantic actions', () => {
     expect(actionAriaLabel(action)).toBe('Roll. No rolls left');
     expect(actionTitle({ id: 'ok', kind: 'confirm', label: 'OK' })).toBeUndefined();
     expect(actionAriaLabel({ id: 'ok', kind: 'confirm', label: 'OK' })).toBe('OK');
+  });
+
+  it('filters move intents out of pew chrome', () => {
+    const actions: SemanticAction[] = [
+      { id: 'place-0', kind: 'move', label: 'Place' },
+      { id: 'pass', kind: 'dismiss', label: 'Pass' },
+      { id: 'roll', kind: 'roll', label: 'Roll' },
+      { id: 'ask-A', kind: 'choose', label: 'Ask for aces' },
+      { id: 'ready', kind: 'confirm', label: 'Ready' },
+    ];
+    expect(boardFirstChromeActions(actions).map((a) => a.id)).toEqual(['pass', 'roll', 'ready']);
   });
 
   it('builds control a11y for board taps and pew buttons alike', () => {

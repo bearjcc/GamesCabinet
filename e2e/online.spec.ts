@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
-import { openOnlinePair, readRoomCode } from './helpers';
+import { openOnlinePair, pickHogwartsHero, readRoomCode, setTableSeatKind } from './helpers';
 
 async function playCrazyEightsTurn(page: Page) {
   const playable = page.locator('.tt-hand button.is-playable');
@@ -29,8 +29,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-tic-tac-toe').click();
-    await hostPage.getByTestId('table-seat-0-kind-online').click();
-    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await setTableSeatKind(hostPage, 0, 'online');
+    await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('room-code')).toBeVisible();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
@@ -54,7 +54,7 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-tic-tac-toe').click();
-    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
     const code = await readRoomCode(hostPage);
@@ -66,7 +66,7 @@ test.describe('GamesCabinet smokes', () => {
     await expect(hostPage.getByTestId('ttt-board')).toBeVisible();
 
     await hostPage.getByTestId('ttt-cell-0').click();
-    await expect(guestPage.getByTestId('ttt-cell-0')).toContainText('X');
+    await expect(guestPage.getByTestId('ttt-cell-0')).toHaveAttribute('data-mark', 'X');
 
     await close();
   });
@@ -76,7 +76,7 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-crazy-eights').click();
-    await hostPage.getByTestId('table-seat-2-kind-online').click();
+    await setTableSeatKind(hostPage, 2, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
     const code = await readRoomCode(hostPage);
@@ -96,8 +96,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-crazy-eights').click();
-    await hostPage.getByTestId('table-seat-1-kind-bot').click();
-    await hostPage.getByTestId('table-seat-2-kind-online').click();
+    await setTableSeatKind(hostPage, 1, 'bot');
+    await setTableSeatKind(hostPage, 2, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
     const code = await readRoomCode(hostPage);
@@ -109,7 +109,7 @@ test.describe('GamesCabinet smokes', () => {
     await expect(hostPage.getByTestId('ce-board')).toBeVisible();
 
     await playCrazyEightsTurn(hostPage);
-    await expect(guestPage.locator('.status')).toContainText(/Your turn/i, { timeout: 30_000 });
+    await expect(guestPage.locator('.status')).toContainText(/'s turn/i, { timeout: 30_000 });
 
     await close();
   });
@@ -119,8 +119,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-connect-four').click();
-    await hostPage.getByTestId('table-seat-0-kind-online').click();
-    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await setTableSeatKind(hostPage, 0, 'online');
+    await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
 
@@ -138,8 +138,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-yatzy').click();
-    await hostPage.getByTestId('table-seat-0-kind-online').click();
-    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await setTableSeatKind(hostPage, 0, 'online');
+    await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
@@ -163,12 +163,12 @@ test.describe('GamesCabinet smokes', () => {
     await guestPage.addInitScript(unlock);
 
     await hostPage.goto('/game/hogwarts-battle');
-    await hostPage.getByTestId('hogwarts-year').selectOption('7');
-    await hostPage.getByTestId('table-seat-1-kind-local').click();
-    await hostPage.getByTestId('hogwarts-hero-0').selectOption('neville');
-    await hostPage.getByTestId('hogwarts-hero-1').selectOption('harry');
-    await hostPage.getByTestId('table-seat-0-kind-online').click();
-    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await hostPage.getByTestId('hogwarts-year-7').click();
+    await setTableSeatKind(hostPage, 1, 'local');
+    await pickHogwartsHero(hostPage, 0, 'Neville Longbottom');
+    await pickHogwartsHero(hostPage, 1, 'Harry Potter');
+    await setTableSeatKind(hostPage, 0, 'online');
+    await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
     const code = await readRoomCode(hostPage);
@@ -188,8 +188,8 @@ test.describe('GamesCabinet smokes', () => {
 
     await hostPage.goto('/');
     await hostPage.getByTestId('home-game-tic-tac-toe').click();
-    await hostPage.getByTestId('table-seat-0-kind-online').click();
-    await hostPage.getByTestId('table-seat-1-kind-online').click();
+    await setTableSeatKind(hostPage, 0, 'online');
+    await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
 
