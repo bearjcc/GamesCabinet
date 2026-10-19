@@ -1,6 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Roll } from '../../components/cinematic';
+import { ActionSurface } from '../../components/ActionSurface';
+import { GameRules } from '../../components/GameRules';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
@@ -8,6 +9,7 @@ import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { composeDieFaceArt, dieFaceArtMap, kenneyDieFaceAsset } from '../shared/dice';
+import { getYatzyActions } from './actions';
 import type { YatzyState } from './game';
 import {
   CATEGORIES,
@@ -18,7 +20,6 @@ import {
   upperTotal,
 } from './scoring';
 
-/** Kenney d6 faces via shared dice slots (ADR Decision 5). */
 const YATZY_FACE_ART = composeDieFaceArt(
   dieFaceArtMap({
     1: kenneyDieFaceAsset(1),
@@ -50,8 +51,7 @@ export function YatzyBoard({
   const canScore = yourTurn && G.rolls > 0;
   const solo = ctx.numPlayers === 1;
   const [tab, setTab] = useState<'play' | 'scores'>('play');
-  /** Client-only roll pulse; remounts Roll so motion never gates G. */
-  const [rollPulse, setRollPulse] = useState(0);
+  const [rolling, setRolling] = useState(false);
   const prevRollsRef = useRef(G.rolls);
   const prevDiceRef = useRef<readonly number[]>(G.dice.slice());
 
@@ -59,7 +59,11 @@ export function YatzyBoard({
     const rolled = G.rolls > prevRollsRef.current;
     const changed = diceValuesChanged(prevDiceRef.current, G.dice);
     if (rolled && changed) {
-      setRollPulse((n) => n + 1);
+      setRolling(true);
+      const t = window.setTimeout(() => setRolling(false), 360);
+      prevRollsRef.current = G.rolls;
+      prevDiceRef.current = G.dice.slice();
+      return () => window.clearTimeout(t);
     }
     prevRollsRef.current = G.rolls;
     prevDiceRef.current = G.dice.slice();
@@ -98,12 +102,25 @@ export function YatzyBoard({
     return name?.trim() || `P${i + 1}`;
   };
 
-  const canRoll = yourTurn && G.rolls < 3;
+  const pewActions = getYatzyActions({ rolls: G.rolls, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
+    ...action,
+    onAction: () => {
+      if (action.id === 'roll') moves.rollDice();
+    },
+  }));
 
   const info = (
     <>
       <StatusBar text={status} tone={tone} />
       <MatchScoreboard scores={[{ label: 'Roll', value: `${G.rolls}/3` }]} testId="yatzy-meta" />
+      <GameRules testId="yatzy-rules">
+        <p>Upper section: sum the matching faces. Reach 63 for a 35-point bonus.</p>
+        <p>
+          Lower section: pairs, straights, full house, chance, and Yatzy each score by their rule.
+        </p>
+        <p>Yatzy (five alike) scores 50. Total after fifteen boxes wins.</p>
+      </GameRules>
     </>
   );
 
@@ -112,14 +129,14 @@ export function YatzyBoard({
       <table className="yatzy-card" data-testid="yatzy-card">
         <thead>
           <tr>
-            <th scope="col">Category</th>
+            <th scope="col">Cat.</th>
             {G.scores.map((_, i) => (
               <th
                 key={i}
                 scope="col"
                 className={i === Number(ctx.currentPlayer) ? 'is-active' : ''}
               >
-                {seatLabel(i)}
+                {solo ? 'You' : seatLabel(i)}
               </th>
             ))}
           </tr>
@@ -155,19 +172,19 @@ export function YatzyBoard({
             </tr>
           ))}
           <tr className="yatzy-sub">
-            <th scope="row">Upper</th>
+            <th scope="row">Up</th>
             {G.scores.map((scoreCard, i) => (
               <td key={i}>{upperTotal(scoreCard)}</td>
             ))}
           </tr>
           <tr className="yatzy-sub">
-            <th scope="row">Bonus</th>
+            <th scope="row">+35</th>
             {G.scores.map((scoreCard, i) => (
               <td key={i}>{upperBonus(scoreCard)}</td>
             ))}
           </tr>
           <tr className="yatzy-total">
-            <th scope="row">Total</th>
+            <th scope="row">Σ</th>
             {G.scores.map((scoreCard, i) => (
               <td key={i}>{grandTotal(scoreCard)}</td>
             ))}
@@ -178,31 +195,21 @@ export function YatzyBoard({
   );
 
   const pew = (
-    <div className="yatzy-dice">
-      <Roll key={rollPulse} active={rollPulse > 0} className="yatzy-dice__cinematic">
-        <DiceTray
-          dice={G.dice}
-          held={G.held}
-          disabled={!canHold}
-          onToggle={(i) => moves.toggleDie(i)}
-          faceArt={YATZY_FACE_ART}
-          testId="yatzy-dice"
-          testIdPrefix="yatzy-die"
-          label="Dice"
-        />
-      </Roll>
-      {canRoll ? (
-        <button
-          type="button"
-          className="btn yatzy-roll"
-          data-testid="yatzy-roll"
-          onClick={() => moves.rollDice()}
-        >
-          Roll ({G.rolls}/3)
-        </button>
-      ) : null}
+    <div className={`yatzy-dice${rolling ? ' is-rolling' : ''}`}>
+      <DiceTray
+        dice={G.dice}
+        held={G.held}
+        disabled={!canHold}
+        onToggle={(i) => moves.toggleDie(i)}
+        faceArt={YATZY_FACE_ART}
+        testId="yatzy-dice"
+        testIdPrefix="yatzy-die"
+        label="Dice"
+      />
     </div>
   );
+
+  const actionSurface = <ActionSurface label="Yatzy actions" actions={surfaceActions} />;
 
   if (solo) {
     return (
@@ -215,9 +222,10 @@ export function YatzyBoard({
         info={info}
         board={card}
         pew={pew}
+        actions={actionSurface}
       />
     );
   }
 
-  return <PlayTable info={info} board={card} pew={pew} />;
+  return <PlayTable info={info} board={card} pew={pew} actions={actionSurface} />;
 }

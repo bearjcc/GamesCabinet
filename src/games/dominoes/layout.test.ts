@@ -6,6 +6,7 @@ import {
   TILE_LONG_REM,
   TILE_SHORT_REM,
   tileBoxRem,
+  tileDisplayRotation,
 } from './layout';
 
 describe('tileBoxRem', () => {
@@ -68,6 +69,15 @@ describe('boardBoundsRem empty board', () => {
       width: TILE_SHORT_REM * 2,
       height: TILE_SHORT_REM * 2,
     });
+  });
+});
+
+describe('tileDisplayRotation', () => {
+  it('maps rules rotation to Kenney portrait art', () => {
+    expect(tileDisplayRotation(0)).toBe(90);
+    expect(tileDisplayRotation(180)).toBe(270);
+    expect(tileDisplayRotation(90)).toBe(0);
+    expect(tileDisplayRotation(270)).toBe(180);
   });
 });
 

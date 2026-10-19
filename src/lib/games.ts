@@ -113,10 +113,11 @@ export const GAMES: GameMeta[] = [
   {
     id: 'memory',
     name: 'Memory',
-    blurb: 'Flip pairs. Most matches wins.',
-    minPlayers: 2,
+    blurb: 'Flip pairs. Play solo or race a friend.',
+    minPlayers: 1,
     maxPlayers: 2,
     hasBot: true,
+    hasSolo: true,
     hasLocal: true,
   },
   {

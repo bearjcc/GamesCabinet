@@ -12,6 +12,14 @@ export function isVerticalRot(rot: number): boolean {
   return rot === 90 || rot === 270;
 }
 
+/** Kenney domino art is portrait; map rules rotation to CSS degrees. */
+export function tileDisplayRotation(rot: 0 | 90 | 180 | 270): number {
+  if (rot === 0) return 90;
+  if (rot === 180) return 270;
+  if (rot === 90) return 0;
+  return 180;
+}
+
 /** Axis-aligned box for a placed tile (rotation applied visually via CSS). */
 export function tileBoxRem(x: number, y: number, rot: number): BoxRem {
   const cx = x * TILE_LONG_REM;

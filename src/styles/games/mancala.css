@@ -27,12 +27,9 @@
 .mancala-store {
   min-height: var(--tap-min);
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgb(255 255 255 / 20%);
   background: #2a4a36;
   color: #f4f0e6;
-  font-family: var(--font);
-  font-size: 1.15rem;
-  font-weight: 700;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,13 +41,16 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 2px;
-  max-width: 90%;
+  align-content: center;
+  gap: 3px;
+  max-width: 92%;
+  max-height: 92%;
+  padding: 0.15rem;
 }
 
 .mancala-stones .tt-token {
-  width: 0.42rem;
-  height: 0.42rem;
+  width: 0.55rem;
+  height: 0.55rem;
 }
 
 .mancala-stones .tt-token--p0 {
@@ -68,7 +68,7 @@
 
 .mancala-pit.is-open {
   cursor: pointer;
-  border-color: rgba(244, 240, 230, 0.55);
+  border-color: rgb(244 240 230 / 55%);
   background: #355c43;
 }
 
@@ -80,20 +80,14 @@
 
 .mancala-store {
   border-radius: var(--radius-lg);
-  padding: 0.5rem 0.35rem;
-  gap: 0.25rem;
+  padding: 0.35rem 0.25rem;
+  gap: 0.2rem;
 }
 
-/* Pit chrome owns the circle; hide Counter label (aria is on the button). */
-.mancala-pit .tt-counter__label {
-  display: none;
-}
-
-.mancala-pit .tt-counter__value {
-  font-size: inherit;
-  font-weight: inherit;
-}
-
-.mancala-store .tt-counter__label {
-  color: inherit;
+.mancala-store__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
 }

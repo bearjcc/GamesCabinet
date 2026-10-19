@@ -8,11 +8,10 @@ import {
 } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Snap } from '../../components/cinematic';
+import { GameRules } from '../../components/GameRules';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { boardFirstChromeActions } from '../../lib/actions';
-import { turnStatusText } from '../../lib/matchPlayers';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
@@ -24,6 +23,7 @@ import {
   TILE_LONG_REM,
   TILE_SHORT_REM,
   tileBoxRem,
+  tileDisplayRotation,
 } from './layout';
 
 const KENNEY = '/assets/kenney/domino-pack/Vector/Light';
@@ -83,12 +83,12 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
     isYourTurn: yourTurn,
   });
   let status = baseStatus;
-  if (yourTurn && !ctx.gameover) {
-    const named = turnStatusText(ctx.currentPlayer, { matchData: undefined });
-    if (drag) status = `${named} — drop on a glowing end`;
-    else if (handIndex === null) status = `${named} — drag or tap a tile`;
-    else if (G.board.length === 0) status = `${named} — play starter below, or drop on the table`;
-    else status = `${named} — tap a glowing end or Play on end below`;
+  if (G.showing) status = 'Blocked — showing hands for pip count';
+  else if (yourTurn && !ctx.gameover) {
+    if (drag) status = 'Drop on an open end';
+    else if (handIndex === null) status = 'Your turn — drag a tile to play';
+    else if (G.board.length === 0) status = 'Drop a starter on the table';
+    else status = 'Drag to an open end';
   }
 
   const clientToStageRem = (clientX: number, clientY: number) => {
@@ -178,45 +178,44 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
       ? placementForEnd(G.ends[hoverEnd], dragTile)
       : null;
 
-  const chromeActions = boardFirstChromeActions(
-    getDominoesActions({ G, player: pid, yourTurn, handIndex }),
-  ).map((action) => ({
+  const pewActions = getDominoesActions({ G, player: pid, yourTurn });
+  const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
       if (action.id === 'draw') {
         moves.drawTile();
         return;
       }
-      if (action.id === 'pass') moves.pass();
+      if (action.id === 'pass') {
+        moves.pass();
+      }
     },
+  }));
+
+  const scoreItems = G.scores.map((value, seat) => ({
+    label: seat === pid ? 'You' : `P${seat + 1}`,
+    value,
   }));
 
   return (
     <PlayTable
-      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
           <MatchScoreboard
-            scores={[
-              { label: 'Boneyard', value: G.boneyard.length },
-              ...G.hands.flatMap((h, seat) =>
-                seat === pid ? [] : [{ label: `P${seat + 1}`, value: `${h.length} tiles` }],
-              ),
-            ]}
-            rules={{
-              summary: 'How points work',
-              body: (
-                <>
-                  <p>When someone goes out, each opponent counts the pips left in their hand.</p>
-                  <p>
-                    Those pips are added to the winner&apos;s score. Lowest total wins the match.
-                  </p>
-                </>
-              ),
-            }}
+            scores={[{ label: 'Boneyard', value: G.boneyard.length }, ...scoreItems]}
             testId="dom-meta"
           />
+          <GameRules testId="dom-rules">
+            <p>
+              Empty your hand or win when the game blocks. Score the pip total left in every
+              opponent&apos;s hand.
+            </p>
+            <ul>
+              <li>Go out: add all pips still held by opponents.</li>
+              <li>Blocked: everyone shows their tiles; lowest pip total wins the same way.</li>
+            </ul>
+          </GameRules>
         </>
       }
       board={
@@ -243,12 +242,13 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
                       height: `${box.height}rem`,
                     }}
                   >
-                    <div
-                      className="dom-tile kenney dom-tile-orient"
-                      style={{ transform: `rotate(${p.rot}deg)` }}
-                    >
-                      <img src={kenneySrc(p.tile)} alt="" draggable={false} />
-                    </div>
+                    <img
+                      className="dom-tile-img"
+                      src={kenneySrc(p.tile)}
+                      alt=""
+                      draggable={false}
+                      style={{ transform: `rotate(${tileDisplayRotation(p.rot)}deg)` }}
+                    />
                   </div>
                 );
               })}
@@ -290,7 +290,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
                       setHandIndex(null);
                     }}
                   >
-                    {e.value}
+                    <span className="sr-only">Play on {e.value}</span>
                   </button>
                 );
               })}
@@ -307,9 +307,13 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
               }}
               data-testid="dom-placement-preview"
             >
-              <div className="dom-tile kenney" style={{ transform: `rotate(${preview.rot}deg)` }}>
-                <img src={kenneySrc(dragTile)} alt="" draggable={false} />
-              </div>
+              <img
+                className="dom-tile-img"
+                src={kenneySrc(dragTile)}
+                alt=""
+                draggable={false}
+                style={{ transform: `rotate(${tileDisplayRotation(preview.rot)}deg)` }}
+              />
             </div>
           ) : dragTile && drag ? (
             <div
@@ -345,11 +349,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
           ))}
         </div>
       }
-      actions={
-        chromeActions.length > 0 ? (
-          <ActionSurface label="Dominoes actions" actions={chromeActions} />
-        ) : undefined
-      }
+      actions={<ActionSurface label="Dominoes actions" actions={surfaceActions} />}
     />
   );
 }
