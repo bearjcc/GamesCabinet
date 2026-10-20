@@ -31,7 +31,7 @@ export function SnakesAndLaddersBoard({
   const yourTurn = Boolean(isActive && !ctx.gameover);
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: 'Your turn - roll the die' },
+    turnHint: yourTurn ? 'roll the die' : undefined,
   });
 
   const [rollPulse, setRollPulse] = useState(0);

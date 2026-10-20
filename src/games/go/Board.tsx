@@ -18,9 +18,8 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
   const white = G.cells.filter((c) => c === '1').length + G.captures[1];
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn: `Your turn (${black}-${white})`,
-    },
+    nameForPlayer: (id) => (id === '0' ? 'Black' : 'White'),
+    turnHint: yourTurn ? `captures ${black}–${white}` : undefined,
   });
 
   const chromeActions = boardFirstChromeActions(getGoActions({ G, player, yourTurn })).map(

@@ -92,14 +92,13 @@ export function ChineseCheckersBoard({
 
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn:
-        chainFrom !== null
-          ? 'Hop again or end hop'
-          : effectiveSelected === null
-            ? 'Your turn — tap a peg'
-            : 'Tap a hole to move',
-    },
+    turnHint: yourTurn
+      ? chainFrom !== null
+        ? 'hop again or end hop'
+        : effectiveSelected === null
+          ? 'tap a peg'
+          : 'tap a hole to move'
+      : undefined,
   });
 
   const chromeActions = boardFirstChromeActions(

@@ -66,9 +66,7 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
 
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn: solo ? 'Flip a card' : 'Your turn — flip a card',
-    },
+    turnHint: yourTurn ? 'flip a card' : undefined,
   });
 
   const scores = solo

@@ -15,13 +15,16 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
   const oppHandCount = opp >= 0 ? G.hands[opp].length : 0;
   const mayDraw = yourTurn && pid >= 0 && canDraw(G, pid);
 
-  let yourTurnLabel = 'Your turn - ask for a rank';
-  if (G.pendingFishRank != null) yourTurnLabel = 'Go fish - draw from the stock';
-  else if (hand.length === 0 && G.stock.length > 0) yourTurnLabel = 'Your turn - draw a card';
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (G.pendingFishRank != null) turnHint = 'go fish — draw from the stock';
+    else if (hand.length === 0 && G.stock.length > 0) turnHint = 'draw a card';
+    else turnHint = 'ask for a rank';
+  }
 
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: yourTurnLabel },
+    turnHint,
   });
 
   const onCardSelect = (index: number) => {

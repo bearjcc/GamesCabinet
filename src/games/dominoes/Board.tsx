@@ -79,17 +79,21 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
 
   const litEnds = drag ? dragChoices : endChoices;
 
+  let turnHint: string | undefined;
+  if (G.showing) {
+    turnHint = undefined;
+  } else if (yourTurn && !ctx.gameover) {
+    if (drag) turnHint = 'drop on an open end';
+    else if (handIndex === null) turnHint = 'drag a tile to play';
+    else if (G.board.length === 0) turnHint = 'drop a starter on the table';
+    else turnHint = 'drag to an open end';
+  }
+
   const { text: baseStatus, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
+    turnHint,
   });
-  let status = baseStatus;
-  if (G.showing) status = 'Blocked — showing hands for pip count';
-  else if (yourTurn && !ctx.gameover) {
-    if (drag) status = 'Drop on an open end';
-    else if (handIndex === null) status = 'Your turn — drag a tile to play';
-    else if (G.board.length === 0) status = 'Drop a starter on the table';
-    else status = 'Drag to an open end';
-  }
+  const status = G.showing ? 'Blocked — showing hands for pip count' : baseStatus;
 
   const clientToStageRem = (clientX: number, clientY: number) => {
     const stage = stageRef.current;
@@ -199,6 +203,7 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
 
   return (
     <PlayTable
+      felt="blue"
       info={
         <>
           <StatusBar text={status} tone={tone} />
