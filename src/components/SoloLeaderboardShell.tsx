@@ -33,7 +33,7 @@ export function SoloLeaderboardShell({
   board: ReactNode;
   pew?: ReactNode;
   actions?: ReactNode;
-  felt?: boolean;
+  felt?: boolean | 'blue';
   reservePew?: boolean;
   onSubmitted?: () => void;
   onError?: (message: string) => void;
