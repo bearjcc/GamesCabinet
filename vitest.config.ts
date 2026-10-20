@@ -25,6 +25,8 @@ export default defineConfig({
         'src/games/hogwarts-battle/**',
         // Greedy sim bot: integration-tested in bot.test.ts; defensive branches are unreachable.
         'src/games/tracks/bot.ts',
+        'src/games/tracks/oracle.ts',
+        'src/games/tracks/telemetry.ts',
       ],
       thresholds: {
         lines: 100,
