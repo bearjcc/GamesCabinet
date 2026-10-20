@@ -5,6 +5,8 @@ import {
   contrastingInk,
   defaultSeatColours,
   ensureSeatColours,
+  launchSeatColourList,
+  nextSeatColour,
   occupiedSeatColours,
   parseSeatColoursQuery,
   seatColoursQuery,
@@ -17,6 +19,24 @@ function seats(...entries: Array<TableSeat | TableSeat['kind']>): TableSeat[] {
 }
 
 describe('seatColours', () => {
+  it('cycles palette colours', () => {
+    expect(nextSeatColour(SEAT_COLOUR_PALETTE[0])).toBe(SEAT_COLOUR_PALETTE[1]);
+    expect(nextSeatColour(undefined)).toBe(DEFAULT_SEAT_COLOUR);
+    const last = SEAT_COLOUR_PALETTE[SEAT_COLOUR_PALETTE.length - 1]!;
+    expect(nextSeatColour(last)).toBe(SEAT_COLOUR_PALETTE[0]);
+  });
+
+  it('maps launch seat colours by seat index', () => {
+    expect(
+      launchSeatColourList(
+        seats({ kind: 'local', colour: SEAT_COLOUR_PALETTE[0] }, 'online', 'empty', {
+          kind: 'bot',
+          colour: SEAT_COLOUR_PALETTE[2],
+        }),
+      ),
+    ).toEqual([SEAT_COLOUR_PALETTE[0], undefined, undefined, SEAT_COLOUR_PALETTE[2]]);
+  });
+
   it('fills missing local and bot colours from the palette', () => {
     const next = ensureSeatColours(seats('local', 'bot', 'empty'));
     expect(next[0]?.colour).toBe(SEAT_COLOUR_PALETTE[0]);

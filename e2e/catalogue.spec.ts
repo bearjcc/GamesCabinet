@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { pickHogwartsHero, setTableSeatKind } from './helpers';
+import { openJoinPanel, pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
@@ -151,6 +151,7 @@ test.describe('GamesCabinet smokes', () => {
 
   test('bad room code shows a clear error', async ({ page }) => {
     await page.goto('/');
+    await openJoinPanel(page);
     await page.getByTestId('join-code').fill('ZZZZZZ');
     await page.getByTestId('join-room').click();
     await expect(page.locator('.error')).toContainText(/No room with that code/i);

@@ -345,9 +345,9 @@ export function catalogueGroups(games: GameMeta[] = GAMES): CatalogueGroup[] {
     else withOthers.push(game);
   }
   const groups: CatalogueGroup[] = [];
-  if (solo.length) groups.push({ id: 'solo', label: 'Solo', games: solo });
+  if (solo.length) groups.push({ id: 'solo', label: 'Play alone', games: solo });
   if (withOthers.length) {
-    groups.push({ id: 'with-others', label: 'With others', games: withOthers });
+    groups.push({ id: 'with-others', label: 'Play together', games: withOthers });
   }
   return groups;
 }

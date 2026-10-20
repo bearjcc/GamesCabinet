@@ -1,5 +1,11 @@
 import { expect, type Page, test } from '@playwright/test';
-import { openOnlinePair, pickHogwartsHero, readRoomCode, setTableSeatKind } from './helpers';
+import {
+  openJoinPanel,
+  openOnlinePair,
+  pickHogwartsHero,
+  readRoomCode,
+  setTableSeatKind,
+} from './helpers';
 
 async function playCrazyEightsTurn(page: Page) {
   const playable = page.locator('.tt-hand button.is-playable');
@@ -125,6 +131,7 @@ test.describe('GamesCabinet smokes', () => {
     const code = await readRoomCode(hostPage);
 
     await guestPage.goto('/');
+    await openJoinPanel(guestPage);
     await guestPage.getByTestId('join-code').fill(code);
     await guestPage.getByTestId('join-room').click();
     await expect(guestPage).toHaveURL(new RegExp(`/g/connect-four/${code}`, 'i'));

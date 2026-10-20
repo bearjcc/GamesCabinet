@@ -190,13 +190,16 @@ describe('table setup', () => {
     });
   });
 
-  it('cycles seat kinds in tabletop order when claiming and advancing', () => {
-    expect(seatKindCycle(twoPlayerGame)).toEqual(['local', 'bot', 'online', 'empty']);
+  it('cycles local and bot on tap; online returns to local', () => {
+    expect(seatKindCycle(twoPlayerGame)).toEqual(['local', 'bot', 'empty']);
     expect(defaultClaimKind(twoPlayerGame)).toBe('local');
     expect(nextSeatKind(twoPlayerGame, 'empty', { claim: true })).toBe('local');
     expect(nextSeatKind(twoPlayerGame, 'local')).toBe('bot');
-    expect(nextSeatKind(twoPlayerGame, 'bot')).toBe('online');
-    expect(nextSeatKind(twoPlayerGame, 'online')).toBe('empty');
+    expect(nextSeatKind(twoPlayerGame, 'bot')).toBe('empty');
+    expect(nextSeatKind(twoPlayerGame, 'online')).toBe('local');
+    expect(
+      nextSeatKind({ ...twoPlayerGame, hasLocal: false, hasBot: false, hasOnline: true }, 'online'),
+    ).toBe('empty');
   });
 
   it('falls back when no claimable seat kinds are configured', () => {

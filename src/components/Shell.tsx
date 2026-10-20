@@ -12,19 +12,21 @@ export function Shell({
   children,
   backTo,
   trailing,
+  layout = 'default',
 }: {
   title?: string;
   children: ReactNode;
   /** Separate back control — the brand mark always navigates home. */
   backTo?: string;
   trailing?: ReactNode;
+  layout?: 'default' | 'catalogue';
 }) {
   useEffect(() => {
     document.title = title ? `${title} · ${APP_TITLE}` : APP_TITLE;
   }, [title]);
 
   return (
-    <div className="shell">
+    <div className={layout === 'catalogue' ? 'shell shell--catalogue' : 'shell'}>
       <header className="topbar">
         <div className="topbar-start">
           <Link to="/" className="brand" data-testid="shell-home" aria-label="GamesCabinet home">
