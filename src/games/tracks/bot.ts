@@ -19,8 +19,19 @@ import {
   START_ROW,
   WIDTH,
 } from './grid';
-import type { ObjectiveId } from './objectives';
+import { boardMetrics, type ObjectiveId, scoreObjective } from './objectives';
 import { allowedRotations, type Tile, type TileKind } from './tiles';
+
+const TRACK_KINDS = new Set<TileKind>([
+  'straight',
+  'curve',
+  'junction',
+  'bridge-start',
+  'bridge-mid',
+  'tunnel-arch',
+  'tunnel-mid',
+  'whistlestop',
+]);
 
 const PLACE_PRIORITY: TileKind[] = [
   'straight',
@@ -110,13 +121,35 @@ function cloneBoard(board: Board): Board {
   });
 }
 
-/** Higher is better: connect first, then extend the eastward route. */
+function objectivePlacementBonus(
+  g: TracksState,
+  me: number,
+  boardBefore: Board,
+  boardAfter: Board,
+): number {
+  const beforeMetrics = g.players.map((p, i) => boardMetrics(i === me ? boardBefore : p.board));
+  const afterMetrics = g.players.map((p, i) => boardMetrics(i === me ? boardAfter : p.board));
+  let bonus = 0;
+  for (const obj of g.players[me]?.objectives ?? []) {
+    const before = scoreObjective(obj, me, beforeMetrics, { races: g.objectiveRaces });
+    const after = scoreObjective(obj, me, afterMetrics, { races: g.objectiveRaces });
+    if (after > before) bonus += (after - before) * 250_000;
+  }
+  const beforeRm = rightmostConnectedColumn(reachableFromStart(boardBefore));
+  const afterRm = rightmostConnectedColumn(reachableFromStart(boardAfter));
+  bonus += (afterRm - beforeRm) * 10_000;
+  return bonus;
+}
+
+/** Higher is better: connect first, then extend the eastward route and objectives. */
 export function placementScore(
   board: Board,
   tile: Tile,
   row: number,
   col: number,
   rot: number,
+  g?: TracksState,
+  me?: number,
 ): number {
   const beforeRm = rightmostConnectedColumn(reachableFromStart(board));
   const trial = cloneBoard(board);
@@ -131,6 +164,12 @@ export function placementScore(
   if (delta < 0) score -= 2_000_000;
   if (row === START_ROW) score += 2_000;
   score += col;
+  if (g !== undefined && me !== undefined) {
+    score += objectivePlacementBonus(g, me, board, trial);
+    if (TRACK_KINDS.has(tile.kind) && advancesRoute(board, tile, row, col, rot)) {
+      score += 800_000;
+    }
+  }
   return score;
 }
 
@@ -142,12 +181,17 @@ function allowsDestination(spot: BotPlacement, g: TracksState, tile: Tile): bool
   return isConnected(trial, reachableFromStart(trial));
 }
 
-function bestScoredSpot(pool: BotPlacement[], g: TracksState, tile: Tile): BotPlacement {
+function bestScoredSpot(
+  pool: BotPlacement[],
+  g: TracksState,
+  tile: Tile,
+  me: number,
+): BotPlacement {
   let best = pool[0];
   let bestScore = -Infinity;
   for (const spot of pool) {
     const board = g.players[spot.target].board;
-    const score = placementScore(board, tile, spot.row, spot.col, spot.rot);
+    const score = placementScore(board, tile, spot.row, spot.col, spot.rot, g, me);
     if (score > bestScore) {
       bestScore = score;
       best = spot;
@@ -177,6 +221,14 @@ function straightExtensionSpot(board: Board, tile: Tile, me: number): BotPlaceme
   return best;
 }
 
+function advancesRoute(board: Board, tile: Tile, row: number, col: number, rot: number): boolean {
+  const before = rightmostConnectedColumn(reachableFromStart(board));
+  const trial = cloneBoard(board);
+  placeTile(trial, tile, row, col, rot);
+  const reach = reachableFromStart(trial);
+  return isConnected(trial, reach) || rightmostConnectedColumn(reach) > before;
+}
+
 export function pickPlacement(
   spots: BotPlacement[],
   g: TracksState,
@@ -200,28 +252,41 @@ export function pickPlacement(
     return straight;
   }
 
+  if (tile.kind === 'straight' || tile.kind === 'curve' || tile.kind === 'junction') {
+    const onMain = pool.filter((s) => s.target === me && s.row === START_ROW);
+    if (onMain.length > 0) pool = onMain;
+  }
+
   const connecting = pool.filter((spot) => {
     const board = g.players[spot.target].board;
     const trial = cloneBoard(board);
     placeTile(trial, tile, spot.row, spot.col, spot.rot);
     return isConnected(trial, reachableFromStart(trial));
   });
-  if (connecting.length > 0) return bestScoredSpot(connecting, g, tile);
+  if (connecting.length > 0) return bestScoredSpot(connecting, g, tile, me);
 
   const board = g.players[me].board;
   const extendCols = extensionCols(board);
   const extendSpots = pool.filter(
     (s) => s.target === me && s.row === START_ROW && extendCols.includes(s.col),
   );
-  if (extendSpots.length > 0) return bestScoredSpot(extendSpots, g, tile);
+  if (extendSpots.length > 0) return bestScoredSpot(extendSpots, g, tile, me);
 
   for (const kind of PLACE_PRIORITY) {
     if (tile.kind !== kind) continue;
     const mainRow = pool.filter((s) => s.row === START_ROW);
     const tier = mainRow.length > 0 ? mainRow : pool;
-    return bestScoredSpot(tier, g, tile);
+    return bestScoredSpot(tier, g, tile, me);
   }
-  return bestScoredSpot(pool, g, tile);
+  return bestScoredSpot(pool, g, tile, me);
+}
+
+function pickDraftChoice(draft: ObjectiveId[]): ObjectiveId {
+  const prefer: ObjectiveId[] = ['mayor', 'mountain-express', 'non-stop', 'longest-track'];
+  for (const id of prefer) {
+    if (draft.includes(id)) return id;
+  }
+  return draft[0];
 }
 
 export function finishDraft(client: TracksClient) {
@@ -230,9 +295,9 @@ export function finishDraft(client: TracksClient) {
     if (state?.ctx.phase !== 'draft') return;
     const g = state.G;
     const me = Number(state.ctx.currentPlayer);
-    const choice = g.players[me]?.draft[0] as ObjectiveId | undefined;
-    if (!choice) return;
-    client.moves.chooseObjective(choice);
+    const options = g.players[me]?.draft ?? [];
+    if (options.length === 0) return;
+    client.moves.chooseObjective(pickDraftChoice(options));
   }
 }
 
@@ -270,20 +335,33 @@ export function playBotTurn(client: TracksClient, numPlayers: number): 'ok' | 's
   const me = Number(state.ctx.currentPlayer);
 
   if (g.drawnId === null) {
+    const top = g.discard[g.discard.length - 1];
+    const discardPlayable =
+      numPlayers > 1 &&
+      top &&
+      g.discardDrawRule === '2023' &&
+      legalSpots(g, me, top).some((s) => allowsDestination(s, g, top));
+
     if (g.deck.length > 0) {
       client.moves.drawTile('deck');
       return drawnTile(client.getState()?.G ?? g, me) ? 'ok' : 'stuck';
     }
-    if (numPlayers > 1 && g.discard.length > 0) {
-      const top = g.discard[g.discard.length - 1];
-      if (top && legalSpots(g, me, top).length > 0) {
-        client.moves.drawTile('discard');
-        return drawnTile(client.getState()?.G ?? g, me) ? 'ok' : 'stuck';
-      }
-    }
-    if (g.discard.length > 0) {
-      client.moves.drawTile('deck');
+    if (discardPlayable) {
+      client.moves.drawTile('discard');
       return drawnTile(client.getState()?.G ?? g, me) ? 'ok' : 'stuck';
+    }
+    if (g.deck.length === 0 && g.discard.length > 0) {
+      client.moves.drawTile('deck');
+      const after = client.getState()?.G ?? g;
+      if (drawnTile(after, me)) return 'ok';
+      if (!g.drewFromDiscard && after.drawnId) {
+        const drawn = drawnTile(after, me);
+        if (drawn && legalSpots(after, me, drawn).length === 0) {
+          client.moves.discardTile(drawn.id);
+          return turnAdvanced(state, client.getState()) ? 'ok' : 'stuck';
+        }
+      }
+      return drawnTile(after, me) ? 'ok' : 'stuck';
     }
     return 'stuck';
   }
@@ -301,8 +379,8 @@ export function playBotTurn(client: TracksClient, numPlayers: number): 'ok' | 's
     const boardForScore = (s: BotPlacement) => g.players[s.target].board;
     const scored = [...spots].sort(
       (a, b) =>
-        placementScore(boardForScore(b), tile, b.row, b.col, b.rot) -
-        placementScore(boardForScore(a), tile, a.row, a.col, a.rot),
+        placementScore(boardForScore(b), tile, b.row, b.col, b.rot, g, me) -
+        placementScore(boardForScore(a), tile, a.row, a.col, a.rot, g, me),
     );
     const ranked = [primary, ...scored.filter((s) => s !== primary)].slice(0, 16);
     for (const spot of ranked) {
