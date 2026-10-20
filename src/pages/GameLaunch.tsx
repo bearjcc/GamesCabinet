@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { GameThumbnail } from '../components/GameThumbnail';
+import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
 import { TableSetup } from '../components/TableSetup';
 import { UnlockPanel } from '../components/UnlockPanel';
@@ -12,7 +14,7 @@ import {
 } from '../games/hogwarts-battle/setup';
 import { getGameMeta, isAccessGated, isSoloOnly, soloPlayPath } from '../lib/games';
 import { hostRoom } from '../lib/lobby';
-import { ensureSeatColours, seatColoursQuery } from '../lib/seatColours';
+import { ensureSeatColours, launchSeatColourList, seatColoursQuery } from '../lib/seatColours';
 import { getNickname, getUnlockedGames, setNickname } from '../lib/storage';
 import {
   deriveLaunch,
@@ -158,85 +160,92 @@ export function GameLaunch() {
     return <Navigate to={soloPlayPath(meta.id)} replace />;
   }
 
+  const launchColours = launchSeatColourList(boundedSeats);
+
   return (
-    <Shell title={meta.name} backTo="/">
+    <Shell title={meta.name} backTo="/" layout="catalogue">
       <p className="launch-blurb">{meta.blurb}</p>
-      <TableSetup
-        action={
-          <button
-            className="btn primary"
-            data-testid={
-              launchPlan.status === 'ready' && launchPlan.mode === 'online'
-                ? 'host-room'
-                : 'play-start'
-            }
-            disabled={busy || launchPlan.status !== 'ready'}
-            onClick={
-              launchPlan.status === 'ready' && launchPlan.mode === 'online' ? onHost : onStart
-            }
-            type="button"
-          >
-            {launchPlan.status === 'ready' && launchPlan.mode === 'online' ? 'Host' : 'Start'}
-          </button>
-        }
-        centreContent={
-          meta.id === 'hogwarts-battle' ? (
-            <div className="table-year-strip" data-testid="hogwarts-year-strip">
-              <span className="table-year-label">Year</span>
-              <div className="table-year-chips" role="radiogroup" aria-label="Campaign year">
-                {HOGWARTS_CAMPAIGNS.map((campaign) => (
-                  <button
-                    aria-checked={hogwartsYear === campaign.number}
-                    className={
-                      hogwartsYear === campaign.number
-                        ? 'table-year-chip selected'
-                        : 'table-year-chip'
-                    }
-                    data-testid={`hogwarts-year-${campaign.number}`}
-                    key={campaign.number}
-                    onClick={() => changeHogwartsYear(campaign.number)}
-                    role="radio"
-                    type="button"
-                  >
-                    {campaign.number}
-                  </button>
-                ))}
-              </div>
-              <p className="table-year-name">
-                {HOGWARTS_CAMPAIGNS.find((campaign) => campaign.number === hogwartsYear)?.name}
-              </p>
-            </div>
-          ) : null
-        }
-        maxSeats={maxSeats}
-        meta={meta}
-        onChange={updateSeats}
-        seatDetails={
-          meta.id === 'hogwarts-battle'
-            ? (seat, index) => {
-                const heroes = getHogwartsHeroesForYear(hogwartsYear);
-                const heroId = seat.role ?? heroes[index]?.id ?? heroes[0]?.id ?? '';
-                const hero = heroes.find((entry) => entry.id === heroId) ?? heroes[0];
-                if (!hero) return null;
-                return (
-                  <button
-                    className="table-spot-hero"
-                    data-testid={`hogwarts-hero-${index}`}
-                    onClick={() => {
-                      const nextIndex =
-                        (heroes.findIndex((entry) => entry.id === hero.id) + 1) % heroes.length;
-                      changeHogwartsHero(index, heroes[nextIndex]!.id);
-                    }}
-                    type="button"
-                  >
-                    {hero.name}
-                  </button>
-                );
+      <SeatColoursProvider colours={launchColours}>
+        <TableSetup
+          action={
+            <button
+              className="btn primary"
+              data-testid={
+                launchPlan.status === 'ready' && launchPlan.mode === 'online'
+                  ? 'host-room'
+                  : 'play-start'
               }
-            : undefined
-        }
-        seats={boundedSeats}
-      />
+              disabled={busy || launchPlan.status !== 'ready'}
+              onClick={
+                launchPlan.status === 'ready' && launchPlan.mode === 'online' ? onHost : onStart
+              }
+              type="button"
+            >
+              {launchPlan.status === 'ready' && launchPlan.mode === 'online' ? 'Host' : 'Start'}
+            </button>
+          }
+          centreContent={
+            <>
+              <GameThumbnail gameId={meta.id} variant="launch" />
+              {meta.id === 'hogwarts-battle' ? (
+                <div className="table-year-strip" data-testid="hogwarts-year-strip">
+                  <span className="table-year-label">Year</span>
+                  <div className="table-year-chips" role="radiogroup" aria-label="Campaign year">
+                    {HOGWARTS_CAMPAIGNS.map((campaign) => (
+                      <button
+                        aria-checked={hogwartsYear === campaign.number}
+                        className={
+                          hogwartsYear === campaign.number
+                            ? 'table-year-chip selected'
+                            : 'table-year-chip'
+                        }
+                        data-testid={`hogwarts-year-${campaign.number}`}
+                        key={campaign.number}
+                        onClick={() => changeHogwartsYear(campaign.number)}
+                        role="radio"
+                        type="button"
+                      >
+                        {campaign.number}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="table-year-name">
+                    {HOGWARTS_CAMPAIGNS.find((campaign) => campaign.number === hogwartsYear)?.name}
+                  </p>
+                </div>
+              ) : null}
+            </>
+          }
+          maxSeats={maxSeats}
+          meta={meta}
+          onChange={updateSeats}
+          seatDetails={
+            meta.id === 'hogwarts-battle'
+              ? (seat, index) => {
+                  const heroes = getHogwartsHeroesForYear(hogwartsYear);
+                  const heroId = seat.role ?? heroes[index]?.id ?? heroes[0]?.id ?? '';
+                  const hero = heroes.find((entry) => entry.id === heroId) ?? heroes[0];
+                  if (!hero) return null;
+                  return (
+                    <button
+                      className="table-spot-hero"
+                      data-testid={`hogwarts-hero-${index}`}
+                      onClick={() => {
+                        const nextIndex =
+                          (heroes.findIndex((entry) => entry.id === hero.id) + 1) % heroes.length;
+                        changeHogwartsHero(index, heroes[nextIndex]!.id);
+                      }}
+                      type="button"
+                    >
+                      {hero.name}
+                    </button>
+                  );
+                }
+              : undefined
+          }
+          seats={boundedSeats}
+        />
+      </SeatColoursProvider>
       {error ? (
         <p className="error" role="alert">
           {error}

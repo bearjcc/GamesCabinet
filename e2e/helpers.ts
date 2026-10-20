@@ -1,4 +1,4 @@
-import type { Browser, Page } from '@playwright/test';
+import { type Browser, expect, type Page } from '@playwright/test';
 
 export type OnlinePair = {
   hostPage: Page;
@@ -21,6 +21,12 @@ export async function openOnlinePair(browser: Browser): Promise<OnlinePair> {
   };
 }
 
+export async function openJoinPanel(page: Page): Promise<void> {
+  await page.getByTestId('join-details').evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
+}
+
 export async function readRoomCode(page: Page): Promise<string> {
   return (await page.getByTestId('room-code').innerText()).trim();
 }
@@ -31,6 +37,12 @@ export async function setTableSeatKind(
   kind: 'local' | 'bot' | 'online',
 ): Promise<void> {
   const spot = page.getByTestId(`table-seat-${index}`);
+  if (kind === 'online') {
+    const hook = page.getByTestId(`table-seat-${index}-kind-online`);
+    await hook.dispatchEvent('click');
+    await expect(spot).toHaveAttribute('data-seat-kind', 'online');
+    return;
+  }
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const current = await spot.getAttribute('data-seat-kind');
     if (current === kind) return;

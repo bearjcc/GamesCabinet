@@ -1,5 +1,8 @@
-import { type ReactNode, useMemo } from 'react';
+import { type CSSProperties, type ReactNode, useMemo, useRef } from 'react';
+import { usesLaunchSeatColours } from '../lib/gameIdentity';
 import type { GameMeta } from '../lib/games';
+import { nextSeatColour } from '../lib/seatColours';
+import { isSeatColour } from '../lib/storage';
 import {
   deriveLaunch,
   getSeatKinds,
@@ -31,6 +34,8 @@ const KIND_SHORT: Record<Exclude<SeatKind, 'empty'>, string> = {
   bot: 'Bot',
 };
 
+const LONG_PRESS_MS = 500;
+
 export function TableSetup({
   meta,
   seats,
@@ -43,7 +48,8 @@ export function TableSetup({
   const boundedSeats = useMemo(() => seats.slice(0, maxSeats), [maxSeats, seats]);
   const allowedKinds = getSeatKinds(meta);
   const plan = deriveLaunch(meta, boundedSeats);
-  const occupied = boundedSeats.filter((seat) => seat.kind !== 'empty').length;
+  const showSeatColours = usesLaunchSeatColours(meta.id);
+  const pressTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   function updateSeat(index: number, next: Partial<TableSeat>) {
     onChange(
@@ -72,6 +78,36 @@ export function TableSetup({
     applyKind(index, nextSeatKind(meta, seat.kind));
   }
 
+  function onColourTap(index: number) {
+    if (!showSeatColours) return;
+    const seat = boundedSeats[index];
+    if (!seat || seat.kind === 'empty' || seat.kind === 'online') return;
+    const next = nextSeatColour(isSeatColour(seat.colour) ? seat.colour : undefined);
+    updateSeat(index, { colour: next });
+  }
+
+  function clearPressTimer(index: number) {
+    const timer = pressTimers.current.get(index);
+    if (timer) {
+      clearTimeout(timer);
+      pressTimers.current.delete(index);
+    }
+  }
+
+  function onPiecePointerDown(index: number) {
+    clearPressTimer(index);
+    if (!allowedKinds.includes('online')) return;
+    const timer = setTimeout(() => {
+      pressTimers.current.delete(index);
+      applyKind(index, 'online');
+    }, LONG_PRESS_MS);
+    pressTimers.current.set(index, timer);
+  }
+
+  function onPiecePointerUp(index: number) {
+    clearPressTimer(index);
+  }
+
   return (
     <section className="table-setup launch-modes" data-testid="launch-modes">
       <div className={`table-stage table-stage-${boundedSeats.length}`}>
@@ -82,29 +118,62 @@ export function TableSetup({
             data-testid={`table-seat-${index}`}
             key={index}
           >
-            <button
-              aria-label={
-                seat.kind === 'empty'
-                  ? `Seat ${index + 1}, open. Tap to sit here.`
-                  : `Seat ${index + 1}, ${KIND_LABELS[seat.kind]}. Tap to change.`
-              }
-              className="table-spot-piece"
-              data-testid={`table-seat-${index}-piece`}
-              onClick={() => onSpotTap(index)}
-              type="button"
-            >
-              {seat.kind === 'empty' ? (
+            {seat.kind === 'empty' ? (
+              <button
+                aria-label={`Seat ${index + 1}, open. Tap to sit here.`}
+                className="table-spot-piece"
+                data-testid={`table-seat-${index}-piece`}
+                onClick={() => onSpotTap(index)}
+                type="button"
+              >
                 <span aria-hidden className="table-spot-ring" />
-              ) : (
-                <Token
-                  label={`Seat ${index + 1}`}
-                  player={String(index)}
-                  size="lg"
-                  testId={`table-seat-${index}-token`}
-                  variant="disc"
-                />
-              )}
-            </button>
+              </button>
+            ) : (
+              <div className="table-spot-piece">
+                <button
+                  aria-label={`Seat ${index + 1}, ${KIND_LABELS[seat.kind]}. Tap to change. Long press for online.`}
+                  className="table-spot-ring-btn"
+                  data-testid={`table-seat-${index}-piece`}
+                  onClick={() => onSpotTap(index)}
+                  onPointerCancel={() => onPiecePointerUp(index)}
+                  onPointerDown={() => onPiecePointerDown(index)}
+                  onPointerLeave={() => onPiecePointerUp(index)}
+                  onPointerUp={() => onPiecePointerUp(index)}
+                  type="button"
+                >
+                  <span aria-hidden className="table-spot-ring is-filled" />
+                </button>
+                <button
+                  aria-label={
+                    showSeatColours
+                      ? `Seat ${index + 1} colour. Tap to change.`
+                      : `Seat ${index + 1}`
+                  }
+                  className="table-spot-token-btn"
+                  data-testid={`table-seat-${index}-colour`}
+                  disabled={!showSeatColours}
+                  onClick={() => onColourTap(index)}
+                  type="button"
+                >
+                  <span
+                    className="table-spot-token"
+                    style={
+                      showSeatColours && isSeatColour(seat.colour)
+                        ? ({ '--seat-colour': seat.colour } as CSSProperties)
+                        : undefined
+                    }
+                  >
+                    <Token
+                      label={`Seat ${index + 1}`}
+                      player={String(index)}
+                      size="lg"
+                      testId={`table-seat-${index}-token`}
+                      variant="disc"
+                    />
+                  </span>
+                </button>
+              </div>
+            )}
 
             <div className="table-spot-copy">
               <span className="table-spot-seat">Seat {index + 1}</span>
@@ -129,12 +198,11 @@ export function TableSetup({
               .filter((kind) => kind !== 'empty')
               .map((kind) => (
                 <button
-                  aria-hidden={seat.kind !== kind}
-                  className="table-spot-kind-hook"
+                  aria-label={`Set seat ${index + 1} to ${KIND_LABELS[kind]}`}
+                  className="table-spot-kind-hook sr-only"
                   data-testid={`table-seat-${index}-kind-${kind}`}
                   key={kind}
                   onClick={() => applyKind(index, kind)}
-                  tabIndex={-1}
                   type="button"
                 />
               ))}
@@ -142,12 +210,6 @@ export function TableSetup({
         ))}
 
         <div className="table-well">
-          <div className="table-well-copy">
-            <h2>{meta.name}</h2>
-            <p>
-              {occupied} of {maxSeats} seats taken
-            </p>
-          </div>
           {centreContent}
           {plan.status === 'invalid' ? (
             <p className="table-setup-hint" role="status">

@@ -108,6 +108,20 @@ export function appendSeatColoursQuery(
   return params;
 }
 
+export function nextSeatColour(current: SeatColour | undefined): SeatColour {
+  if (!current || !isSeatColour(current)) return getSeatColour();
+  const index = SEAT_COLOUR_PALETTE.indexOf(current);
+  return SEAT_COLOUR_PALETTE[(index + 1) % SEAT_COLOUR_PALETTE.length]!;
+}
+
+export function launchSeatColourList(seats: readonly TableSeat[]): Array<SeatColour | undefined> {
+  return seats.map((seat) =>
+    seat.kind === 'empty' || seat.kind === 'online' || !isSeatColour(seat.colour)
+      ? undefined
+      : seat.colour,
+  );
+}
+
 export function contrastingInk(hex: string): string {
   const raw = hex.replace('#', '');
   if (raw.length !== 6) return '#fbf6ec';
