@@ -21,5 +21,8 @@ describe('tracks setup', () => {
     expect(tracksPlayQuery({ discardDrawRule: '2021', junctionPoints: 1 }, 3)).toBe(
       '?seats=3&discard=2021&junction=1',
     );
+    expect(tracksPlayQuery(DEFAULT_TRACKS_SETUP, 2, 'red,blue')).toBe(
+      '?seats=2&colours=red%2Cblue',
+    );
   });
 });

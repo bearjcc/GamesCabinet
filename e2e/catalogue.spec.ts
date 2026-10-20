@@ -136,7 +136,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('unlock-submit').click();
     await expect(page.getByTestId('play-start')).toBeVisible();
 
-    await page.getByTestId('table-seat-1-kind-local').click();
+    await setTableSeatKind(page, 1, 'local');
     await page.getByTestId('play-start').click();
     await expect(page).toHaveURL(/\/play\/tracks/);
     // Hot-seat hand-off hides each seat's secret cards until they are ready.

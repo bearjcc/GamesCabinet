@@ -3,6 +3,7 @@ import { type ReactNode, useState } from 'react';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
+import { useHotseatClaimSeat } from '../../lib/hotseat';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
 import { type Cell, cellAt, HEIGHT, placeError, START_ROW, WIDTH } from './grid';
 import { objectiveDef } from './objectives';
@@ -71,6 +72,7 @@ export function TracksBoard({
   // Hot-seat hand-off: hide hands until the next seat says they're ready.
   const turnKey = `${ctx.phase}-${ctx.turn}-${ctx.currentPlayer}`;
   const [readyFor, setReadyFor] = useState<string | null>(null);
+  const claimHotseatSeat = useHotseatClaimSeat();
   // Pass-and-play matches are local-* ids; online seats never hand off.
   const hotSeat = ctx.numPlayers > 1 && (matchID ?? '').startsWith('local-');
   const handOff = hotSeat && !ctx.gameover && readyFor !== turnKey;
@@ -396,7 +398,10 @@ export function TracksBoard({
         type="button"
         className="tracks-handoff__ready"
         data-testid="tracks-handoff-ready"
-        onClick={() => setReadyFor(turnKey)}
+        onClick={() => {
+          setReadyFor(turnKey);
+          claimHotseatSeat?.();
+        }}
       >
         I'm {who}
       </button>

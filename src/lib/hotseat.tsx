@@ -3,6 +3,7 @@ import {
   type ComponentType,
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useLayoutEffect,
   useRef,
@@ -12,10 +13,16 @@ import {
 export const HOTSEAT_TURN_HOLD_MS = 1600;
 
 const HotseatContext = createContext(false);
+const HotseatClaimSeatContext = createContext<(() => void) | null>(null);
 
 /** True inside pass-and-play boards wrapped by withHotseatSeatSync. */
 export function useHotseat(): boolean {
   return useContext(HotseatContext);
+}
+
+/** Jump the shell seat to the current player (e.g. after a privacy hand-off). */
+export function useHotseatClaimSeat(): (() => void) | null {
+  return useContext(HotseatClaimSeatContext);
 }
 
 export function HotseatProvider({ value, children }: { value: boolean; children: ReactNode }) {
@@ -62,9 +69,18 @@ export function withHotseatSeatSync(
 
     const isActive = !ctx.gameover && effectivePlayerID === ctx.currentPlayer;
 
+    const claimSeat = useCallback(() => {
+      if (!takeSeat) return;
+      const current = ctx.currentPlayer;
+      prevPlayerRef.current = current;
+      onSeat(current);
+    }, [takeSeat, ctx.currentPlayer]);
+
     return (
       <HotseatContext.Provider value={true}>
-        <Board {...props} playerID={effectivePlayerID} isActive={isActive} />
+        <HotseatClaimSeatContext.Provider value={claimSeat}>
+          <Board {...props} playerID={effectivePlayerID} isActive={isActive} />
+        </HotseatClaimSeatContext.Provider>
       </HotseatContext.Provider>
     );
   };
