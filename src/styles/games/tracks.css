@@ -1,9 +1,26 @@
 /* TRACKS board, hand, and piles. */
+.tracks-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 20rem;
+}
+
 .tracks-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(2.5rem, 4rem));
+  grid-template-columns: repeat(8, minmax(2.75rem, 1fr));
   gap: 4px;
   justify-content: center;
+  width: min(100%, 52rem);
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  .tracks-grid {
+    width: min(92vw, 58rem);
+    gap: 6px;
+  }
 }
 
 .tracks-cell {
@@ -247,4 +264,60 @@
   font-size: 0.8rem;
   text-align: center;
   margin: 0.4rem 0 0;
+}
+
+/* Hot-seat hand-off: same footprint as the board so nothing resizes. */
+.tracks-handoff {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  min-height: 18rem;
+  text-align: center;
+}
+.tracks-handoff strong {
+  font-size: 2rem;
+}
+.tracks-handoff__ready {
+  min-height: 3rem;
+  padding: 0 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 999px;
+}
+.tracks-hand__card--drawn {
+  outline: 2px dashed var(--accent, #2f9e44);
+}
+.tracks-rules {
+  position: relative;
+}
+.tracks-rules summary {
+  cursor: pointer;
+}
+.tracks-rules ul {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin: 0.25rem 0 0;
+  padding: 0.5rem 0.5rem 0.5rem 1.1rem;
+  font-size: 0.85rem;
+  list-style: disc;
+  background: var(--surface, #fff);
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.tracks-objectives__tag {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+  margin-right: 0.25rem;
+}
+
+.play-table:has(.tracks-play) .play-table__board {
+  align-items: center;
+  justify-content: center;
 }

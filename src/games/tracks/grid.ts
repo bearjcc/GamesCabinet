@@ -4,7 +4,15 @@
  * list in the 2021-05-18 rules email; route pruning at scoring keeps every card
  * lying on some start-to-terminal route by leaf-trimming dead-end branches.
  */
-import { type Edge, edgesAt, isTrackTile, overlayBaseKinds, type Tile, tilePoints } from './tiles';
+import {
+  type Edge,
+  edgesAt,
+  isTrackTile,
+  overlayBaseKinds,
+  type Tile,
+  type TilePointOptions,
+  tilePoints,
+} from './tiles';
 
 export const WIDTH = 8;
 export const HEIGHT = 3;
@@ -70,10 +78,10 @@ export function placeError(
 
   const cell = cellAt(board, row, col);
   const overlays = overlayBaseKinds(tile.kind);
-  if (overlays) {
-    // Overlays per rules 7-8: junction on straight/curve, whistlestop on town,
-    // middle bridge/tunnel on an obstacle.
-    if (!cell || cell.top || !overlays.includes(cell.base.tile.kind)) return 'bad-overlay';
+  const overlayTarget =
+    overlays && cell && !cell.top && overlays.includes(cell.base.tile.kind) ? cell : null;
+  if (overlays && overlayTarget) {
+    // Optional overlay: middle bridge/tunnel on an obstacle.
     const edges = edgesAt(tile.kind, rot);
     let matched = false;
     for (const { dr, dc, mine, theirs } of DIRS) {
@@ -81,13 +89,7 @@ export function placeError(
       if (!edge) continue;
       const nr = row + dr;
       const nc = col + dc;
-      if (nr < 0 || nr >= HEIGHT || nc < 0 || nc >= WIDTH) {
-        // Rule 2 applies to overlays too (whistlestop on a start-slot town).
-        const terminal =
-          (mine === 3 && isStartSlot(row, col)) || (mine === 1 && isDestinationSlot(row, col));
-        if (!terminal) return 'off-grid-connection';
-        continue;
-      }
+      if (nr < 0 || nr >= HEIGHT || nc < 0 || nc >= WIDTH) continue;
       const facing = cellEdges(cellAt(board, nr, nc));
       const facingEdge = facing ? facing[theirs] : null;
       if (edge && facingEdge && edge !== facingEdge) return 'material-mismatch';
@@ -99,6 +101,7 @@ export function placeError(
     }
     return null;
   }
+  if (overlays && cell) return 'bad-overlay';
   if (cell) return 'occupied';
 
   if (tile.kind === 'obstacle') {
@@ -114,33 +117,31 @@ export function placeError(
     return null;
   }
 
-  if (isTrackTile(tile.kind)) {
-    const edges = edgesAt(tile.kind, rot);
-    let anchored = false;
-    for (const { dr, dc, mine, theirs } of DIRS) {
-      const edge = edges[mine];
-      const nr = row + dr;
-      const nc = col + dc;
-      const offBoard = nr < 0 || nr >= HEIGHT || nc < 0 || nc >= WIDTH;
-      if (offBoard) {
-        // Rule 2: off-grid connections only at the start and destination slots.
-        if (!edge) continue;
-        const terminal =
-          (mine === 3 && isStartSlot(row, col)) || (mine === 1 && isDestinationSlot(row, col));
-        if (!terminal) return 'off-grid-connection';
-        anchored = true;
-        continue;
-      }
-      const facing = cellEdges(cellAt(board, nr, nc));
-      const facingEdge = facing ? facing[theirs] : null;
-      // Rule 5: bridge meets bridge, tunnel meets tunnel, rail meets rail.
-      if (edge && facingEdge && edge !== facingEdge) return 'material-mismatch';
-      if (edge && facingEdge === edge) anchored = true;
+  const edges = edgesAt(tile.kind, rot);
+  let anchored = false;
+  for (const { dr, dc, mine, theirs } of DIRS) {
+    const edge = edges[mine];
+    const nr = row + dr;
+    const nc = col + dc;
+    const offBoard = nr < 0 || nr >= HEIGHT || nc < 0 || nc >= WIDTH;
+    if (offBoard) {
+      // Rule 2: off-grid connections only at the start and destination slots.
+      if (!edge) continue;
+      const terminal =
+        (mine === 3 && isStartSlot(row, col)) || (mine === 1 && isDestinationSlot(row, col));
+      if (!terminal) return 'off-grid-connection';
+      anchored = true;
+      continue;
     }
-    // Rule 1: track cards must connect to existing rail or the start
-    // (the destination terminal anchors too - it is the other railhead).
-    if (!anchored) return 'not-connected';
+    const facing = cellEdges(cellAt(board, nr, nc));
+    const facingEdge = facing ? facing[theirs] : null;
+    // Rule 5: bridge meets bridge, tunnel meets tunnel, rail meets rail.
+    if (edge && facingEdge && edge !== facingEdge) return 'material-mismatch';
+    if (edge && facingEdge === edge) anchored = true;
   }
+  // Rule 1: track cards must connect to existing rail or the start
+  // (the destination terminal anchors too - it is the other railhead).
+  if (!anchored) return 'not-connected';
   return null;
 }
 
@@ -242,18 +243,16 @@ export function keptCells(board: Board, reachable: Set<number>): Set<number> {
   return kept;
 }
 
-/** Points for one kept cell, base card plus any overlay. */
-export function cellPoints(cell: Cell): number {
+/** Points for one kept cell — the face-up card only. */
+export function cellPoints(cell: Cell, opts: TilePointOptions = {}): number {
   if (!cell) return 0;
-  let pts = tilePoints(cell.base.tile);
-  if (cell.top) pts += tilePoints(cell.top.tile, cell.base.tile.kind);
-  return pts;
+  const placed = cell.top ?? cell.base;
+  return tilePoints(placed.tile, opts);
 }
 
 /** Counts used by objective scoring, over kept cells only. */
 export function boardCounts(board: Board, kept: Set<number>) {
   let whistlestops = 0;
-  let towns = 0;
   let tunnelCards = 0;
   let bridgeCards = 0;
   let trackCards = 0;
@@ -264,12 +263,11 @@ export function boardCounts(board: Board, kept: Set<number>) {
     for (const p of placed) {
       if (isTrackTile(p.tile.kind)) trackCards++;
       if (p.tile.kind === 'whistlestop') whistlestops++;
-      if (p.tile.kind === 'town') towns++;
       if (p.tile.kind === 'tunnel-arch' || p.tile.kind === 'tunnel-mid') tunnelCards++;
       if (p.tile.kind === 'bridge-start' || p.tile.kind === 'bridge-mid') bridgeCards++;
     }
   }
-  return { whistlestops, towns, tunnelCards, bridgeCards, trackCards };
+  return { whistlestops, tunnelCards, bridgeCards, trackCards };
 }
 
 /**

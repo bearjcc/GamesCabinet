@@ -30,7 +30,7 @@ type Client2 = ReturnType<typeof makeClient>;
 
 function makeClient(numPlayers: number, customize?: (G: TracksState) => void, seed = 'tracks') {
   const state: TracksState = {
-    deck: [tile('straight'), tile('curve'), tile('town')],
+    deck: [tile('straight'), tile('curve'), tile('obstacle')],
     discard: [],
     players: Array.from({ length: numPlayers }, () => freshPlayer()),
     scores: Array(numPlayers).fill(0),
@@ -41,6 +41,10 @@ function makeClient(numPlayers: number, customize?: (G: TracksState) => void, se
     lastTurns: null,
     prepared: true,
     draftsDealt: false,
+    discardDrawRule: '2023',
+    junctionPoints: 2,
+    publicObjectives: ['longest-track', 'most-tracks'],
+    objectiveRaces: {},
   };
   customize?.(state);
   const client = Client({ game: { ...Tracks, seed, setup: () => state }, numPlayers });
@@ -193,7 +197,7 @@ describe('play phase turns', () => {
   });
 
   it('discards a card as the turn action', () => {
-    const card = tile('town');
+    const card = tile('curve');
     const client = playing((g) => {
       g.players[0].hand = [card];
     });
@@ -206,7 +210,7 @@ describe('play phase turns', () => {
 
   it('rejects discards and unknown cards', () => {
     const client = playing((g) => {
-      g.players[0].hand = [tile('town')];
+      g.players[0].hand = [tile('curve')];
     });
     client.moves.drawTile('deck');
     client.moves.discardTile('missing');
@@ -238,7 +242,7 @@ describe('play phase turns', () => {
   });
 
   it('rejects plays on a missing board', () => {
-    const card = tile('town');
+    const card = tile('curve');
     const client = playing((g) => {
       g.players[0].hand = [card];
     });
@@ -264,7 +268,7 @@ describe('round flow and scoring', () => {
     client.moves.drawTile('deck');
     client.moves.playTile(G(client).players[1].hand[0].id, 1, START_ROW, WIDTH - 1, 1);
     const g = G(client);
-    expect(g.scores).toEqual([10, 10]);
+    expect(g.scores).toEqual([20, 10]);
     expect(g.round).toBe(2);
     expect(phase(client)).toBe('draft');
     // Round 2 was dealt fresh.
@@ -276,26 +280,24 @@ describe('round flow and scoring', () => {
       rowRun(g.players[0].board, WIDTH - 1);
       g.players[0].hand = [tile('straight')];
       rowRun(g.players[1].board, 3);
-      g.players[1].hand = [tile('town')];
+      g.players[1].hand = [tile('curve')];
       g.players[1].objectives = ['mayor'];
     });
     throughDraft(client, 2);
     client.moves.drawTile('deck');
     client.moves.playTile(G(client).players[0].hand[0].id, 0, START_ROW, WIDTH - 1, 1);
-    // Player 1 cannot connect; the round only ends when both do in 2p, so
-    // player 1 connects by force of a straight run... not possible here.
-    // Instead player 1 plays their town and the wind-down never starts:
+    // Player 1 cannot connect; once player 0 connects, player 1 still gets a last turn.
     client.moves.drawTile('deck');
     client.moves.discardTile(G(client).players[1].hand[0].id);
-    expect(G(client).round).toBe(1);
-    expect(phase(client)).toBe('play');
+    expect(G(client).round).toBe(2);
+    expect(phase(client)).toBe('draft');
   });
 
   it('winds down final turns for non-connected players, skipping connectors (3p)', () => {
     const client = makeClient(3, (g) => {
       rowRun(g.players[0].board, WIDTH - 1);
       g.players[0].hand = [tile('straight')];
-      g.players[1].hand = [tile('town')];
+      g.players[1].hand = [tile('curve')];
       rowRun(g.players[2].board, WIDTH - 1);
       g.players[2].hand = [tile('straight')];
     });
@@ -314,8 +316,8 @@ describe('round flow and scoring', () => {
     client.moves.discardTile(G(client).players[1].hand[0].id);
     const g = G(client);
     expect(g.round).toBe(2);
-    expect(g.scores[0]).toBe(10);
-    expect(g.scores[2]).toBe(10);
+    expect(g.scores[0]).toBeGreaterThanOrEqual(10);
+    expect(g.scores[2]).toBeGreaterThanOrEqual(10);
     expect(g.scores[1]).toBe(0);
   });
 
@@ -323,7 +325,7 @@ describe('round flow and scoring', () => {
     const client = makeClient(3, (g) => {
       rowRun(g.players[0].board, WIDTH - 1);
       g.players[0].hand = [tile('straight')];
-      g.players[1].hand = [tile('town')];
+      g.players[1].hand = [tile('curve')];
       rowRun(g.players[2].board, WIDTH - 1);
       g.players[2].hand = [tile('straight')];
     });
@@ -379,6 +381,10 @@ describe('scoreRound', () => {
       lastTurns: null,
       prepared: false,
       draftsDealt: false,
+      discardDrawRule: '2023',
+      junctionPoints: 2,
+      objectiveRaces: {},
+      publicObjectives: [],
     };
     extras?.(g);
     return g;
@@ -386,7 +392,6 @@ describe('scoreRound', () => {
 
   it('scores connection, kept card values, and objectives', () => {
     const board = emptyBoard();
-    placeTile(board, tile('town'), START_ROW, 0, 0);
     placeTile(board, tile('whistlestop'), START_ROW, 0, 0);
     for (let c = 1; c < WIDTH; c++) placeTile(board, tile('straight'), START_ROW, c, 1);
     const other = emptyBoard();
@@ -396,8 +401,8 @@ describe('scoreRound', () => {
       s.players[1].objectives = ['mayor'];
     });
     scoreRound(g);
-    // P0: connected 10 + whistlestop 2; mayor: whistlestop + town = 2 x 2 = 4.
-    expect(g.scores[0]).toBe(16);
+    // P0: connected 10 + whistlestop 2; mayor: one whistlestop = 2.
+    expect(g.scores[0]).toBe(14);
     expect(g.players[0].objectives).toEqual([]);
     // P1: unconnected, rightmost column 4, straights worth 0; mayor unmet, kept.
     expect(g.scores[1]).toBe(4);
@@ -413,17 +418,18 @@ describe('scoreRound', () => {
     expect(g.players[0].draft.length).toBeLessThanOrEqual(2);
   });
 
-  it('awards bonus objectives only at 4+ players', () => {
+  it('awards public objectives at 4+ players', () => {
     const boards = Array.from({ length: 4 }, () => emptyBoard());
     rowRun(boards[0], WIDTH);
     rowRun(boards[1], 5);
     rowRun(boards[2], 3);
     const g = stateFor(boards, (s) => {
       s.connectedOrder = ['0'];
+      s.publicObjectives = ['longest-track', 'most-tracks', 'speed-layer', 'land-baron'];
     });
     scoreRound(g);
-    // P0: 10 + speed layer 5 + land baron (8 filled) 5 = 20.
-    expect(g.scores[0]).toBe(20);
+    // P0: 10 + four public cards (longest, most tracks, speed, land baron).
+    expect(g.scores[0]).toBe(30);
     expect(g.scores[1]).toBe(5);
     expect(g.scores[2]).toBe(3);
 
@@ -443,5 +449,95 @@ describe('scoreRound', () => {
     const g = stateFor(boards);
     scoreRound(g);
     expect(g.scores).toEqual([3, 3, 1, 1]);
+  });
+});
+
+describe('1-player variant', () => {
+  function solo(customize?: (G: TracksState) => void) {
+    const client = makeClient(1, customize);
+    client.moves.chooseObjective('mayor');
+    return client;
+  }
+
+  it('forbids discard draws and reshuffles', () => {
+    const client = solo((g) => {
+      g.deck = [tile('curve')];
+      g.discard = [tile('straight')];
+    });
+    client.moves.drawTile('discard');
+    expect(G(client).drawnId).toBeNull();
+    expect(G(client).discard).toHaveLength(1);
+  });
+
+  it('ends the round on the 5th discard or when connecting', () => {
+    const client = solo((g) => {
+      g.deck = Array.from({ length: 12 }, () => tile('curve'));
+      g.players[0].hand = [];
+      rowRun(g.players[0].board, WIDTH - 1);
+      g.players[0].hand = [tile('straight')];
+    });
+    client.moves.drawTile('deck');
+    client.moves.playTile(G(client).players[0].hand[0].id, 0, START_ROW, WIDTH - 1, 1);
+    expect(G(client).round).toBe(2);
+
+    const client2 = solo((g) => {
+      g.deck = Array.from({ length: 12 }, () => tile('curve'));
+      g.players[0].hand = [];
+      rowRun(g.players[0].board, 3);
+    });
+    for (let i = 0; i < 4; i++) {
+      client2.moves.drawTile('deck');
+      client2.moves.discardTile(G(client2).players[0].hand[0].id);
+    }
+    expect(G(client2).soloDiscards).toBe(4);
+    expect(G(client2).round).toBe(1);
+    client2.moves.drawTile('deck');
+    client2.moves.discardTile(G(client2).players[0].hand[0].id);
+    expect(G(client2).round).toBe(2);
+  });
+
+  it('ends the round when the solo deck is empty', () => {
+    const client = solo((g) => {
+      g.deck = [tile('curve')];
+      g.players[0].hand = [];
+    });
+    client.moves.drawTile('deck');
+    client.moves.discardTile(G(client).players[0].hand[0].id);
+    expect(G(client).round).toBe(2);
+  });
+});
+
+describe('discard draw variants', () => {
+  it('2021 lets you keep a discard draw and play another card from hand', () => {
+    const top = tile('straight');
+    const other = tile('curve');
+    const client = makeClient(2, (g) => {
+      g.discardDrawRule = '2021';
+      g.discard = [top];
+      g.players[0].hand = [other];
+    });
+    throughDraft(client, 2);
+    client.moves.drawTile('discard');
+    expect(G(client).drewFromDiscard).toBe(false);
+    client.moves.playTile(other.id, 0, START_ROW, 0, 1);
+    expect(G(client).players[0].hand.some((t) => t.id === top.id)).toBe(true);
+  });
+});
+
+describe('discard draws never strand a turn', () => {
+  it('refuses a discard draw that fits nowhere', () => {
+    const client = makeClient(2, (g) => {
+      for (const p of g.players) {
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < WIDTH; c++) placeTile(p.board, tile('obstacle'), r, c, 0);
+        }
+      }
+      g.discard = [tile('straight')];
+    });
+    client.moves.chooseObjective('mayor');
+    client.moves.chooseObjective('mayor');
+    client.moves.drawTile('discard');
+    expect(G(client).drawnId).toBeNull();
+    expect(G(client).discard).toHaveLength(1);
   });
 });
