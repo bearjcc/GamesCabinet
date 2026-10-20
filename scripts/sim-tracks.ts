@@ -208,11 +208,14 @@ for (const numPlayers of playerList) {
         discardDrawRule: '2023',
       };
       const results: GameStats[] = [];
-      for (let i = 0; i < games; i++) results.push(playGame(config, i));
+      for (let i = 0; i < games; i++) {
+        results.push(playGame(config, i));
+      }
       const row = aggregate(config, results);
       console.log(
         `${row.label} | ${row.completed}/${row.games} | ${row.avgFinalScore.toFixed(1)} | ${row.avgSpread.toFixed(1)} | ${row.pctRoundsViaConnection.toFixed(1)}% | ${row.avgTurnsPerRound.toFixed(1)}`,
       );
+      results.length = 0;
     }
   }
 }
