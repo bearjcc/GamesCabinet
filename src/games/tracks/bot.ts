@@ -20,6 +20,7 @@ import {
   WIDTH,
 } from './grid';
 import { boardMetrics, type ObjectiveId, scoreObjective } from './objectives';
+import type { TurnTelemetry } from './telemetry';
 import { allowedRotations, type Tile, type TileKind } from './tiles';
 
 const TRACK_KINDS = new Set<TileKind>([
@@ -77,7 +78,7 @@ export function legalPlacements(
   return out;
 }
 
-function legalSpots(G: TracksState, player: number, card: Tile): BotPlacement[] {
+export function legalSpots(G: TracksState, player: number, card: Tile): BotPlacement[] {
   if (card.kind === 'obstacle') return legalPlacements(G, player, card);
   return legalPlacements(G, player, card, player);
 }
@@ -110,6 +111,23 @@ export function extensionCols(board: Board): number[] {
     }
   }
   return cols;
+}
+
+export function placementExtendsRoute(
+  board: Board,
+  tile: Tile,
+  row: number,
+  col: number,
+  rot: number,
+  foreign = false,
+): boolean {
+  if (placeError(board, tile, row, col, rot, { foreign }) !== null) return false;
+  const before = rightmostConnectedColumn(reachableFromStart(board));
+  const trial = cloneBoard(board);
+  placeTile(trial, tile, row, col, rot);
+  const reach = reachableFromStart(trial);
+  if (isConnected(trial, reach)) return true;
+  return rightmostConnectedColumn(reach) > before;
 }
 
 function cloneBoard(board: Board): Board {
@@ -265,6 +283,18 @@ export function pickPlacement(
   });
   if (connecting.length > 0) return bestScoredSpot(connecting, g, tile, me);
 
+  const extending = pool.filter((spot) =>
+    placementExtendsRoute(
+      g.players[spot.target].board,
+      tile,
+      spot.row,
+      spot.col,
+      spot.rot,
+      spot.target !== me,
+    ),
+  );
+  if (extending.length > 0) return bestScoredSpot(extending, g, tile, me);
+
   const board = g.players[me].board;
   const extendCols = extensionCols(board);
   const extendSpots = pool.filter(
@@ -311,17 +341,36 @@ export function drawnTile(g: TracksState, me: number): Tile | null {
 }
 
 function turnAdvanced(
-  before: { ctx: { currentPlayer: string; phase: string } },
-  after: { ctx: { currentPlayer: string; phase: string } } | null,
+  before: {
+    ctx: { currentPlayer: string; phase: string; turn: number };
+    G: TracksState;
+  },
+  after: {
+    ctx: { currentPlayer: string; phase: string; turn: number };
+    G: TracksState;
+  } | null,
 ): boolean {
   if (!after) return false;
+  if (after.ctx.turn !== before.ctx.turn) return true;
+  if (before.G.drawnId !== null && after.G.drawnId === null) return true;
   return (
     after.ctx.currentPlayer !== before.ctx.currentPlayer || after.ctx.phase !== before.ctx.phase
   );
 }
 
+function placementConnects(board: Board, tile: Tile, spot: BotPlacement, foreign = false): boolean {
+  if (placeError(board, tile, spot.row, spot.col, spot.rot, { foreign }) !== null) return false;
+  const trial = cloneBoard(board);
+  placeTile(trial, tile, spot.row, spot.col, spot.rot);
+  return isConnected(trial, reachableFromStart(trial));
+}
+
 /** One cabinet turn: draft pick, draw, then play or discard. */
-export function playBotTurn(client: TracksClient, numPlayers: number): 'ok' | 'stuck' | 'over' {
+export function playBotTurn(
+  client: TracksClient,
+  numPlayers: number,
+  tel?: TurnTelemetry,
+): 'ok' | 'stuck' | 'over' {
   const state = client.getState();
   if (!state) return 'stuck';
   if (state.ctx.gameover) return 'over';
@@ -344,7 +393,11 @@ export function playBotTurn(client: TracksClient, numPlayers: number): 'ok' | 's
 
     if (g.deck.length > 0) {
       client.moves.drawTile('deck');
-      return drawnTile(client.getState()?.G ?? g, me) ? 'ok' : 'stuck';
+      if (drawnTile(client.getState()?.G ?? g, me)) {
+        if (tel) tel.draws++;
+        return 'ok';
+      }
+      return 'stuck';
     }
     if (discardPlayable) {
       client.moves.drawTile('discard');
@@ -374,10 +427,27 @@ export function playBotTurn(client: TracksClient, numPlayers: number): 'ok' | 's
   if (spots.length === 0 && g.drewFromDiscard && allSpots.length > 0) {
     spots = allSpots;
   }
-  if (spots.length > 0) {
-    const primary = pickPlacement(spots, g, me, tile);
+  const progressSpots = spots.filter((s) => {
+    const foreign = s.target !== me;
+    const board = g.players[s.target].board;
+    return (
+      placementConnects(board, tile, s, foreign) ||
+      placementExtendsRoute(board, tile, s.row, s.col, s.rot, foreign)
+    );
+  });
+  const playable =
+    progressSpots.length > 0
+      ? progressSpots
+      : tile.kind === 'obstacle'
+        ? spots
+        : g.drewFromDiscard && spots.length > 0
+          ? spots
+          : spots;
+
+  if (playable.length > 0) {
+    const primary = pickPlacement(playable, g, me, tile);
     const boardForScore = (s: BotPlacement) => g.players[s.target].board;
-    const scored = [...spots].sort(
+    const scored = [...playable].sort(
       (a, b) =>
         placementScore(boardForScore(b), tile, b.row, b.col, b.rot, g, me) -
         placementScore(boardForScore(a), tile, a.row, a.col, a.rot, g, me),
@@ -385,12 +455,36 @@ export function playBotTurn(client: TracksClient, numPlayers: number): 'ok' | 's
     const ranked = [primary, ...scored.filter((s) => s !== primary)].slice(0, 16);
     for (const spot of ranked) {
       client.moves.playTile(spot.cardId, spot.target, spot.row, spot.col, spot.rot);
-      if (turnAdvanced(state, client.getState())) return 'ok';
+      if (turnAdvanced(state, client.getState())) {
+        if (tel) {
+          tel.playTurns++;
+          const board = g.players[spot.target].board;
+          const foreign = spot.target !== me;
+          if (placementConnects(board, tile, spot, foreign)) tel.connects++;
+          else if (placementExtendsRoute(board, tile, spot.row, spot.col, spot.rot, foreign))
+            tel.placeExtend++;
+          else tel.placeStall++;
+        }
+        return 'ok';
+      }
+      if (tel) tel.illegalAttempts++;
+    }
+    if (!g.drewFromDiscard) {
+      client.moves.discardTile(tile.id);
+      if (tel) {
+        tel.playTurns++;
+        tel.discards++;
+      }
+      return turnAdvanced(state, client.getState()) ? 'ok' : 'stuck';
     }
     return 'stuck';
   }
   if (!g.drewFromDiscard) {
     client.moves.discardTile(tile.id);
+    if (tel) {
+      tel.playTurns++;
+      tel.discards++;
+    }
     return turnAdvanced(state, client.getState()) ? 'ok' : 'stuck';
   }
   /* v8 ignore next */

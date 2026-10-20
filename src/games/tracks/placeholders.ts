@@ -25,6 +25,22 @@ export const PLACEHOLDER_DECK_MANIFEST: DeckManifestEntry[] = [
   { kind: 'obstacle', count: 3, variants: ['river', 'mountain', 'river'] },
 ];
 
+/**
+ * PROPOSAL (not wired to sims): route-heavy ~50-card mix targeting ~15–30 turn solo
+ * connects with oracle play. Bear must approve before replacing PLACEHOLDER_DECK_MANIFEST.
+ */
+export const PLACEHOLDER_DECK_MANIFEST_ROUTE_PROPOSAL: DeckManifestEntry[] = [
+  { kind: 'straight', count: 24 },
+  { kind: 'curve', count: 12 },
+  { kind: 'junction', count: 4 },
+  { kind: 'bridge-start', count: 2 },
+  { kind: 'bridge-mid', count: 1 },
+  { kind: 'tunnel-arch', count: 2 },
+  { kind: 'tunnel-mid', count: 1 },
+  { kind: 'whistlestop', count: 2 },
+  { kind: 'obstacle', count: 2, variants: ['river', 'mountain'] },
+];
+
 /** PLACEHOLDER: alternate 55-card mix for manufacturing / balance sims. */
 export const PLACEHOLDER_DECK_MANIFEST_55: DeckManifestEntry[] = [
   { kind: 'straight', count: 20 },

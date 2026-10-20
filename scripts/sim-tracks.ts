@@ -118,7 +118,6 @@ function playGame(
 
     const outcome = playBotTurn(client, config.numPlayers);
     if (outcome === 'over') break;
-    if (outcome === 'stuck') break;
 
     const after = client.getState();
     if (!after) break;
@@ -230,9 +229,12 @@ for (const numPlayers of playerList) {
         discardDrawRule: '2023',
       };
       const stats = freshStats(config.label, games);
-      const maxSteps = numPlayers >= 6 ? 80_000 : 20_000;
+      const maxSteps = numPlayers >= 6 ? 80_000 : 40_000;
       for (let i = 0; i < games; i++) {
         absorb(stats, playGame(config, i, maxSteps));
+        if (games >= 100 && (i + 1) % 100 === 0) {
+          console.error(`${config.label}: ${i + 1}/${games} games`);
+        }
       }
       allStats.push(stats);
       const capPct = (100 * stats.capHits) / stats.games;
@@ -281,7 +283,7 @@ ${allStats
 
 ## Notes
 
-- **Cap hit** — sim step limit (${playerList.map((p) => (p >= 6 ? '8k' : '4k')).join(' / ')} steps by table size) before game over.
+- **Cap hit** — sim step limit (${playerList.map((p) => (p >= 6 ? '80k' : '40k')).join(' / ')} steps by table size) before game over.
 - **Objective clear %** — secret objectives scored and removed, divided by objectives held entering scored rounds.
 - **Lap end %** — rounds where at least one player had connected before scoring (expected ~100% in normal play).
 `;
