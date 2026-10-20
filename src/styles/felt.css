@@ -1,10 +1,15 @@
 :root {
-  --felt-green: #1f6b3a;
-  --felt-green-deep: #174f2b;
+  --felt-green: var(--felt);
+  --felt-green-deep: var(--felt-deep);
   --felt-bg:
     radial-gradient(circle at 18% 12%, rgb(255 255 255 / 6%), transparent 38%),
     radial-gradient(circle at 82% 88%, rgb(0 0 0 / 14%), transparent 42%),
     linear-gradient(160deg, var(--felt-green), var(--felt-green-deep));
+}
+
+.play-table--felt-blue {
+  --felt-green: var(--felt-blue);
+  --felt-green-deep: var(--felt-blue-deep);
 }
 
 .shell:has(.play-table--felt) {
