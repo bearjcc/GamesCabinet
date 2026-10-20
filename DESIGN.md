@@ -49,7 +49,15 @@ Yellow is fill/mark colour, not body text on light surfaces.
 
 Chrome tokens: `--bg`, `--surface`, `--surface-2`, `--ink`, `--ink-contrast`, `--muted`, `--line`, `--wait`, `--hover`, `--hover-line`, `--hover-strong`.
 
-Semantic pops: `--accent`, `--accent-ink`, `--you`, `--danger`, `--warn`.
+Semantic pops: `--accent`, `--accent-ink`, `--turn` (active seat; `--you` aliases it), `--danger`, `--warn`.
+
+Felt tables: `--felt` / `--felt-deep` (green baize); `--felt-blue` / `--felt-blue-deep` for dominoes. Game identity on catalogue tiles: `--game-red`, `--game-blue`, `--game-green`, `--game-yellow`, `--game-umber`, `--game-navy`.
+
+Spacing uses a 4px scale: `--space-1` (4px) through `--space-7` (48px).
+
+Motion: `--motion-fast` / `--motion-base` / `--motion-slow` with `--ease-out` and `--ease-land` (playful lengthens all three). Chrome uses fast colour-only transitions; objects use base/slow.
+
+Object shadows only: `--lift-0`, `--lift-1`, `--lift-2` on cards and pieces, not shell panels.
 
 Game objects: `--tile` / `--tile-ink` (cream / umber) stay shared.
 
@@ -88,7 +96,7 @@ Surface + 1px line. No floating shadows, glass, or page gradients.
 
 ## Motion
 
-Chrome stays still: 140ms ease-out on button backgrounds, no entrance motion on shell surfaces.
+Chrome stays still: `--motion-fast` ease-out on button backgrounds, no entrance motion on shell surfaces.
 
 Game objects may move, because motion is how a state change reads as physical. Boards use the shared primitives (lift, drop, deal, flip, fan, stack, roll, snap, count) rather than bespoke animation, so a card behaves the same in every game. Motion decorates and never gates - input is honoured immediately and animation is always interruptible.
 

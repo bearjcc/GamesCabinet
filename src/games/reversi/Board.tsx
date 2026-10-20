@@ -119,13 +119,11 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
 
   const dark = G.cells.filter((c) => c === '0').length;
   const light = G.cells.filter((c) => c === '1').length;
-  const { text: status, tone } = useMatchStatus(ctx, playerID, {
+  const { text: baseStatus, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn:
-        places.length === 0 ? 'No moves - passing' : `Your turn - place a disc (${dark}-${light})`,
-    },
+    turnHint: yourTurn && places.length > 0 ? `place a disc (${dark}–${light})` : undefined,
   });
+  const status = yourTurn && places.length === 0 ? `${baseStatus} — no moves, passing` : baseStatus;
 
   const pewActions = getReversiActions({ G, player, yourTurn });
   const surfaceActions = pewActions.map((action) => ({

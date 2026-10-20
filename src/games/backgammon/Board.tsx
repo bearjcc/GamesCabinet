@@ -23,15 +23,16 @@ export function BackgammonBoard({
   const plays = yourTurn ? legalPlays(G, ctx.currentPlayer) : [];
   const playableFrom = new Set(plays.map((p) => p.from));
 
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (!G.hasRolled) turnHint = 'roll the dice';
+    else if (plays.length === 0) turnHint = 'no legal moves — pass';
+    else turnHint = 'play a die';
+  }
+
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn: G.hasRolled
-        ? plays.length === 0
-          ? 'No legal moves - pass'
-          : 'Your turn - play a die'
-        : 'Your turn - roll the dice',
-    },
+    turnHint,
   });
 
   const chromeActions = boardFirstChromeActions(

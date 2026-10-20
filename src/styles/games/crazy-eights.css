@@ -9,8 +9,8 @@
 }
 
 .ce-table .tt-card {
-  width: clamp(4.5rem, 22vw, 5.75rem);
-  height: clamp(6.4rem, 31vw, 8.1rem);
+  width: clamp(5.25rem, 26vw, 7rem);
+  height: clamp(7.4rem, 37vw, 9.9rem);
 }
 
 .ce-stock__cinematic,
@@ -32,8 +32,8 @@
 }
 
 .play-table:has(.ce-table) .tt-hand .tt-card {
-  width: clamp(3.8rem, 18vw, 4.85rem);
-  height: clamp(5.4rem, 26vw, 6.9rem);
+  width: clamp(4.5rem, 22vw, 5.85rem);
+  height: clamp(6.4rem, 31vw, 8.3rem);
 }
 
 .play-table:has(.ce-table) .tt-hand__slot:first-child {

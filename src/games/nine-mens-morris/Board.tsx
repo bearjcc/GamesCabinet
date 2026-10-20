@@ -64,15 +64,17 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
     G.selected === null ? [] : relocations.filter((m) => m.from === G.selected).map((m) => m.to);
   const targetSet = new Set(targets);
 
-  let yourTurnLabel = 'Your turn';
-  if (G.pendingRemoval) yourTurnLabel = 'Mill — remove an opponent piece';
-  else if (G.phase === 'place') yourTurnLabel = 'Your turn — place a piece';
-  else if (G.selected === null) yourTurnLabel = 'Your turn — select a piece';
-  else yourTurnLabel = 'Your turn — choose a destination';
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (G.pendingRemoval) turnHint = 'mill — remove an opponent piece';
+    else if (G.phase === 'place') turnHint = 'place a piece';
+    else if (G.selected === null) turnHint = 'select a piece';
+    else turnHint = 'choose a destination';
+  }
 
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: yourTurnLabel },
+    turnHint,
   });
 
   return (

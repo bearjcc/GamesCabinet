@@ -11,29 +11,57 @@
   --brand-cream: #ebe4cf;
   --brand-umber: #5c3a22;
 
+  /* Per-game catalogue / launch accents (one colour per game). */
+  --game-red: var(--brand-red);
+  --game-blue: var(--brand-blue);
+  --game-green: var(--brand-green);
+  --game-yellow: var(--brand-yellow);
+  --game-umber: var(--brand-umber);
+  --game-navy: var(--brand-navy);
+
+  /* Page-as-felt tables (card / tile games). */
+  --felt: #2f6b4a;
+  --felt-deep: #174f2b;
+  --felt-blue: #1f3d5c;
+  --felt-blue-deep: #152a40;
+
   /* Game objects (not chrome). */
   --tile: var(--brand-cream);
   --tile-ink: var(--brand-umber);
 
   --radius: 5px;
-  --radius-lg: 7px;
+  --radius-lg: 8px;
 
-  /* Spacing scale — padding inside, margin between (see intentional-spacing.mdc) */
+  /* Spacing scale (4px base) — padding inside, margin between */
   --space-1: 0.25rem;
-  --space-2: 0.4rem;
-  --space-3: 0.55rem;
-  --space-4: 0.85rem;
-  --space-5: 1.1rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
   --font: "Source Sans 3", system-ui, sans-serif;
   --font-brand: Fraunces, Georgia, "Times New Roman", serif;
 
   /* Play layout — tap-first boards */
   --tap-min: 2.75rem;
   --board-max: min(100%, 42rem);
-  --play-gap: 0.65rem;
-  --pew-pad: 0.55rem 0.35rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
-  --motion-duration: 200ms;
-  --motion-ease: ease-out;
+  --play-gap: var(--space-3);
+  --pew-pad: var(--space-3) var(--space-2) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+
+  /* Motion tiers */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --motion-duration: var(--motion-base);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-land: cubic-bezier(0.3, 1.3, 0.5, 1);
+  --motion-ease: var(--ease-out);
+
+  /* Object elevation (game pieces only; chrome stays flat). */
+  --lift-0: 0 1px 0 rgb(42 36 28 / 25%);
+  --lift-1: 0 4px 10px rgb(42 36 28 / 22%);
+  --lift-2: 0 10px 24px rgb(42 36 28 / 28%);
 
   font-family: var(--font);
   color: var(--ink);
@@ -43,12 +71,19 @@
 }
 
 [data-motion="playful"] {
-  --motion-duration: 280ms;
-  --motion-ease: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --motion-fast: 160ms;
+  --motion-base: 280ms;
+  --motion-slow: 450ms;
+  --motion-duration: var(--motion-base);
+  --ease-land: cubic-bezier(0.34, 1.5, 0.64, 1);
+  --motion-ease: var(--ease-land);
 }
 
 [data-motion="reduced"] {
   --motion-duration: 0ms;
+  --motion-fast: 0ms;
+  --motion-base: 0ms;
+  --motion-slow: 0ms;
 }
 
 /*
@@ -64,15 +99,16 @@
   --surface-2: #fbf6ec;
   --ink: #2a241c;
   --ink-contrast: #fbf6ec;
-  --muted: #7a6f5f;
+  --muted: #6e6353;
   --line: #d9cdb8;
   --wait: #9a8b74;
   --hover: #e3d9c4;
   --hover-line: #c4b49a;
   --hover-strong: #3a3228;
-  --accent: #6b8db5;
+  --accent: #3a6fad;
   --accent-ink: #fbf6ec;
-  --you: #7d9b5a;
+  --turn: #7d9b5a;
+  --you: var(--turn);
   --danger: #c75b4a;
   --warn: #e0b35a;
   color-scheme: light;
@@ -93,7 +129,8 @@
   --hover-strong: #424242;
   --accent: var(--brand-blue);
   --accent-ink: #fafafa;
-  --you: var(--brand-green);
+  --turn: var(--brand-green);
+  --you: var(--turn);
   --danger: var(--brand-red);
   --warn: var(--brand-yellow);
   color-scheme: light;
@@ -114,7 +151,8 @@
   --hover-strong: #e8d48a;
   --accent: #8bb4e0;
   --accent-ink: #122033;
-  --you: #e8d48a;
+  --turn: #e8d48a;
+  --you: var(--turn);
   --danger: #ef6a5a;
   --warn: #edc96a;
   color-scheme: dark;
@@ -135,7 +173,8 @@
   --hover-strong: #e0e0e0;
   --accent: #6a9fd4;
   --accent-ink: #212121;
-  --you: #8fbc5a;
+  --turn: #8fbc5a;
+  --you: var(--turn);
   --danger: #ef6a5a;
   --warn: #ed9f18;
   color-scheme: dark;

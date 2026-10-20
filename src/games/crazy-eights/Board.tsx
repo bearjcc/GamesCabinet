@@ -106,19 +106,18 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     },
   }));
 
-  const { text: baseStatus, tone } = useMatchStatus(ctx, playerID, {
-    isYourTurn: yourTurn,
-    labels: {
-      theirTurn: `Player ${Number(ctx.currentPlayer) + 1}'s turn`,
-    },
-  });
-  let status = baseStatus;
+  let turnHint: string | undefined;
   if (yourTurn && !ctx.gameover) {
-    if (pickingSuit) status = 'Choose a suit for your eight';
-    else if (selected != null) status = 'Play the selected card, or pick another';
-    else if (G.drewThisTurn) status = 'Play a card or pass';
-    else status = 'Your turn — play or draw';
+    if (pickingSuit) turnHint = 'choose a suit for your eight';
+    else if (selected != null) turnHint = 'play the selected card, or pick another';
+    else if (G.drewThisTurn) turnHint = 'play a card or pass';
+    else turnHint = 'play or draw';
   }
+
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    turnHint,
+  });
 
   function tryPlay(index: number) {
     if (!yourTurn) return;
@@ -144,6 +143,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />

@@ -6,6 +6,7 @@ import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { StockPile } from '../../components/tabletop/CardPile';
 import { SolitaireDragGhost } from '../../components/tabletop/SolitaireDragGhost';
 import type { SubmitScoreInput } from '../../lib/scores';
+import { hasSeenGame, markGameSeen } from '../../lib/storage';
 import { kenneyPlayingCardAsset } from '../shared/cards';
 import { findSolDropTarget } from '../shared/solitaire/drag';
 import { preloadKenneyPlayingCards } from '../shared/solitaire/kenneyPreload';
@@ -43,6 +44,7 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
   const [drag, setDrag] = useState<DragState | null>(null);
   useEffect(() => {
     preloadKenneyPlayingCards();
+    markGameSeen('klondike');
   }, []);
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
@@ -52,7 +54,9 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
   }, [ctx.gameover]);
 
   const over = ctx.gameover as { won?: boolean; score?: number } | undefined;
-  let status = 'Drag cards. Double-click to send home.';
+  const [showPlayHint] = useState(() => !hasSeenGame('klondike'));
+  let status =
+    showPlayHint && playable && !over && !drag ? 'Drag cards. Double-click to send home.' : '';
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'you';
   if (over?.won) {
     status = 'You win';
@@ -172,7 +176,8 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="klondike"
-      info={<StatusBar text={status} tone={tone} />}
+      felt
+      info={status ? <StatusBar text={status} tone={tone} /> : null}
       board={
         <div className="sol-board klondike-board" data-testid="klondike-board">
           <div className="klondike-top">

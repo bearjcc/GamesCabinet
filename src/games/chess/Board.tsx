@@ -152,9 +152,8 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
 
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn: selected === null ? 'Your turn - tap a piece' : 'Tap a square to move',
-    },
+    nameForPlayer: (id) => (id === '0' ? 'White' : 'Black'),
+    turnHint: yourTurn ? (selected === null ? 'tap a piece' : 'tap a square to move') : undefined,
   });
 
   const handleSquareClick = (index: number, piece: Piece | null, isTarget: boolean) => {

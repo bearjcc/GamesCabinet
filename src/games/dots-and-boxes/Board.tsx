@@ -56,7 +56,7 @@ export function DotsAndBoxesBoard({
   } as CSSProperties;
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: 'Your turn - claim a line' },
+    turnHint: yourTurn ? 'claim a line' : undefined,
   });
   const width = PAD * 2 + BOX_COLS * CELL;
   const height = PAD * 2 + BOX_ROWS * CELL;

@@ -82,8 +82,8 @@ export const MOTION_DURATION_MS: Record<MotionIntensity, number> = {
 /** CSS `--motion-ease` token values (stylesheets only). */
 export const MOTION_CSS_EASE: Record<MotionIntensity, string> = {
   reduced: 'linear',
-  normal: 'ease-out',
-  playful: 'cubic-bezier(0.34, 1.4, 0.64, 1)',
+  normal: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
+  playful: 'cubic-bezier(0.34, 1.5, 0.64, 1)',
 };
 
 /** Motion library easing: named curve or cubic-bezier tuple. */

@@ -14,7 +14,7 @@ export function NimBoard({ G, ctx, moves, playerID, isActive }: BoardProps<NimSt
   const yourTurn = Boolean(isActive && !ctx.gameover);
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: 'Your turn - take 1 to 3 stones' },
+    turnHint: yourTurn ? 'take 1 to 3 stones' : undefined,
   });
 
   const tokenCount = Math.min(G.heap, VISUAL_TOKEN_CAP);

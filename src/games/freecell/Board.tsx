@@ -5,6 +5,7 @@ import { StatusBar } from '../../components/StatusBar';
 import { CardFace } from '../../components/tabletop/CardFace';
 import { SolitaireDragGhost } from '../../components/tabletop/SolitaireDragGhost';
 import type { SubmitScoreInput } from '../../lib/scores';
+import { hasSeenGame, markGameSeen } from '../../lib/storage';
 import { findFoundationIndex } from '../klondike/game';
 import { type Card, kenneyPlayingCardAsset } from '../shared/cards';
 import { findSolDropTarget } from '../shared/solitaire/drag';
@@ -43,6 +44,7 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
   const [drag, setDrag] = useState<DragState | null>(null);
   useEffect(() => {
     preloadKenneyPlayingCards();
+    markGameSeen('freecell');
   }, []);
 
   const pendingSubmit = useMemo((): SubmitScoreInput | null => {
@@ -52,7 +54,9 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
   }, [ctx.gameover]);
 
   const over = ctx.gameover as { won?: boolean; score?: number } | undefined;
-  let status = 'Drag cards. Double-click to send home.';
+  const [showPlayHint] = useState(() => !hasSeenGame('freecell'));
+  let status =
+    showPlayHint && playable && !over && !drag ? 'Drag cards. Double-click to send home.' : '';
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'you';
   if (over?.won) {
     status = 'You win';
@@ -171,7 +175,8 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="freecell"
-      info={<StatusBar text={status} tone={tone} />}
+      felt
+      info={status ? <StatusBar text={status} tone={tone} /> : null}
       board={
         <div className="sol-board freecell-board" data-testid="freecell-board">
           <div className="freecell-top">

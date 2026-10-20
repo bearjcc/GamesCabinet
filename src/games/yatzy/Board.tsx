@@ -8,6 +8,7 @@ import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
 import type { SubmitScoreInput } from '../../lib/scores';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { composeDieFaceArt, dieFaceArtMap, kenneyDieFaceAsset } from '../shared/dice';
 import { getYatzyActions } from './actions';
 import type { YatzyState } from './game';
@@ -75,8 +76,21 @@ export function YatzyBoard({
     return { score: over.totals[0] ?? grandTotal(G.scores[0]) };
   }, [G.scores, ctx.gameover, solo]);
 
-  let status = 'Waiting…';
-  let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
+  const turnHint = useMemo(() => {
+    if (!yourTurn || ctx.gameover) return undefined;
+    if (G.rolls === 0) return 'roll the dice';
+    if (G.rolls < 3) return 'hold dice or score a category';
+    return 'choose a score category';
+  }, [yourTurn, ctx.gameover, G.rolls]);
+
+  const { text: liveStatus, tone: liveTone } = useMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    turnHint,
+    matchData,
+  });
+
+  let status = liveStatus;
+  let tone: 'neutral' | 'you' | 'wait' | 'done' = liveTone;
   if (ctx.gameover) {
     tone = 'done';
     const over = ctx.gameover as { winner?: string; draw?: boolean; totals: number[] };
@@ -85,16 +99,6 @@ export function YatzyBoard({
     else if (over.winner === String(pid) || over.winner === playerID)
       status = `You win — ${over.totals[pid]} pts`;
     else status = `Player ${Number(over.winner) + 1} wins`;
-  } else if (yourTurn) {
-    tone = 'you';
-    status =
-      G.rolls === 0
-        ? 'Your turn — roll the dice'
-        : G.rolls < 3
-          ? 'Hold dice or score a category'
-          : 'Choose a score category';
-  } else {
-    status = `Player ${Number(ctx.currentPlayer) + 1}'s turn`;
   }
 
   const seatLabel = (i: number) => {

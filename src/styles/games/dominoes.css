@@ -1,8 +1,6 @@
-/* Dominoes: felt table fills the play area; no inset panel. */
+/* Dominoes: page-as-felt via PlayTable; no inset panel. */
 .play-table:has(.dom-scroll) {
-  gap: 0.3rem;
-  background: #1a4d32;
-  border-radius: var(--radius-lg);
+  gap: var(--space-1);
 }
 
 .play-table:has(.dom-scroll) .play-table__info {

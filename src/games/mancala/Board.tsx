@@ -24,7 +24,7 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: 'Your turn — tap a pit' },
+    turnHint: yourTurn ? 'tap a pit' : undefined,
   });
 
   const playable = new Set(yourTurn ? ownPits(ctx.currentPlayer) : []);

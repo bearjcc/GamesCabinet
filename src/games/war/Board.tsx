@@ -15,12 +15,15 @@ import { canPlay } from './game';
 
 export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarState>) {
   const yourTurn = Boolean(isActive && !ctx.gameover);
-  let yourTurnLabel = 'Your turn - tap a deck to fight';
-  if (G.lastWasWar) yourTurnLabel = 'Your turn - tap a deck to fight (war!)';
+  const turnHint = yourTurn
+    ? G.lastWasWar
+      ? 'tap a deck to fight (war!)'
+      : 'tap a deck to fight'
+    : undefined;
 
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: yourTurnLabel },
+    turnHint,
   });
 
   const [flipPulse, setFlipPulse] = useState(0);

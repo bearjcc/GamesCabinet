@@ -50,24 +50,18 @@ export function BattleshipBoard({
   const ownShipCells = new Set(own.ships.flatMap((s) => s.cells));
   const nextId = phase === 'setup' ? nextShipId(own) : null;
 
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (phase === 'setup') {
+      if (own.ready) turnHint = 'fleet ready — waiting for opponent';
+      else if (nextId !== null) turnHint = `place ship (${SHIP_LENGTHS[nextId]} long)`;
+      else turnHint = 'confirm when ready';
+    } else turnHint = 'fire';
+  }
+
   const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn:
-        phase === 'setup'
-          ? own.ready
-            ? 'Fleet ready - waiting for opponent'
-            : nextId !== null
-              ? `Place ship (${SHIP_LENGTHS[nextId]} long)`
-              : 'Confirm when ready'
-          : 'Your turn - fire',
-      theirTurn:
-        phase === 'setup'
-          ? own.ready
-            ? 'Fleet ready - waiting for opponent'
-            : 'Opponent is placing ships'
-          : 'Their turn',
-    },
+    turnHint,
   });
 
   const pewActions = getBattleshipActions({
