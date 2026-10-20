@@ -103,6 +103,26 @@ describe('draft phase', () => {
     expect(G(client).players[0].objectives).toEqual([]);
     expect(phase(client)).toBe('draft');
   });
+
+  it('rejects passDraft while draft options remain', () => {
+    const client = makeClient(2);
+    client.moves.passDraft();
+    expect(phase(client)).toBe('draft');
+    expect(client.getState()?.ctx.currentPlayer).toBe('0');
+  });
+
+  it('passDraft ends the turn when a seat has no draft cards left', () => {
+    const client = makeClient(2, (g) => {
+      g.draftsDealt = true;
+      g.players[0].draft = [];
+      g.players[1].draft = ['mayor', 'non-stop'];
+    });
+    client.moves.passDraft();
+    expect(client.getState()?.ctx.currentPlayer).toBe('1');
+    client.moves.chooseObjective('mayor');
+    client.moves.passDraft();
+    expect(phase(client)).toBe('play');
+  });
 });
 
 describe('play phase turns', () => {
