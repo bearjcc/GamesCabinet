@@ -217,7 +217,12 @@ export function TracksBoard({
               Solo: no discard draws or reshuffle; the round ends when you connect or on your 5th
               discard.
             </li>
-          ) : null}
+          ) : (
+            <li>
+              With others: once anyone connects start to destination, finish the current lap — play
+              stops just before the round&apos;s starting player would go again.
+            </li>
+          )}
           {G.discardDrawRule === '2021' ? (
             <li>Discard draw (2021): take the top discard freely; play or discard any card.</li>
           ) : (

@@ -56,7 +56,10 @@ export type TracksState = {
   discardDrawRule: '2021' | '2023';
   junctionPoints: 1 | 2;
   connectedOrder: string[];
-  lastTurns: string[] | null;
+  /** Multiplayer: after the first connection, finish the lap before the round starter acts again. */
+  lapEnding: boolean;
+  /** When the starter connected, skip ending until other seats have taken a turn. */
+  lapGraceStarter: boolean;
   prepared: boolean;
   draftsDealt: boolean;
   soloDiscards?: number;
@@ -107,7 +110,8 @@ export function dealRound(
   G.publicObjectives = publicObjectivesForPlayers(numPlayers);
   G.objectiveRaces = initComparativeRaces(comparativeIdsForState(G.publicObjectives, numPlayers));
   G.connectedOrder = [];
-  G.lastTurns = null;
+  G.lapEnding = false;
+  G.lapGraceStarter = false;
   G.drawnId = null;
   G.drewFromDiscard = false;
   G.draftsDealt = true;
@@ -146,10 +150,8 @@ export function scoreRound(G: TracksState): void {
   scorePublicObjectives(G.publicObjectives, metrics, G.scores, G.objectiveRaces, connectedFirst);
 }
 
-/** Connections needed before non-connectors take their final turns (2p: one connect). */
-function connectedThreshold(numPlayers: number): number {
-  if (numPlayers <= 2) return 1;
-  return Math.min(2, numPlayers);
+export function roundStarter(round: number, numPlayers: number): number {
+  return (round - 1) % numPlayers;
 }
 
 function endPlayTurn(
@@ -157,10 +159,18 @@ function endPlayTurn(
   ctx: { currentPlayer: string },
   events: { endTurn: () => void },
 ): void {
-  if (G.lastTurns) {
-    G.lastTurns = G.lastTurns.filter((id) => id !== ctx.currentPlayer);
+  if (G.lapEnding && ctx.currentPlayer !== String(roundStarter(G.round, G.players.length))) {
+    G.lapGraceStarter = false;
   }
   events.endTurn();
+}
+
+function multiplayerRoundOver(
+  G: TracksState,
+  ctx: { currentPlayer: string; numPlayers: number },
+): boolean {
+  if (!G.lapEnding || G.lapGraceStarter) return false;
+  return ctx.currentPlayer === String(roundStarter(G.round, ctx.numPlayers));
 }
 
 export function hasLegalPlacement(G: TracksState, tile: Tile, me: number): boolean {
@@ -201,7 +211,8 @@ export const Tracks: Game<TracksState> = {
       discardDrawRule: rules.discardDrawRule,
       junctionPoints: rules.junctionPoints,
       connectedOrder: [],
-      lastTurns: null,
+      lapEnding: false,
+      lapGraceStarter: false,
       prepared: false,
       draftsDealt: false,
       publicObjectives: publicObjectivesForPlayers(ctx.numPlayers),
@@ -219,7 +230,8 @@ export const Tracks: Game<TracksState> = {
         if (G.prepared) {
           G.prepared = false;
           G.connectedOrder = [];
-          G.lastTurns = null;
+          G.lapEnding = false;
+          G.lapGraceStarter = false;
           G.draftsDealt = true;
           G.publicObjectives = publicObjectivesForPlayers(ctx.numPlayers);
           G.objectiveRaces = initComparativeRaces(
@@ -252,16 +264,8 @@ export const Tracks: Game<TracksState> = {
       next: 'draft',
       turn: {
         order: {
-          first: ({ G, ctx }) => (G.round - 1) % ctx.numPlayers,
-          next: ({ G, ctx }) => {
-            if (G.lastTurns && G.lastTurns.length > 0) {
-              for (let i = 1; i <= ctx.numPlayers; i++) {
-                const pos = (ctx.playOrderPos + i) % ctx.numPlayers;
-                if (G.lastTurns.includes(ctx.playOrder[pos])) return pos;
-              }
-            }
-            return (ctx.playOrderPos + 1) % ctx.numPlayers;
-          },
+          first: ({ G, ctx }) => roundStarter(G.round, ctx.numPlayers),
+          next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
         onBegin: ({ G }) => {
           G.drawnId = null;
@@ -338,12 +342,10 @@ export const Tracks: Game<TracksState> = {
           const targetId = String(target);
           if (isConnected(board) && !G.connectedOrder.includes(targetId)) {
             G.connectedOrder.push(targetId);
-            if (!isSolo(G)) {
-              if (
-                G.connectedOrder.length === connectedThreshold(G.players.length) &&
-                G.lastTurns === null
-              ) {
-                G.lastTurns = ctx.playOrder.filter((id) => !G.connectedOrder.includes(id));
+            if (!isSolo(G) && !G.lapEnding) {
+              G.lapEnding = true;
+              if (targetId === String(roundStarter(G.round, ctx.numPlayers))) {
+                G.lapGraceStarter = true;
               }
             }
           }
@@ -361,14 +363,15 @@ export const Tracks: Game<TracksState> = {
           endPlayTurn(G, ctx, events);
         },
       },
-      endIf: ({ G }) => {
+      endIf: ({ G, ctx }) => {
         if (isSolo(G)) return soloRoundOver(G);
-        return G.lastTurns !== null && G.lastTurns.length === 0;
+        return multiplayerRoundOver(G, ctx);
       },
       onEnd: ({ G }) => {
         scoreRound(G);
         G.round += 1;
-        G.lastTurns = null;
+        G.lapEnding = false;
+        G.lapGraceStarter = false;
         G.draftsDealt = false;
         G.soloDiscards = 0;
       },

@@ -38,7 +38,8 @@ function makeClient(numPlayers: number, customize?: (G: TracksState) => void, se
     drawnId: null,
     drewFromDiscard: false,
     connectedOrder: [],
-    lastTurns: null,
+    lapEnding: false,
+    lapGraceStarter: false,
     prepared: true,
     draftsDealt: false,
     discardDrawRule: '2023',
@@ -293,7 +294,20 @@ describe('round flow and scoring', () => {
     expect(phase(client)).toBe('draft');
   });
 
-  it('winds down final turns for non-connected players, skipping connectors (3p)', () => {
+  it('sets lapEnding on the first connection (2p)', () => {
+    const client = makeClient(2, (g) => {
+      rowRun(g.players[0].board, WIDTH - 1);
+      g.players[0].hand = [tile('straight')];
+    });
+    throughDraft(client, 2);
+    client.moves.drawTile('deck');
+    client.moves.playTile(G(client).players[0].hand[0].id, 0, START_ROW, WIDTH - 1, 1);
+    expect(G(client).lapEnding).toBe(true);
+    expect(G(client).connectedOrder).toEqual(['0']);
+    expect(phase(client)).toBe('play');
+  });
+
+  it('finishes the lap after the first connection (3p)', () => {
     const client = makeClient(3, (g) => {
       rowRun(g.players[0].board, WIDTH - 1);
       g.players[0].hand = [tile('straight')];
@@ -308,12 +322,7 @@ describe('round flow and scoring', () => {
     client.moves.discardTile(G(client).players[1].hand[0].id);
     client.moves.drawTile('deck');
     client.moves.playTile(G(client).players[2].hand[0].id, 2, START_ROW, WIDTH - 1, 1);
-    // Players 0 and 2 connected; player 1 is owed the only last turn, and the
-    // turn order must skip player 0 to reach them.
-    expect(G(client).lastTurns).toEqual(['1']);
-    expect(client.getState()?.ctx.currentPlayer).toBe('1');
-    client.moves.drawTile('deck');
-    client.moves.discardTile(G(client).players[1].hand[0].id);
+    // P0 connected first; P1 took their lap turn; P2 connected — next would be P0, so the round ends.
     const g = G(client);
     expect(g.round).toBe(2);
     expect(g.scores[0]).toBeGreaterThanOrEqual(10);
@@ -337,8 +346,6 @@ describe('round flow and scoring', () => {
     client.moves.discardTile(G(client).players[1].hand[0].id);
     client.moves.drawTile('deck');
     client.moves.playTile(G(client).players[2].hand[0].id, 2, START_ROW, WIDTH - 1, 1);
-    client.moves.drawTile('deck');
-    client.moves.discardTile(G(client).players[1].hand[0].id);
     throughDraft(client, 3);
     expect(client.getState()?.ctx.currentPlayer).toBe('1');
   });
@@ -378,7 +385,8 @@ describe('scoreRound', () => {
       drawnId: null,
       drewFromDiscard: false,
       connectedOrder: [],
-      lastTurns: null,
+      lapEnding: false,
+      lapGraceStarter: false,
       prepared: false,
       draftsDealt: false,
       discardDrawRule: '2023',
