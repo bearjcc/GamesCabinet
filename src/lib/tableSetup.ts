@@ -29,6 +29,36 @@ export function getSeatKinds(meta: GameMeta): SeatKind[] {
   return kinds;
 }
 
+const TAP_KIND_CYCLE: SeatKind[] = ['local', 'bot', 'empty'];
+
+/** Seat kinds offered when tapping an occupied spot (online is long-press). */
+export function seatKindCycle(meta: GameMeta): SeatKind[] {
+  return TAP_KIND_CYCLE.filter((kind) => kind === 'empty' || getSeatKinds(meta).includes(kind));
+}
+
+/** First kind offered when claiming an open seat. */
+export function defaultClaimKind(meta: GameMeta): SeatKind {
+  const allowed = getSeatKinds(meta);
+  return (['local', 'online', 'bot'] as const).find((kind) => allowed.includes(kind)) ?? 'local';
+}
+
+export function nextSeatKind(
+  meta: GameMeta,
+  current: SeatKind,
+  options: { claim?: boolean } = {},
+): SeatKind {
+  const cycle = seatKindCycle(meta);
+  if (options.claim || current === 'empty') {
+    return defaultClaimKind(meta);
+  }
+  if (current === 'online') {
+    return getSeatKinds(meta).includes('local') ? 'local' : 'empty';
+  }
+  const index = cycle.indexOf(current);
+  if (index < 0) return defaultClaimKind(meta);
+  return cycle[(index + 1) % cycle.length]!;
+}
+
 function occupiedSeats(seats: readonly TableSeat[]): TableSeat[] {
   return seats.filter((seat) => seat.kind !== 'empty');
 }

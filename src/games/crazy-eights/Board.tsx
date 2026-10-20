@@ -7,8 +7,8 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
-import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import type { Suit } from '../shared/cards';
 import { canPlayMatching, topOf } from '../shared/cards';
 import { getCrazyEightsActions } from './actions';
@@ -51,6 +51,12 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
   const match = matchContext(G);
   const mayDraw = yourTurn && pid >= 0 && canDraw(G, pid);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clear local UI when the seat changes
+  useEffect(() => {
+    setSelected(null);
+    setPickingSuit(false);
+  }, [ctx.currentPlayer]);
+
   useEffect(() => {
     const nextLens = handLengths(G.hands);
     const nextTopId = topOf(G.discard)?.id;
@@ -92,7 +98,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     return set;
   }, [hand, match, yourTurn]);
 
-  const pewActions = getCrazyEightsActions({ G, yourTurn });
+  const pewActions = getCrazyEightsActions({ G, player: pid, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
     ...action,
     onAction: () => {
@@ -100,28 +106,24 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     },
   }));
 
-  const { text: baseStatus, tone } = deriveMatchStatus(ctx, playerID, {
-    isYourTurn: yourTurn,
-    labels: {
-      theirTurn: `Player ${Number(ctx.currentPlayer) + 1}'s turn`,
-    },
-  });
-  let status = baseStatus;
+  let turnHint: string | undefined;
   if (yourTurn && !ctx.gameover) {
-    if (pickingSuit) status = 'Choose a suit for your eight';
-    else if (selected != null) status = 'Play the selected card, or pick another';
-    else if (G.drewThisTurn) status = 'Play a card or pass';
-    else status = 'Your turn — play or draw';
+    if (pickingSuit) turnHint = 'choose a suit for your eight';
+    else if (selected != null) turnHint = 'play the selected card, or pick another';
+    else if (G.drewThisTurn) turnHint = 'play a card or pass';
+    else turnHint = 'play or draw';
   }
+
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
+    isYourTurn: yourTurn,
+    turnHint,
+  });
 
   function tryPlay(index: number) {
     if (!yourTurn) return;
     const card = hand[index];
     if (!card || !match) return;
-    if (!canPlayMatching(card, match, { wildRanks: [WILD_RANK] })) {
-      setSelected(index);
-      return;
-    }
+    if (!canPlayMatching(card, match, { wildRanks: [WILD_RANK] })) return;
     if (card.rank === WILD_RANK) {
       setSelected(index);
       setPickingSuit(true);
@@ -141,6 +143,7 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
 
   return (
     <PlayTable
+      felt
       info={
         <>
           <StatusBar text={status} tone={tone} />
@@ -189,8 +192,9 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
       pew={
         <CardHand
           cards={hand}
-          selectedIndex={selected}
+          selectedIndex={pickingSuit ? selected : null}
           disabled={!yourTurn}
+          mode="physical"
           isPlayable={(_, i) => playableIndexes.has(i)}
           isWild={(card) => isWildEightId(card.id)}
           assetFor={resolveAsset}
@@ -198,7 +202,11 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
           testIdPrefix="ce-hand"
         />
       }
-      actions={<ActionSurface label="Crazy Eights actions" actions={surfaceActions} />}
+      actions={
+        pewActions.length > 0 ? (
+          <ActionSurface label="Crazy Eights actions" actions={surfaceActions} />
+        ) : null
+      }
     />
   );
 }

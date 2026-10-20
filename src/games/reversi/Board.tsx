@@ -1,13 +1,13 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { Drop, Snap } from '../../components/cinematic';
+import { Flip, Snap } from '../../components/cinematic';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
-import { deriveMatchStatus } from '../../lib/matchStatus';
 import { readEffectiveMotion } from '../../lib/motion';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getReversiActions } from './actions';
 import type { ReversiState } from './game';
 import { legalPlaces, SIZE } from './game';
@@ -55,9 +55,13 @@ function DiscChrome({ player, snapPulse, snapActive, dropPulse, dropActive }: Di
   }
   if (dropActive) {
     return (
-      <Drop key={dropPulse} active={dropActive} className="reversi-cell__cinematic">
+      <Flip
+        key={dropPulse}
+        active={dropActive}
+        className="reversi-cell__cinematic reversi-cell__flip"
+      >
         {inner}
-      </Drop>
+      </Flip>
     );
   }
   return inner;
@@ -108,20 +112,18 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
   useEffect(() => {
     if (flipPulse === 0) return;
     setFlipActive(true);
-    const ms = primitiveProfile('drop', readEffectiveMotion()).durationMs;
+    const ms = primitiveProfile('flip', readEffectiveMotion()).durationMs;
     const t = window.setTimeout(() => setFlipActive(false), ms);
     return () => window.clearTimeout(t);
   }, [flipPulse]);
 
   const dark = G.cells.filter((c) => c === '0').length;
   const light = G.cells.filter((c) => c === '1').length;
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: baseStatus, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn:
-        places.length === 0 ? 'No moves - passing' : `Your turn - place a disc (${dark}-${light})`,
-    },
+    turnHint: yourTurn && places.length > 0 ? `place a disc (${dark}–${light})` : undefined,
   });
+  const status = yourTurn && places.length === 0 ? `${baseStatus} — no moves, passing` : baseStatus;
 
   const pewActions = getReversiActions({ G, player, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
@@ -184,7 +186,11 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
           })}
         </div>
       }
-      actions={<ActionSurface label="Reversi actions" actions={surfaceActions} />}
+      actions={
+        surfaceActions.length > 0 ? (
+          <ActionSurface label="Reversi actions" actions={surfaceActions} />
+        ) : null
+      }
     />
   );
 }

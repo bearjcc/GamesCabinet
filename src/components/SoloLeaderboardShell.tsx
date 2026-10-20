@@ -12,22 +12,29 @@ export function SoloLeaderboardShell({
   tab,
   onTabChange,
   testIdPrefix,
+  showTabs = true,
   info,
   board,
   pew,
   actions,
   onSubmitted,
   onError,
+  felt = false,
+  reservePew = false,
 }: {
   gameId: string;
   pendingSubmit?: SubmitScoreInput | null;
   tab: SoloPlayTab;
   onTabChange: (tab: SoloPlayTab) => void;
   testIdPrefix: string;
+  /** When false, callers supply their own scores navigation (e.g. compact toolbar). */
+  showTabs?: boolean;
   info: ReactNode;
   board: ReactNode;
   pew?: ReactNode;
   actions?: ReactNode;
+  felt?: boolean | 'blue';
+  reservePew?: boolean;
   onSubmitted?: () => void;
   onError?: (message: string) => void;
 }) {
@@ -42,10 +49,14 @@ export function SoloLeaderboardShell({
         onError={onError}
       />
       <PlayTable
+        felt={felt}
+        reservePew={reservePew}
         info={
           <>
             {info}
-            <SoloPlayTabs value={tab} onChange={onTabChange} testIdPrefix={testIdPrefix} />
+            {showTabs ? (
+              <SoloPlayTabs value={tab} onChange={onTabChange} testIdPrefix={testIdPrefix} />
+            ) : null}
           </>
         }
         board={

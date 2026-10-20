@@ -20,10 +20,11 @@ export function parseTracksSetup(
   return { discardDrawRule, junctionPoints };
 }
 
-export function tracksPlayQuery(setup: TracksSetupData, seats: number): string {
+export function tracksPlayQuery(setup: TracksSetupData, seats: number, colours?: string): string {
   const params = new URLSearchParams();
   params.set('seats', String(seats));
   if (setup.discardDrawRule !== '2023') params.set('discard', setup.discardDrawRule);
   if (setup.junctionPoints !== 2) params.set('junction', String(setup.junctionPoints));
+  if (colours) params.set('colours', colours);
   return `?${params.toString()}`;
 }

@@ -7,7 +7,9 @@ import {
   getSeatColour,
   getSoloBestScore,
   getUnlockedGames,
+  hasSeenGame,
   loadSeat,
+  markGameSeen,
   SEAT_COLOUR_PALETTE,
   saveSeat,
   setNickname,
@@ -202,6 +204,26 @@ describe('solo best scores', () => {
     });
     expect(getSoloBestScore('2048')).toBe(0);
     expect(() => setSoloBestScore('2048', 42)).not.toThrow();
+  });
+
+  it('tracks first-play seen games', () => {
+    stubLocalStorage();
+    expect(hasSeenGame('klondike')).toBe(false);
+    markGameSeen('klondike');
+    expect(hasSeenGame('klondike')).toBe(true);
+    expect(hasSeenGame('freecell')).toBe(false);
+  });
+
+  it('treats unreadable seen-game storage as not seen', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {},
+      removeItem: () => {},
+    });
+    expect(hasSeenGame('klondike')).toBe(false);
+    expect(() => markGameSeen('klondike')).not.toThrow();
   });
 
   it('ignores invalid stored best scores and bad writes', () => {

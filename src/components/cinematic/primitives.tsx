@@ -26,7 +26,7 @@ const REST: TransformTarget = {
 const ACTIVE_TRANSFORMS: Record<CinematicKind, TransformTarget> = {
   lift: { ...REST, y: -10 },
   drop: { ...REST, y: 10 },
-  snap: { ...REST, scale: 1.04 },
+  snap: { ...REST, scale: 1.02 },
   deal: { ...REST, y: -16, rotate: -4 },
   flip: { ...REST, rotateY: 180 },
   fan: { ...REST, rotate: -8, x: -6 },

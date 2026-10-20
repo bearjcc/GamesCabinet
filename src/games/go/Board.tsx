@@ -3,7 +3,8 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { boardFirstChromeActions } from '../../lib/actions';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getGoActions } from './actions';
 import { type GoState, legalPlaces, SIZE } from './game';
 
@@ -15,25 +16,20 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
 
   const black = G.cells.filter((c) => c === '0').length + G.captures[0];
   const white = G.cells.filter((c) => c === '1').length + G.captures[1];
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn: `Your turn (${black}-${white})`,
-    },
+    nameForPlayer: (id) => (id === '0' ? 'Black' : 'White'),
+    turnHint: yourTurn ? `captures ${black}–${white}` : undefined,
   });
 
-  const pewActions = getGoActions({ G, player, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const match = /^place-(\d+)$/.exec(action.id);
-      if (match) moves.place(Number(match[1]));
-    },
-  }));
+  const chromeActions = boardFirstChromeActions(getGoActions({ G, player, yourTurn })).map(
+    (action) => ({
+      ...action,
+      onAction: () => {
+        if (action.id === 'pass') moves.pass();
+      },
+    }),
+  );
 
   return (
     <PlayTable
@@ -68,7 +64,11 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
           })}
         </div>
       }
-      actions={<ActionSurface label="Go actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Go actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

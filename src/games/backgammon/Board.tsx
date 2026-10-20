@@ -3,7 +3,8 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray, Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { boardFirstChromeActions } from '../../lib/actions';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getBackgammonActions } from './actions';
 import { BAR, type BackgammonState, checkerCount, legalPlays, pointOwner } from './game';
 
@@ -22,37 +23,34 @@ export function BackgammonBoard({
   const plays = yourTurn ? legalPlays(G, ctx.currentPlayer) : [];
   const playableFrom = new Set(plays.map((p) => p.from));
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (!G.hasRolled) turnHint = 'roll the dice';
+    else if (plays.length === 0) turnHint = 'no legal moves — pass';
+    else turnHint = 'play a die';
+  }
+
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn: G.hasRolled
-        ? plays.length === 0
-          ? 'No legal moves - pass'
-          : 'Your turn - play a die'
-        : 'Your turn - roll the dice',
-    },
+    turnHint,
   });
 
-  const pewActions = getBackgammonActions({
-    G,
-    player: ctx.currentPlayer,
-    yourTurn,
-  });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'roll') {
-        moves.roll();
-        return;
-      }
-      if (action.id === 'pass') {
-        moves.pass();
-        return;
-      }
-      const match = /^play-(\d+)-(\d+)$/.exec(action.id);
-      if (match) moves.play(Number(match[1]), Number(match[2]));
-    },
-  }));
+  const chromeActions = boardFirstChromeActions(
+    getBackgammonActions({
+      G,
+      player: ctx.currentPlayer,
+      yourTurn,
+    }),
+  )
+    .filter((action) => action.id !== 'roll')
+    .map((action) => ({
+      ...action,
+      onAction: () => {
+        if (action.id === 'pass') moves.pass();
+      },
+    }));
+
+  const canRoll = yourTurn && !G.hasRolled;
 
   const onPoint = (from: number) => {
     if (!yourTurn || !G.hasRolled) return;
@@ -132,9 +130,18 @@ export function BackgammonBoard({
                 {G.hasRolled && G.dice.length > 0 ? (
                   <DiceTray dice={G.dice} disabled testId="backgammon-dice" />
                 ) : (
-                  <div className="bg-dice-slot" data-testid="backgammon-dice-empty">
-                    {G.hasRolled ? 'No dice left' : 'Roll to start'}
-                  </div>
+                  <button
+                    type="button"
+                    className={`bg-dice-slot${canRoll ? ' is-open' : ''}`}
+                    data-testid="backgammon-dice-empty"
+                    disabled={!canRoll}
+                    onClick={() => {
+                      if (canRoll) moves.roll();
+                    }}
+                    aria-label={canRoll ? 'Roll dice' : 'Dice'}
+                  >
+                    {G.hasRolled ? 'No dice left' : 'Tap to roll'}
+                  </button>
                 )}
               </div>
               <div className="bg-row bg-row-bottom">{bottom.map(renderPoint)}</div>
@@ -152,7 +159,11 @@ export function BackgammonBoard({
           </div>
         </div>
       }
-      actions={<ActionSurface label="Backgammon actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Backgammon actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

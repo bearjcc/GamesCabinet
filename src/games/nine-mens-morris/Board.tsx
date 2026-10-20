@@ -1,10 +1,8 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
-import { getNineMensMorrisActions } from './actions';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import {
   ADJACENT,
   type Cell,
@@ -66,42 +64,18 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
     G.selected === null ? [] : relocations.filter((m) => m.from === G.selected).map((m) => m.to);
   const targetSet = new Set(targets);
 
-  let yourTurnLabel = 'Your turn';
-  if (G.pendingRemoval) yourTurnLabel = 'Mill — remove an opponent piece';
-  else if (G.phase === 'place') yourTurnLabel = 'Your turn — place a piece';
-  else if (G.selected === null) yourTurnLabel = 'Your turn — select a piece';
-  else yourTurnLabel = 'Your turn — choose a destination';
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (G.pendingRemoval) turnHint = 'mill — remove an opponent piece';
+    else if (G.phase === 'place') turnHint = 'place a piece';
+    else if (G.selected === null) turnHint = 'select a piece';
+    else turnHint = 'choose a destination';
+  }
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: { yourTurn: yourTurnLabel },
+    turnHint,
   });
-
-  const pewActions = getNineMensMorrisActions({ G, player, yourTurn });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      const place = /^place-(\d+)$/.exec(action.id);
-      if (place) {
-        moves.place(Number(place[1]));
-        return;
-      }
-      const remove = /^remove-(\d+)$/.exec(action.id);
-      if (remove) {
-        moves.remove(Number(remove[1]));
-        return;
-      }
-      const select = /^select-(\d+)$/.exec(action.id);
-      if (select) {
-        moves.select(Number(select[1]));
-        return;
-      }
-      const moveTo = /^move-to-(\d+)$/.exec(action.id);
-      if (moveTo && G.selected !== null) {
-        moves.move(Number(moveTo[1]));
-      }
-    },
-  }));
 
   return (
     <PlayTable
@@ -184,7 +158,6 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
           })}
         </div>
       }
-      actions={<ActionSurface label="Nine Men's Morris actions" actions={surfaceActions} />}
     />
   );
 }

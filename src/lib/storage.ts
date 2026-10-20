@@ -3,6 +3,23 @@ const SEAT_PREFIX = 'gamescabinet.seat.';
 export const SEAT_COLOUR_KEY = 'gamescabinet.seatColour';
 const UNLOCKED_GAMES_KEY = 'gamescabinet.unlockedGames';
 const SOLO_BEST_PREFIX = 'gamescabinet.best.';
+const SEEN_GAME_PREFIX = 'gamescabinet.seen.';
+
+export function hasSeenGame(gameId: string): boolean {
+  try {
+    return localStorage.getItem(`${SEEN_GAME_PREFIX}${gameId}`) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markGameSeen(gameId: string): void {
+  try {
+    localStorage.setItem(`${SEEN_GAME_PREFIX}${gameId}`, '1');
+  } catch {
+    /* private mode */
+  }
+}
 
 /** Fixed palette for default seat / pawn colour preference. */
 export const SEAT_COLOUR_PALETTE = [
@@ -61,6 +78,8 @@ export type SeatSession = {
   gameName: string;
   setupData?: unknown;
   localSeats?: DeviceSeat[];
+  /** Palette-index query for launch seat colours (same format as the play URL). */
+  seatColourQuery?: string;
 };
 
 export function deviceSeats(

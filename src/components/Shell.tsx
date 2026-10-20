@@ -1,5 +1,7 @@
 import { type ReactNode, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { IconLink } from './IconControl';
+import { IconSettings } from './icons';
 import { MotionCycle } from './MotionCycle';
 import { ThemeCycle } from './ThemeCycle';
 
@@ -8,23 +10,26 @@ const APP_TITLE = 'GamesCabinet';
 export function Shell({
   title,
   children,
-  backTo = '/',
+  backTo,
   trailing,
+  layout = 'default',
 }: {
   title?: string;
   children: ReactNode;
+  /** Separate back control — the brand mark always navigates home. */
   backTo?: string;
   trailing?: ReactNode;
+  layout?: 'default' | 'catalogue';
 }) {
   useEffect(() => {
     document.title = title ? `${title} · ${APP_TITLE}` : APP_TITLE;
   }, [title]);
 
   return (
-    <div className="shell">
+    <div className={layout === 'catalogue' ? 'shell shell--catalogue' : 'shell'}>
       <header className="topbar">
-        <div className="topbar-left">
-          <Link to={backTo} className="brand">
+        <div className="topbar-start">
+          <Link to="/" className="brand" data-testid="shell-home" aria-label="GamesCabinet home">
             <img
               className="brand-mark"
               src="/brand/gamescabinet-mark.png"
@@ -32,15 +37,24 @@ export function Shell({
               height={24}
               alt=""
             />
-            GamesCabinet
+            {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
           </Link>
-          {title ? <h1 className="page-title">{title}</h1> : null}
+          {backTo ? (
+            <Link to={backTo} className="btn ghost shell-back" data-testid="shell-back">
+              Back
+            </Link>
+          ) : null}
         </div>
+        {title ? (
+          <h1 className="page-title topbar-center">{title}</h1>
+        ) : (
+          <div className="topbar-center" aria-hidden="true" />
+        )}
         <div className="topbar-right" role="toolbar" aria-label="Shell controls">
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
-          <Link to="/settings" className="btn ghost" data-testid="shell-settings">
-            Settings
-          </Link>
+          <IconLink to="/settings" label="Settings" testId="shell-settings">
+            <IconSettings />
+          </IconLink>
           <MotionCycle />
           <ThemeCycle />
         </div>

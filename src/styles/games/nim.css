@@ -16,3 +16,23 @@
   max-width: 16rem;
   min-height: 2.5rem;
 }
+
+.nim-stone {
+  display: inline-flex;
+  padding: 0.15rem;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.nim-stone.is-open {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.nim-stone:disabled {
+  cursor: default;
+  opacity: 0.55;
+}

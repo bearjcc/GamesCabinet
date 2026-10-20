@@ -1,14 +1,11 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActionSurface } from '../../components/ActionSurface';
-import { AnimatedCounter } from '../../components/cinematic';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
-import { StatusBar } from '../../components/StatusBar';
-import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { getSoloBestScore, updateSoloBestScore } from '../../lib/storage';
 import { get2048Actions } from './actions';
 import type { Game2048State, SwipeDir } from './game';
+import { Game2048Toolbar } from './Toolbar';
 
 const KEY_DIRS: Record<string, SwipeDir> = {
   ArrowUp: 'up',
@@ -30,6 +27,18 @@ function tileClass(value: number | null, popped: boolean): string {
   const classes = [`g2048-cell`, `v${value}`];
   if (popped) classes.push('is-new');
   return classes.join(' ');
+}
+
+function helpText(G: Game2048State, gameover: unknown): string {
+  if (gameover) {
+    const over = gameover as { won: boolean };
+    return over.won
+      ? 'Game over. You reached 2048. Swipe, arrow keys, or WASD to merge tiles.'
+      : 'Game over. Swipe, arrow keys, or WASD to merge matching tiles.';
+  }
+  if (G.winPaused) return 'You made 2048. Keep going for a higher score, or start again.';
+  if (G.won) return 'Keep going for a higher score. Swipe, arrow keys, or WASD.';
+  return 'Swipe, arrow keys, or WASD to merge matching tiles.';
 }
 
 export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Game2048State>) {
@@ -109,37 +118,25 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
     };
   }, [moves, playable]);
 
-  let status = 'Swipe, arrow keys, or WASD';
-  let tone: StatusTone = 'you';
-  if (ctx.gameover) {
-    tone = 'done';
-    const over = ctx.gameover as { score: number; won: boolean };
-    status = over.won ? 'Game over - you reached 2048' : 'Game over';
-  } else if (G.winPaused) {
-    tone = 'you';
-    status = 'You made 2048!';
-  } else if (G.won) {
-    status = 'Keep going for a higher score';
-  }
+  const toolbarActions = get2048Actions({ G, playable, gameover: ctx.gameover });
 
-  const pewActions = get2048Actions({ G, playable, gameover: ctx.gameover });
-  const surfaceActions = pewActions.map((action) => ({
-    ...action,
-    onAction: () => {
-      if (action.id === 'undo') {
-        moves.undo();
-        return;
-      }
-      if (action.id === 'keep-going') {
-        moves.keepGoing();
-        return;
-      }
-      if (action.id === 'new-game' || action.id === 'try-again') {
-        reset();
-        return;
-      }
-    },
-  }));
+  const runAction = (id: string) => {
+    if (id === 'undo') {
+      moves.undo();
+      return;
+    }
+    if (id === 'redo') {
+      moves.redo();
+      return;
+    }
+    if (id === 'keep-going') {
+      moves.keepGoing();
+      return;
+    }
+    if (id === 'new-game' || id === 'try-again') {
+      reset();
+    }
+  };
 
   return (
     <SoloLeaderboardShell
@@ -148,22 +145,17 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="g2048"
+      showTabs={false}
       info={
-        <>
-          <div className="g2048-scores" data-testid="g2048-score">
-            <div className="g2048-scoreline">
-              <span className="g2048-score-label">Score</span>
-              <AnimatedCounter value={scoreValue} className="g2048-score-value" />
-            </div>
-            <div className="g2048-scoreline">
-              <span className="g2048-score-label">Best</span>
-              <span className="g2048-score-value" data-testid="g2048-best">
-                {bestScore}
-              </span>
-            </div>
-          </div>
-          <StatusBar text={status} tone={tone} />
-        </>
+        <Game2048Toolbar
+          score={scoreValue}
+          bestScore={bestScore}
+          helpText={helpText(G, ctx.gameover)}
+          actions={toolbarActions}
+          onAction={runAction}
+          onShowScores={() => setTab((current) => (current === 'scores' ? 'play' : 'scores'))}
+          scoresActive={tab === 'scores'}
+        />
       }
       board={
         <div ref={playAreaRef} className="g2048-play-area" data-testid="g2048-play-area">
@@ -191,7 +183,6 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
           ) : null}
         </div>
       }
-      actions={<ActionSurface label="2048 actions" actions={surfaceActions} />}
     />
   );
 }

@@ -1,29 +1,34 @@
 .freecell-board {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: 0.5rem 0.25rem 1rem;
+  --sol-card-w: min(4.5rem, calc((100% - 7 * 0.35rem) / 8));
 }
 
 .freecell-top {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 0.65rem;
   align-items: start;
+  flex-shrink: 0;
 }
 
 .freecell-freecells,
 .freecell-foundations {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.freecell-freecells .tt-card,
+.freecell-slot {
+  width: var(--sol-card-w);
 }
 
 .freecell-foundations {
   justify-content: flex-end;
+}
+
+.freecell-foundations .tt-card,
+.freecell-foundation {
+  width: var(--sol-card-w);
 }
 
 .freecell-slot,
@@ -32,25 +37,21 @@
   border: 0;
   background: transparent;
   padding: 0;
-  cursor: pointer;
-}
-
-.freecell-slot:disabled,
-.freecell-foundation:disabled {
   cursor: default;
 }
 
 .freecell-cascades {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 0.35rem;
-  align-items: start;
-  min-height: 14rem;
+  align-content: start;
 }
 
 .freecell-column {
   position: relative;
-  min-height: 6.5rem;
+  min-height: 6rem;
 }
 
 .freecell-column__empty {
@@ -61,10 +62,6 @@
   position: absolute;
   left: 0;
   right: 0;
-}
-
-.freecell-slot-card .tt-card {
-  width: 100%;
 }
 
 @media (max-width: 40rem) {

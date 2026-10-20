@@ -163,6 +163,30 @@ describe('hostRoom', () => {
     });
   });
 
+  it('persists launch seat colours on the hosted room session', async () => {
+    lobbyMocks.createMatch.mockResolvedValue({ matchID: 'CLR1' });
+    lobbyMocks.joinMatch.mockResolvedValue({ playerID: '0', playerCredentials: 'cred-0' });
+    const { hostRoom } = await loadLobby();
+    const { saveSeat } = await import('./storage');
+
+    await expect(hostRoom('connect-four', 2, 'Bear', undefined, undefined, '0,4')).resolves.toEqual(
+      {
+        matchID: 'CLR1',
+        gameName: 'connect-four',
+        playerID: '0',
+        credentials: 'cred-0',
+        seatColourQuery: '0,4',
+      },
+    );
+    expect(saveSeat).toHaveBeenCalledWith({
+      matchID: 'CLR1',
+      playerID: '0',
+      credentials: 'cred-0',
+      gameName: 'connect-four',
+      seatColourQuery: '0,4',
+    });
+  });
+
   it('joins bot chairs as Bot when hosting an online table', async () => {
     lobbyMocks.createMatch.mockResolvedValue({ matchID: 'MIXB' });
     lobbyMocks.joinMatch

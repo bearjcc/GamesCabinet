@@ -1,5 +1,5 @@
 import type { SemanticAction } from '../../lib/actions';
-import { canUndo, type Game2048State } from './game';
+import { canRedo, canUndo, type Game2048State } from './game';
 
 export type Game2048ActionInput = {
   G: Game2048State;
@@ -7,7 +7,7 @@ export type Game2048ActionInput = {
   gameover?: unknown;
 };
 
-/** Chrome actions for solo 2048 (undo, new game, win pause). Tile moves use keys / swipe. */
+/** Chrome actions for solo 2048 (undo, redo, new game, win pause). Tile moves use keys / swipe. */
 export function get2048Actions({ G, gameover }: Game2048ActionInput): SemanticAction[] {
   if (G.winPaused && !gameover) {
     return [
@@ -29,6 +29,7 @@ export function get2048Actions({ G, gameover }: Game2048ActionInput): SemanticAc
   }
 
   const undoOk = canUndo(G, gameover);
+  const redoOk = canRedo(G, gameover);
   const actions: SemanticAction[] = [];
 
   if (!gameover) {
@@ -49,6 +50,16 @@ export function get2048Actions({ G, gameover }: Game2048ActionInput): SemanticAc
     disabled: !undoOk,
     disabledReason: undoOk ? undefined : gameover ? 'Game over' : 'Nothing to undo',
     testId: 'g2048-action-undo',
+  });
+
+  actions.push({
+    id: 'redo',
+    kind: 'dismiss',
+    label: 'Redo',
+    variant: 'secondary',
+    disabled: !redoOk,
+    disabledReason: redoOk ? undefined : gameover ? 'Game over' : 'Nothing to redo',
+    testId: 'g2048-action-redo',
   });
 
   return actions;

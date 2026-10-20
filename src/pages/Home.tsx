@@ -1,6 +1,9 @@
+import type { CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GameThumbnail } from '../components/GameThumbnail';
 import { JoinRoomPanel } from '../components/JoinRoomPanel';
 import { Shell } from '../components/Shell';
+import { gameAccentStyle } from '../lib/gameIdentity';
 import { catalogueGroups, isSoloOnly, soloPlayPath, visibleGames } from '../lib/games';
 import { getUnlockedGames } from '../lib/storage';
 
@@ -9,9 +12,7 @@ export function Home() {
   const groups = catalogueGroups(visibleGames(getUnlockedGames()));
 
   return (
-    <Shell>
-      <h1 className="page-heading">Games</h1>
-
+    <Shell layout="catalogue">
       {groups.map((group) => (
         <section
           key={group.id}
@@ -27,23 +28,28 @@ export function Home() {
               <Link
                 key={g.id}
                 className="game-tile"
+                style={gameAccentStyle(g.id) as CSSProperties}
                 to={isSoloOnly(g) ? soloPlayPath(g.id) : `/game/${g.id}`}
                 data-testid={`home-game-${g.id}`}
               >
+                <GameThumbnail gameId={g.id} />
                 <h3>{g.name}</h3>
-                <p>{g.blurb}</p>
               </Link>
             ))}
           </div>
         </section>
       ))}
 
-      <JoinRoomPanel
-        askName
-        onJoined={(room) => {
-          navigate(`/g/${room.gameName}/${room.matchID}`);
-        }}
-      />
+      <details className="join-details" data-testid="join-details">
+        <summary className="join-panel-summary">Join with a code</summary>
+        <JoinRoomPanel
+          askName
+          title=""
+          onJoined={(room) => {
+            navigate(`/g/${room.gameName}/${room.matchID}`);
+          }}
+        />
+      </details>
     </Shell>
   );
 }

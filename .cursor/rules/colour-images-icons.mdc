@@ -1,0 +1,49 @@
+---
+description: "Every colour, image, and icon earns its place — distinction, hierarchy, state, evidence, recognition."
+alwaysApply: true
+---
+
+# Colour, images, and icons
+
+Read [`DESIGN.md`](../../DESIGN.md) for theme tokens and brand pops.
+
+## Principle
+
+Every colour, image, and icon has a **job**. If you cannot name the job in one phrase, remove it.
+
+| Job | Examples in this cabinet |
+|---|---|
+| **Distinction** | Player vs opponent, suit colour, legal vs illegal |
+| **Hierarchy** | Muted group labels, ink for primary actions |
+| **State** | `--you`, `--danger`, `--wait`, selected seat |
+| **Evidence** | Score, room code, whose turn — must stay legible without colour alone |
+| **Recognition** | Brand mark, Kenney art, game-specific board identity |
+
+Colour is **redundant**, not the sole channel. Pair tint with weight, border, position, or copy.
+
+## Restraint
+
+- Theme neutrals carry the shell; brand pops mark state and rare emphasis.
+- Boards keep saturated game colour; chrome stays quiet.
+- No indigo-violet defaults, purple-blue gradients, or vibecode accent stacks (see `anti-slop.mdc`).
+- Yellow (`--brand-yellow`) is fill/mark, not body text on light surfaces.
+
+## Icons
+
+Icons share one language: simple, readable at tap size, same stroke weight family.
+
+- Settings, theme cycle, motion cycle: functional, not decorative.
+- **Sometimes no icon** — a word or the board itself is enough.
+- Do not sprinkle icons to fake structure (feature-card grids, eyebrow pills).
+
+## Images
+
+- Default art: Kenney CC0 via shared tabletop kit.
+- Brand mark on the wordmark only; games supply their own board personality.
+- No stock illustration heroes, orbs, blobs, or page gradients as chrome filler.
+
+## Visual abundance
+
+More boxes, badges, and ribbons ≠ clearer UI. Prefer one honest surface over layered faux depth.
+
+Conflicts: favour **intentionality** and **GamesCabinet undertone** (handmade cabinet, not SaaS landing) over ornamental chrome.

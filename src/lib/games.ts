@@ -113,10 +113,11 @@ export const GAMES: GameMeta[] = [
   {
     id: 'memory',
     name: 'Memory',
-    blurb: 'Flip pairs. Most matches wins.',
-    minPlayers: 2,
+    blurb: 'Flip pairs. Play solo or race a friend.',
+    minPlayers: 1,
     maxPlayers: 2,
     hasBot: true,
+    hasSolo: true,
     hasLocal: true,
   },
   {
@@ -345,9 +346,9 @@ export function catalogueGroups(games: GameMeta[] = GAMES): CatalogueGroup[] {
     else withOthers.push(game);
   }
   const groups: CatalogueGroup[] = [];
-  if (solo.length) groups.push({ id: 'solo', label: 'Solo', games: solo });
+  if (solo.length) groups.push({ id: 'solo', label: 'Play alone', games: solo });
   if (withOthers.length) {
-    groups.push({ id: 'with-others', label: 'With others', games: withOthers });
+    groups.push({ id: 'with-others', label: 'Play together', games: withOthers });
   }
   return groups;
 }

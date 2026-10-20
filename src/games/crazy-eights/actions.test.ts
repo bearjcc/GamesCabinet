@@ -18,6 +18,7 @@ describe('getCrazyEightsActions', () => {
   it('exposes pass as a dismiss action with ce-pass test id', () => {
     const [pass] = getCrazyEightsActions({
       G: baseG({ drewThisTurn: true }),
+      player: 0,
       yourTurn: true,
     });
     expect(pass).toMatchObject({
@@ -30,15 +31,23 @@ describe('getCrazyEightsActions', () => {
   });
 
   it('disables pass until the player has drawn this turn', () => {
-    const [pass] = getCrazyEightsActions({ G: baseG({ drewThisTurn: false }), yourTurn: true });
+    const [pass] = getCrazyEightsActions({
+      G: baseG({ drewThisTurn: false }),
+      player: 0,
+      yourTurn: true,
+    });
     expect(pass).toMatchObject({
       disabled: true,
-      disabledReason: 'Draw a card before you can pass',
+      disabledReason: 'Play a card or draw first',
     });
   });
 
   it('disables pass off-turn with a reason', () => {
-    const [pass] = getCrazyEightsActions({ G: baseG({ drewThisTurn: true }), yourTurn: false });
+    const [pass] = getCrazyEightsActions({
+      G: baseG({ drewThisTurn: true }),
+      player: 0,
+      yourTurn: false,
+    });
     expect(pass).toMatchObject({
       disabled: true,
       disabledReason: 'Wait for your turn',

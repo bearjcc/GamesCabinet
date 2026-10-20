@@ -4,7 +4,8 @@ import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { boardFirstChromeActions } from '../../lib/actions';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getChineseCheckersActions } from './actions';
 import {
   type ChineseCheckersState,
@@ -89,36 +90,31 @@ export function ChineseCheckersBoard({
       : relocate.filter((m) => m.from === effectiveSelected).map((m) => m.to);
   const selectable = new Set(chainFrom !== null ? [chainFrom] : relocate.map((m) => m.from));
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn:
-        chainFrom !== null
-          ? 'Hop again or end hop'
-          : effectiveSelected === null
-            ? 'Your turn — tap a peg'
-            : 'Tap a hole to move',
-    },
+    turnHint: yourTurn
+      ? chainFrom !== null
+        ? 'hop again or end hop'
+        : effectiveSelected === null
+          ? 'tap a peg'
+          : 'tap a hole to move'
+      : undefined,
   });
 
-  const pewActions = getChineseCheckersActions({
-    G,
-    player,
-    yourTurn,
-    selected: effectiveSelected,
-  });
-  const surfaceActions = pewActions.map((action) => ({
+  const chromeActions = boardFirstChromeActions(
+    getChineseCheckersActions({
+      G,
+      player,
+      yourTurn,
+      selected: effectiveSelected,
+    }),
+  ).map((action) => ({
     ...action,
     onAction: () => {
       if (action.id === 'end-hop') {
         moves.endHop();
         setSelected(null);
-        return;
       }
-      const match = /^move-to-(\d+)$/.exec(action.id);
-      if (!match || effectiveSelected === null) return;
-      moves.movePeg(effectiveSelected, Number(match[1]));
-      setSelected(null);
     },
   }));
 
@@ -166,7 +162,11 @@ export function ChineseCheckersBoard({
           })}
         </div>
       }
-      actions={<ActionSurface label="Chinese Checkers actions" actions={surfaceActions} />}
+      actions={
+        chromeActions.length > 0 ? (
+          <ActionSurface label="Chinese Checkers actions" actions={chromeActions} />
+        ) : undefined
+      }
     />
   );
 }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
-import { deriveMatchStatus } from '../../lib/matchStatus';
+import { useMatchStatus } from '../../lib/useMatchStatus';
 import { KENNEY_HIT, KENNEY_MISS, KENNEY_SUNK } from '../shared/tokens';
 import { getBattleshipActions } from './actions';
 import {
@@ -50,24 +50,18 @@ export function BattleshipBoard({
   const ownShipCells = new Set(own.ships.flatMap((s) => s.cells));
   const nextId = phase === 'setup' ? nextShipId(own) : null;
 
-  const { text: status, tone } = deriveMatchStatus(ctx, playerID, {
+  let turnHint: string | undefined;
+  if (yourTurn) {
+    if (phase === 'setup') {
+      if (own.ready) turnHint = 'fleet ready — waiting for opponent';
+      else if (nextId !== null) turnHint = `place ship (${SHIP_LENGTHS[nextId]} long)`;
+      else turnHint = 'confirm when ready';
+    } else turnHint = 'fire';
+  }
+
+  const { text: status, tone } = useMatchStatus(ctx, playerID, {
     isYourTurn: yourTurn,
-    labels: {
-      yourTurn:
-        phase === 'setup'
-          ? own.ready
-            ? 'Fleet ready - waiting for opponent'
-            : nextId !== null
-              ? `Place ship (${SHIP_LENGTHS[nextId]} long)`
-              : 'Confirm when ready'
-          : 'Your turn - fire',
-      theirTurn:
-        phase === 'setup'
-          ? own.ready
-            ? 'Fleet ready - waiting for opponent'
-            : 'Opponent is placing ships'
-          : 'Their turn',
-    },
+    turnHint,
   });
 
   const pewActions = getBattleshipActions({
@@ -178,11 +172,7 @@ export function BattleshipBoard({
           </div>
         </div>
       }
-      actions={
-        surfaceActions.length > 0 ? (
-          <ActionSurface label="Battleship actions" actions={surfaceActions} />
-        ) : null
-      }
+      actions={<ActionSurface label="Battleship actions" actions={surfaceActions} />}
     />
   );
 }

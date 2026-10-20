@@ -1,3 +1,4 @@
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { type Card, KENNEY_CARD_BACK, type Suit } from '../../games/shared/cards';
 
 const SUIT_LETTER: Record<Suit, string> = {
@@ -21,6 +22,9 @@ export function CardFace({
   playable,
   wild,
   onSelect,
+  onPointerDown,
+  onDoubleClick,
+  className: classNameProp,
   testId,
 }: {
   card: Card;
@@ -31,6 +35,9 @@ export function CardFace({
   /** Presentation badge (e.g. Crazy Eights wild). */
   wild?: boolean;
   onSelect?: () => void;
+  onPointerDown?: (event: ReactPointerEvent<HTMLButtonElement>) => void;
+  onDoubleClick?: () => void;
+  className?: string;
   testId?: string;
 }) {
   const red = RED.includes(card.suit);
@@ -42,6 +49,7 @@ export function CardFace({
     playable ? 'is-playable' : '',
     disabled ? 'is-disabled' : '',
     wild ? 'is-wild' : '',
+    classNameProp ?? '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -73,7 +81,7 @@ export function CardFace({
     </>
   );
 
-  if (onSelect) {
+  if (onSelect || onPointerDown || onDoubleClick) {
     return (
       <button
         type="button"
@@ -83,6 +91,8 @@ export function CardFace({
         aria-pressed={selected ?? false}
         data-testid={testId}
         onClick={onSelect}
+        onPointerDown={onPointerDown}
+        onDoubleClick={onDoubleClick}
       >
         {body}
       </button>

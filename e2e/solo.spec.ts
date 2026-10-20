@@ -6,7 +6,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-letter-walker').click();
     await expect(page).toHaveURL(/\/play\/letter-walker/);
     await expect(page.getByTestId('lw-board')).toBeVisible();
-    await page.getByTestId('lw-row-left-0').click();
+    await page.getByTestId('lw-cell-0-0').click();
     await expect(page.getByRole('status')).toBeVisible();
     await page.getByTestId('lw-tab-scores').click();
     await expect(page.getByTestId('lw-scores')).toBeVisible();
@@ -18,9 +18,22 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page).toHaveURL(/\/play\/2048/);
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('g2048-best')).toBeVisible();
-    await page.keyboard.press('ArrowLeft');
+
+    await page.getByTestId('g2048-board').click();
+    const before = await page.getByTestId('g2048-board').innerText();
+    for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'd']) {
+      await page.keyboard.press(key);
+      const after = await page.getByTestId('g2048-board').innerText();
+      if (after !== before) break;
+    }
+    await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
+    await expect(page.getByTestId('g2048-score')).toBeVisible();
+
+    await page.getByTestId('g2048-help-toggle').click();
+    await expect(page.getByTestId('g2048-help')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
-    await page.getByTestId('g2048-tab-scores').click();
+
+    await page.getByTestId('g2048-scores-link').click();
     await expect(page.getByTestId('g2048-scores')).toBeVisible();
   });
 
@@ -29,8 +42,6 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-yatzy').click();
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
-    await expect(page.getByTestId('action-surface')).toBeVisible();
-    await expect(page.getByTestId('play-table-actions')).toBeVisible();
     await page.getByTestId('yatzy-roll').click();
     await page.getByTestId('yatzy-score-chance').click();
     await expect(page.getByRole('status')).toBeVisible();
