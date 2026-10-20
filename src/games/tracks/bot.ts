@@ -20,6 +20,14 @@ import {
   WIDTH,
 } from './grid';
 import { boardMetrics, type ObjectiveId, scoreObjective } from './objectives';
+import {
+  applyPlay,
+  cloneState,
+  pickAmongRoutePlacements,
+  pickOraclePlacement,
+  playOracleTurn,
+  simulateTurnsToConnect,
+} from './oracle';
 import type { TurnTelemetry } from './telemetry';
 import { allowedRotations, type Tile, type TileKind } from './tiles';
 
@@ -257,8 +265,13 @@ export function pickPlacement(
   let pool = own.length > 0 ? own : spots;
   if (tile.kind === 'obstacle') {
     const foreign = spots.filter((s) => s.target !== me);
-    if (foreign.length > 0) pool = foreign;
-    else pool = pool.filter((s) => s.row !== START_ROW);
+    if (foreign.length > 0) {
+      const safe = foreign.filter((s) => {
+        const extend = extensionCols(g.players[s.target].board);
+        return !extend.includes(s.col) || s.row !== START_ROW;
+      });
+      pool = safe.length > 0 ? safe : foreign;
+    } else pool = pool.filter((s) => s.row !== START_ROW);
   }
   if (pool.length === 0) return spots[0];
 
@@ -320,13 +333,16 @@ function pickDraftChoice(draft: ObjectiveId[]): ObjectiveId {
 }
 
 export function finishDraft(client: TracksClient) {
-  for (let guard = 0; guard < 32; guard++) {
+  for (let guard = 0; guard < 64; guard++) {
     const state = client.getState();
     if (state?.ctx.phase !== 'draft') return;
     const g = state.G;
     const me = Number(state.ctx.currentPlayer);
     const options = g.players[me]?.draft ?? [];
-    if (options.length === 0) return;
+    if (options.length === 0) {
+      client.moves.passDraft();
+      continue;
+    }
     client.moves.chooseObjective(pickDraftChoice(options));
   }
 }
@@ -365,6 +381,28 @@ function placementConnects(board: Board, tile: Tile, spot: BotPlacement, foreign
   return isConnected(trial, reachableFromStart(trial));
 }
 
+/** Legal play that neither connects nor lengthens the eastward route. */
+export function placementIsStall(
+  board: Board,
+  tile: Tile,
+  spot: BotPlacement,
+  foreign = false,
+): boolean {
+  if (placeError(board, tile, spot.row, spot.col, spot.rot, { foreign }) !== null) return true;
+  if (placementConnects(board, tile, spot, foreign)) return false;
+  return !placementExtendsRoute(board, tile, spot.row, spot.col, spot.rot, foreign);
+}
+
+function lookaheadFor(
+  numPlayers: number,
+  progressCount: number,
+): { candidates: number; simCap: number } {
+  if (progressCount === 0) return { candidates: 0, simCap: 0 };
+  if (numPlayers >= 6) return { candidates: 14, simCap: 48 + numPlayers * 14 };
+  if (numPlayers >= 4) return { candidates: 10, simCap: 48 + numPlayers * 14 };
+  return { candidates: 12, simCap: 200 };
+}
+
 /** One cabinet turn: draft pick, draw, then play or discard. */
 export function playBotTurn(
   client: TracksClient,
@@ -380,6 +418,10 @@ export function playBotTurn(
     return 'ok';
   }
 
+  if (numPlayers <= 2) {
+    return playOracleTurn(client, numPlayers);
+  }
+
   const g = state.G;
   const me = Number(state.ctx.currentPlayer);
 
@@ -390,6 +432,25 @@ export function playBotTurn(
       top &&
       g.discardDrawRule === '2023' &&
       legalSpots(g, me, top).some((s) => allowsDestination(s, g, top));
+
+    if (discardPlayable && top) {
+      const topSpots = legalSpots(g, me, top).filter((s) => allowsDestination(s, g, top));
+      const topProgress = topSpots.some((s) => {
+        const foreign = s.target !== me;
+        const board = g.players[s.target].board;
+        return (
+          placementConnects(board, top, s, foreign) ||
+          placementExtendsRoute(board, top, s.row, s.col, s.rot, foreign)
+        );
+      });
+      if (topProgress) {
+        client.moves.drawTile('discard');
+        if (drawnTile(client.getState()?.G ?? g, me)) {
+          if (tel) tel.draws++;
+          return 'ok';
+        }
+      }
+    }
 
     if (g.deck.length > 0) {
       client.moves.drawTile('deck');
@@ -419,7 +480,81 @@ export function playBotTurn(
     return 'stuck';
   }
 
-  const tile = drawnTile(g, me);
+  const drawn = drawnTile(g, me);
+  if (!drawn && g.players[me].hand.length === 0) return 'stuck';
+
+  const handPlayable = (): { tile: Tile; spots: BotPlacement[] }[] => {
+    const out: { tile: Tile; spots: BotPlacement[] }[] = [];
+    for (const t of g.players[me].hand) {
+      const all = legalSpots(g, me, t).filter((s) => allowsDestination(s, g, t));
+      if (all.length > 0) out.push({ tile: t, spots: all });
+    }
+    return out;
+  };
+
+  const playCandidates = handPlayable().filter(
+    ({ tile }) => !g.drewFromDiscard || tile.id === g.drawnId,
+  );
+  if (playCandidates.length > 0 && g.drawnId !== null && !g.drewFromDiscard) {
+    const rankedHand: { tile: Tile; spot: BotPlacement; pri: number }[] = [];
+    for (const { tile, spots } of playCandidates) {
+      const progressSpots = spots.filter((s) => {
+        const foreign = s.target !== me;
+        const board = g.players[s.target].board;
+        return (
+          placementConnects(board, tile, s, foreign) ||
+          placementExtendsRoute(board, tile, s.row, s.col, s.rot, foreign)
+        );
+      });
+      const routeSpots = spots.filter((s) => {
+        const foreign = s.target !== me;
+        return !placementIsStall(g.players[s.target].board, tile, s, foreign);
+      });
+      const playable =
+        progressSpots.length > 0
+          ? progressSpots
+          : tile.kind === 'obstacle'
+            ? spots
+            : routeSpots.length > 0
+              ? routeSpots
+              : [];
+      if (playable.length === 0) continue;
+
+      const { candidates, simCap } = lookaheadFor(numPlayers, progressSpots.length);
+      const spot =
+        TRACK_KINDS.has(tile.kind) && progressSpots.length > 0 && candidates > 0
+          ? (pickAmongRoutePlacements(
+              g,
+              me,
+              tile,
+              progressSpots,
+              Math.min(candidates, progressSpots.length),
+              simCap,
+            ) ?? pickPlacement(playable, g, me, tile))
+          : pickPlacement(playable, g, me, tile);
+
+      let pri = 50_000;
+      if (progressSpots.length > 0) {
+        const simG = cloneState(g);
+        applyPlay(simG, me, spot, tile);
+        const turns = simulateTurnsToConnect(simG, me, simCap || 200);
+        pri = turns === null ? 40_000 + spot.col : turns;
+      }
+      if (tile.id === g.drawnId) pri -= 0.5;
+      rankedHand.push({ tile, spot, pri });
+    }
+    rankedHand.sort((a, b) => a.pri - b.pri);
+    for (const { tile, spot } of rankedHand.slice(0, 12)) {
+      client.moves.playTile(tile.id, spot.target, spot.row, spot.col, spot.rot);
+      if (turnAdvanced(state, client.getState())) {
+        if (tel) tel.playTurns++;
+        return 'ok';
+      }
+      if (tel) tel.illegalAttempts++;
+    }
+  }
+
+  const tile = drawn;
   if (!tile) return 'stuck';
 
   const allSpots = legalSpots(g, me, tile);
@@ -445,9 +580,31 @@ export function playBotTurn(
           : spots;
 
   if (playable.length > 0) {
-    const primary = pickPlacement(playable, g, me, tile);
+    const routePool =
+      tile.kind === 'obstacle'
+        ? playable
+        : playable.filter((s) => {
+            const foreign = s.target !== me;
+            return !placementIsStall(g.players[s.target].board, tile, s, foreign);
+          });
+    const pool = routePool.length > 0 ? routePool : playable;
+    const { candidates, simCap } = lookaheadFor(numPlayers, progressSpots.length);
+    const oracleSpot =
+      numPlayers <= 2 && TRACK_KINDS.has(tile.kind) ? pickOraclePlacement(g, me, tile) : null;
+    const primary =
+      oracleSpot ??
+      (TRACK_KINDS.has(tile.kind) && progressSpots.length > 0 && candidates > 0
+        ? (pickAmongRoutePlacements(
+            g,
+            me,
+            tile,
+            progressSpots,
+            Math.min(candidates, progressSpots.length),
+            simCap,
+          ) ?? pickPlacement(pool, g, me, tile))
+        : pickPlacement(pool, g, me, tile));
     const boardForScore = (s: BotPlacement) => g.players[s.target].board;
-    const scored = [...playable].sort(
+    const scored = [...pool].sort(
       (a, b) =>
         placementScore(boardForScore(b), tile, b.row, b.col, b.rot, g, me) -
         placementScore(boardForScore(a), tile, a.row, a.col, a.rot, g, me),
