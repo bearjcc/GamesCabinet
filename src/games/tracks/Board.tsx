@@ -5,9 +5,10 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { useHotseatClaimSeat } from '../../lib/hotseat';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
-import { type Cell, cellAt, HEIGHT, placeError, START_ROW, WIDTH } from './grid';
+import { type Cell, cellAt, HEIGHT, placeError, WIDTH } from './grid';
 import { objectiveDef } from './objectives';
 import { TileGlyph } from './TileGlyph';
+import { TracksTerminal } from './TracksTerminal';
 import { allowedRotations, overlayBaseKinds } from './tiles';
 import { preloadTracksTiles } from './tracksPreload';
 
@@ -291,40 +292,36 @@ export function TracksBoard({
             </button>
           ))}
         </div>
-        <div className="tracks-grid" data-testid="tracks-board">
-          {Array.from({ length: HEIGHT }, (_, row) =>
-            Array.from({ length: WIDTH }, (_, col) => {
-              const cell = cellAt(viewed.board, row, col);
-              const overlay = selectedTile ? overlayBaseKinds(selectedTile.kind) !== null : false;
-              const canPlaceHere =
-                myTurn &&
-                selectedTile !== null &&
-                G.drawnId !== null &&
-                placeError(viewed.board, selectedTile, row, col, rot, { foreign: view !== me }) ===
-                  null;
-              const terminal =
-                row === START_ROW && (col === 0 || col === WIDTH - 1) ? (
-                  <span
-                    className={`tracks-terminal tracks-terminal--${col === 0 ? 'start' : 'end'}`}
+        <div className="tracks-board-frame" data-testid="tracks-board-frame">
+          <TracksTerminal side="start" />
+          <TracksTerminal side="end" />
+          <div className="tracks-grid" data-testid="tracks-board">
+            {Array.from({ length: HEIGHT }, (_, row) =>
+              Array.from({ length: WIDTH }, (_, col) => {
+                const cell = cellAt(viewed.board, row, col);
+                const overlay = selectedTile ? overlayBaseKinds(selectedTile.kind) !== null : false;
+                const canPlaceHere =
+                  myTurn &&
+                  selectedTile !== null &&
+                  G.drawnId !== null &&
+                  placeError(viewed.board, selectedTile, row, col, rot, {
+                    foreign: view !== me,
+                  }) === null;
+                return (
+                  <button
+                    key={`${row}-${col}`}
+                    type="button"
+                    className={`tracks-cell${cell ? ' is-filled' : ''}${canPlaceHere ? ' is-legal' : ''}${overlay ? ' is-overlay-target' : ''}`}
+                    data-testid={`tracks-cell-${row}-${col}`}
+                    onClick={() => tryPlace(row, col)}
+                    disabled={!canPlaceHere && !cell}
                   >
-                    {col === 0 ? 'START' : 'END'}
-                  </span>
-                ) : null;
-              return (
-                <button
-                  key={`${row}-${col}`}
-                  type="button"
-                  className={`tracks-cell${cell ? ' is-filled' : ''}${canPlaceHere ? ' is-legal' : ''}${overlay ? ' is-overlay-target' : ''}`}
-                  data-testid={`tracks-cell-${row}-${col}`}
-                  onClick={() => tryPlace(row, col)}
-                  disabled={!canPlaceHere && !cell}
-                >
-                  {terminal}
-                  <CellView cell={cell} />
-                </button>
-              );
-            }),
-          )}
+                    <CellView cell={cell} />
+                  </button>
+                );
+              }),
+            )}
+          </div>
         </div>
         {hint ? (
           <p className="tracks-hint" role="alert" data-testid="tracks-hint">
@@ -371,38 +368,40 @@ export function TracksBoard({
   const pew =
     ctx.phase === 'play' ? (
       <div className="tracks-pew">
-        {handRail}
-        <div className="tracks-piles">
-          <button
-            type="button"
-            className="tracks-pile"
-            data-testid="tracks-draw-deck"
-            onClick={() => moves.drawTile('deck')}
-            disabled={handOff || !myTurn || G.drawnId !== null}
-          >
-            <span className="tracks-pile__deck" />
-            Deck ({G.deck.length})
-          </button>
-          <button
-            type="button"
-            className="tracks-pile"
-            data-testid="tracks-draw-discard"
-            onClick={tapDiscard}
-            disabled={
-              handOff ||
-              !myTurn ||
-              (G.drawnId === null
-                ? !discardTop || ctx.numPlayers === 1
-                : G.drewFromDiscard || !selectedTile)
-            }
-          >
-            {discardTop ? (
-              <TileGlyph tile={discardTop} rot={0} />
-            ) : (
-              <span className="tracks-pile__empty" />
-            )}
-            Discard
-          </button>
+        <div className="tracks-pew__tray">
+          {handRail}
+          <div className="tracks-piles">
+            <button
+              type="button"
+              className="tracks-pile"
+              data-testid="tracks-draw-deck"
+              onClick={() => moves.drawTile('deck')}
+              disabled={handOff || !myTurn || G.drawnId !== null}
+            >
+              <span className="tracks-pile__deck" />
+              Deck ({G.deck.length})
+            </button>
+            <button
+              type="button"
+              className="tracks-pile"
+              data-testid="tracks-draw-discard"
+              onClick={tapDiscard}
+              disabled={
+                handOff ||
+                !myTurn ||
+                (G.drawnId === null
+                  ? !discardTop || ctx.numPlayers === 1
+                  : G.drewFromDiscard || !selectedTile)
+              }
+            >
+              {discardTop ? (
+                <TileGlyph tile={discardTop} rot={0} />
+              ) : (
+                <span className="tracks-pile__empty" />
+              )}
+              Discard
+            </button>
+          </div>
         </div>
       </div>
     ) : null;
@@ -427,5 +426,5 @@ export function TracksBoard({
     board
   );
 
-  return <PlayTable info={info} board={shownBoard} pew={pew} />;
+  return <PlayTable info={info} board={shownBoard} pew={pew} felt="tracks" />;
 }

@@ -15,7 +15,7 @@ export function PlayTable({
   /** Sticky thumb-zone for shared ActionSurface (or equivalent). */
   actions?: ReactNode;
   /** Page background is the felt table; no inner panel behind cards/tiles. */
-  felt?: boolean | 'blue';
+  felt?: boolean | 'blue' | 'tracks';
   /** Reserve pew height so actions appearing never shrink the board. */
   reservePew?: boolean;
 }) {
@@ -26,6 +26,7 @@ export function PlayTable({
     'play-table',
     felt ? 'play-table--felt' : '',
     felt === 'blue' ? 'play-table--felt-blue' : '',
+    felt === 'tracks' ? 'play-table--tracks-grass' : '',
     reservePew ? 'play-table--reserve-pew' : '',
   ]
     .filter(Boolean)
