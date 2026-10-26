@@ -4,6 +4,8 @@ Square card faces for TRACKS. Art is Bear's; faces were assembled from his GIMP 
 
 WebPs at **512** and **1024** px. Do not re-encode these files in the cabinet repo; replace the folder contents when art updates.
 
+- `grass-tile.webp` / `grass-tile-768.webp` — Bear's seamless grass field (1536 px tile; 1024 px = one card width at play scale).
+
 Files:
 
 - `straight`, `curve`, `junction`, `bridge-start`, `bridge-mid`, `tunnel-arch`, `tunnel-mid`, `whistlestop`

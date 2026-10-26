@@ -18,5 +18,6 @@ describe('preloadTracksTiles', () => {
     preloadTracksTiles();
     preloadTracksTiles();
     expect(imgs.some((i) => i.src.includes('junction'))).toBe(true);
+    expect(imgs.some((i) => i.src.includes('grass-tile'))).toBe(true);
   });
 });
