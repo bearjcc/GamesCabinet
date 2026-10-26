@@ -2,30 +2,26 @@ import type { Tile, TileKind } from './tiles';
 
 export const TRACKS_ASSETS = '/assets/tracks';
 
-export type TracksTileArtSource = 'bear-finished' | 'bear-composed' | 'bear-composed-placeholder';
+const ASSET_KEYS = [
+  'straight',
+  'curve',
+  'junction',
+  'bridge-start',
+  'bridge-mid',
+  'tunnel-arch',
+  'tunnel-mid',
+  'whistlestop',
+  'obstacle-river',
+  'obstacle-mountain',
+] as const;
 
-const SOURCE: Partial<Record<string, TracksTileArtSource>> = {
-  'tunnel-arch': 'bear-finished',
-  'tunnel-mid': 'bear-finished',
-  straight: 'bear-composed',
-  curve: 'bear-composed',
-  junction: 'bear-composed-placeholder',
-  'bridge-start': 'bear-composed-placeholder',
-  'bridge-mid': 'bear-composed-placeholder',
-  whistlestop: 'bear-composed-placeholder',
-  'obstacle-river': 'bear-composed-placeholder',
-  'obstacle-mountain': 'bear-composed-placeholder',
-};
+export type TracksTileAssetKey = (typeof ASSET_KEYS)[number];
 
-export function tracksTileAssetKey(tile: Pick<Tile, 'kind' | 'variant'>): string {
+export function tracksTileAssetKey(tile: Pick<Tile, 'kind' | 'variant'>): TracksTileAssetKey {
   if (tile.kind === 'obstacle') {
-    return `obstacle-${tile.variant ?? 'river'}`;
+    return tile.variant === 'mountain' ? 'obstacle-mountain' : 'obstacle-river';
   }
-  return tile.kind;
-}
-
-export function tracksTileArtSource(tile: Pick<Tile, 'kind' | 'variant'>): TracksTileArtSource {
-  return SOURCE[tracksTileAssetKey(tile)] as TracksTileArtSource;
+  return tile.kind as TracksTileAssetKey;
 }
 
 export type TracksTileSize = 512 | 1024;
@@ -44,10 +40,9 @@ export function tracksTileUrl(
 }
 
 export function tracksTilePreloadUrls(): string[] {
-  const keys = Object.keys(SOURCE);
   const urls: string[] = [];
   for (const size of [512, 1024] as const) {
-    for (const key of keys) {
+    for (const key of ASSET_KEYS) {
       urls.push(`${TRACKS_ASSETS}/${size}/${key}.webp`);
     }
   }

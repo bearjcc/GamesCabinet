@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  tracksTileArtSource,
   tracksTileAssetKey,
   tracksTilePreloadUrls,
   tracksTileSizeForDisplay,
@@ -12,15 +11,10 @@ describe('tracks tile art', () => {
     vi.unstubAllGlobals();
   });
 
-  it('maps asset keys and sources', () => {
+  it('maps obstacle variants to asset keys', () => {
     expect(tracksTileAssetKey({ kind: 'obstacle', variant: 'mountain' })).toBe('obstacle-mountain');
     expect(tracksTileAssetKey({ kind: 'obstacle' })).toBe('obstacle-river');
-    expect(tracksTileArtSource({ kind: 'tunnel-arch' })).toBe('bear-finished');
-    expect(tracksTileArtSource({ kind: 'junction' })).toBe('bear-composed-placeholder');
-    expect(tracksTileArtSource({ kind: 'straight' })).toBe('bear-composed');
-    expect(tracksTileArtSource({ kind: 'obstacle', variant: 'river' })).toBe(
-      'bear-composed-placeholder',
-    );
+    expect(tracksTileAssetKey({ kind: 'junction' })).toBe('junction');
   });
 
   it('builds stable URLs', () => {
@@ -30,10 +24,10 @@ describe('tracks tile art', () => {
     );
   });
 
-  it('preloads every raster at both sizes', () => {
+  it('preloads every face at both sizes', () => {
     const urls = tracksTilePreloadUrls();
-    expect(urls.filter((u) => u.includes('whistlestop')).length).toBe(2);
-    expect(urls.filter((u) => u.includes('obstacle-mountain')).length).toBe(2);
+    expect(urls).toHaveLength(20);
+    expect(urls).toContain('/assets/tracks/1024/tunnel-arch.webp');
   });
 
   it('picks tile size from device pixel ratio', () => {

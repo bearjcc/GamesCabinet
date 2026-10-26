@@ -93,5 +93,5 @@ export const PLACEHOLDER_ADVANCED_SIDE = {
 /** PLACEHOLDER: board and score-sheet design — the cabinet draws a plain grid and an on-screen score table. */
 export const PLACEHOLDER_BOARD_DESIGN = 'plain-grid';
 
-/** Bear tunnel tiles plus composed WebP faces for all card kinds. */
+/** Bear WebP card faces (assembled from his GIMP layers). */
 export const PLACEHOLDER_ART = 'bear-tracks-webp';
