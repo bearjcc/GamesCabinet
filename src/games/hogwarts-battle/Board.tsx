@@ -1,8 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type CSSProperties, useEffect, useState } from 'react';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import {
   getCampaignGame,
   getCard,
@@ -167,11 +165,13 @@ export function HogwartsBattleBoard({
   const locDef = loc ? getLocation(loc.locationId) : undefined;
 
   return (
-    <PlayTable
-      info={
+    <MatchGameShell
+      gameTitle="Hogwarts Battle"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      railMeta={
         <>
-          <StatusBar text={status} tone={tone} />
-          <MatchScoreboard scores={scores} />
+          <Scoreboard model={{ rows: scores.map((s) => ({ label: s.label, value: s.value })) }} />
           <p className="hb-meta" data-testid="hb-meta">
             Game {G.gameNumber}: {campaign?.name ?? 'Campaign'} - Turn {G.turnNumber}
             {unassigned > 0 ? ` - ${unassigned} attack unassigned` : ''}
@@ -433,7 +433,8 @@ export function HogwartsBattleBoard({
           ) : null}
         </div>
       }
-      pew={
+      tray={{ testId: 'hb-tray' }}
+      trayContent={
         <div className="hb-pew" data-testid="hb-pew">
           <div className="hb-resources">
             <span data-testid="hb-attack">Attack {player?.attackTokens ?? 0}</span>

@@ -1,8 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect } from 'react';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { type Card, kenneyPlayingCardAsset, makeCard, type Rank } from '../shared/cards';
@@ -77,12 +75,17 @@ export function MemoryBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Me
       ];
 
   return (
-    <PlayTable
-      info={
-        <>
-          <StatusBar text={status} tone={tone} />
-          <MatchScoreboard scores={scores} testId="memory-scores" />
-        </>
+    <MatchGameShell
+      gameTitle="Memory"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      railMeta={
+        <Scoreboard
+          model={{
+            testId: 'memory-scores',
+            rows: scores.map((s) => ({ label: s.label, value: s.value })),
+          }}
+        />
       }
       board={
         <div

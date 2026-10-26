@@ -1,8 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { KENNEY_HIT, KENNEY_MISS, KENNEY_SUNK } from '../shared/tokens';
 import { getBattleshipActions } from './actions';
@@ -88,8 +87,10 @@ export function BattleshipBoard({
   const canFire = phase === 'battle' && yourTurn;
 
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Battleship"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div className="battleship-board" data-testid="battleship-board">
           <div className="battleship-grid-wrap">
@@ -172,7 +173,8 @@ export function BattleshipBoard({
           </div>
         </div>
       }
-      actions={<ActionSurface label="Battleship actions" actions={surfaceActions} />}
+      tray={{ testId: 'battleship-tray' }}
+      trayContent={<ActionSurface label="Battleship actions" actions={surfaceActions} />}
     />
   );
 }

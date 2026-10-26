@@ -1,8 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { Roll } from '../../components/cinematic';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { DieFace, Token } from '../../components/tabletop';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { asDieFaceValue } from '../shared/dice';
@@ -56,8 +55,10 @@ export function SnakesAndLaddersBoard({
   }
 
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Snakes and Ladders"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div className="sal-table" data-testid="sal-board">
           <div className="sal-meta">

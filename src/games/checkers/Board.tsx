@@ -1,8 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Lift, Snap } from '../../components/cinematic';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Token } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
 import type { StatusTone } from '../../lib/matchStatus';
@@ -250,9 +249,14 @@ export function CheckersBoard({ G, ctx, moves, playerID, matchData }: BoardProps
   const dragPiece = drag ? G.board[drag.from] : null;
   const litTargets = drag ? dragTargets : targets;
 
+  const actor = checkersSeatLabel(ctx.currentPlayer, matchData);
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Checkers"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      turnName={actor}
       board={
         <div className="checkers-stage">
           <div

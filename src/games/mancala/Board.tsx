@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Token } from '../../components/tabletop';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import type { MancalaState } from './game';
@@ -59,8 +58,10 @@ export function MancalaBoard({ G, ctx, moves, playerID }: BoardProps<MancalaStat
   );
 
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Mancala"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div
           className="mancala-board"

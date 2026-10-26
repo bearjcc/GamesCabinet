@@ -1,7 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { CardHand, StockPile } from '../../components/tabletop';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { kenneyPlayingCardAsset } from '../shared/cards';
@@ -35,13 +33,16 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
   };
 
   return (
-    <PlayTable
-      felt
-      info={
-        <>
-          <StatusBar text={status} tone={tone} />
-          <MatchScoreboard
-            scores={[
+    <MatchGameShell
+      gameTitle="Go Fish"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      stage={{ felt: 'green' }}
+      railMeta={
+        <Scoreboard
+          model={{
+            testId: 'go-fish-meta',
+            rows: [
               { label: 'Books', value: pid >= 0 ? G.books[pid] : '-' },
               { label: 'Opp', value: pid >= 0 ? G.books[opponentOf(pid)] : '-' },
               { label: 'Stock', value: G.stock.length },
@@ -49,23 +50,21 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
               ...(G.pendingFishRank != null
                 ? [{ label: 'Fishing', value: G.pendingFishRank }]
                 : []),
-            ]}
-            rules={{
-              summary: 'How points work',
-              body: (
-                <>
-                  <p>Collect four-of-a-kind books by asking opponents for ranks you hold.</p>
-                  <p>
-                    When the stock runs out, the most books wins. Book counts above are sets
-                    completed.
-                  </p>
-                </>
-              ),
-            }}
-            testId="go-fish-meta"
-          />
-        </>
+            ],
+          }}
+        />
       }
+      rules={{
+        testId: 'go-fish-meta-rules',
+        body: (
+          <>
+            <p>Collect four-of-a-kind books by asking opponents for ranks you hold.</p>
+            <p>
+              When the stock runs out, the most books wins. Book counts above are sets completed.
+            </p>
+          </>
+        ),
+      }}
       board={
         <div className="go-fish-table" data-testid="go-fish-board">
           <StockPile
@@ -84,7 +83,8 @@ export function GoFishBoard({ G, ctx, moves, playerID, isActive }: BoardProps<Go
           </div>
         </div>
       }
-      pew={
+      tray={{ testId: 'go-fish-tray', title: 'Your hand' }}
+      trayContent={
         <CardHand
           cards={hand}
           disabled={!yourTurn || G.pendingFishRank != null}

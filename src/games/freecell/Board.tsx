@@ -1,7 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useState } from 'react';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
-import { StatusBar } from '../../components/StatusBar';
 import { CardFace } from '../../components/tabletop/CardFace';
 import { SolitaireDragGhost } from '../../components/tabletop/SolitaireDragGhost';
 import type { SubmitScoreInput } from '../../lib/scores';
@@ -171,12 +170,14 @@ export function FreeCellBoard({ G, ctx, moves, isActive }: BoardProps<FreeCellSt
   return (
     <SoloLeaderboardShell
       gameId="freecell"
+      gameTitle="FreeCell"
       pendingSubmit={pendingSubmit}
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="freecell"
-      felt
-      info={status ? <StatusBar text={status} tone={tone} /> : null}
+      stage={{ felt: 'green' }}
+      status={status ? { text: status, tone } : undefined}
+      gameover={ctx.gameover}
       board={
         <div className="sol-board freecell-board" data-testid="freecell-board">
           <div className="freecell-top">

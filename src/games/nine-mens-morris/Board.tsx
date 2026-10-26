@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Token } from '../../components/tabletop';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import {
@@ -78,8 +77,10 @@ export function NineMensMorrisBoard({ G, ctx, moves, playerID }: BoardProps<NmmS
   });
 
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Nine Men's Morris"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div
           className="nmm-board"

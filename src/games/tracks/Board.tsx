@@ -1,8 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type ReactNode, useEffect, useState } from 'react';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { useHotseatClaimSeat } from '../../lib/hotseat';
 import { playerDisplayName } from '../../lib/matchPlayers';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
@@ -161,21 +159,19 @@ export function TracksBoard({
     status = `${seatLabel(matchData, Number(ctx.currentPlayer))}'s turn`;
   }
 
-  // ----- info rail -----
-  const info = (
+  const railMeta = (
     <>
-      <span data-testid="tracks-status">
-        <StatusBar text={status} tone={tone} />
-      </span>
-      <MatchScoreboard
-        testId="tracks-meta"
-        scores={[
-          { label: 'Round', value: `${Math.min(G.round, 5)}/5` },
-          ...G.scores.map((s, i) => ({
-            label: seatLabel(matchData, i),
-            value: `${s}${G.connectedOrder.includes(String(i)) ? ' *' : ''}`,
-          })),
-        ]}
+      <Scoreboard
+        model={{
+          testId: 'tracks-meta',
+          rows: [
+            { label: 'Round', value: `${Math.min(G.round, 5)}/5` },
+            ...G.scores.map((s, i) => ({
+              label: seatLabel(matchData, i),
+              value: `${s}${G.connectedOrder.includes(String(i)) ? ' *' : ''}`,
+            })),
+          ],
+        }}
       />
       {G.players.length === 1 ? (
         <span data-testid="tracks-solo-discards">
@@ -205,38 +201,6 @@ export function TracksBoard({
           ))}
         </ul>
       ) : null}
-      <details className="tracks-rules" data-testid="tracks-scoring-rules">
-        <summary>Scoring</summary>
-        <ul>
-          <li>Connected start to destination: 10.</li>
-          <li>Not connected: the column number of your furthest connected track (1–8).</li>
-          <li>Cards off your route are removed and score nothing.</li>
-          <li>
-            Straight, obstacle 0 · curve 1 · junction {G.junctionPoints} · land to bridge, tunnel
-            arch, whistlestop 2 · middle bridge or tunnel 3.
-          </li>
-          <li>Whistlestop: 2 when legally placed (one connection is enough).</li>
-          <li>Completed objectives score and are discarded; others carry over.</li>
-          <li>Public objectives are scored each round to the table leader.</li>
-          {G.players.length === 1 ? (
-            <li>
-              Solo: no discard draws or reshuffle; the round ends when you connect or on your 5th
-              discard.
-            </li>
-          ) : (
-            <li>
-              With others: once anyone connects start to destination, finish the current lap — play
-              stops just before the round&apos;s starting player would go again.
-            </li>
-          )}
-          {G.discardDrawRule === '2021' ? (
-            <li>Discard draw (2021): take the top discard freely; play or discard any card.</li>
-          ) : (
-            <li>Discard draw (2023): a discard draw must be played immediately.</li>
-          )}
-          <li>Five rounds. Highest total wins.</li>
-        </ul>
-      </details>
     </>
   );
 
@@ -430,12 +394,50 @@ export function TracksBoard({
     board
   );
 
+  const scoringRules = (
+    <ul>
+      <li>Connected start to destination: 10.</li>
+      <li>Not connected: the column number of your furthest connected track (1–8).</li>
+      <li>Cards off your route are removed and score nothing.</li>
+      <li>
+        Straight, obstacle 0 · curve 1 · junction {G.junctionPoints} · land to bridge, tunnel arch,
+        whistlestop 2 · middle bridge or tunnel 3.
+      </li>
+      <li>Whistlestop: 2 when legally placed (one connection is enough).</li>
+      <li>Completed objectives score and are discarded; others carry over.</li>
+      <li>Public objectives are scored each round to the table leader.</li>
+      {G.players.length === 1 ? (
+        <li>
+          Solo: no discard draws or reshuffle; the round ends when you connect or on your 5th
+          discard.
+        </li>
+      ) : (
+        <li>
+          With others: once anyone connects start to destination, finish the current lap — play
+          stops just before the round&apos;s starting player would go again.
+        </li>
+      )}
+      {G.discardDrawRule === '2021' ? (
+        <li>Discard draw (2021): take the top discard freely; play or discard any card.</li>
+      ) : (
+        <li>Discard draw (2023): a discard draw must be played immediately.</li>
+      )}
+      <li>Five rounds. Highest total wins.</li>
+    </ul>
+  );
+
   return (
-    <PlayTable
-      info={info}
+    <MatchGameShell
+      gameTitle="TRACKS"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      turnName={who}
+      stage={{ felt: ctx.phase === 'play' ? 'tracks' : false }}
+      railMeta={railMeta}
+      rules={{ testId: 'tracks-scoring-rules', title: 'Scoring', body: scoringRules }}
       board={shownBoard}
-      pew={pew}
-      felt={ctx.phase === 'play' ? 'tracks' : undefined}
+      tray={pew ? { testId: 'tracks-tray', title: 'Hand' } : null}
+      trayContent={pew}
     />
   );
 }
