@@ -112,8 +112,10 @@ async function measureLayout(page: Page, viewportWidth: number) {
       : grid.getBoundingClientRect().bottom;
     const pewBox = pew.getBoundingClientRect();
     const midY = frameBox.top + 1.5 * cellPx;
-    const startCenterY = startBuffer.getBoundingClientRect().top + startBuffer.getBoundingClientRect().height / 2;
-    const endCenterY = endBuffer.getBoundingClientRect().top + endBuffer.getBoundingClientRect().height / 2;
+    const startCenterY =
+      startBuffer.getBoundingClientRect().top + startBuffer.getBoundingClientRect().height / 2;
+    const endCenterY =
+      endBuffer.getBoundingClientRect().top + endBuffer.getBoundingClientRect().height / 2;
     const leftMargin = frameBox.left;
     const rightMargin = vw - frameBox.right;
     return {

@@ -32,6 +32,7 @@ type LayoutMetrics = {
   pewTop: number;
   startRailDelta: number;
   endRailDelta: number;
+  maxCellOverlapPx: number;
 };
 
 async function measureLayout(
@@ -67,12 +68,18 @@ async function measureLayout(
     const endCenterY = endBox.top + endBox.height / 2;
     const leftMargin = frameBox.left;
     const rightMargin = vw - frameBox.right;
+    let maxCellOverlapPx = 0;
+    for (const cell of document.querySelectorAll('[data-testid^="tracks-cell-"]')) {
+      const overlap = cell.getBoundingClientRect().bottom - pewBox.top;
+      if (overlap > maxCellOverlapPx) maxCellOverlapPx = overlap;
+    }
     return {
       frameMarginDelta: Math.abs(leftMargin - rightMargin),
       boardBottom: stackBottom,
       pewTop: pewBox.top,
       startRailDelta: Math.abs(startCenterY - midY),
       endRailDelta: Math.abs(endCenterY - midY),
+      maxCellOverlapPx,
     };
   }, viewportWidth);
 }
@@ -117,6 +124,7 @@ for (const viewport of VIEWPORTS) {
       const metrics = await measureLayout(page, viewport.width);
       expect(metrics.frameMarginDelta).toBeLessThanOrEqual(4);
       expect(metrics.boardBottom).toBeLessThanOrEqual(metrics.pewTop + 1);
+      expect(metrics.maxCellOverlapPx).toBeLessThanOrEqual(1);
       expect(metrics.startRailDelta).toBeLessThanOrEqual(2);
       expect(metrics.endRailDelta).toBeLessThanOrEqual(2);
 
