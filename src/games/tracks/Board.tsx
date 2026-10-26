@@ -1,5 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
@@ -9,7 +9,6 @@ import { type Cell, cellAt, HEIGHT, placeError, START_ROW, WIDTH } from './grid'
 import { objectiveDef } from './objectives';
 import { TileGlyph } from './TileGlyph';
 import { allowedRotations, overlayBaseKinds } from './tiles';
-import { preloadTracksTiles } from './tracksPreload';
 
 function seatLabel(matchData: BoardProps['matchData'], i: number): string {
   const name = matchData?.[i]?.name;
@@ -74,10 +73,6 @@ export function TracksBoard({
   const turnKey = `${ctx.phase}-${ctx.turn}-${ctx.currentPlayer}`;
   const [readyFor, setReadyFor] = useState<string | null>(null);
   const claimHotseatSeat = useHotseatClaimSeat();
-
-  useEffect(() => {
-    preloadTracksTiles();
-  }, []);
   // Pass-and-play matches are local-* ids; online seats never hand off.
   const hotSeat = ctx.numPlayers > 1 && (matchID ?? '').startsWith('local-');
   const handOff = hotSeat && !ctx.gameover && readyFor !== turnKey;

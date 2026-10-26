@@ -93,5 +93,5 @@ export const PLACEHOLDER_ADVANCED_SIDE = {
 /** PLACEHOLDER: board and score-sheet design — the cabinet draws a plain grid and an on-screen score table. */
 export const PLACEHOLDER_BOARD_DESIGN = 'plain-grid';
 
-/** Bear tunnel tiles + composed straight/curve WebPs; other kinds use grass + glyph overlays. */
-export const PLACEHOLDER_ART = 'bear-tracks-mix';
+/** PLACEHOLDER: art — cards are drawn as vector glyphs (TileGlyph), no Kenney/commissioned art yet. */
+export const PLACEHOLDER_ART = 'vector-glyphs';
