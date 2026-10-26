@@ -44,7 +44,7 @@ export function measureTracksLayout(
   _pewEl: HTMLElement | null,
 ): TracksLayoutMetrics {
   const vw = window.innerWidth;
-  const gutterPx = Math.round(Math.min(42, Math.max(20, (vw * 42) / 820)));
+  const gutterPx = Math.round(Math.min(48, Math.max(28, (vw * 48) / 820)));
   const cellFromWidth = (vw - 2 * gutterPx) / 8;
 
   const fieldTop = fieldEl?.getBoundingClientRect().top ?? 0;

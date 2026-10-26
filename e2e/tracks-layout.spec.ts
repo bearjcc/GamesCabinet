@@ -32,6 +32,8 @@ type LayoutMetrics = {
   pewTop: number;
   startRailDelta: number;
   endRailDelta: number;
+  startGutterGap: number;
+  endGutterGap: number;
   maxCellOverlapPx: number;
 };
 
@@ -42,17 +44,13 @@ async function measureLayout(
   return page.evaluate((vw) => {
     const frame = document.querySelector('[data-testid="tracks-board-frame"]');
     const pew = document.querySelector('[data-testid="tracks-pew"]');
-    const playTable = document.querySelector('[data-testid="play-table"]');
-    const startBuffer = document.querySelector(
-      '[data-testid="tracks-terminal-start"] .tracks-terminal__buffer',
-    );
-    const endBuffer = document.querySelector(
-      '[data-testid="tracks-terminal-end"] .tracks-terminal__buffer',
-    );
-    if (!frame || !pew || !playTable || !startBuffer || !endBuffer) {
+    const startTrack = document.querySelector('[data-testid="tracks-terminal-start-track"]');
+    const endTrack = document.querySelector('[data-testid="tracks-terminal-end-track"]');
+    const col1 = document.querySelector('[data-testid="tracks-cell-1-0"]');
+    const col8 = document.querySelector('[data-testid="tracks-cell-1-7"]');
+    if (!frame || !pew || !startTrack || !endTrack || !col1 || !col8) {
       throw new Error('TRACKS layout nodes missing');
     }
-    const cellPx = Number(playTable.getAttribute('data-tracks-cell-px') ?? 0);
     const grid = document.querySelector('[data-testid="tracks-board"]');
     if (!grid) throw new Error('TRACKS grid missing');
     const frameBox = frame.getBoundingClientRect();
@@ -61,11 +59,14 @@ async function measureLayout(
       ? hint.getBoundingClientRect().bottom
       : grid.getBoundingClientRect().bottom;
     const pewBox = pew.getBoundingClientRect();
-    const midY = frameBox.top + 1.5 * cellPx;
-    const startBox = startBuffer.getBoundingClientRect();
-    const endBox = endBuffer.getBoundingClientRect();
+    const midCell = col1.getBoundingClientRect();
+    const midCenterY = midCell.top + midCell.height / 2;
+    const startBox = startTrack.getBoundingClientRect();
+    const endBox = endTrack.getBoundingClientRect();
     const startCenterY = startBox.top + startBox.height / 2;
     const endCenterY = endBox.top + endBox.height / 2;
+    const col1Box = col1.getBoundingClientRect();
+    const col8Box = col8.getBoundingClientRect();
     const leftMargin = frameBox.left;
     const rightMargin = vw - frameBox.right;
     let maxCellOverlapPx = 0;
@@ -77,8 +78,10 @@ async function measureLayout(
       frameMarginDelta: Math.abs(leftMargin - rightMargin),
       boardBottom: stackBottom,
       pewTop: pewBox.top,
-      startRailDelta: Math.abs(startCenterY - midY),
-      endRailDelta: Math.abs(endCenterY - midY),
+      startRailDelta: Math.abs(startCenterY - midCenterY),
+      endRailDelta: Math.abs(endCenterY - midCenterY),
+      startGutterGap: startBox.right - col1Box.left,
+      endGutterGap: col8Box.right - endBox.left,
       maxCellOverlapPx,
     };
   }, viewportWidth);
@@ -127,6 +130,8 @@ for (const viewport of VIEWPORTS) {
       expect(metrics.maxCellOverlapPx).toBeLessThanOrEqual(1);
       expect(metrics.startRailDelta).toBeLessThanOrEqual(2);
       expect(metrics.endRailDelta).toBeLessThanOrEqual(2);
+      expect(metrics.startGutterGap).toBeLessThanOrEqual(1);
+      expect(metrics.endGutterGap).toBeLessThanOrEqual(1);
 
       await expectNoPageScroll(page);
     });

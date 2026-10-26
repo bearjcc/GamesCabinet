@@ -95,14 +95,12 @@ async function measureLayout(page: Page, viewportWidth: number) {
     const pew = document.querySelector('[data-testid="tracks-pew"]');
     const playTable = document.querySelector('[data-testid="play-table"]');
     const grid = document.querySelector('[data-testid="tracks-board"]');
-    const startBuffer = document.querySelector(
-      '[data-testid="tracks-terminal-start"] .tracks-terminal__buffer',
-    );
-    const endBuffer = document.querySelector(
-      '[data-testid="tracks-terminal-end"] .tracks-terminal__buffer',
-    );
+    const startTrack = document.querySelector('[data-testid="tracks-terminal-start-track"]');
+    const endTrack = document.querySelector('[data-testid="tracks-terminal-end-track"]');
+    const col1 = document.querySelector('[data-testid="tracks-cell-1-0"]');
+    const col8 = document.querySelector('[data-testid="tracks-cell-1-7"]');
     const hint = document.querySelector('[data-testid="tracks-hint"]');
-    if (!frame || !pew || !playTable || !grid || !startBuffer || !endBuffer) {
+    if (!frame || !pew || !playTable || !grid || !startTrack || !endTrack || !col1 || !col8) {
       throw new Error('TRACKS layout nodes missing');
     }
     const cellPx = Number(playTable.getAttribute('data-tracks-cell-px') ?? 0);
@@ -111,11 +109,12 @@ async function measureLayout(page: Page, viewportWidth: number) {
       ? hint.getBoundingClientRect().bottom
       : grid.getBoundingClientRect().bottom;
     const pewBox = pew.getBoundingClientRect();
-    const midY = frameBox.top + 1.5 * cellPx;
-    const startCenterY =
-      startBuffer.getBoundingClientRect().top + startBuffer.getBoundingClientRect().height / 2;
-    const endCenterY =
-      endBuffer.getBoundingClientRect().top + endBuffer.getBoundingClientRect().height / 2;
+    const midCell = col1.getBoundingClientRect();
+    const midCenterY = midCell.top + midCell.height / 2;
+    const startBox = startTrack.getBoundingClientRect();
+    const endBox = endTrack.getBoundingClientRect();
+    const col1Box = col1.getBoundingClientRect();
+    const col8Box = col8.getBoundingClientRect();
     const leftMargin = frameBox.left;
     const rightMargin = vw - frameBox.right;
     return {
@@ -124,8 +123,10 @@ async function measureLayout(page: Page, viewportWidth: number) {
       boardBottom: stackBottom,
       pewTop: pewBox.top,
       boardPewGap: pewBox.top - stackBottom,
-      startRailDelta: Math.abs(startCenterY - midY),
-      endRailDelta: Math.abs(endCenterY - midY),
+      startRailDelta: Math.abs(startBox.top + startBox.height / 2 - midCenterY),
+      endRailDelta: Math.abs(endBox.top + endBox.height / 2 - midCenterY),
+      startGutterGap: startBox.right - col1Box.left,
+      endGutterGap: col8Box.right - endBox.left,
     };
   }, viewportWidth);
 }

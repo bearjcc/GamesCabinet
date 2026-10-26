@@ -124,7 +124,7 @@ describe('measureTracksLayout', () => {
       getBoundingClientRect: () => ({ top: 780 }),
     } as unknown as HTMLElement;
     const { cellPx } = measureTracksLayout(field, pew);
-    expect(cellPx).toBe(100);
+    expect(cellPx).toBe(98);
   });
 
   it('uses landscape play padding fallback when the play surface is missing', () => {

@@ -220,14 +220,15 @@
   pointer-events: none;
 }
 
-/* START / END stubs: centreline on middle row (row index 1). */
+/* START / END stubs: middle row centreline, wholly inside gutters. */
 .tracks-terminal {
   position: absolute;
   left: 0;
   right: auto;
   top: calc(var(--tracks-cell) * 1.5);
   width: var(--tracks-gutter);
-  height: 0;
+  height: var(--tracks-cell);
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
@@ -238,51 +239,59 @@
 
 .tracks-terminal__track {
   position: absolute;
-  top: 0;
+  top: 50%;
   left: 0;
-  width: calc(var(--tracks-gutter) + var(--tracks-cell) * 0.4);
+  width: 100%;
   height: var(--tracks-cell);
-  margin-top: calc(var(--tracks-cell) * -0.5);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.tracks-terminal--start .tracks-terminal__track {
+  left: auto;
+  right: 0;
+}
+
+.tracks-terminal__rail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: calc(var(--tracks-cell) * 0.36);
+  transform: translateY(-50%);
   background-image: url("/assets/tracks/512/straight.webp");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-.tracks-terminal--start .tracks-terminal__track {
-  right: 0;
+.tracks-terminal--start .tracks-terminal__rail {
   left: auto;
-  transform: rotate(-90deg);
-  transform-origin: right center;
-}
-
-.tracks-terminal--end .tracks-terminal__track {
-  transform: rotate(90deg);
-  transform-origin: left center;
+  right: 0;
 }
 
 .tracks-terminal__buffer {
   position: absolute;
-  top: 0;
+  top: 50%;
   width: 7px;
   height: calc(var(--tracks-cell) * 0.44);
-  margin-top: calc(var(--tracks-cell) * 0.44 * -0.5);
+  transform: translateY(-50%);
   background: var(--tracks-buffer-red);
   border: 1px solid var(--tracks-buffer-dark);
   box-sizing: border-box;
 }
 
 .tracks-terminal--start .tracks-terminal__buffer {
-  left: 4px;
+  right: 0;
 }
 
 .tracks-terminal--end .tracks-terminal__buffer {
-  right: 4px;
+  left: 0;
 }
 
 .tracks-terminal__sign {
   position: absolute;
-  top: calc(var(--tracks-cell) * 0.52);
+  top: calc(50% + var(--tracks-cell) * 0.08);
   left: 50%;
   transform: translateX(-50%);
   padding: 0.12rem 0.45rem;
