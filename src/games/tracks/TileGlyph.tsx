@@ -1,4 +1,11 @@
-import { edgesAt, type Tile } from './tiles';
+import { useMemo } from 'react';
+import {
+  tracksGrassUrl,
+  tracksRasterTileUrl,
+  tracksTileHasRaster,
+  tracksTileSizeForDisplay,
+} from './tileArt';
+import { edgesAt, type Tile, tilePoints } from './tiles';
 
 const MAT_CLASS = {
   rail: 'tracks-edge--rail',
@@ -15,26 +22,54 @@ const STUBS = [
 ] as const;
 
 export function TileGlyph({ tile, rot = 0 }: { tile: Tile; rot?: number }) {
+  const size = tracksTileSizeForDisplay();
+  const points = tilePoints(tile);
+  const rasterSrc = useMemo(
+    () => (tracksTileHasRaster(tile.kind) ? tracksRasterTileUrl(tile.kind, size) : null),
+    [tile.kind, size],
+  );
+  const grassSrc = useMemo(() => tracksGrassUrl(size), [size]);
+
+  if (rasterSrc) {
+    return (
+      <div
+        className={`tracks-tile-wrap tracks-tile-wrap--${tile.kind}`}
+        style={{ transform: `rotate(${rot * 90}deg)` }}
+        aria-hidden="true"
+      >
+        <img className="tracks-tile tracks-tile--photo" src={rasterSrc} alt="" decoding="async" />
+        {points > 0 ? <span className="tracks-tile__score">{points}</span> : null}
+      </div>
+    );
+  }
+
   const edges = edgesAt(tile.kind, rot);
   return (
-    <svg viewBox="0 0 40 40" className={`tracks-tile tracks-tile--${tile.kind}`} aria-hidden="true">
-      <rect x="1" y="1" width="38" height="38" rx="4" className="tracks-tile__bg" />
-      {tile.kind === 'obstacle' && <ObstacleArt variant={tile.variant} />}
-      {edges.map((edge, i) =>
-        edge ? (
-          <line
-            key={i}
-            x1="20"
-            y1="20"
-            x2={STUBS[i].x2}
-            y2={STUBS[i].y2}
-            className={`tracks-edge ${MAT_CLASS[edge]}`}
-          />
-        ) : null,
-      )}
-      {edges.some(Boolean) && <circle cx="20" cy="20" r="3" className="tracks-tile__hub" />}
-      {tile.kind === 'whistlestop' && <TownArt small />}
-    </svg>
+    <div className={`tracks-tile-wrap tracks-tile-wrap--${tile.kind}`} aria-hidden="true">
+      <img className="tracks-tile tracks-tile--grass" src={grassSrc} alt="" decoding="async" />
+      <svg
+        viewBox="0 0 40 40"
+        className={`tracks-tile tracks-tile--glyph tracks-tile--${tile.kind}`}
+        aria-hidden="true"
+      >
+        {tile.kind === 'obstacle' && <ObstacleArt variant={tile.variant} />}
+        {edges.map((edge, i) =>
+          edge ? (
+            <line
+              key={i}
+              x1="20"
+              y1="20"
+              x2={STUBS[i].x2}
+              y2={STUBS[i].y2}
+              className={`tracks-edge ${MAT_CLASS[edge]}`}
+            />
+          ) : null,
+        )}
+        {edges.some(Boolean) && <circle cx="20" cy="20" r="3" className="tracks-tile__hub" />}
+        {tile.kind === 'whistlestop' && <TownArt small />}
+      </svg>
+      {points > 0 ? <span className="tracks-tile__score">{points}</span> : null}
+    </div>
   );
 }
 
