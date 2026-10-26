@@ -1,7 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useState } from 'react';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
-import { StatusBar } from '../../components/StatusBar';
 import { CardBack, CardFace } from '../../components/tabletop/CardFace';
 import { StockPile } from '../../components/tabletop/CardPile';
 import { SolitaireDragGhost } from '../../components/tabletop/SolitaireDragGhost';
@@ -172,12 +171,14 @@ export function KlondikeBoard({ G, ctx, moves, isActive }: BoardProps<KlondikeSt
   return (
     <SoloLeaderboardShell
       gameId="klondike"
+      gameTitle="Klondike"
       pendingSubmit={pendingSubmit}
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="klondike"
-      felt
-      info={status ? <StatusBar text={status} tone={tone} /> : null}
+      stage={{ felt: 'green' }}
+      status={status ? { text: status, tone } : undefined}
+      gameover={ctx.gameover}
       board={
         <div className="sol-board klondike-board" data-testid="klondike-board">
           <div className="klondike-top">

@@ -1,8 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Token } from '../../components/tabletop';
 import { boardFirstChromeActions } from '../../lib/actions';
 import { useMatchStatus } from '../../lib/useMatchStatus';
@@ -118,9 +117,16 @@ export function ChineseCheckersBoard({
     },
   }));
 
+  const actionTray =
+    chromeActions.length > 0 ? (
+      <ActionSurface label="Chinese Checkers actions" actions={chromeActions} />
+    ) : null;
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Chinese Checkers"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div
           className="chinese-checkers-board"
@@ -162,11 +168,8 @@ export function ChineseCheckersBoard({
           })}
         </div>
       }
-      actions={
-        chromeActions.length > 0 ? (
-          <ActionSurface label="Chinese Checkers actions" actions={chromeActions} />
-        ) : undefined
-      }
+      tray={actionTray ? { testId: 'chinese-checkers-tray' } : null}
+      trayContent={actionTray}
     />
   );
 }

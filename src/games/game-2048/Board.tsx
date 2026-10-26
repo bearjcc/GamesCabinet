@@ -141,6 +141,7 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
   return (
     <SoloLeaderboardShell
       gameId="2048"
+      gameTitle="2048"
       pendingSubmit={pendingSubmit}
       tab={tab}
       onTabChange={setTab}

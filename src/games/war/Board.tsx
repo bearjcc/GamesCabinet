@@ -1,9 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { Flip } from '../../components/cinematic';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { CardFace, StockPile } from '../../components/tabletop';
 import { controlA11y } from '../../lib/actions';
 import { primitiveProfile } from '../../lib/cinematic';
@@ -75,36 +73,34 @@ export function WarBoard({ G, ctx, moves, playerID, isActive }: BoardProps<WarSt
   );
 
   return (
-    <PlayTable
-      felt
-      info={
-        <>
-          <StatusBar text={status} tone={tone} />
-          <MatchScoreboard
-            scores={[
+    <MatchGameShell
+      gameTitle="War"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      stage={{ felt: 'green' }}
+      railMeta={
+        <Scoreboard
+          model={{
+            testId: 'war-meta',
+            rows: [
               { label: 'P1', value: G.decks[0].length },
               { label: 'P2', value: G.decks[1].length },
               ...metaBits.map((bit) => ({ label: 'Last', value: bit })),
-            ]}
-            rules={{
-              summary: 'How points work',
-              body: (
-                <>
-                  <p>
-                    Each card you win joins your deck. Higher card wins the battle; ties start a
-                    war.
-                  </p>
-                  <p>
-                    Collect every card to win. Deck counts above are cards still in play for each
-                    seat.
-                  </p>
-                </>
-              ),
-            }}
-            testId="war-meta"
-          />
-        </>
+            ],
+          }}
+        />
       }
+      rules={{
+        testId: 'war-meta-rules',
+        body: (
+          <>
+            <p>Each card you win joins your deck. Higher card wins the battle; ties start a war.</p>
+            <p>
+              Collect every card to win. Deck counts above are cards still in play for each seat.
+            </p>
+          </>
+        ),
+      }}
       board={
         <div className="war-table" data-testid="war-board">
           {seat(0, 'P1')}

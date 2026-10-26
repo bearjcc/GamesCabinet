@@ -1,7 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { DiceTray, Token } from '../../components/tabletop';
 import { boardFirstChromeActions } from '../../lib/actions';
 import { useMatchStatus } from '../../lib/useMatchStatus';
@@ -97,9 +96,16 @@ export function BackgammonBoard({
 
   const barOpen = playableFrom.has(BAR);
 
+  const actionTray =
+    chromeActions.length > 0 ? (
+      <ActionSurface label="Backgammon actions" actions={chromeActions} />
+    ) : null;
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Backgammon"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div className="bg-wrap" data-testid="backgammon-board">
           <div className="bg-board" role="group" aria-label="Backgammon board">
@@ -159,11 +165,8 @@ export function BackgammonBoard({
           </div>
         </div>
       }
-      actions={
-        chromeActions.length > 0 ? (
-          <ActionSurface label="Backgammon actions" actions={chromeActions} />
-        ) : undefined
-      }
+      tray={actionTray ? { testId: 'backgammon-tray' } : null}
+      trayContent={actionTray}
     />
   );
 }

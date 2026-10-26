@@ -2,8 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Flip, Snap } from '../../components/cinematic';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Token } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
 import { readEffectiveMotion } from '../../lib/motion';
@@ -138,9 +137,16 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
     },
   }));
 
+  const actionTray =
+    surfaceActions.length > 0 ? (
+      <ActionSurface label="Reversi actions" actions={surfaceActions} />
+    ) : null;
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Reversi"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div
           className="reversi-board"
@@ -186,11 +192,8 @@ export function ReversiBoard({ G, ctx, moves, playerID, isActive }: BoardProps<R
           })}
         </div>
       }
-      actions={
-        surfaceActions.length > 0 ? (
-          <ActionSurface label="Reversi actions" actions={surfaceActions} />
-        ) : null
-      }
+      tray={actionTray ? { testId: 'reversi-tray' } : null}
+      trayContent={actionTray}
     />
   );
 }

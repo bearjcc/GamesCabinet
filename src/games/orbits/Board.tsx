@@ -1,7 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useMemo, useState } from 'react';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
-import { StatusBar } from '../../components/StatusBar';
 import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
 import {
@@ -92,17 +91,17 @@ export function OrbitsBoard({ G, ctx, moves, isActive, playerID }: BoardProps<Or
   return (
     <SoloLeaderboardShell
       gameId="orbits"
+      gameTitle="Orbits"
       pendingSubmit={pendingSubmit}
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="orbits"
+      status={{ text: status, tone }}
+      gameover={ctx.gameover}
       info={
-        <>
-          <div className="orbits-scoreline" data-testid="orbits-score">
-            Score {G.scores[p]} - Failures {G.failures}/{MAX_FAILURES} - Deck {G.deck.length}
-          </div>
-          <StatusBar text={status} tone={tone} />
-        </>
+        <div className="orbits-scoreline" data-testid="orbits-score">
+          Score {G.scores[p]} - Failures {G.failures}/{MAX_FAILURES} - Deck {G.deck.length}
+        </div>
       }
       board={
         <div className="orbits-board" data-testid="orbits-board">

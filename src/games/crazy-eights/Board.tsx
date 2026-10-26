@@ -2,9 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Deal, Flip } from '../../components/cinematic';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { CardHand, DiscardPile, StockPile, SuitPicker } from '../../components/tabletop';
 import { primitiveProfile } from '../../lib/cinematic';
 import { readEffectiveMotion } from '../../lib/motion';
@@ -141,22 +139,29 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
     setPickingSuit(false);
   }
 
+  const actionTray =
+    pewActions.length > 0 ? (
+      <ActionSurface label="Crazy Eights actions" actions={surfaceActions} />
+    ) : null;
+
   return (
-    <PlayTable
-      felt
-      info={
-        <>
-          <StatusBar text={status} tone={tone} />
-          <MatchScoreboard
-            scores={[
+    <MatchGameShell
+      gameTitle="Crazy Eights"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      stage={{ felt: 'green' }}
+      railMeta={
+        <Scoreboard
+          model={{
+            testId: 'ce-meta',
+            rows: [
               { label: 'Stock', value: G.stock.length },
               ...G.hands.flatMap((h, seat) =>
                 seat === pid ? [] : [{ label: `P${seat + 1}`, value: h.length }],
               ),
-            ]}
-            testId="ce-meta"
-          />
-        </>
+            ],
+          }}
+        />
       }
       board={
         <div className="ce-table" data-testid="ce-board">
@@ -189,23 +194,22 @@ export function CrazyEightsBoard({ G, ctx, moves, playerID }: BoardProps<CrazyEi
           ) : null}
         </div>
       }
-      pew={
-        <CardHand
-          cards={hand}
-          selectedIndex={pickingSuit ? selected : null}
-          disabled={!yourTurn}
-          mode="physical"
-          isPlayable={(_, i) => playableIndexes.has(i)}
-          isWild={(card) => isWildEightId(card.id)}
-          assetFor={resolveAsset}
-          onSelect={tryPlay}
-          testIdPrefix="ce-hand"
-        />
-      }
-      actions={
-        pewActions.length > 0 ? (
-          <ActionSurface label="Crazy Eights actions" actions={surfaceActions} />
-        ) : null
+      tray={{ testId: 'ce-tray' }}
+      trayContent={
+        <>
+          <CardHand
+            cards={hand}
+            selectedIndex={pickingSuit ? selected : null}
+            disabled={!yourTurn}
+            mode="physical"
+            isPlayable={(_, i) => playableIndexes.has(i)}
+            isWild={(card) => isWildEightId(card.id)}
+            assetFor={resolveAsset}
+            onSelect={tryPlay}
+            testIdPrefix="ce-hand"
+          />
+          {actionTray}
+        </>
       }
     />
   );

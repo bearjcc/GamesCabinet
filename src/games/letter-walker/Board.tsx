@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { FocusTrap } from '../../components/FocusTrap';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
-import { StatusBar } from '../../components/StatusBar';
 import type { StatusTone } from '../../lib/matchStatus';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { getNickname } from '../../lib/storage';
@@ -222,20 +221,20 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
     <>
       <SoloLeaderboardShell
         gameId="letter-walker"
+        gameTitle="Letter Walker"
         pendingSubmit={pendingSubmit}
         tab={tab}
         onTabChange={setTab}
         testIdPrefix="lw"
         onSubmitted={() => setMessage(null)}
+        status={{ text: status, tone }}
+        gameover={G.completed}
         info={
-          <>
-            <StatusBar text={status} tone={tone} />
-            {message ? (
-              <p className="lw-message" role="status" data-testid="lw-message">
-                {message}
-              </p>
-            ) : null}
-          </>
+          message ? (
+            <p className="lw-message" role="status" data-testid="lw-message">
+              {message}
+            </p>
+          ) : null
         }
         board={
           <div className="lw-play">

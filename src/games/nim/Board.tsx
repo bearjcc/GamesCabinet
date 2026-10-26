@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Counter, Token } from '../../components/tabletop';
 import { controlA11y } from '../../lib/actions';
 import { useMatchStatus } from '../../lib/useMatchStatus';
@@ -21,8 +20,10 @@ export function NimBoard({ G, ctx, moves, playerID, isActive }: BoardProps<NimSt
   const legal = new Set(legalTakes(G.heap));
 
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Nim"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div className="nim-table" data-testid="nim-board">
           <Counter value={G.heap} label="Stones left" emphasize testId="nim-count" />

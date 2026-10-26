@@ -1,7 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { Token } from '../../components/tabletop';
 import { boardFirstChromeActions } from '../../lib/actions';
 import { useMatchStatus } from '../../lib/useMatchStatus';
@@ -31,9 +30,14 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
     }),
   );
 
+  const actionTray =
+    chromeActions.length > 0 ? <ActionSurface label="Go actions" actions={chromeActions} /> : null;
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Go"
+      ctx={ctx}
+      status={{ text: status, tone }}
       board={
         <div className="go-board" role="grid" aria-label="Go board" data-testid="go-board">
           {G.cells.map((cell, i) => {
@@ -64,11 +68,8 @@ export function GoBoard({ G, ctx, moves, playerID, isActive }: BoardProps<GoStat
           })}
         </div>
       }
-      actions={
-        chromeActions.length > 0 ? (
-          <ActionSurface label="Go actions" actions={chromeActions} />
-        ) : undefined
-      }
+      tray={actionTray ? { testId: 'go-tray' } : null}
+      trayContent={actionTray}
     />
   );
 }

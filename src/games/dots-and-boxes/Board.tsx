@@ -1,8 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import type { CSSProperties } from 'react';
-import { PlayTable } from '../../components/PlayTable';
+import { MatchGameShell } from '../../components/game-shell';
 import { useSeatColour } from '../../components/SeatColours';
-import { StatusBar } from '../../components/StatusBar';
 import { Counter } from '../../components/tabletop';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import {
@@ -62,18 +61,18 @@ export function DotsAndBoxesBoard({
   const height = PAD * 2 + BOX_ROWS * CELL;
 
   return (
-    <PlayTable
-      info={
-        <>
-          <StatusBar text={status} tone={tone} />
-          <div className="dab-scores" data-testid="dab-scores">
-            <Counter value={G.scores[0]} label="P1" emphasize testId="dab-score-0" />
-            <span className="dab-scores__sep" aria-hidden="true">
-              -
-            </span>
-            <Counter value={G.scores[1]} label="P2" emphasize testId="dab-score-1" />
-          </div>
-        </>
+    <MatchGameShell
+      gameTitle="Dots and Boxes"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      railMeta={
+        <div className="dab-scores" data-testid="dab-scores">
+          <Counter value={G.scores[0]} label="P1" emphasize testId="dab-score-0" />
+          <span className="dab-scores__sep" aria-hidden="true">
+            -
+          </span>
+          <Counter value={G.scores[1]} label="P2" emphasize testId="dab-score-1" />
+        </div>
       }
       board={
         <div

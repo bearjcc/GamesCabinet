@@ -8,10 +8,7 @@ import {
 } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
 import { Snap } from '../../components/cinematic';
-import { GameRules } from '../../components/GameRules';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { getDominoesActions } from './actions';
 import type { DominoesState, Tile } from './game';
@@ -202,16 +199,23 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
   }));
 
   return (
-    <PlayTable
-      felt="blue"
-      info={
-        <>
-          <StatusBar text={status} tone={tone} />
-          <MatchScoreboard
-            scores={[{ label: 'Boneyard', value: G.boneyard.length }, ...scoreItems]}
-            testId="dom-meta"
-          />
-          <GameRules testId="dom-rules">
+    <MatchGameShell
+      gameTitle="Dominoes"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      stage={{ felt: 'blue' }}
+      railMeta={
+        <Scoreboard
+          model={{
+            testId: 'dom-meta',
+            rows: [{ label: 'Boneyard', value: G.boneyard.length }, ...scoreItems],
+          }}
+        />
+      }
+      rules={{
+        testId: 'dom-rules',
+        body: (
+          <>
             <p>
               Empty your hand or win when the game blocks. Score the pip total left in every
               opponent&apos;s hand.
@@ -220,9 +224,9 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
               <li>Go out: add all pips still held by opponents.</li>
               <li>Blocked: everyone shows their tiles; lowest pip total wins the same way.</li>
             </ul>
-          </GameRules>
-        </>
-      }
+          </>
+        ),
+      }}
       board={
         <div className="dom-scroll" data-testid="dom-board" ref={tableRef}>
           <Snap key={playPulse} active={playPulse > 0} className="dom-snap">
@@ -335,26 +339,29 @@ export function DominoesBoard({ G, ctx, moves, playerID }: BoardProps<DominoesSt
           ) : null}
         </div>
       }
-      pew={
-        <div className="dom-hand" data-testid="dom-hand">
-          {hand.map((tile, i) => (
-            <button
-              key={`${tile.id}-${i}`}
-              type="button"
-              className={`dom-hand-slot${handIndex === i ? ' selected' : ''}${drag?.handIndex === i ? ' is-dragging' : ''}`}
-              disabled={!yourTurn}
-              aria-label={`${tile.a}-${tile.b}`}
-              data-testid={`dom-hand-${i}`}
-              onPointerDown={(e) => startDrag(i, e)}
-            >
-              <span className="dom-tile kenney">
-                <img src={kenneySrc(tile)} alt="" draggable={false} />
-              </span>
-            </button>
-          ))}
-        </div>
+      tray={{ testId: 'dom-tray' }}
+      trayContent={
+        <>
+          <div className="dom-hand" data-testid="dom-hand">
+            {hand.map((tile, i) => (
+              <button
+                key={`${tile.id}-${i}`}
+                type="button"
+                className={`dom-hand-slot${handIndex === i ? ' selected' : ''}${drag?.handIndex === i ? ' is-dragging' : ''}`}
+                disabled={!yourTurn}
+                aria-label={`${tile.a}-${tile.b}`}
+                data-testid={`dom-hand-${i}`}
+                onPointerDown={(e) => startDrag(i, e)}
+              >
+                <span className="dom-tile kenney">
+                  <img src={kenneySrc(tile)} alt="" draggable={false} />
+                </span>
+              </button>
+            ))}
+          </div>
+          <ActionSurface label="Dominoes actions" actions={surfaceActions} />
+        </>
       }
-      actions={<ActionSurface label="Dominoes actions" actions={surfaceActions} />}
     />
   );
 }

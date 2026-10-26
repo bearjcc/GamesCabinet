@@ -1,11 +1,8 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { GameRules } from '../../components/GameRules';
-import { MatchScoreboard } from '../../components/MatchScoreboard';
-import { PlayTable } from '../../components/PlayTable';
+import { MatchGameShell, Scoreboard } from '../../components/game-shell';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
-import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
 import { playerDisplayName } from '../../lib/matchPlayers';
 import type { SubmitScoreInput } from '../../lib/scores';
@@ -112,19 +109,24 @@ export function YatzyBoard({
     },
   }));
 
-  const info = (
-    <>
-      <StatusBar text={status} tone={tone} />
-      <MatchScoreboard scores={[{ label: 'Roll', value: `${G.rolls}/3` }]} testId="yatzy-meta" />
-      <GameRules testId="yatzy-rules">
+  const rollMeta = (
+    <Scoreboard
+      model={{ testId: 'yatzy-meta', rows: [{ label: 'Roll', value: `${G.rolls}/3` }] }}
+    />
+  );
+
+  const yatzyRules = {
+    testId: 'yatzy-rules',
+    body: (
+      <>
         <p>Upper section: sum the matching faces. Reach 63 for a 35-point bonus.</p>
         <p>
           Lower section: pairs, straights, full house, chance, and Yatzy each score by their rule.
         </p>
         <p>Yatzy (five alike) scores 50. Total after fifteen boxes wins.</p>
-      </GameRules>
-    </>
-  );
+      </>
+    ),
+  };
 
   const card = (
     <div className="yatzy-card-wrap">
@@ -217,11 +219,15 @@ export function YatzyBoard({
     return (
       <SoloLeaderboardShell
         gameId="yatzy"
+        gameTitle="Yatzy"
         pendingSubmit={pendingSubmit}
         tab={tab}
         onTabChange={setTab}
         testIdPrefix="yatzy"
-        info={info}
+        status={{ text: status, tone }}
+        gameover={ctx.gameover}
+        rules={yatzyRules}
+        info={rollMeta}
         board={card}
         pew={pew}
         actions={actionSurface}
@@ -229,5 +235,21 @@ export function YatzyBoard({
     );
   }
 
-  return <PlayTable info={info} board={card} pew={pew} actions={actionSurface} />;
+  return (
+    <MatchGameShell
+      gameTitle="Yatzy"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      railMeta={rollMeta}
+      rules={yatzyRules}
+      board={card}
+      tray={{ testId: 'yatzy-tray' }}
+      trayContent={
+        <>
+          {pew}
+          {actionSurface}
+        </>
+      }
+    />
+  );
 }

@@ -1,6 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import { MatchGameShell } from '../../components/game-shell';
 import { controlA11y } from '../../lib/actions';
 import type { StatusTone } from '../../lib/matchStatus';
 import { playerSeatLabel } from '../../lib/playerLabel';
@@ -77,9 +76,18 @@ export function TicTacToeBoard({
       ? nInARowWinningCells(G.cells, { rows: SIZE, cols: SIZE, n: SIZE })
       : null;
 
+  const actor = seatLabel(ctx.currentPlayer, matchData);
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
+    <MatchGameShell
+      gameTitle="Tic-tac-toe"
+      ctx={ctx}
+      status={{ text: status, tone }}
+      turnName={actor}
+      rules={{
+        testId: 'ttt-rules',
+        body: <p>Three in a row wins.</p>,
+      }}
       board={
         <div className="ttt-board-wrap" data-testid="ttt-board">
           <div className="ttt-lines" aria-hidden>
