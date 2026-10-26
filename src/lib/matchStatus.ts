@@ -1,5 +1,6 @@
 import type { FilteredMetadata } from 'boardgame.io';
 import { hintFromLegacyYourTurn, type PlayerNameOptions, turnStatusText } from './matchPlayers';
+import { defaultSeatDisplayName } from './seatNames';
 
 export type StatusTone = 'neutral' | 'you' | 'wait' | 'done';
 
@@ -28,7 +29,7 @@ export type DeriveMatchStatusOptions = {
   /** Action hint appended after the named turn line. */
   turnHint?: string;
   matchData?: FilteredMetadata;
-  nameForPlayer?: (playerID: string) => string;
+  nameForPlayer?: (playerID: string) => string | undefined;
   /**
    * Override seat-vs-currentPlayer turn detection (e.g. boardgame.io `isActive`,
    * or UI that still treats the seat as active while selecting a piece).
@@ -44,7 +45,7 @@ export type DeriveMatchStatusOptions = {
 
 /** Default pass-and-play seat label when matchData has no nickname. */
 export function defaultSeatLabel(playerId: string): string {
-  return `Player ${Number(playerId) + 1}`;
+  return defaultSeatDisplayName(playerId);
 }
 
 const DEFAULT_LABELS: MatchStatusLabels = {
@@ -101,15 +102,18 @@ export function deriveMatchStatus(
 
   const yourTurn = options?.isYourTurn ?? (playerID != null && playerID === ctx.currentPlayer);
   const hint = yourTurn ? resolveTurnHint(options) : undefined;
-  const text = turnStatusText(ctx.currentPlayer, nameOptions(options), hint);
 
   if (options?.seatLabel) {
     const name = options.seatLabel(ctx.currentPlayer);
+    const base = `${name}'s turn`;
+    const text = hint ? `${base} — ${hint}` : base;
     return {
-      text: `${name}'s turn`,
+      text,
       tone: yourTurn ? 'you' : 'wait',
     };
   }
+
+  const text = turnStatusText(ctx.currentPlayer, nameOptions(options), hint);
 
   if (yourTurn) {
     return { text, tone: 'you' };

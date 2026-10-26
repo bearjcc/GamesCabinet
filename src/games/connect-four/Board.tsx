@@ -4,8 +4,8 @@ import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { Token } from '../../components/tabletop';
 import { controlA11y } from '../../lib/actions';
+import { playerDisplayName } from '../../lib/matchPlayers';
 import type { StatusTone } from '../../lib/matchStatus';
-import { playerSeatLabel } from '../../lib/playerLabel';
 import { nInARowWinningCells } from '../shared/grid';
 import { WinLine } from '../shared/WinLine';
 import { columnDropState } from './actions';
@@ -15,7 +15,7 @@ import { COLS, ROWS } from './game';
 const WIN_LENGTH = 4;
 
 function c4SeatLabel(player: string, matchData: BoardProps<C4State>['matchData']): string {
-  return playerSeatLabel(player, matchData, player === '0' ? 'Yellow' : 'Red');
+  return playerDisplayName(player, { matchData });
 }
 
 function columnAtClientX(board: HTMLElement, clientX: number): number | null {

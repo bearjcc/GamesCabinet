@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { hintFromLegacyYourTurn, playerDisplayName, turnStatusText } from './matchPlayers';
+import * as storage from './storage';
 
 describe('matchPlayers', () => {
   it('uses lobby names when present', () => {
@@ -13,9 +14,11 @@ describe('matchPlayers', () => {
     ).toBe('Pat');
   });
 
-  it('falls back to Player N', () => {
-    expect(playerDisplayName('0')).toBe('Player 1');
-    expect(playerDisplayName('alpha')).toBe('Player alpha');
+  it('falls back to named seats when lobby metadata is missing', () => {
+    vi.spyOn(storage, 'getNickname').mockReturnValue('Bear');
+    expect(playerDisplayName('0')).toBe('Bear');
+    expect(playerDisplayName('1')).toBe('Orange');
+    expect(playerDisplayName('alpha')).toBe('Seat alpha');
   });
 
   it('prefers nameForPlayer over lobby', () => {
@@ -35,6 +38,7 @@ describe('matchPlayers', () => {
   });
 
   it('extracts hints from legacy your-turn labels', () => {
+    expect(hintFromLegacyYourTurn('   ')).toBeUndefined();
     expect(hintFromLegacyYourTurn('Your turn — tap a column')).toBe('tap a column');
     expect(hintFromLegacyYourTurn('Your turn - roll the die')).toBe('roll the die');
     expect(hintFromLegacyYourTurn('Your turn roll the die')).toBe('roll the die');

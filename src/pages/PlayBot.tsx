@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { SeatColoursProvider } from '../components/SeatColours';
+import { SeatNameOverridesProvider } from '../components/SeatNameOverrides';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
@@ -120,7 +121,9 @@ export function PlayBot() {
         }}
       >
         <SeatColoursProvider colours={seatColours}>
-          <BotClient key={`${matchID}-${difficulty}`} playerID={seat} matchID={matchID} />
+          <SeatNameOverridesProvider botPlayerIds={botIDs}>
+            <BotClient key={`${matchID}-${difficulty}`} playerID={seat} matchID={matchID} />
+          </SeatNameOverridesProvider>
         </SeatColoursProvider>
       </MatchLifecycleProvider>
     </Shell>
