@@ -7,6 +7,7 @@ import { PlayTable } from '../../components/PlayTable';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { StatusBar } from '../../components/StatusBar';
 import { DiceTray } from '../../components/tabletop';
+import { playerDisplayName } from '../../lib/matchPlayers';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { useMatchStatus } from '../../lib/useMatchStatus';
 import { composeDieFaceArt, dieFaceArtMap, kenneyDieFaceAsset } from '../shared/dice';
@@ -98,13 +99,10 @@ export function YatzyBoard({
     else if (solo) status = `Finished — ${over.totals[0]} pts`;
     else if (over.winner === String(pid) || over.winner === playerID)
       status = `You win — ${over.totals[pid]} pts`;
-    else status = `Player ${Number(over.winner) + 1} wins`;
+    else status = `${playerDisplayName(String(over.winner), { matchData })} wins`;
   }
 
-  const seatLabel = (i: number) => {
-    const name = matchData?.[i]?.name;
-    return name?.trim() || `P${i + 1}`;
-  };
+  const seatLabel = (i: number) => playerDisplayName(String(i), { matchData });
 
   const pewActions = getYatzyActions({ rolls: G.rolls, yourTurn });
   const surfaceActions = pewActions.map((action) => ({
