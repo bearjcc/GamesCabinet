@@ -1,5 +1,5 @@
 import type { BoardProps } from 'boardgame.io/react';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
@@ -9,6 +9,7 @@ import { type Cell, cellAt, HEIGHT, placeError, START_ROW, WIDTH } from './grid'
 import { objectiveDef } from './objectives';
 import { TileGlyph } from './TileGlyph';
 import { allowedRotations, overlayBaseKinds } from './tiles';
+import { preloadTracksTiles } from './tracksPreload';
 
 function seatLabel(matchData: BoardProps['matchData'], i: number): string {
   const name = matchData?.[i]?.name;
@@ -73,6 +74,10 @@ export function TracksBoard({
   const turnKey = `${ctx.phase}-${ctx.turn}-${ctx.currentPlayer}`;
   const [readyFor, setReadyFor] = useState<string | null>(null);
   const claimHotseatSeat = useHotseatClaimSeat();
+
+  useEffect(() => {
+    preloadTracksTiles();
+  }, []);
   // Pass-and-play matches are local-* ids; online seats never hand off.
   const hotSeat = ctx.numPlayers > 1 && (matchID ?? '').startsWith('local-');
   const handOff = hotSeat && !ctx.gameover && readyFor !== turnKey;
@@ -326,72 +331,79 @@ export function TracksBoard({
             {hint}
           </p>
         ) : null}
-        <div className="tracks-hand" data-testid="tracks-hand">
-          {(handOff ? [] : (player?.hand ?? [])).map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`tracks-hand__card${selected === t.id ? ' is-selected' : ''}`}
-              data-testid={`tracks-hand-${t.id}`}
-              onClick={() => pick(t.id)}
-              disabled={!myTurn || G.drewFromDiscard}
-            >
-              <TileGlyph tile={t} rot={selected === t.id ? rot : 0} />
-              <span>{KIND_LABEL[t.kind]}</span>
-            </button>
-          ))}
-          {drawnFromDiscard && !handOff ? (
-            <button
-              type="button"
-              className={`tracks-hand__card tracks-hand__card--drawn${selected === drawnFromDiscard.id ? ' is-selected' : ''}`}
-              data-testid="tracks-hand-drawn"
-              onClick={() => pick(drawnFromDiscard.id)}
-              disabled={!myTurn}
-            >
-              <TileGlyph tile={drawnFromDiscard} rot={selected === drawnFromDiscard.id ? rot : 0} />
-              <span>{KIND_LABEL[drawnFromDiscard.kind]}</span>
-            </button>
-          ) : null}
-        </div>
       </div>
     );
   }
 
-  // ----- pew: deck + discard + actions -----
+  const handRail =
+    ctx.phase === 'play' && !handOff ? (
+      <div className="tracks-hand" data-testid="tracks-hand">
+        {(player?.hand ?? []).map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`tracks-hand__card${selected === t.id ? ' is-selected' : ''}`}
+            data-testid={`tracks-hand-${t.id}`}
+            onClick={() => pick(t.id)}
+            disabled={!myTurn || G.drewFromDiscard}
+          >
+            <TileGlyph tile={t} rot={selected === t.id ? rot : 0} />
+            <span>{KIND_LABEL[t.kind]}</span>
+          </button>
+        ))}
+        {drawnFromDiscard ? (
+          <button
+            type="button"
+            className={`tracks-hand__card tracks-hand__card--drawn${selected === drawnFromDiscard.id ? ' is-selected' : ''}`}
+            data-testid="tracks-hand-drawn"
+            onClick={() => pick(drawnFromDiscard.id)}
+            disabled={!myTurn}
+          >
+            <TileGlyph tile={drawnFromDiscard} rot={selected === drawnFromDiscard.id ? rot : 0} />
+            <span>{KIND_LABEL[drawnFromDiscard.kind]}</span>
+          </button>
+        ) : null}
+      </div>
+    ) : null;
+
+  // ----- pew: hand + deck + discard -----
   const discardTop = G.discard[G.discard.length - 1];
   const pew =
     ctx.phase === 'play' ? (
-      <div className="tracks-piles">
-        <button
-          type="button"
-          className="tracks-pile"
-          data-testid="tracks-draw-deck"
-          onClick={() => moves.drawTile('deck')}
-          disabled={handOff || !myTurn || G.drawnId !== null}
-        >
-          <span className="tracks-pile__deck" />
-          Deck ({G.deck.length})
-        </button>
-        <button
-          type="button"
-          className="tracks-pile"
-          data-testid="tracks-draw-discard"
-          onClick={tapDiscard}
-          disabled={
-            handOff ||
-            !myTurn ||
-            (G.drawnId === null
-              ? !discardTop || ctx.numPlayers === 1
-              : G.drewFromDiscard || !selectedTile)
-          }
-        >
-          {discardTop ? (
-            <TileGlyph tile={discardTop} rot={0} />
-          ) : (
-            <span className="tracks-pile__empty" />
-          )}
-          Discard
-        </button>
+      <div className="tracks-pew">
+        {handRail}
+        <div className="tracks-piles">
+          <button
+            type="button"
+            className="tracks-pile"
+            data-testid="tracks-draw-deck"
+            onClick={() => moves.drawTile('deck')}
+            disabled={handOff || !myTurn || G.drawnId !== null}
+          >
+            <span className="tracks-pile__deck" />
+            Deck ({G.deck.length})
+          </button>
+          <button
+            type="button"
+            className="tracks-pile"
+            data-testid="tracks-draw-discard"
+            onClick={tapDiscard}
+            disabled={
+              handOff ||
+              !myTurn ||
+              (G.drawnId === null
+                ? !discardTop || ctx.numPlayers === 1
+                : G.drewFromDiscard || !selectedTile)
+            }
+          >
+            {discardTop ? (
+              <TileGlyph tile={discardTop} rot={0} />
+            ) : (
+              <span className="tracks-pile__empty" />
+            )}
+            Discard
+          </button>
+        </div>
       </div>
     ) : null;
 
