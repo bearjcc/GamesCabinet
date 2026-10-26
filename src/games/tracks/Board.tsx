@@ -426,5 +426,12 @@ export function TracksBoard({
     board
   );
 
-  return <PlayTable info={info} board={shownBoard} pew={pew} felt="tracks" />;
+  return (
+    <PlayTable
+      info={info}
+      board={shownBoard}
+      pew={pew}
+      felt={ctx.phase === 'play' ? 'tracks' : undefined}
+    />
+  );
 }

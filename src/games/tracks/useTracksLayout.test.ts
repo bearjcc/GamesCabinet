@@ -1,0 +1,413 @@
+// @vitest-environment jsdom
+import { createElement, createRef, useLayoutEffect, useState } from 'react';
+
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class {
+    private readonly cb: ResizeObserverCallback;
+    constructor(cb: ResizeObserverCallback) {
+      this.cb = cb;
+    }
+    observe() {
+      this.cb([], this as unknown as ResizeObserver);
+    }
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+}
+
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  measureTracksLayout,
+  pewHeightForCell,
+  tracksCellWithMeasuredPewSlack,
+  useTracksLayout,
+} from './useTracksLayout';
+
+describe('tracksCellWithMeasuredPewSlack', () => {
+  it('returns the next cell when slack covers the formula gap', () => {
+    expect(tracksCellWithMeasuredPewSlack(109, 137, 531, 190, true)).toBe(110);
+  });
+
+  it('returns the same cell when slack is zero', () => {
+    expect(tracksCellWithMeasuredPewSlack(109, 137, 531, pewHeightForCell(109, true), true)).toBe(
+      109,
+    );
+  });
+
+  it('returns the same cell when the next size exceeds the width cap', () => {
+    expect(tracksCellWithMeasuredPewSlack(100, 100, 900, 120, true)).toBe(100);
+  });
+
+  it('returns the same cell when the next row still exceeds the height budget', () => {
+    expect(tracksCellWithMeasuredPewSlack(109, 137, 520, 190, true)).toBe(109);
+  });
+});
+
+describe('measureTracksLayout', () => {
+  it('yields at least 110px cells at 1180×820', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+
+    const field = {
+      getBoundingClientRect: () => ({ top: 200, bottom: 700, left: 0, right: 1180 }),
+      querySelector: () => null,
+    } as unknown as HTMLElement;
+    const pew = { offsetHeight: 190 } as unknown as HTMLElement;
+
+    const { cellPx } = measureTracksLayout(field, pew);
+    expect(cellPx).toBeGreaterThanOrEqual(110);
+  });
+
+  it('fits large cells at 1180×820 when the field starts low enough', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const field = {
+      getBoundingClientRect: () => ({ top: 188 }),
+      querySelector: () => null,
+    } as unknown as HTMLElement;
+    const { cellPx } = measureTracksLayout(field, null);
+    expect(cellPx).toBeGreaterThanOrEqual(110);
+  });
+
+  it('infers compact landscape from the viewport when pew height is omitted', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    expect(pewHeightForCell(90)).toBe(pewHeightForCell(90, true));
+  });
+
+  it('uses taller pew estimate in portrait', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 820 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1180 });
+    expect(pewHeightForCell(100, false)).toBeGreaterThan(pewHeightForCell(100, true));
+  });
+
+  it('uses portrait play padding in the height budget', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const landscape = measureTracksLayout(
+      {
+        getBoundingClientRect: () => ({ top: 300 }),
+        querySelector: () => null,
+      } as unknown as HTMLElement,
+      null,
+    );
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 820 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1180 });
+    const portrait = measureTracksLayout(
+      {
+        getBoundingClientRect: () => ({ top: 300 }),
+        querySelector: () => null,
+      } as unknown as HTMLElement,
+      null,
+    );
+    expect(landscape.cellPx).toBeGreaterThanOrEqual(portrait.cellPx);
+  });
+
+  it('does not bump past the width-derived cell cap', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 884 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const playTable = document.createElement('div');
+    playTable.className = 'play-table';
+    playTable.setAttribute('data-tracks-cell-px', '100');
+    const field = {
+      getBoundingClientRect: () => ({ top: 20 }),
+      querySelector: () => null,
+      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
+    } as unknown as HTMLElement;
+    const pew = { offsetHeight: 120 } as unknown as HTMLElement;
+    const { cellPx } = measureTracksLayout(field, pew);
+    expect(cellPx).toBe(100);
+  });
+
+  it('does not bump cell size when measured pew matches the formula', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const playTable = document.createElement('div');
+    playTable.className = 'play-table';
+    playTable.setAttribute('data-tracks-cell-px', '109');
+    const field = {
+      getBoundingClientRect: () => ({ top: 285 }),
+      querySelector: () => null,
+      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
+    } as unknown as HTMLElement;
+    const formulaPew = pewHeightForCell(109, true);
+    const pew = { offsetHeight: formulaPew } as unknown as HTMLElement;
+    const { cellPx } = measureTracksLayout(field, pew);
+    expect(cellPx).toBe(109);
+  });
+
+  it('falls back when nodes are missing', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 800 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 600 });
+    const { cellPx } = measureTracksLayout(null, null);
+    expect(cellPx).toBeGreaterThanOrEqual(48);
+  });
+
+  it('ignores slack when the play table cell attribute is stale', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const playTable = document.createElement('div');
+    playTable.className = 'play-table';
+    playTable.setAttribute('data-tracks-cell-px', '80');
+    const field = {
+      getBoundingClientRect: () => ({ top: 285 }),
+      querySelector: () => null,
+      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
+    } as unknown as HTMLElement;
+    const pew = { offsetHeight: 190 } as unknown as HTMLElement;
+    const { cellPx } = measureTracksLayout(field, pew);
+    expect(cellPx).toBe(109);
+  });
+
+  it('uses measured pew slack to bump cell size when the formula is conservative', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const playTable = document.createElement('div');
+    playTable.className = 'play-table';
+    playTable.setAttribute('data-tracks-cell-px', '109');
+    const field = {
+      getBoundingClientRect: () => ({ top: 285 }),
+      querySelector: () => null,
+      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
+    } as unknown as HTMLElement;
+    const pew = { offsetHeight: 190 } as unknown as HTMLElement;
+    const withoutSlack = measureTracksLayout(field, null);
+    expect(withoutSlack.cellPx).toBe(109);
+    const { cellPx } = measureTracksLayout(field, pew);
+    expect(cellPx).toBe(110);
+  });
+
+  it('subtracts board chrome inside the field', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const field = {
+      getBoundingClientRect: () => ({ top: 180 }),
+      querySelector: (sel: string) => {
+        if (sel.includes('boardswitch')) return { offsetHeight: 28 };
+        if (sel.includes('hint')) return { offsetHeight: 14 };
+        return null;
+      },
+    } as unknown as HTMLElement;
+    const pew = { offsetHeight: 200 } as unknown as HTMLElement;
+    const tight = measureTracksLayout(field, pew);
+    const loose = measureTracksLayout(
+      {
+        getBoundingClientRect: () => ({ top: 180 }),
+        querySelector: () => null,
+      } as unknown as HTMLElement,
+      pew,
+    );
+    expect(tight.cellPx).toBeLessThanOrEqual(loose.cellPx);
+    expect(pewHeightForCell(92)).toBeGreaterThan(120);
+  });
+});
+
+describe('useTracksLayout', () => {
+  let container: HTMLDivElement;
+
+  afterEach(() => {
+    container?.remove();
+  });
+
+  it('measures on mount when enabled', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+    let cell = 0;
+
+    function Probe() {
+      const layout = useTracksLayout(true, { infoRef, fieldRef, pewRef });
+      cell = layout.cellPx;
+      return createElement(
+        'div',
+        null,
+        createElement('div', { ref: infoRef, style: { height: '120px' } }),
+        createElement('div', { ref: fieldRef, style: { height: '300px' } }),
+        createElement('div', { ref: pewRef, style: { height: '180px' } }),
+      );
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe));
+    });
+    expect(cell).toBeGreaterThan(48);
+    root.unmount();
+  });
+
+  it('handles enabling before refs attach', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+
+    function Probe() {
+      const [on, setOn] = useState(false);
+      useLayoutEffect(() => setOn(true));
+      useTracksLayout(on, { infoRef, fieldRef, pewRef });
+      return null;
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe));
+    });
+    root.unmount();
+  });
+
+  it('observes whichever refs are mounted', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+
+    function Probe({ mode }: { mode: 'info' | 'field' | 'pew' }) {
+      useTracksLayout(true, { infoRef, fieldRef, pewRef });
+      if (mode === 'info') return createElement('div', { ref: infoRef });
+      if (mode === 'field') return createElement('div', { ref: fieldRef });
+      return createElement('div', { ref: pewRef });
+    }
+
+    const root = createRoot(container);
+    for (const mode of ['info', 'field', 'pew'] as const) {
+      flushSync(() => {
+        root.render(createElement(Probe, { mode }));
+      });
+    }
+    window.dispatchEvent(new Event('resize'));
+    root.unmount();
+  });
+
+  it('works when ResizeObserver is unavailable', () => {
+    const saved = globalThis.ResizeObserver;
+    // @ts-expect-error test fallback
+    delete globalThis.ResizeObserver;
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+
+    function Probe() {
+      useTracksLayout(true, { infoRef, fieldRef, pewRef });
+      return createElement('div', { ref: fieldRef });
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe));
+    });
+    root.unmount();
+    globalThis.ResizeObserver = saved;
+  });
+
+  it('remeasures on the next animation frame', () => {
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0);
+      return 1;
+    });
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+
+    function Probe() {
+      useTracksLayout(true, { infoRef, fieldRef, pewRef });
+      return createElement('div', { ref: fieldRef });
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe));
+    });
+    root.unmount();
+    vi.restoreAllMocks();
+  });
+
+  it('cancels a pending remeasure on unmount', () => {
+    const raf = vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(42);
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame');
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+
+    function Probe() {
+      useTracksLayout(true, { infoRef, fieldRef, pewRef });
+      return createElement('div', { ref: fieldRef });
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe));
+    });
+    root.unmount();
+    expect(cancel).toHaveBeenCalledWith(42);
+    raf.mockRestore();
+    cancel.mockRestore();
+  });
+
+  it('tears down observers when layout is disabled', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+    const disconnect = vi.fn();
+    const saved = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect = disconnect;
+    } as unknown as typeof ResizeObserver;
+
+    function Probe({ enabled }: { enabled: boolean }) {
+      useTracksLayout(enabled, { infoRef, fieldRef, pewRef });
+      return createElement('div', { ref: fieldRef });
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe, { enabled: true }));
+    });
+    flushSync(() => {
+      root.render(createElement(Probe, { enabled: false }));
+    });
+    expect(disconnect).toHaveBeenCalled();
+    root.unmount();
+    globalThis.ResizeObserver = saved;
+  });
+
+  it('skips layout work when disabled', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const infoRef = createRef<HTMLDivElement>();
+    const fieldRef = createRef<HTMLDivElement>();
+    const pewRef = createRef<HTMLDivElement>();
+    let cell = 0;
+
+    function Probe() {
+      const layout = useTracksLayout(false, { infoRef, fieldRef, pewRef });
+      cell = layout.cellPx;
+      return null;
+    }
+
+    const root = createRoot(container);
+    flushSync(() => {
+      root.render(createElement(Probe));
+    });
+    expect(cell).toBe(72);
+    root.unmount();
+  });
+});
