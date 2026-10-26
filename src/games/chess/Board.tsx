@@ -1,8 +1,12 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { Lift, Snap } from '../../components/cinematic';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import {
+  GameShell,
+  RulesPanel,
+  shellSheetActions,
+  turnPlateFromMatchStatus,
+} from '../../components/game-shell';
 import { primitiveProfile } from '../../lib/cinematic';
 import { readEffectiveMotion } from '../../lib/motion';
 import { useMatchStatus } from '../../lib/useMatchStatus';
@@ -155,6 +159,21 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
     nameForPlayer: (id) => (id === '0' ? 'White' : 'Black'),
     turnHint: yourTurn ? (selected === null ? 'tap a piece' : 'tap a square to move') : undefined,
   });
+  const [sheet, setSheet] = useState<'rules' | 'scores' | 'menu' | null>(null);
+  const turnPlate =
+    ctx.gameover || tone === 'done'
+      ? null
+      : turnPlateFromMatchStatus(
+          { text: status, tone },
+          ctx.currentPlayer === '0' ? 'White' : 'Black',
+          {
+            hint: yourTurn
+              ? selected === null
+                ? 'tap a piece'
+                : 'tap a square to move'
+              : undefined,
+          },
+        );
 
   const handleSquareClick = (index: number, piece: Piece | null, isTarget: boolean) => {
     if (!yourTurn) return;
@@ -170,49 +189,79 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
     setSelected(null);
   };
 
+  const board = (
+    <div className="chess-board" role="grid" aria-label="Chess board" data-testid="chess-board">
+      {Array.from({ length: 64 }, (_, i) => {
+        const { row, col } = rc(i);
+        const light = (row + col) % 2 === 0;
+        const piece = G.board[i];
+        const isTarget = targets.includes(i);
+        const isSel = selected === i;
+        const isLanding = landIndex === i;
+        return (
+          <button
+            key={i}
+            type="button"
+            data-testid={`chess-cell-${i}`}
+            aria-label={squareAriaLabel(row, col, piece, isSel, isTarget)}
+            className={[
+              'chess-sq',
+              light ? 'light' : 'dark',
+              isSel ? 'selected' : '',
+              isTarget ? 'target' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            disabled={!yourTurn}
+            onClick={() => handleSquareClick(i, piece, isTarget)}
+          >
+            {piece ? (
+              <PieceChrome
+                piece={piece}
+                liftPulse={selectPulse}
+                liftActive={isSel && selectActive}
+                snapPulse={landPulse}
+                snapActive={isLanding && landActive}
+              />
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
-      board={
-        <div className="chess-board" role="grid" aria-label="Chess board" data-testid="chess-board">
-          {Array.from({ length: 64 }, (_, i) => {
-            const { row, col } = rc(i);
-            const light = (row + col) % 2 === 0;
-            const piece = G.board[i];
-            const isTarget = targets.includes(i);
-            const isSel = selected === i;
-            const isLanding = landIndex === i;
-            return (
-              <button
-                key={i}
-                type="button"
-                data-testid={`chess-cell-${i}`}
-                aria-label={squareAriaLabel(row, col, piece, isSel, isTarget)}
-                className={[
-                  'chess-sq',
-                  light ? 'light' : 'dark',
-                  isSel ? 'selected' : '',
-                  isTarget ? 'target' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                disabled={!yourTurn}
-                onClick={() => handleSquareClick(i, piece, isTarget)}
-              >
-                {piece ? (
-                  <PieceChrome
-                    piece={piece}
-                    liftPulse={selectPulse}
-                    liftActive={isSel && selectActive}
-                    snapPulse={landPulse}
-                    snapActive={isLanding && landActive}
-                  />
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      }
-    />
+    <>
+      {ctx.gameover ? (
+        <p className="sr-only" role="status" data-testid="match-status">
+          {status}
+        </p>
+      ) : null}
+      <GameShell
+        rail={{
+          gameTitle: 'Chess',
+          turnPlate,
+          actions: shellSheetActions(sheet, {
+            onRules: () => setSheet((s) => (s === 'rules' ? null : 'rules')),
+            onScores: () => setSheet((s) => (s === 'scores' ? null : 'scores')),
+            onMenu: () => setSheet((s) => (s === 'menu' ? null : 'menu')),
+            undoDisabled: true,
+          }),
+        }}
+        stage={{ felt: 'green' }}
+        board={board}
+        rulesSheet={
+          sheet === 'rules' ? (
+            <RulesPanel
+              model={{
+                title: 'Chess',
+                testId: 'chess-rules',
+                body: <p>Checkmate the opponent king to win.</p>,
+              }}
+            />
+          ) : null
+        }
+      />
+    </>
   );
 }
