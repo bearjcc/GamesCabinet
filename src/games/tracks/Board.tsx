@@ -4,6 +4,7 @@ import { MatchScoreboard } from '../../components/MatchScoreboard';
 import { PlayTable } from '../../components/PlayTable';
 import { StatusBar } from '../../components/StatusBar';
 import { useHotseatClaimSeat } from '../../lib/hotseat';
+import { playerDisplayName } from '../../lib/matchPlayers';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
 import { type Cell, cellAt, HEIGHT, placeError, WIDTH } from './grid';
 import { objectiveDef } from './objectives';
@@ -13,8 +14,7 @@ import { allowedRotations, overlayBaseKinds } from './tiles';
 import { preloadTracksTiles } from './tracksPreload';
 
 function seatLabel(matchData: BoardProps['matchData'], i: number): string {
-  const name = matchData?.[i]?.name;
-  return name?.trim() || `P${i + 1}`;
+  return playerDisplayName(String(i), { matchData });
 }
 
 /** Plain-language reasons for an illegal drop (placeError keys). */

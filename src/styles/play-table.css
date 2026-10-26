@@ -58,9 +58,12 @@
 .play-table__board:has(.dom-scroll),
 .play-table__board:has(.yatzy-card-wrap),
 .play-table__board:has(.ce-table),
-.play-table__board:has(.lw-play) {
+.play-table__board:has(.lw-play),
+.play-table__board:has(.klondike-board) {
   place-items: stretch;
-  align-content: stretch;
+  align-content: start;
+  overflow: visible;
+  min-height: max(18rem, min-content);
 }
 
 .play-table__pew {

@@ -1,12 +1,13 @@
 import type { FilteredMetadata } from 'boardgame.io';
+import { defaultSeatDisplayName } from './seatNames';
 
 export type PlayerNameOptions = {
   matchData?: FilteredMetadata;
   /** Game-specific seat labels (colour, symbol, hero name). */
-  nameForPlayer?: (playerID: string) => string;
+  nameForPlayer?: (playerID: string) => string | undefined;
 };
 
-/** Display name for a seat: lobby name, custom label, or Player N. */
+/** Display name for a seat: lobby name, custom label, or a named fallback. */
 export function playerDisplayName(
   playerID: string,
   { matchData, nameForPlayer }: PlayerNameOptions = {},
@@ -18,10 +19,10 @@ export function playerDisplayName(
   if (Number.isFinite(index)) {
     const lobby = matchData?.[index]?.name?.trim();
     if (lobby) return lobby;
-    return `Player ${index + 1}`;
+    return defaultSeatDisplayName(playerID);
   }
 
-  return `Player ${playerID}`;
+  return defaultSeatDisplayName(playerID);
 }
 
 /** Turn line for the active seat — always names who is up. */

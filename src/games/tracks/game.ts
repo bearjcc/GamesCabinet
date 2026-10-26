@@ -77,6 +77,19 @@ function freshPlayer(): TracksPlayer {
   return { board: emptyBoard(), hand: [], objectives: [], draft: [] };
 }
 
+/** Two different objectives for the draft step (deck may hold duplicates). */
+export function dealDistinctDraftPair(deck: ObjectiveId[]): ObjectiveId[] {
+  if (deck.length === 0) return [];
+  const first = deck.shift()!;
+  if (deck.length === 0) return [first];
+  const secondIndex = deck.findIndex((id) => id !== first);
+  if (secondIndex < 0) {
+    return [first, deck.shift()!];
+  }
+  const second = deck.splice(secondIndex, 1)[0]!;
+  return [first, second];
+}
+
 /** Round setup: fresh shuffled decks, new boards, deal hands and the draft. */
 export function dealRound(
   G: TracksState,
@@ -104,7 +117,7 @@ export function dealRound(
   }
   const objectiveDeck = shuffle(available);
   for (const p of G.players) {
-    p.draft = objectiveDeck.splice(0, 2);
+    p.draft = dealDistinctDraftPair(objectiveDeck);
   }
 
   G.publicObjectives = publicObjectivesForPlayers(numPlayers);

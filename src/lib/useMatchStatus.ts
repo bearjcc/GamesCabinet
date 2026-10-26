@@ -1,4 +1,5 @@
 import type { FilteredMetadata } from 'boardgame.io';
+import { useSeatNameOverrides } from '../components/SeatNameOverrides';
 import { useHotseat } from './hotseat';
 import {
   type DeriveMatchStatusOptions,
@@ -35,5 +36,15 @@ export function useMatchStatus(
   matchData?: FilteredMetadata,
 ): MatchStatus {
   const hotseat = useHotseat();
-  return deriveMatchStatus(ctx, playerID, withHotseatStatusOptions(hotseat, options, matchData));
+  const seatNameOverrides = useSeatNameOverrides();
+  const merged: DeriveMatchStatusOptions = {
+    ...options,
+    matchData: options?.matchData ?? matchData,
+    nameForPlayer: (id) => {
+      const custom = options?.nameForPlayer?.(id)?.trim();
+      if (custom) return custom;
+      return seatNameOverrides?.(id)?.trim();
+    },
+  };
+  return deriveMatchStatus(ctx, playerID, withHotseatStatusOptions(hotseat, merged, matchData));
 }

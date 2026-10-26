@@ -1,6 +1,7 @@
 import { Client } from 'boardgame.io/client';
 import { describe, expect, it } from 'vitest';
 import {
+  dealDistinctDraftPair,
   dealRound,
   HAND_SIZE,
   scoreRound,
@@ -73,7 +74,44 @@ function throughDraft(client: Client2, numPlayers: number) {
   }
 }
 
+describe('dealDistinctDraftPair', () => {
+  it('offers two different objectives when the deck has a choice', () => {
+    const deck: ObjectiveId[] = ['mayor', 'mayor', 'subway'];
+    const draft = dealDistinctDraftPair(deck);
+    expect(draft).toHaveLength(2);
+    expect(draft[0]).not.toBe(draft[1]);
+    expect(deck).toHaveLength(1);
+  });
+
+  it('returns a single card when the deck runs out', () => {
+    const deck: ObjectiveId[] = ['mayor'];
+    expect(dealDistinctDraftPair(deck)).toEqual(['mayor']);
+    expect(deck).toHaveLength(0);
+  });
+
+  it('returns an empty draft from an empty deck', () => {
+    const deck: ObjectiveId[] = [];
+    expect(dealDistinctDraftPair(deck)).toEqual([]);
+  });
+
+  it('still deals when only duplicate copies remain', () => {
+    const deck: ObjectiveId[] = ['mayor', 'mayor'];
+    const draft = dealDistinctDraftPair(deck);
+    expect(draft).toEqual(['mayor', 'mayor']);
+    expect(deck).toHaveLength(0);
+  });
+});
+
 describe('draft phase', () => {
+  it('never deals duplicate objectives in one draft hand', () => {
+    const client = Client({ game: { ...Tracks, seed: 'draft-dup' }, numPlayers: 2 });
+    client.start();
+    const g = G(client as Client2);
+    for (const p of g.players) {
+      expect(p.draft[0]).not.toBe(p.draft[1]);
+    }
+  });
+
   it('deals a shuffled combined deck, four-card hands, and a face-up discard', () => {
     const client = Client({ game: { ...Tracks, seed: 'deal' }, numPlayers: 2 });
     client.start();
