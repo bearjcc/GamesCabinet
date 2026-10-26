@@ -9,6 +9,11 @@
   gap: 0;
 }
 
+.match-chrome > .game-shell {
+  flex: 1;
+  min-height: 0;
+}
+
 .game-shell-rail {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -196,6 +201,38 @@
   padding: 0.5rem 0.65rem;
   background: var(--game-shell-cream);
   border-top: 1px solid #d6ccb2;
+}
+
+.game-shell--tracks {
+  flex: 1;
+  min-height: 0;
+}
+
+.game-shell--tracks .game-shell-tracks-field {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-shell--tracks .game-shell-stage {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  background: transparent;
+}
+
+.game-shell--tracks .game-shell-stage__board {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 @media (max-width: 40rem) {

@@ -90,10 +90,7 @@ export function PlayLocal() {
   }
 
   return (
-    <Shell
-      title={hotseat ? `${meta.name} (pass and play)` : meta.name}
-      backTo={isSoloOnly(meta) ? '/' : `/game/${meta.id}`}
-    >
+    <Shell backTo={isSoloOnly(meta) ? '/' : `/game/${meta.id}`}>
       <MatchLifecycleProvider
         value={{
           resetOnPlayAgain: true,

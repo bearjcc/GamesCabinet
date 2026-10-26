@@ -29,11 +29,12 @@ test.describe('GamesCabinet smokes', () => {
     await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(before);
     await expect(page.getByTestId('g2048-score')).toBeVisible();
 
-    await page.getByTestId('g2048-help-toggle').click();
-    await expect(page.getByTestId('g2048-help')).toBeVisible();
-    await expect(page.getByRole('status')).toBeVisible();
+    await page.getByTestId('game-shell-action-rules').click();
+    const rulesSheet = page.getByTestId('game-shell-rules-sheet');
+    await expect(rulesSheet).toBeVisible();
+    await expect(rulesSheet.getByTestId('g2048-help')).toBeVisible();
 
-    await page.getByTestId('g2048-scores-link').click();
+    await page.getByTestId('game-shell-action-scores').click();
     await expect(page.getByTestId('g2048-scores')).toBeVisible();
   });
 

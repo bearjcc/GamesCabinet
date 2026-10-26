@@ -26,10 +26,10 @@ test.describe('first-minute fixes', () => {
     await page.getByTestId('home-game-yatzy').click();
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
-    const status = page.locator('.status').first();
-    await expect(status).toBeVisible();
-    await expect(status).not.toContainText(/Player 1/);
-    await expect(status).toHaveText(/'s turn/);
+    const plate = page.getByTestId('game-shell-turn-plate');
+    await expect(plate).toBeVisible();
+    await expect(plate).not.toContainText(/Player 1/);
+    await expect(plate).toContainText(/'s turn/);
   });
 
   test('tracks draft shows distinct objective choices', async ({ page }) => {

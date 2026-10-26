@@ -110,25 +110,33 @@ export function useTracksLayout(
   useLayoutEffect(() => {
     if (!enabled) return;
 
+    let debounce: ReturnType<typeof setTimeout> | undefined;
     const run = () => {
-      setMetrics(measureTracksLayout(refs.fieldRef.current, refs.pewRef.current));
+      const next = measureTracksLayout(refs.fieldRef.current, refs.pewRef.current);
+      setMetrics((prev) => (prev.cellPx === next.cellPx ? prev : next));
+    };
+    const schedule = () => {
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(run, 48);
     };
 
     run();
     const raf = requestAnimationFrame(() => {
       requestAnimationFrame(() => run());
     });
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => run()) : undefined;
+    const ro =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => schedule()) : undefined;
     if (ro) {
       if (refs.infoRef.current) ro.observe(refs.infoRef.current);
       if (refs.fieldRef.current) ro.observe(refs.fieldRef.current);
       if (refs.pewRef.current) ro.observe(refs.pewRef.current);
     }
-    window.addEventListener('resize', run);
+    window.addEventListener('resize', schedule);
     return () => {
       cancelAnimationFrame(raf);
+      if (debounce) clearTimeout(debounce);
       ro?.disconnect();
-      window.removeEventListener('resize', run);
+      window.removeEventListener('resize', schedule);
     };
   }, [enabled, refs.infoRef, refs.fieldRef, refs.pewRef]);
 

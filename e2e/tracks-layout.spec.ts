@@ -118,7 +118,7 @@ for (const viewport of VIEWPORTS) {
 
       const cellBox = await page.getByTestId('tracks-cell-1-1').boundingBox();
       expect(cellBox).not.toBeNull();
-      const cellPx = await page.getByTestId('play-table').getAttribute('data-tracks-cell-px');
+      const cellPx = await page.getByTestId('game-shell').getAttribute('data-tracks-cell-px');
       if ('minCell' in viewport && viewport.minCell) {
         expect(Number(cellPx)).toBeGreaterThanOrEqual(viewport.minCell);
         expect(cellBox!.width).toBeGreaterThanOrEqual(viewport.minCell);

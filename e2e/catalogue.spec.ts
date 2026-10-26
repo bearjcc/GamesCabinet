@@ -150,7 +150,7 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('tracks-board')).toBeVisible();
     await expect(page.getByTestId('tracks-draw-deck')).toBeVisible();
     await page.getByTestId('tracks-draw-deck').click();
-    await expect(page.getByTestId('tracks-status')).toContainText(/play a card/i);
+    await expect(page.getByTestId('game-shell-turn-plate')).toContainText(/play a card/i);
   });
 
   test('TRACKS solo variant skips the hand-off and forbids discard draws', async ({ page }) => {
@@ -167,6 +167,7 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('tracks-hand').locator('button').first().click();
     await page.getByTestId('tracks-draw-discard').click();
     await expect(page.getByTestId('tracks-solo-discards')).toContainText('1/5');
+    await page.getByTestId('game-shell-action-rules').click();
     await expect(page.getByTestId('tracks-scoring-rules')).toBeVisible();
   });
 

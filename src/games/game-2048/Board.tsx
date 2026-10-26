@@ -1,11 +1,14 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActionSurface } from '../../components/ActionSurface';
+import { AnimatedCounter } from '../../components/cinematic';
+import { Scoreboard } from '../../components/game-shell';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
+import { isActionInteractive } from '../../lib/actions';
 import type { SubmitScoreInput } from '../../lib/scores';
 import { getSoloBestScore, updateSoloBestScore } from '../../lib/storage';
 import { get2048Actions } from './actions';
 import type { Game2048State, SwipeDir } from './game';
-import { Game2048Toolbar } from './Toolbar';
 
 const KEY_DIRS: Record<string, SwipeDir> = {
   ArrowUp: 'up',
@@ -51,6 +54,7 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
 
   const playable = Boolean(isActive && !ctx.gameover && !G.winPaused);
   const scoreValue = ctx.gameover ? (ctx.gameover as { score: number }).score : G.score;
+  const hint = helpText(G, ctx.gameover);
 
   useEffect(() => {
     const next = new Set<number>();
@@ -138,6 +142,16 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
     }
   };
 
+  const undoAction = toolbarActions.find((action) => action.id === 'undo');
+  const pewActions = toolbarActions
+    .filter((action) => action.id !== 'undo')
+    .map((action) => ({
+      ...action,
+      onAction: () => runAction(action.id),
+    }));
+
+  const statusTone = ctx.gameover ? 'done' : 'you';
+
   return (
     <SoloLeaderboardShell
       gameId="2048"
@@ -147,17 +161,39 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
       onTabChange={setTab}
       testIdPrefix="g2048"
       showTabs={false}
+      gameover={ctx.gameover}
+      status={{ text: hint, tone: statusTone }}
+      turnName="You"
+      rules={{
+        testId: 'g2048-rules',
+        body: <p data-testid="g2048-help">{hint}</p>,
+      }}
+      undo={{
+        disabled: !undoAction || !isActionInteractive(undoAction),
+        onUndo: () => runAction('undo'),
+      }}
       info={
-        <Game2048Toolbar
-          score={scoreValue}
-          bestScore={bestScore}
-          helpText={helpText(G, ctx.gameover)}
-          actions={toolbarActions}
-          onAction={runAction}
-          onShowScores={() => setTab((current) => (current === 'scores' ? 'play' : 'scores'))}
-          scoresActive={tab === 'scores'}
+        <Scoreboard
+          model={{
+            testId: 'g2048-score',
+            rows: [
+              {
+                label: 'Score',
+                value: <AnimatedCounter value={scoreValue} className="g2048-score-value" />,
+              },
+              {
+                label: 'Best',
+                value: (
+                  <span className="g2048-score-value" data-testid="g2048-best">
+                    {bestScore}
+                  </span>
+                ),
+              },
+            ],
+          }}
         />
       }
+      actions={<ActionSurface label="2048 actions" actions={pewActions} />}
       board={
         <div ref={playAreaRef} className="g2048-play-area" data-testid="g2048-play-area">
           <div

@@ -70,8 +70,17 @@ a:focus-visible {
   gap: var(--space-4);
 }
 
+.main > .match-chrome {
+  flex: 1;
+  min-height: 0;
+}
+
 .shell--catalogue .main {
   gap: var(--space-2);
+}
+
+.main:has(.match-chrome) {
+  gap: 0;
 }
 
 /* boardgame.io Client wrapper — pass height through to PlayTable */
@@ -90,6 +99,18 @@ a:focus-visible {
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--line);
+}
+
+.shell:has(.game-shell--tracks) {
+  max-width: none;
+  margin-inline: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+.shell:has(.game-shell--tracks) .topbar {
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-1);
 }
 
 .topbar-start {

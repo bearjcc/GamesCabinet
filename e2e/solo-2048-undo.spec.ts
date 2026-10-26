@@ -6,7 +6,7 @@ test.describe('2048 undo', () => {
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('animated-counter')).toBeVisible();
 
-    const undo = page.getByTestId('g2048-action-undo');
+    const undo = page.getByTestId('game-shell-action-undo');
     await expect(undo).toBeDisabled();
 
     const before = await page.getByTestId('g2048-board').innerText();
@@ -25,7 +25,7 @@ test.describe('2048 undo', () => {
     await page.goto('/play/2048');
     await expect(page.getByTestId('g2048-board')).toBeVisible();
 
-    const undo = page.getByTestId('g2048-action-undo');
+    const undo = page.getByTestId('game-shell-action-undo');
     const redo = page.getByTestId('g2048-action-redo');
     await expect(redo).toBeDisabled();
 
@@ -53,7 +53,7 @@ test.describe('2048 polish', () => {
     const afterMove = await page.getByTestId('g2048-board').innerText();
     await page.getByTestId('g2048-new-game').click();
     await expect.poll(async () => page.getByTestId('g2048-board').innerText()).not.toBe(afterMove);
-    await expect(page.getByTestId('g2048-action-undo')).toBeDisabled();
+    await expect(page.getByTestId('game-shell-action-undo')).toBeDisabled();
   });
 
   test('WASD moves tiles', async ({ page }) => {

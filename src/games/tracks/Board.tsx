@@ -1,6 +1,6 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type ReactNode, useEffect, useState } from 'react';
-import { MatchGameShell, Scoreboard } from '../../components/game-shell';
+import { MatchGameShell, Scoreboard, turnPlateFromMatchStatus } from '../../components/game-shell';
 import { useHotseatClaimSeat } from '../../lib/hotseat';
 import { playerDisplayName } from '../../lib/matchPlayers';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
@@ -335,7 +335,7 @@ export function TracksBoard({
   const discardTop = G.discard[G.discard.length - 1];
   const pew =
     ctx.phase === 'play' ? (
-      <div className="tracks-pew">
+      <div className="tracks-pew play-table__pew--tracks" data-testid="tracks-pew">
         <div className="tracks-pew__tray">
           {handRail}
           <div className="tracks-piles">
@@ -426,12 +426,26 @@ export function TracksBoard({
     </ul>
   );
 
+  const turnPlate =
+    ctx.gameover || tone === 'done'
+      ? null
+      : turnPlateFromMatchStatus({ text: status, tone }, who, {
+          hint:
+            ctx.phase === 'play' && myTurn
+              ? G.drawnId === null
+                ? 'draw from the deck'
+                : 'play a card'
+              : ctx.phase === 'draft' && myTurn
+                ? 'keep one objective'
+                : undefined,
+        });
+
   return (
     <MatchGameShell
       gameTitle="TRACKS"
       ctx={ctx}
       status={{ text: status, tone }}
-      turnName={who}
+      turnPlate={turnPlate}
       stage={{ felt: ctx.phase === 'play' ? 'tracks' : false }}
       railMeta={railMeta}
       rules={{ testId: 'tracks-scoring-rules', title: 'Scoring', body: scoringRules }}

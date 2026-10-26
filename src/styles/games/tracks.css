@@ -7,7 +7,8 @@
   --tracks-hand-paper: color-mix(in srgb, var(--surface-2) 92%, #f5f0e4);
 }
 
-.match-chrome__stage:has(.play-table--tracks-grass) {
+.match-chrome__stage:has(.play-table--tracks-grass),
+.match-chrome__stage:has(.game-shell--tracks) {
   flex: 1;
   min-height: 0;
   display: flex;
