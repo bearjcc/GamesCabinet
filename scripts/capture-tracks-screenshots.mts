@@ -7,7 +7,10 @@ import { chromium, type Page } from 'playwright';
 
 const OUT = '/opt/cursor/artifacts/tracks-art';
 const PORT = Number(process.env.CAPTURE_PORT) || 8765;
+<<<<<<< Updated upstream
 const LABEL = process.env.CAPTURE_LABEL || 'after';
+=======
+>>>>>>> Stashed changes
 const base = `http://127.0.0.1:${PORT}`;
 
 const KINDS = [
@@ -42,6 +45,7 @@ async function openTracksSolo(page: Page) {
   await page.getByTestId('play-start').click();
   await page.getByTestId('tracks-draft').locator('button').first().click();
   await page.getByTestId('tracks-play-surface').waitFor();
+<<<<<<< Updated upstream
 }
 
 async function screenshotCardSheet(page: Page, file: string) {
@@ -89,6 +93,58 @@ async function main() {
   mkdirSync(OUT, { recursive: true });
   const root = process.env.CAPTURE_ROOT || path.resolve(import.meta.dirname, '..');
   const server = await startServer(root);
+=======
+}
+
+async function screenshotBoard(page: Page, file: string) {
+  const board = page.getByTestId('tracks-play-surface');
+  await board.screenshot({ path: file });
+}
+
+async function screenshotCardSheet(page: Page, file: string) {
+  await page.evaluate((kinds) => {
+    const host = document.querySelector('[data-testid="tracks-play-surface"]');
+    if (!host) return;
+    const grid = document.createElement('div');
+    grid.setAttribute('data-testid', 'tracks-art-sheet');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(3, minmax(5rem, 1fr))';
+    grid.style.gap = '12px';
+    grid.style.padding = '12px';
+    grid.style.maxWidth = '28rem';
+    for (const kind of kinds) {
+      const cell = document.createElement('div');
+      cell.style.textAlign = 'center';
+      cell.style.fontSize = '11px';
+      const face = document.createElement('div');
+      face.style.aspectRatio = '1';
+      face.style.borderRadius = '8px';
+      face.style.overflow = 'hidden';
+      const img = document.createElement('img');
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.src =
+        kind === 'straight' ||
+        kind === 'curve' ||
+        kind === 'tunnel-arch' ||
+        kind === 'tunnel-mid'
+          ? `/assets/tracks/512/${kind}.webp`
+          : '/assets/tracks/512/grass.webp';
+      face.appendChild(img);
+      const cap = document.createElement('div');
+      cap.textContent = kind;
+      cell.append(face, cap);
+      grid.appendChild(cell);
+    }
+    host.prepend(grid);
+  }, KINDS);
+  await page.getByTestId('tracks-art-sheet').screenshot({ path: file });
+}
+
+async function captureSet(label: string, repoRoot: string) {
+  const server = await startServer(repoRoot);
+>>>>>>> Stashed changes
   const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
     channel: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? undefined : 'chrome',
@@ -100,20 +156,39 @@ async function main() {
     ] as const) {
       const page = await browser.newPage({ viewport });
       await openTracksSolo(page);
+<<<<<<< Updated upstream
       await page
         .getByTestId('tracks-play-surface')
         .screenshot({ path: path.join(OUT, `${LABEL}-${name}.png`) });
+=======
+      await screenshotBoard(page, path.join(OUT, `${label}-${name}.png`));
+>>>>>>> Stashed changes
       await page.close();
     }
     const sheetPage = await browser.newPage({ viewport: { width: 900, height: 1100 } });
     await openTracksSolo(sheetPage);
+<<<<<<< Updated upstream
     await screenshotCardSheet(sheetPage, path.join(OUT, `${LABEL}-card-sheet.png`));
+=======
+    await screenshotCardSheet(sheetPage, path.join(OUT, `${label}-card-sheet.png`));
+>>>>>>> Stashed changes
     await sheetPage.close();
   } finally {
     await browser.close();
     server.kill();
   }
+<<<<<<< Updated upstream
   console.log(`Wrote ${LABEL} screenshots to ${OUT}`);
+=======
+}
+
+async function main() {
+  mkdirSync(OUT, { recursive: true });
+  const root = path.resolve(import.meta.dirname, '..');
+  const label = process.env.CAPTURE_LABEL || 'after';
+  await captureSet(label, root);
+  console.log(`Wrote ${label} screenshots to ${OUT}`);
+>>>>>>> Stashed changes
 }
 
 main().catch((e) => {
