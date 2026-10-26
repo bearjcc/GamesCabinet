@@ -11,7 +11,7 @@ import { type GameId, gamesById } from '../games/registry';
 import { createSilentBotBoard } from '../lib/botSeat';
 import { getGameMeta, isAccessGated } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
-import { leaveRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
+import { leaveRoom, lookupRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
 import { makeClient } from '../lib/makeClient';
 import { parseSeatColoursQuery } from '../lib/seatColours';
 import {
@@ -21,6 +21,7 @@ import {
   loadSeat,
   type SeatSession,
 } from '../lib/storage';
+import { EmptyShelfPage } from './EmptyShelfPage';
 
 const server = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
@@ -44,8 +45,20 @@ export function PlayOnline() {
   const Board = boards[gameId as GameId];
   const matchCode = code.toUpperCase();
   const [seat, setSeat] = useState<SeatSession | null>(() => loadSeat(gameId, matchCode));
+  const [roomValid, setRoomValid] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    void lookupRoom(matchCode).then((info) => {
+      if (cancelled) return;
+      setRoomValid(Boolean(info && info.gameName === gameId));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId, matchCode]);
   const tableSeats = seat ? deviceSeats(seat) : [];
   const humanSeats = tableSeats.filter((entry) => entry.kind !== 'bot');
   const botSeats = tableSeats.filter((entry) => entry.kind === 'bot');
@@ -136,17 +149,35 @@ export function PlayOnline() {
 
   if (!meta || !game || !MatchClient) {
     return (
-      <Shell title="Unknown game">
-        <p>That game is not in the cabinet.</p>
-        <Link className="btn" to="/">
-          Back
-        </Link>
-      </Shell>
+      <EmptyShelfPage
+        title="Unknown game"
+        message="That game is not in the cabinet."
+        testId="unknown-game"
+        showJoin={false}
+      />
     );
   }
 
   if (isAccessGated(meta) && !getUnlockedGames().includes(meta.id)) {
     return <Navigate to={`/game/${meta.id}`} replace />;
+  }
+
+  if (roomValid === false) {
+    return (
+      <EmptyShelfPage
+        title="Empty table"
+        message="No room matches that code. Check the code with your friend, or start a new table from home."
+        testId="bad-room"
+      />
+    );
+  }
+
+  if (!seat && roomValid === null) {
+    return (
+      <Shell title={meta.name} backTo="/">
+        <p role="status">Checking room…</p>
+      </Shell>
+    );
   }
 
   if (!seat) {

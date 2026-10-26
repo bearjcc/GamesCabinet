@@ -1,6 +1,7 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { GameLaunch } from './pages/GameLaunch';
 import { Home } from './pages/Home';
+import { NotFound } from './pages/NotFound';
 import { PlayBot } from './pages/PlayBot';
 import { PlayLocal } from './pages/PlayLocal';
 import { PlayOnline } from './pages/PlayOnline';
@@ -16,7 +17,7 @@ export default function App() {
         <Route path="/play/:gameId" element={<PlayLocal />} />
         <Route path="/vs-bot/:gameId" element={<PlayBot />} />
         <Route path="/g/:gameId/:code" element={<PlayOnline />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

@@ -22,9 +22,7 @@ export async function openOnlinePair(browser: Browser): Promise<OnlinePair> {
 }
 
 export async function openJoinPanel(page: Page): Promise<void> {
-  await page.getByTestId('join-details').evaluate((el) => {
-    (el as HTMLDetailsElement).open = true;
-  });
+  await expect(page.getByTestId('header-join')).toBeVisible();
 }
 
 export async function readRoomCode(page: Page): Promise<string> {

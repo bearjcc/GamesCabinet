@@ -486,6 +486,40 @@
   min-width: 7rem;
 }
 
+.topbar-center--join {
+  justify-self: stretch;
+}
+
+.header-join {
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+.header-join .join-panel--compact {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.empty-shelf {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.empty-shelf__message {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.empty-shelf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .join-panel {
   padding-top: var(--space-2);
   border-top: 1px solid var(--line);
@@ -560,6 +594,21 @@
 
 .join-name input {
   width: 100%;
+}
+
+.join-panel--compact .join-row {
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+}
+
+.join-panel--compact .join-name {
+  flex: 1 1 6rem;
+  min-width: 5rem;
+}
+
+.join-panel--compact .join-row input[data-testid="join-code"] {
+  flex: 0 1 6.5rem;
+  min-width: 5.5rem;
 }
 
 .error {

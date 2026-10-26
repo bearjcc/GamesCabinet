@@ -1,18 +1,17 @@
 import type { CSSProperties } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { GameThumbnail } from '../components/GameThumbnail';
-import { JoinRoomPanel } from '../components/JoinRoomPanel';
+import { HeaderJoin } from '../components/HeaderJoin';
 import { Shell } from '../components/Shell';
 import { gameAccentStyle } from '../lib/gameIdentity';
 import { catalogueGroups, isSoloOnly, soloPlayPath, visibleGames } from '../lib/games';
 import { getUnlockedGames } from '../lib/storage';
 
 export function Home() {
-  const navigate = useNavigate();
   const groups = catalogueGroups(visibleGames(getUnlockedGames()));
 
   return (
-    <Shell layout="catalogue">
+    <Shell layout="catalogue" headerJoin={<HeaderJoin />}>
       {groups.map((group) => (
         <section
           key={group.id}
@@ -40,16 +39,7 @@ export function Home() {
         </section>
       ))}
 
-      <details className="join-details" data-testid="join-details">
-        <summary className="join-panel-summary">Join with a code</summary>
-        <JoinRoomPanel
-          askName
-          title=""
-          onJoined={(room) => {
-            navigate(`/g/${room.gameName}/${room.matchID}`);
-          }}
-        />
-      </details>
+      <span id="join" className="sr-only" />
     </Shell>
   );
 }
