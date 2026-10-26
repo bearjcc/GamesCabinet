@@ -54,7 +54,10 @@ describe('measureTracksLayout', () => {
       getBoundingClientRect: () => ({ top: 200, bottom: 700, left: 0, right: 1180 }),
       querySelector: () => null,
     } as unknown as HTMLElement;
-    const pew = { offsetHeight: 190 } as unknown as HTMLElement;
+    const pew = {
+      offsetHeight: 190,
+      getBoundingClientRect: () => ({ top: 620 }),
+    } as unknown as HTMLElement;
 
     const { cellPx } = measureTracksLayout(field, pew);
     expect(cellPx).toBeGreaterThanOrEqual(110);
@@ -116,26 +119,53 @@ describe('measureTracksLayout', () => {
       querySelector: () => null,
       closest: (sel: string) => (sel === '.play-table' ? playTable : null),
     } as unknown as HTMLElement;
-    const pew = { offsetHeight: 120 } as unknown as HTMLElement;
+    const pew = {
+      offsetHeight: 120,
+      getBoundingClientRect: () => ({ top: 780 }),
+    } as unknown as HTMLElement;
     const { cellPx } = measureTracksLayout(field, pew);
     expect(cellPx).toBe(100);
   });
 
-  it('does not bump cell size when measured pew matches the formula', () => {
+  it('uses landscape play padding fallback when the play surface is missing', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
-    const playTable = document.createElement('div');
-    playTable.className = 'play-table';
-    playTable.setAttribute('data-tracks-cell-px', '109');
+    const { cellPx } = measureTracksLayout(
+      {
+        getBoundingClientRect: () => ({ top: 200 }),
+        querySelector: () => null,
+      } as unknown as HTMLElement,
+      null,
+    );
+    expect(cellPx).toBeGreaterThanOrEqual(48);
+  });
+
+  it('uses portrait play padding fallback when the play surface is missing', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 820 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1180 });
+    const { cellPx } = measureTracksLayout(
+      {
+        getBoundingClientRect: () => ({ top: 300 }),
+        querySelector: () => null,
+      } as unknown as HTMLElement,
+      null,
+    );
+    expect(cellPx).toBeGreaterThanOrEqual(48);
+  });
+
+  it('limits cells when the pew top leaves a short board slot', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
     const field = {
-      getBoundingClientRect: () => ({ top: 285 }),
+      getBoundingClientRect: () => ({ top: 200 }),
       querySelector: () => null,
-      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
     } as unknown as HTMLElement;
-    const formulaPew = pewHeightForCell(109, true);
-    const pew = { offsetHeight: formulaPew } as unknown as HTMLElement;
+    const pew = {
+      offsetHeight: 220,
+      getBoundingClientRect: () => ({ top: 420 }),
+    } as unknown as HTMLElement;
     const { cellPx } = measureTracksLayout(field, pew);
-    expect(cellPx).toBe(109);
+    expect(cellPx).toBeLessThan(80);
   });
 
   it('falls back when nodes are missing', () => {
@@ -145,52 +175,30 @@ describe('measureTracksLayout', () => {
     expect(cellPx).toBeGreaterThanOrEqual(48);
   });
 
-  it('ignores slack when the play table cell attribute is stale', () => {
+  it('subtracts chrome above the grid from the height budget', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
-    const playTable = document.createElement('div');
-    playTable.className = 'play-table';
-    playTable.setAttribute('data-tracks-cell-px', '80');
-    const field = {
-      getBoundingClientRect: () => ({ top: 285 }),
-      querySelector: () => null,
-      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
-    } as unknown as HTMLElement;
-    const pew = { offsetHeight: 190 } as unknown as HTMLElement;
-    const { cellPx } = measureTracksLayout(field, pew);
-    expect(cellPx).toBe(109);
-  });
-
-  it('uses measured pew slack to bump cell size when the formula is conservative', () => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
-    const playTable = document.createElement('div');
-    playTable.className = 'play-table';
-    playTable.setAttribute('data-tracks-cell-px', '109');
-    const field = {
-      getBoundingClientRect: () => ({ top: 285 }),
-      querySelector: () => null,
-      closest: (sel: string) => (sel === '.play-table' ? playTable : null),
-    } as unknown as HTMLElement;
-    const pew = { offsetHeight: 190 } as unknown as HTMLElement;
-    const withoutSlack = measureTracksLayout(field, null);
-    expect(withoutSlack.cellPx).toBe(109);
-    const { cellPx } = measureTracksLayout(field, pew);
-    expect(cellPx).toBe(110);
-  });
-
-  it('subtracts board chrome inside the field', () => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
+    const play = document.createElement('div');
+    play.className = 'tracks-play';
+    document.body.appendChild(play);
+    const switchEl = document.createElement('div');
+    switchEl.className = 'tracks-boardswitch';
+    switchEl.style.marginBottom = '10px';
+    document.body.appendChild(switchEl);
+    Object.defineProperty(switchEl, 'offsetHeight', { value: 28 });
     const field = {
       getBoundingClientRect: () => ({ top: 180 }),
       querySelector: (sel: string) => {
-        if (sel.includes('boardswitch')) return { offsetHeight: 28 };
+        if (sel.includes('tracks-play')) return play;
+        if (sel.includes('boardswitch')) return switchEl;
         if (sel.includes('hint')) return { offsetHeight: 14 };
         return null;
       },
     } as unknown as HTMLElement;
-    const pew = { offsetHeight: 200 } as unknown as HTMLElement;
+    const pew = {
+      offsetHeight: 200,
+      getBoundingClientRect: () => ({ top: 650 }),
+    } as unknown as HTMLElement;
     const tight = measureTracksLayout(field, pew);
     const loose = measureTracksLayout(
       {

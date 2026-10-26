@@ -278,56 +278,60 @@ export function TracksBoard({
   } else {
     board = (
       <div className="tracks-play" data-testid="tracks-play-surface">
-        <div className="tracks-boardswitch" role="tablist" aria-label="Boards">
-          {G.players.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              className={i === view ? 'is-active' : ''}
-              data-testid={`tracks-target-${i}`}
-              onClick={() => setViewBoard(i)}
-            >
-              {seatLabel(matchData, i)}
-              {G.connectedOrder.includes(String(i)) ? ' *' : ''}
-            </button>
-          ))}
-        </div>
-        <div className="tracks-board-frame" data-testid="tracks-board-frame">
-          <TracksTerminal side="start" />
-          <TracksTerminal side="end" />
-          <div className="tracks-grid" data-testid="tracks-board">
-            {Array.from({ length: HEIGHT }, (_, row) =>
-              Array.from({ length: WIDTH }, (_, col) => {
-                const cell = cellAt(viewed.board, row, col);
-                const overlay = selectedTile ? overlayBaseKinds(selectedTile.kind) !== null : false;
-                const canPlaceHere =
-                  myTurn &&
-                  selectedTile !== null &&
-                  G.drawnId !== null &&
-                  placeError(viewed.board, selectedTile, row, col, rot, {
-                    foreign: view !== me,
-                  }) === null;
-                return (
-                  <button
-                    key={`${row}-${col}`}
-                    type="button"
-                    className={`tracks-cell${cell ? ' is-filled' : ''}${canPlaceHere ? ' is-legal' : ''}${overlay ? ' is-overlay-target' : ''}`}
-                    data-testid={`tracks-cell-${row}-${col}`}
-                    onClick={() => tryPlace(row, col)}
-                    disabled={!canPlaceHere && !cell}
-                  >
-                    <CellView cell={cell} />
-                  </button>
-                );
-              }),
-            )}
+        <div className="tracks-play__stack">
+          <div className="tracks-boardswitch" role="tablist" aria-label="Boards">
+            {G.players.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                className={i === view ? 'is-active' : ''}
+                data-testid={`tracks-target-${i}`}
+                onClick={() => setViewBoard(i)}
+              >
+                {seatLabel(matchData, i)}
+                {G.connectedOrder.includes(String(i)) ? ' *' : ''}
+              </button>
+            ))}
           </div>
+          <div className="tracks-board-frame" data-testid="tracks-board-frame">
+            <TracksTerminal side="start" />
+            <TracksTerminal side="end" />
+            <div className="tracks-grid" data-testid="tracks-board">
+              {Array.from({ length: HEIGHT }, (_, row) =>
+                Array.from({ length: WIDTH }, (_, col) => {
+                  const cell = cellAt(viewed.board, row, col);
+                  const overlay = selectedTile
+                    ? overlayBaseKinds(selectedTile.kind) !== null
+                    : false;
+                  const canPlaceHere =
+                    myTurn &&
+                    selectedTile !== null &&
+                    G.drawnId !== null &&
+                    placeError(viewed.board, selectedTile, row, col, rot, {
+                      foreign: view !== me,
+                    }) === null;
+                  return (
+                    <button
+                      key={`${row}-${col}`}
+                      type="button"
+                      className={`tracks-cell${cell ? ' is-filled' : ''}${canPlaceHere ? ' is-legal' : ''}${overlay ? ' is-overlay-target' : ''}`}
+                      data-testid={`tracks-cell-${row}-${col}`}
+                      onClick={() => tryPlace(row, col)}
+                      disabled={!canPlaceHere && !cell}
+                    >
+                      <CellView cell={cell} />
+                    </button>
+                  );
+                }),
+              )}
+            </div>
+          </div>
+          {hint ? (
+            <p className="tracks-hint" role="alert" data-testid="tracks-hint">
+              {hint}
+            </p>
+          ) : null}
         </div>
-        {hint ? (
-          <p className="tracks-hint" role="alert" data-testid="tracks-hint">
-            {hint}
-          </p>
-        ) : null}
       </div>
     );
   }

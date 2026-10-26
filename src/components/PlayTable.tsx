@@ -62,7 +62,11 @@ export function PlayTable({
         >
           <div className="play-table__board">{board}</div>
           {showPew ? (
-            <div ref={pewRef} className="play-table__pew play-table__pew--tracks">
+            <div
+              ref={pewRef}
+              className="play-table__pew play-table__pew--tracks"
+              data-testid="tracks-pew"
+            >
               {showPewBody ? <div className="play-table__pew-body">{pew}</div> : null}
               <div
                 className="play-table__actions"

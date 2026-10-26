@@ -1,7 +1,7 @@
 /**
  * TRACKS review screenshots: grass board at desktop + tablet viewports.
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { chromium, type Page } from 'playwright';
 
@@ -89,8 +89,48 @@ async function fillDemoBoard(page: Page) {
   });
 }
 
+async function measureLayout(page: Page, viewportWidth: number) {
+  return page.evaluate((vw) => {
+    const frame = document.querySelector('[data-testid="tracks-board-frame"]');
+    const pew = document.querySelector('[data-testid="tracks-pew"]');
+    const playTable = document.querySelector('[data-testid="play-table"]');
+    const grid = document.querySelector('[data-testid="tracks-board"]');
+    const startBuffer = document.querySelector(
+      '[data-testid="tracks-terminal-start"] .tracks-terminal__buffer',
+    );
+    const endBuffer = document.querySelector(
+      '[data-testid="tracks-terminal-end"] .tracks-terminal__buffer',
+    );
+    const hint = document.querySelector('[data-testid="tracks-hint"]');
+    if (!frame || !pew || !playTable || !grid || !startBuffer || !endBuffer) {
+      throw new Error('TRACKS layout nodes missing');
+    }
+    const cellPx = Number(playTable.getAttribute('data-tracks-cell-px') ?? 0);
+    const frameBox = frame.getBoundingClientRect();
+    const stackBottom = hint
+      ? hint.getBoundingClientRect().bottom
+      : grid.getBoundingClientRect().bottom;
+    const pewBox = pew.getBoundingClientRect();
+    const midY = frameBox.top + 1.5 * cellPx;
+    const startCenterY = startBuffer.getBoundingClientRect().top + startBuffer.getBoundingClientRect().height / 2;
+    const endCenterY = endBuffer.getBoundingClientRect().top + endBuffer.getBoundingClientRect().height / 2;
+    const leftMargin = frameBox.left;
+    const rightMargin = vw - frameBox.right;
+    return {
+      cellPx,
+      frameMarginDelta: Math.abs(leftMargin - rightMargin),
+      boardBottom: stackBottom,
+      pewTop: pewBox.top,
+      boardPewGap: pewBox.top - stackBottom,
+      startRailDelta: Math.abs(startCenterY - midY),
+      endRailDelta: Math.abs(endCenterY - midY),
+    };
+  }, viewportWidth);
+}
+
 async function main() {
   mkdirSync(OUT, { recursive: true });
+  const layoutMetrics: Record<string, unknown> = {};
   const root = path.resolve(import.meta.dirname, '..');
   const server = await startServer(root);
   const browser = await chromium.launch({
@@ -108,6 +148,7 @@ async function main() {
       await openTracksSolo(page);
       await fillDemoBoard(page);
       await page.waitForTimeout(300);
+      layoutMetrics[name] = await measureLayout(page, viewport.width);
       const shot = await page.screenshot({ path: path.join(OUT, `${name}.png`), fullPage: false });
       if (!shot) throw new Error('screenshot failed');
       const meta = await page.viewportSize();
@@ -120,7 +161,9 @@ async function main() {
     await browser.close();
     server.kill();
   }
+  writeFileSync(path.join(OUT, 'layout-metrics.json'), JSON.stringify(layoutMetrics, null, 2));
   console.log('Wrote review artifacts to', OUT);
+  console.log(JSON.stringify(layoutMetrics, null, 2));
 }
 
 main().catch((e) => {

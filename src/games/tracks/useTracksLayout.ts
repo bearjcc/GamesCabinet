@@ -36,35 +36,48 @@ export function tracksCellWithMeasuredPewSlack(
   return lo;
 }
 
+const TRACKS_BOARD_PEW_GAP = 4;
+const TRACKS_LAYOUT_SAFETY = 4;
+
 export function measureTracksLayout(
   fieldEl: HTMLElement | null,
   _pewEl: HTMLElement | null,
 ): TracksLayoutMetrics {
   const vw = window.innerWidth;
   const gutterPx = Math.round(Math.min(42, Math.max(20, (vw * 42) / 820)));
-  const cellW = (vw - 2 * gutterPx) / 8;
+  const cellFromWidth = (vw - 2 * gutterPx) / 8;
 
   const fieldTop = fieldEl?.getBoundingClientRect().top ?? 0;
-  const switchH = fieldEl?.querySelector<HTMLElement>('.tracks-boardswitch')?.offsetHeight ?? 0;
-  const hintH = fieldEl?.querySelector<HTMLElement>('.tracks-hint')?.offsetHeight ?? 0;
   const compact = window.innerHeight <= 840 && window.innerWidth > window.innerHeight;
-  const playPad = compact ? 4 : 8;
+  const switchH = fieldEl?.querySelector<HTMLElement>('.tracks-boardswitch')?.offsetHeight ?? 0;
+  const switchGap = compact ? 2 : 8;
+  const hintH = fieldEl?.querySelector<HTMLElement>('.tracks-hint')?.offsetHeight ?? 0;
+  const playEl = fieldEl?.querySelector<HTMLElement>('.tracks-play');
+  const playPad =
+    playEl instanceof Element && typeof getComputedStyle !== 'undefined'
+      ? Number.parseFloat(getComputedStyle(playEl).paddingTop) || 0
+      : compact
+        ? 4
+        : 8;
+  const chromeAboveGrid = playPad + switchH + switchGap;
 
-  const heightBudget = window.innerHeight - fieldTop - switchH - hintH - playPad;
+  const pewTopDom = _pewEl?.getBoundingClientRect().top ?? 0;
+  const boardSlotHeight =
+    pewTopDom > fieldTop + 40 ? pewTopDom - fieldTop : window.innerHeight - fieldTop;
+  const totalBudget = window.innerHeight - fieldTop;
+  const pewCostFor = (cell: number) => pewHeightForCell(cell, compact);
+
   let lo = 48;
-  let hi = Math.max(48, Math.floor(cellW));
+  let hi = Math.max(48, Math.floor(cellFromWidth));
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
-    if (3 * mid + pewHeightForCell(mid, compact) <= heightBudget) lo = mid;
+    const boardContent = chromeAboveGrid + 3 * mid + hintH;
+    const stack = boardContent + TRACKS_BOARD_PEW_GAP + pewCostFor(mid);
+    const fits =
+      boardContent + TRACKS_LAYOUT_SAFETY <= boardSlotHeight &&
+      stack + TRACKS_LAYOUT_SAFETY <= totalBudget;
+    if (fits) lo = mid;
     else hi = mid - 1;
-  }
-
-  const pewMeasured = _pewEl?.offsetHeight ?? 0;
-  const playTable =
-    fieldEl && typeof fieldEl.closest === 'function' ? fieldEl.closest('.play-table') : null;
-  const currentCell = Number(playTable?.getAttribute('data-tracks-cell-px') ?? 0);
-  if (pewMeasured > 48 && currentCell > 0 && Math.abs(lo - currentCell) <= 2) {
-    lo = tracksCellWithMeasuredPewSlack(lo, cellW, heightBudget, pewMeasured, compact);
   }
 
   const cellPx = lo;
@@ -102,7 +115,9 @@ export function useTracksLayout(
     };
 
     run();
-    const raf = requestAnimationFrame(() => run());
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => run());
+    });
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => run()) : undefined;
     if (ro) {
       if (refs.infoRef.current) ro.observe(refs.infoRef.current);

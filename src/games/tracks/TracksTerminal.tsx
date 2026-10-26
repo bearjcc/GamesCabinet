@@ -8,7 +8,11 @@ export function TracksTerminal({ side }: { side: 'start' | 'end' }) {
       aria-label={label}
       data-testid={`tracks-terminal-${side}`}
     >
-      <div className="tracks-terminal__track" aria-hidden />
+      <div
+        className="tracks-terminal__track"
+        data-testid={`tracks-terminal-${side}-track`}
+        aria-hidden
+      />
       <div className="tracks-terminal__buffer" aria-hidden />
       <div className="tracks-terminal__sign">{label}</div>
     </div>
