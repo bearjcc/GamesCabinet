@@ -11,6 +11,8 @@ type Props = {
   title?: string;
   /** Nickname field when joining from home or a share link. */
   askName?: boolean;
+  /** Header row on the catalogue: code boxes only, no section title. */
+  compact?: boolean;
   onJoined: (room: SeatedRoom) => void;
 };
 
@@ -20,6 +22,7 @@ export function JoinRoomPanel({
   codeEditable = true,
   title = 'Join a game',
   askName = false,
+  compact = false,
   onJoined,
 }: Props) {
   const [name, setName] = useState(getNickname() || 'Player');
@@ -46,8 +49,8 @@ export function JoinRoomPanel({
   }
 
   return (
-    <section className="join-panel">
-      <h2>{title}</h2>
+    <section className={compact ? 'join-panel join-panel--compact' : 'join-panel'}>
+      {compact ? null : title ? <h2>{title}</h2> : null}
       {!codeEditable ? <p className="code-display">{joinCode}</p> : null}
       <div className="join-row">
         {codeEditable ? (

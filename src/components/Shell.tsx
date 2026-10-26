@@ -12,6 +12,7 @@ export function Shell({
   children,
   backTo,
   trailing,
+  headerJoin,
   layout = 'default',
 }: {
   title?: string;
@@ -19,6 +20,8 @@ export function Shell({
   /** Separate back control — the brand mark always navigates home. */
   backTo?: string;
   trailing?: ReactNode;
+  /** Compact join-a-room control in the catalogue header. */
+  headerJoin?: ReactNode;
   layout?: 'default' | 'catalogue';
 }) {
   useEffect(() => {
@@ -45,7 +48,9 @@ export function Shell({
             </Link>
           ) : null}
         </div>
-        {title ? (
+        {layout === 'catalogue' && headerJoin ? (
+          <div className="topbar-center topbar-center--join">{headerJoin}</div>
+        ) : title ? (
           <h1 className="page-title topbar-center">{title}</h1>
         ) : (
           <div className="topbar-center" aria-hidden="true" />

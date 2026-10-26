@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { GameThumbnail } from '../components/GameThumbnail';
 import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
@@ -23,6 +23,7 @@ import {
   ownedDeviceJoins,
   type TableSeat,
 } from '../lib/tableSetup';
+import { EmptyShelfPage } from './EmptyShelfPage';
 
 export function GameLaunch() {
   const { gameId = '' } = useParams();
@@ -140,12 +141,12 @@ export function GameLaunch() {
 
   if (!meta) {
     return (
-      <Shell title="Unknown game">
-        <p>That game is not in the cabinet.</p>
-        <Link className="btn" to="/">
-          Back
-        </Link>
-      </Shell>
+      <EmptyShelfPage
+        title="Unknown game"
+        message="That game is not in the cabinet."
+        testId="unknown-game"
+        showJoin={false}
+      />
     );
   }
 
