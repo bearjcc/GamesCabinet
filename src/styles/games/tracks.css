@@ -4,22 +4,25 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 20rem;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 var(--space-2);
 }
 
 .tracks-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(2.75rem, 1fr));
-  gap: 4px;
-  justify-content: center;
-  width: min(100%, 52rem);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 3px;
+  width: min(100%, 46rem);
+  max-width: calc(100vw - 2.5rem);
   flex-shrink: 0;
 }
 
 @media (min-width: 900px) {
   .tracks-grid {
-    width: min(92vw, 58rem);
-    gap: 6px;
+    width: min(100%, 44rem);
+    gap: 4px;
   }
 }
 
@@ -61,51 +64,33 @@
   pointer-events: none;
 }
 
+.tracks-tile-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
 .tracks-tile {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover;
 }
 
-.tracks-tile__bg {
-  fill: color-mix(in srgb, currentColor 6%, transparent);
-  stroke: color-mix(in srgb, currentColor 20%, transparent);
-}
-
-.tracks-edge {
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
-.tracks-edge--rail {
-  stroke: #8b5a2b;
-}
-
-.tracks-edge--bridge {
-  stroke: #d97706;
-}
-
-.tracks-edge--tunnel {
-  stroke: #7c3aed;
-  stroke-dasharray: 3 2;
-}
-
-.tracks-tile__hub {
-  fill: #8b5a2b;
-}
-
-.tracks-town {
-  fill: #2f9e44;
-}
-
-.tracks-mountain {
-  fill: #78716a;
-}
-
-.tracks-river {
-  fill: none;
-  stroke: #3b82f6;
-  stroke-width: 3;
+.tracks-tile__score {
+  position: absolute;
+  left: 6%;
+  bottom: 4%;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: 38%;
+  line-height: 1;
+  color: #111;
+  -webkit-text-stroke: 0.14em #fff;
+  paint-order: stroke fill;
+  pointer-events: none;
 }
 
 .tracks-boardswitch {
@@ -128,13 +113,22 @@
   color: white;
 }
 
+.tracks-pew {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 100%;
+}
+
 .tracks-hand {
   display: flex;
   gap: 8px;
   justify-content: center;
-  margin-top: 0.75rem;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 100%;
 }
 
 .tracks-hand__card {
@@ -166,9 +160,9 @@
   font-size: 0.75rem;
 }
 
-.tracks-hand__drawn svg {
-  width: 2rem;
-  height: 2rem;
+.tracks-hand__card .tracks-tile-wrap {
+  width: 4rem;
+  height: 4rem;
 }
 
 .tracks-piles {
@@ -188,7 +182,7 @@
   font-size: 0.75rem;
 }
 
-.tracks-pile svg {
+.tracks-pile .tracks-tile-wrap {
   width: 2.75rem;
   height: 2.75rem;
 }
@@ -319,5 +313,11 @@
 
 .play-table:has(.tracks-play) .play-table__board {
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow: visible;
+  padding-bottom: var(--space-1);
+}
+
+.play-table:has(.tracks-pew) .play-table__pew {
+  max-width: 100%;
 }
