@@ -1,7 +1,13 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PlayTable } from '../../components/PlayTable';
-import { StatusBar } from '../../components/StatusBar';
+import {
+  GameShell,
+  RulesPanel,
+  SeatChip,
+  shellSheetActions,
+  turnPlateFromMatchStatus,
+} from '../../components/game-shell';
+import { useSeatColour } from '../../components/SeatColours';
 import { Token } from '../../components/tabletop';
 import { controlA11y } from '../../lib/actions';
 import { playerDisplayName } from '../../lib/matchPlayers';
@@ -76,6 +82,18 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
   const currentPlayer = ctx.currentPlayer;
 
   const { text: status, tone } = deriveC4Status(ctx, playerID, matchData, yourTurn);
+  const [sheet, setSheet] = useState<'rules' | 'scores' | 'menu' | null>(null);
+  const seatColour = useSeatColour(currentPlayer);
+  const seat0Colour = useSeatColour('0');
+  const seat1Colour = useSeatColour('1');
+  const actor = c4SeatLabel(currentPlayer, matchData);
+  const turnPlate =
+    ctx.gameover || tone === 'done'
+      ? null
+      : turnPlateFromMatchStatus({ text: status, tone }, actor, {
+          seatColour,
+          hint: yourTurn ? 'Drop a disc' : undefined,
+        });
 
   const winningCells =
     ctx.gameover && !('draw' in (ctx.gameover as Record<string, unknown>))
@@ -152,94 +170,141 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
     dropInColumn(col);
   };
 
-  return (
-    <PlayTable
-      info={<StatusBar text={status} tone={tone} />}
-      board={
-        <div
-          className="c4-rack"
-          ref={boardRef}
-          data-testid="c4-board"
-          onPointerMove={(e) => {
-            if (pointerTracking) updateHoverFromPointer(e.clientX);
-          }}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={() => {
-            if (!pointerTracking) setHoverCol(null);
-          }}
-        >
-          <div className="c4-grid" role="grid" aria-label="Connect Four board">
-            {G.cells.map((cell, i) => (
-              <div key={i} className="c4-slot" role="gridcell" aria-hidden>
-                {cell !== null ? (
-                  <div
-                    className={`c4-disc c4-disc--p${cell}${droppingCell === i ? ' is-dropping' : ''}`}
-                    style={
-                      droppingCell === i
-                        ? ({ '--c4-drop-rows': dropRows } as React.CSSProperties)
-                        : undefined
-                    }
-                  >
-                    <Token player={cell} variant="disc" size="md" />
-                  </div>
-                ) : null}
-                <div className="c4-hole-mask" aria-hidden />
+  const rack = (
+    <div
+      className="c4-rack"
+      ref={boardRef}
+      data-testid="c4-board"
+      onPointerMove={(e) => {
+        if (pointerTracking) updateHoverFromPointer(e.clientX);
+      }}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={() => {
+        if (!pointerTracking) setHoverCol(null);
+      }}
+    >
+      <div className="c4-grid" role="grid" aria-label="Connect Four board">
+        {G.cells.map((cell, i) => (
+          <div key={i} className="c4-slot" role="gridcell" aria-hidden>
+            {cell !== null ? (
+              <div
+                className={`c4-disc c4-disc--p${cell}${droppingCell === i ? ' is-dropping' : ''}`}
+                style={
+                  droppingCell === i
+                    ? ({ '--c4-drop-rows': dropRows } as React.CSSProperties)
+                    : undefined
+                }
+              >
+                <Token player={cell} variant="disc" size="md" />
               </div>
-            ))}
+            ) : null}
+            <div className="c4-hole-mask" aria-hidden />
           </div>
-          {winningCells ? (
-            <WinLine
-              cells={winningCells}
-              cols={COLS}
-              rows={ROWS}
-              className="c4-win-line"
-              testId="c4-win-line"
-            />
-          ) : null}
-          {hoverCol !== null && yourTurn ? (
-            <div
-              className={`c4-held c4-held--p${currentPlayer}`}
-              style={{ left: `${((hoverCol + 0.5) / COLS) * 100}%` }}
-              aria-hidden
-              data-testid={`c4-held-${hoverCol}`}
-            >
-              <Token player={currentPlayer} variant="disc" size="md" />
-            </div>
-          ) : null}
-          <div className="c4-columns" aria-hidden>
-            {Array.from({ length: COLS }, (_, col) => {
-              const { enabled, disabledReason } = columnDropState(G.cells, col, yourTurn);
-              const label = `Drop in column ${col + 1}`;
-              const a11y = controlA11y({
-                label,
-                disabled: !enabled,
-                disabledReason,
-              });
-              return (
-                <button
-                  key={col}
-                  type="button"
-                  className={`c4-col${enabled ? ' is-open' : ''}`}
-                  disabled={!enabled}
-                  data-testid={`c4-col-${col}`}
-                  data-disabled-reason={a11y.title}
-                  title={a11y.title}
-                  aria-label={a11y.ariaLabel}
-                  onPointerEnter={() => {
-                    if (!pointerTracking && enabled) setHoverCol(col);
-                  }}
-                  onPointerLeave={() => {
-                    if (!pointerTracking) setHoverCol(null);
-                  }}
-                  onPointerDown={(e) => handlePointerDown(e, col)}
-                  onClick={() => handleClick(col)}
-                />
-              );
-            })}
-          </div>
-          <div className="c4-lip" aria-hidden />
+        ))}
+      </div>
+      {winningCells ? (
+        <WinLine
+          cells={winningCells}
+          cols={COLS}
+          rows={ROWS}
+          className="c4-win-line"
+          testId="c4-win-line"
+        />
+      ) : null}
+      {hoverCol !== null && yourTurn ? (
+        <div
+          className={`c4-held c4-held--p${currentPlayer}`}
+          style={{ left: `${((hoverCol + 0.5) / COLS) * 100}%` }}
+          aria-hidden
+          data-testid={`c4-held-${hoverCol}`}
+        >
+          <Token player={currentPlayer} variant="disc" size="md" />
         </div>
-      }
-    />
+      ) : null}
+      <div className="c4-columns" aria-hidden>
+        {Array.from({ length: COLS }, (_, col) => {
+          const { enabled, disabledReason } = columnDropState(G.cells, col, yourTurn);
+          const label = `Drop in column ${col + 1}`;
+          const a11y = controlA11y({
+            label,
+            disabled: !enabled,
+            disabledReason,
+          });
+          return (
+            <button
+              key={col}
+              type="button"
+              className={`c4-col${enabled ? ' is-open' : ''}`}
+              disabled={!enabled}
+              data-testid={`c4-col-${col}`}
+              data-disabled-reason={a11y.title}
+              title={a11y.title}
+              aria-label={a11y.ariaLabel}
+              onPointerEnter={() => {
+                if (!pointerTracking && enabled) setHoverCol(col);
+              }}
+              onPointerLeave={() => {
+                if (!pointerTracking) setHoverCol(null);
+              }}
+              onPointerDown={(e) => handlePointerDown(e, col)}
+              onClick={() => handleClick(col)}
+            />
+          );
+        })}
+      </div>
+      <div className="c4-lip" aria-hidden />
+    </div>
+  );
+
+  const seatChips =
+    ctx.numPlayers >= 2
+      ? (['0', '1'] as const).map((id) => (
+          <SeatChip
+            key={id}
+            model={{
+              id,
+              label: c4SeatLabel(id, matchData),
+              detail: id === playerID ? 'you' : undefined,
+              seatColour: (id === '0' ? seat0Colour : seat1Colour) ?? undefined,
+              active: id === currentPlayer,
+            }}
+          />
+        ))
+      : null;
+
+  return (
+    <>
+      {ctx.gameover ? (
+        <p className="sr-only" role="status" data-testid="match-status">
+          {status}
+        </p>
+      ) : null}
+      <GameShell
+        rail={{
+          gameTitle: 'Connect Four',
+          turnPlate,
+          actions: shellSheetActions(sheet, {
+            onRules: () => setSheet((s) => (s === 'rules' ? null : 'rules')),
+            onScores: () => setSheet((s) => (s === 'scores' ? null : 'scores')),
+            onMenu: () => setSheet((s) => (s === 'menu' ? null : 'menu')),
+            undoDisabled: true,
+          }),
+        }}
+        stage={{ felt: 'green' }}
+        board={rack}
+        underBoard={seatChips}
+        rulesSheet={
+          sheet === 'rules' ? (
+            <RulesPanel
+              model={{
+                title: 'Connect Four',
+                testId: 'c4-rules',
+                body: <p>Drop discs. Four in a row wins.</p>,
+              }}
+            />
+          ) : null
+        }
+      />
+    </>
   );
 }

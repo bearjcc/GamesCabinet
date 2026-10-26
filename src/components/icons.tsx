@@ -3,6 +3,7 @@ import {
   mdiBrightness2,
   mdiCircleOutline,
   mdiCog,
+  mdiDotsHorizontal,
   mdiHelpCircleOutline,
   mdiMoonWaningCrescent,
   mdiMotionPauseOutline,
@@ -69,6 +70,10 @@ export function IconScores({ className }: IconProps) {
 
 export function IconHelp({ className }: IconProps) {
   return <Mdi path={mdiHelpCircleOutline} className={className} />;
+}
+
+export function IconMore({ className }: IconProps) {
+  return <Mdi path={mdiDotsHorizontal} className={className} />;
 }
 
 export function IconKeepGoing({ className }: IconProps) {

@@ -15,10 +15,10 @@ test.describe('first-minute fixes', () => {
 
   test('connect four names the seat colour on the turn line', async ({ page }) => {
     await page.goto('/vs-bot/connect-four');
-    const status = page.locator('.status').first();
-    await expect(status).toContainText(/'s turn$/);
-    await expect(status).not.toContainText(/Player 1/);
-    await expect(status).not.toContainText(/Yellow's turn/);
+    const plate = page.getByTestId('game-shell-turn-plate');
+    await expect(plate).toContainText(/'s turn/);
+    await expect(plate).not.toContainText(/Player 1/);
+    await expect(plate).not.toContainText(/Yellow's turn/);
   });
 
   test('yatzy vs bot uses a named turn, not Player 1', async ({ page }) => {
