@@ -11,8 +11,8 @@ import {
 import { useSeatColour } from '../../components/SeatColours';
 import { Token } from '../../components/tabletop';
 import { controlA11y } from '../../lib/actions';
-import { playerDisplayName } from '../../lib/matchPlayers';
 import type { StatusTone } from '../../lib/matchStatus';
+import { usePlayerDisplayName } from '../../lib/usePlayerDisplayName';
 import { nInARowWinningCells } from '../shared/grid';
 import { WinLine } from '../shared/WinLine';
 import { columnDropState } from './actions';
@@ -20,10 +20,6 @@ import type { C4State } from './game';
 import { COLS, ROWS } from './game';
 
 const WIN_LENGTH = 4;
-
-function c4SeatLabel(player: string, matchData: BoardProps<C4State>['matchData']): string {
-  return playerDisplayName(player, { matchData });
-}
 
 function columnAtClientX(board: HTMLElement, clientX: number): number | null {
   const rect = board.getBoundingClientRect();
@@ -51,26 +47,29 @@ function dropRowCount(cellIndex: number): number {
 function deriveC4Status(
   ctx: BoardProps<C4State>['ctx'],
   _playerID: string | null | undefined,
-  matchData: BoardProps<C4State>['matchData'],
+  _matchData: BoardProps<C4State>['matchData'],
   yourTurn: boolean,
+  seatLabel: (player: string) => string,
 ): { text: string; tone: StatusTone } {
   if (ctx.gameover) {
     const over = ctx.gameover as Record<string, unknown>;
     if ('draw' in over) return { text: 'Draw', tone: 'done' };
     const winner = typeof over.winner === 'string' ? over.winner : null;
     if (winner) {
-      const label = c4SeatLabel(winner, matchData);
+      const label = seatLabel(winner);
       return { text: `${label} wins`, tone: 'done' };
     }
     return { text: 'Game over', tone: 'done' };
   }
 
-  const actor = c4SeatLabel(ctx.currentPlayer, matchData);
+  const actor = seatLabel(ctx.currentPlayer);
   if (yourTurn) return { text: `${actor}'s turn`, tone: 'you' };
   return { text: `${actor}'s turn`, tone: 'wait' };
 }
 
 export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardProps<C4State>) {
+  const seatLabel = usePlayerDisplayName();
+  const c4SeatLabel = (player: string) => seatLabel(player, matchData);
   const boardRef = useRef<HTMLDivElement>(null);
   const gestureDroppedRef = useRef(false);
   const prevCellsRef = useRef<(string | null)[]>([...G.cells]);
@@ -82,12 +81,12 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
   const yourTurn = playerID !== null && ctx.currentPlayer === playerID && !ctx.gameover;
   const currentPlayer = ctx.currentPlayer;
 
-  const { text: status, tone } = deriveC4Status(ctx, playerID, matchData, yourTurn);
+  const { text: status, tone } = deriveC4Status(ctx, playerID, matchData, yourTurn, c4SeatLabel);
   const [sheet, setSheet] = useState<'rules' | 'scores' | 'menu' | null>(null);
   const seatColour = useSeatColour(currentPlayer);
   const seat0Colour = useSeatColour('0');
   const seat1Colour = useSeatColour('1');
-  const actor = c4SeatLabel(currentPlayer, matchData);
+  const actor = c4SeatLabel(currentPlayer);
   const turnPlate =
     ctx.gameover || tone === 'done'
       ? null
@@ -264,7 +263,7 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
             key={id}
             model={{
               id,
-              label: c4SeatLabel(id, matchData),
+              label: c4SeatLabel(id),
               seatColour: (id === '0' ? seat0Colour : seat1Colour) ?? undefined,
               active: id === currentPlayer,
             }}

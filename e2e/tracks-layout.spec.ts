@@ -4,6 +4,7 @@ const VIEWPORTS = [
   { width: 1280, height: 800, name: 'desktop' },
   { width: 820, height: 1180, name: 'tablet-portrait' },
   { width: 1180, height: 820, name: 'tablet-landscape', minCell: 100 },
+  { width: 390, height: 844, name: 'phone' },
 ] as const;
 
 async function expectNoPageScroll(page: import('@playwright/test').Page): Promise<void> {
@@ -114,7 +115,9 @@ for (const viewport of VIEWPORTS) {
         if (!el) return false;
         return el.getBoundingClientRect().bottom >= document.documentElement.clientHeight - 2;
       });
-      expect(grassFillsHeight).toBe(true);
+      if (viewport.name !== 'phone') {
+        expect(grassFillsHeight).toBe(true);
+      }
 
       const cellBox = await page.getByTestId('tracks-cell-1-1').boundingBox();
       expect(cellBox).not.toBeNull();
@@ -124,14 +127,27 @@ for (const viewport of VIEWPORTS) {
         expect(cellBox!.width).toBeGreaterThanOrEqual(viewport.minCell);
       }
 
-      const metrics = await measureLayout(page, viewport.width);
-      expect(metrics.frameMarginDelta).toBeLessThanOrEqual(4);
-      expect(metrics.boardBottom).toBeLessThanOrEqual(metrics.pewTop + 1);
-      expect(metrics.maxCellOverlapPx).toBeLessThanOrEqual(1);
-      expect(metrics.startRailDelta).toBeLessThanOrEqual(2);
-      expect(metrics.endRailDelta).toBeLessThanOrEqual(2);
-      expect(metrics.startGutterGap).toBeLessThanOrEqual(1);
-      expect(metrics.endGutterGap).toBeLessThanOrEqual(1);
+      const handImg = page.locator('.tracks-hand__card img').first();
+      await expect(handImg).toBeVisible();
+      const imgBox = await handImg.boundingBox();
+      expect(imgBox).not.toBeNull();
+      const cell = Number(cellPx);
+      if (viewport.width <= 640) {
+        expect(imgBox!.width).toBeGreaterThanOrEqual(64);
+      } else {
+        expect(imgBox!.width).toBeGreaterThanOrEqual(cell * 0.75 - 1);
+      }
+
+      if (viewport.name !== 'phone') {
+        const metrics = await measureLayout(page, viewport.width);
+        expect(metrics.frameMarginDelta).toBeLessThanOrEqual(4);
+        expect(metrics.boardBottom).toBeLessThanOrEqual(metrics.pewTop + 1);
+        expect(metrics.maxCellOverlapPx).toBeLessThanOrEqual(1);
+        expect(metrics.startRailDelta).toBeLessThanOrEqual(2);
+        expect(metrics.endRailDelta).toBeLessThanOrEqual(2);
+        expect(metrics.startGutterGap).toBeLessThanOrEqual(1);
+        expect(metrics.endGutterGap).toBeLessThanOrEqual(1);
+      }
 
       await expectNoPageScroll(page);
     });

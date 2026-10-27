@@ -401,15 +401,6 @@
   scrollbar-width: thin;
 }
 
-@media (max-width: 40rem) {
-  .tracks-hand__card {
-    flex: 0 0 max(64px, calc(var(--tracks-cell, 4.5rem) * 0.8));
-    width: max(64px, calc(var(--tracks-cell, 4.5rem) * 0.8));
-    min-width: max(64px, calc(var(--tracks-cell, 4.5rem) * 0.8));
-    max-width: max(64px, calc(var(--tracks-cell, 4.5rem) * 0.8));
-  }
-}
-
 .tracks-shell-tray__hand {
   display: flex;
   flex-direction: column;
@@ -448,14 +439,17 @@
 }
 
 .tracks-hand__card {
-  flex: 0 0 calc(var(--tracks-cell, 4.5rem) * 0.8);
-  width: calc(var(--tracks-cell, 4.5rem) * 0.8);
-  min-width: calc(var(--tracks-cell, 4.5rem) * 0.8);
-  max-width: calc(var(--tracks-cell, 4.5rem) * 0.8);
+  --tracks-hand-size: var(--tracks-hand-card, max(64px, calc(var(--tracks-cell, 4.5rem) * 0.8)));
+  box-sizing: border-box;
+  flex: 0 0 var(--tracks-hand-size);
+  width: var(--tracks-hand-size);
+  min-width: var(--tracks-hand-size);
+  max-width: var(--tracks-hand-size);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  padding: 0;
   border: 2px solid transparent;
   border-radius: 4px;
   background: transparent;
@@ -474,9 +468,16 @@
 }
 
 .tracks-hand__card .tracks-tile-wrap {
+  flex: 0 0 var(--tracks-hand-size);
+  width: var(--tracks-hand-size);
+  height: var(--tracks-hand-size);
+  min-width: var(--tracks-hand-size);
+  min-height: var(--tracks-hand-size);
+}
+
+.tracks-hand__card .tracks-tile-wrap .tracks-tile {
   width: 100%;
-  aspect-ratio: 1;
-  height: auto;
+  height: 100%;
 }
 
 .tracks-piles {

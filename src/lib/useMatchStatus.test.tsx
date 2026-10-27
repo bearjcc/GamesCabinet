@@ -51,7 +51,7 @@ describe('useMatchStatus', () => {
         ),
       );
     });
-    expect(seen).toEqual({ text: "Red's turn", tone: 'you' });
+    expect(seen).toEqual({ text: "You's turn", tone: 'you' });
     root.unmount();
   });
 

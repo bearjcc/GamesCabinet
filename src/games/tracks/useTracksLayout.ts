@@ -6,12 +6,17 @@ export type TracksLayoutMetrics = {
   vars: CSSProperties;
 };
 
+export function tracksHandCardPx(cellPx: number, viewportWidth = window.innerWidth): number {
+  return viewportWidth <= 640 ? Math.max(64, Math.round(cellPx * 0.8)) : Math.round(cellPx * 0.8);
+}
+
 /** Hand tray height at a given cell size (matches tracks.css tray + hand + piles). */
 export function pewHeightForCell(cellPx: number, compact?: boolean): number {
   const isCompact =
     compact ?? (window.innerHeight <= 840 && window.innerWidth > window.innerHeight);
+  const handCard = tracksHandCardPx(cellPx);
   const pile = Math.min(52, cellPx * 0.72);
-  const hand = cellPx + 8;
+  const hand = handCard + 8;
   const pilesBlock = 8 + pile + 10;
   const trayVertical = isCompact ? 8 : 16;
   const pewPad = 6;
@@ -83,6 +88,7 @@ export function measureTracksLayout(
   }
 
   const cellPx = lo;
+  const handCardPx = tracksHandCardPx(cellPx, vw);
 
   return {
     cellPx,
@@ -90,6 +96,7 @@ export function measureTracksLayout(
     vars: {
       '--tracks-cell': `${cellPx}px`,
       '--tracks-gutter': `${gutterPx}px`,
+      '--tracks-hand-card': `${handCardPx}px`,
     } as CSSProperties,
   };
 }
@@ -106,7 +113,11 @@ export function useTracksLayout(
   const [metrics, setMetrics] = useState<TracksLayoutMetrics>(() => ({
     cellPx: 72,
     gutterPx: 42,
-    vars: { '--tracks-cell': '72px', '--tracks-gutter': '42px' } as CSSProperties,
+    vars: {
+      '--tracks-cell': '72px',
+      '--tracks-gutter': '42px',
+      '--tracks-hand-card': '58px',
+    } as CSSProperties,
   }));
 
   useLayoutEffect(() => {

@@ -24,6 +24,7 @@ export function defaultSeatDisplayName(playerID: string): string {
   if (index === 0) {
     const nick = getNickname();
     if (nick) return nick;
+    return 'You';
   }
   const colours = defaultSeatColours(Math.max(index + 1, 2));
   return seatColourLabel(colours[index]!);

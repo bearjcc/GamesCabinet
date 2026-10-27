@@ -7,16 +7,27 @@ const SeatNameOverridesContext = createContext<
 
 export function SeatNameOverridesProvider({
   botPlayerIds,
+  seatLabels,
   children,
 }: {
   botPlayerIds?: readonly string[];
+  /** Indexed labels for local hot-seat (`?names=`). */
+  seatLabels?: readonly string[];
   children: ReactNode;
 }) {
   const value = useMemo(() => {
-    if (!botPlayerIds?.length) return undefined;
-    const bots = new Set(botPlayerIds);
-    return (playerID: string) => (bots.has(playerID) ? BOT_SEAT_NAME : undefined);
-  }, [botPlayerIds]);
+    const bots = botPlayerIds?.length ? new Set(botPlayerIds) : null;
+    const hasLabels = seatLabels?.some((l) => l.trim());
+    if (!bots && !hasLabels) return undefined;
+    return (playerID: string) => {
+      if (bots?.has(playerID)) return BOT_SEAT_NAME;
+      const index = Number(playerID);
+      if (hasLabels && Number.isFinite(index) && seatLabels![index]?.trim()) {
+        return seatLabels![index]!.trim();
+      }
+      return undefined;
+    };
+  }, [botPlayerIds, seatLabels]);
 
   return (
     <SeatNameOverridesContext.Provider value={value}>{children}</SeatNameOverridesContext.Provider>

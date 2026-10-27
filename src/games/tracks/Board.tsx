@@ -2,7 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { type ReactNode, useEffect, useState } from 'react';
 import { MatchGameShell, Scoreboard, turnPlateFromMatchStatus } from '../../components/game-shell';
 import { useHotseatClaimSeat } from '../../lib/hotseat';
-import { playerDisplayName } from '../../lib/matchPlayers';
+import { usePlayerDisplayName } from '../../lib/usePlayerDisplayName';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
 import { type Cell, cellAt, HEIGHT, placeError, WIDTH } from './grid';
 import { objectiveDef } from './objectives';
@@ -10,19 +10,6 @@ import { TileGlyph } from './TileGlyph';
 import { TracksTerminal } from './TracksTerminal';
 import { allowedRotations, overlayBaseKinds } from './tiles';
 import { preloadTracksTiles } from './tracksPreload';
-
-function seatLabel(matchData: BoardProps['matchData'], i: number): string {
-  return playerDisplayName(String(i), { matchData });
-}
-
-function tracksPlayerName(
-  matchData: BoardProps['matchData'],
-  playerIndex: number,
-  numPlayers: number,
-): string {
-  if (numPlayers === 1) return 'You';
-  return seatLabel(matchData, playerIndex);
-}
 
 /** Plain-language reasons for an illegal drop (placeError keys). */
 export const HINTS: Record<string, string> = {
@@ -82,6 +69,9 @@ export function TracksBoard({
   const turnKey = `${ctx.phase}-${ctx.turn}-${ctx.currentPlayer}`;
   const [readyFor, setReadyFor] = useState<string | null>(null);
   const claimHotseatSeat = useHotseatClaimSeat();
+  const displaySeatName = usePlayerDisplayName();
+  const tracksPlayerName = (playerIndex: number) =>
+    ctx.numPlayers === 1 ? 'You' : displaySeatName(String(playerIndex), matchData);
 
   useEffect(() => {
     preloadTracksTiles();
@@ -146,15 +136,15 @@ export function TracksBoard({
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
   const over = ctx.gameover as { winners?: string[] } | undefined;
   const solo = ctx.numPlayers === 1;
-  const who = tracksPlayerName(matchData, Number(ctx.currentPlayer), ctx.numPlayers);
+  const who = tracksPlayerName(Number(ctx.currentPlayer));
   if (over) {
     tone = 'done';
     status = over.winners?.length
       ? over.winners.length > 1
-        ? `Tie: ${over.winners.map((w) => seatLabel(matchData, Number(w))).join(' & ')}`
+        ? `Tie: ${over.winners.map((w) => tracksPlayerName(Number(w))).join(' & ')}`
         : solo
           ? 'You win'
-          : `${seatLabel(matchData, Number(over.winners[0]))} wins`
+          : `${tracksPlayerName(Number(over.winners[0]))} wins`
       : 'Game over';
   } else if (ctx.phase === 'draft') {
     status = myTurn
@@ -180,7 +170,7 @@ export function TracksBoard({
             ? 'Play a card, or tap the discard pile to discard it'
             : `${who}: play a card, or tap the discard pile to discard it`;
   } else {
-    status = solo ? 'Your turn' : `${seatLabel(matchData, Number(ctx.currentPlayer))}'s turn`;
+    status = solo ? 'Your turn' : `${tracksPlayerName(Number(ctx.currentPlayer))}'s turn`;
   }
 
   const railMeta = `Round ${Math.min(G.round, 5)} of 5`;
@@ -269,7 +259,7 @@ export function TracksBoard({
                 data-testid={`tracks-target-${i}`}
                 onClick={() => setViewBoard(i)}
               >
-                {tracksPlayerName(matchData, i, ctx.numPlayers)}
+                {tracksPlayerName(i)}
                 {G.connectedOrder.includes(String(i)) ? ' *' : ''}
               </button>
             ))}
@@ -355,7 +345,7 @@ export function TracksBoard({
       model={{
         testId: 'tracks-tray-scores',
         rows: G.scores.map((s, i) => ({
-          label: tracksPlayerName(matchData, i, ctx.numPlayers),
+          label: tracksPlayerName(i),
           value: `${s}${G.connectedOrder.includes(String(i)) ? ' *' : ''}`,
         })),
       }}

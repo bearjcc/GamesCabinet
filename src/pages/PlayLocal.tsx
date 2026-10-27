@@ -3,6 +3,7 @@ import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
 import { PlayViewport } from '../components/PlayViewport';
 import { SeatColoursProvider } from '../components/SeatColours';
+import { SeatNameOverridesProvider } from '../components/SeatNameOverrides';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { parseHogwartsSetup } from '../games/hogwarts-battle/setup';
@@ -11,6 +12,7 @@ import { parseTracksSetup } from '../games/tracks/setup';
 import { getGameMeta, isAccessGated, isSoloOnly, supportsLocalPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
+import { parseSeatNamesQuery } from '../lib/parseSeatNamesQuery';
 import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
 import { getUnlockedGames } from '../lib/storage';
 
@@ -43,6 +45,11 @@ export function PlayLocal() {
     const requested = Number.isFinite(seatsParam) && seatsParam > 0 ? seatsParam : floor;
     return Math.min(meta.maxPlayers, Math.max(floor, requested));
   }, [meta, seatsParam]);
+
+  const seatLabels = useMemo(
+    () => parseSeatNamesQuery(params.get('names'), numPlayers),
+    [params, numPlayers],
+  );
 
   const seatColours = useMemo(() => {
     const parsed = parseSeatColoursQuery(coloursParam, numPlayers);
@@ -101,10 +108,12 @@ export function PlayLocal() {
         }}
       >
         <SeatColoursProvider colours={seatColours}>
-          <LocalClient
-            playerID={hotseat ? seat : '0'}
-            matchID={`local-${gameId}-${numPlayers}-${matchSuffix}`}
-          />
+          <SeatNameOverridesProvider seatLabels={seatLabels}>
+            <LocalClient
+              playerID={hotseat ? seat : '0'}
+              matchID={`local-${gameId}-${numPlayers}-${matchSuffix}`}
+            />
+          </SeatNameOverridesProvider>
         </SeatColoursProvider>
       </MatchLifecycleProvider>
     </PlayViewport>

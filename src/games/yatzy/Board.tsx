@@ -19,6 +19,8 @@ import {
   upperTotal,
 } from './scoring';
 
+const YATZY_IDLE_FACES = [1, 2, 3, 4, 5] as const;
+
 const YATZY_FACE_ART = composeDieFaceArt(
   dieFaceArtMap({
     1: kenneyDieFaceAsset(1),
@@ -199,11 +201,16 @@ export function YatzyBoard({
     </div>
   );
 
+  const diceInTray = G.rolls === 0 ? [...YATZY_IDLE_FACES] : G.dice;
+  const heldInTray = G.rolls === 0 ? [false, false, false, false, false] : G.held;
+
   const pew = (
-    <div className={`yatzy-dice${rolling ? ' is-rolling' : ''}`}>
+    <div
+      className={`yatzy-dice${rolling ? ' is-rolling' : ''}${G.rolls === 0 ? ' yatzy-dice--idle' : ''}`}
+    >
       <DiceTray
-        dice={G.dice}
-        held={G.held}
+        dice={diceInTray}
+        held={heldInTray}
         disabled={!canHold}
         onToggle={(i) => moves.toggleDie(i)}
         faceArt={YATZY_FACE_ART}

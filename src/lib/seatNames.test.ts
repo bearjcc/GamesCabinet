@@ -19,6 +19,11 @@ describe('seatNames', () => {
     expect(defaultSeatDisplayName('0')).toBe('Bear');
   });
 
+  it('defaults seat 0 to You when no nickname is saved', () => {
+    vi.spyOn(storage, 'getNickname').mockReturnValue('');
+    expect(defaultSeatDisplayName('0')).toBe('You');
+  });
+
   it('names other seats by colour when no lobby name exists', () => {
     vi.spyOn(storage, 'getNickname').mockReturnValue('');
     expect(defaultSeatDisplayName('1')).toBe('Orange');

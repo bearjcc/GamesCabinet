@@ -22,12 +22,25 @@ import {
   measureTracksLayout,
   pewHeightForCell,
   tracksCellWithMeasuredPewSlack,
+  tracksHandCardPx,
   useTracksLayout,
 } from './useTracksLayout';
 
+describe('tracksHandCardPx', () => {
+  it('scales with cell size on desktop widths', () => {
+    expect(tracksHandCardPx(112, 1280)).toBe(90);
+  });
+
+  it('never goes below 64px on phone widths', () => {
+    expect(tracksHandCardPx(48, 390)).toBe(64);
+    expect(tracksHandCardPx(100, 390)).toBe(80);
+  });
+});
+
 describe('tracksCellWithMeasuredPewSlack', () => {
   it('returns the next cell when slack covers the formula gap', () => {
-    expect(tracksCellWithMeasuredPewSlack(109, 137, 531, 190, true)).toBe(110);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    expect(tracksCellWithMeasuredPewSlack(105, 137, 600, 140, true)).toBe(106);
   });
 
   it('returns the same cell when slack is zero', () => {
@@ -38,6 +51,8 @@ describe('tracksCellWithMeasuredPewSlack', () => {
 
   it('returns the same cell when the next size exceeds the width cap', () => {
     expect(tracksCellWithMeasuredPewSlack(100, 100, 900, 120, true)).toBe(100);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
+    expect(tracksCellWithMeasuredPewSlack(109, 109, 900, 140, true)).toBe(109);
   });
 
   it('returns the same cell when the next row still exceeds the height budget', () => {
@@ -78,6 +93,50 @@ describe('measureTracksLayout', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1180 });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 820 });
     expect(pewHeightForCell(90)).toBe(pewHeightForCell(90, true));
+    expect(pewHeightForCell(90, false)).toBeGreaterThan(pewHeightForCell(90));
+  });
+
+  it('uses full viewport height when pew top is not below the field', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+    const field = {
+      getBoundingClientRect: () => ({ top: 200 }),
+      querySelector: () => null,
+    } as unknown as HTMLElement;
+    const pew = {
+      getBoundingClientRect: () => ({ top: 220 }),
+    } as unknown as HTMLElement;
+    const tight = measureTracksLayout(field, pew);
+    const loose = measureTracksLayout(field, {
+      getBoundingClientRect: () => ({ top: 650 }),
+    } as unknown as HTMLElement);
+    expect(loose.cellPx).toBeLessThanOrEqual(tight.cellPx);
+  });
+
+  it('sets hand card size to 0.8× cell on desktop width', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+    const field = {
+      getBoundingClientRect: () => ({ top: 120 }),
+      querySelector: () => null,
+    } as unknown as HTMLElement;
+    const { cellPx, vars } = measureTracksLayout(field, {
+      getBoundingClientRect: () => ({ top: 700 }),
+    } as unknown as HTMLElement);
+    expect((vars as Record<string, string>)['--tracks-hand-card']).toBe(
+      `${Math.round(cellPx * 0.8)}px`,
+    );
+  });
+
+  it('enforces 64px minimum hand cards on phone width', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
+    const field = {
+      getBoundingClientRect: () => ({ top: 120 }),
+      querySelector: () => null,
+    } as unknown as HTMLElement;
+    const { vars } = measureTracksLayout(field, null);
+    expect((vars as Record<string, string>)['--tracks-hand-card']).toBe('64px');
   });
 
   it('uses taller pew estimate in portrait', () => {

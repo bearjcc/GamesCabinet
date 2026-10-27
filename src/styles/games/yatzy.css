@@ -70,6 +70,14 @@
   object-fit: contain;
 }
 
+.yatzy-dice--idle .tt-die {
+  opacity: 0.52;
+}
+
+.yatzy-dice--idle .tt-die.is-held {
+  opacity: 0.52;
+}
+
 .yatzy-dice.is-rolling .tt-die__img {
   animation: yatzy-die-tumble 0.34s ease;
 }
