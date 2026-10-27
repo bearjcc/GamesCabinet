@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { openGameFromHome } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('letter-walker solo play reaches a playable board and scores tab', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-letter-walker').click();
+    await openGameFromHome(page, 'letter-walker');
     await expect(page).toHaveURL(/\/play\/letter-walker/);
     await expect(page.getByTestId('lw-board')).toBeVisible();
     await page.getByTestId('lw-cell-0-0').click();
@@ -13,8 +13,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('2048 solo play reaches a playable board and scores tab', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-2048').click();
+    await openGameFromHome(page, '2048');
     await expect(page).toHaveURL(/\/play\/2048/);
     await expect(page.getByTestId('g2048-board')).toBeVisible();
     await expect(page.getByTestId('g2048-best')).toBeVisible();
@@ -39,8 +38,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('yatzy solo play can roll and open scores tab', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-yatzy').click();
+    await openGameFromHome(page, 'yatzy');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
     await page.getByTestId('yatzy-roll').click();
@@ -51,8 +49,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('klondike solo play reaches a playable board and scores tab', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-klondike').click();
+    await openGameFromHome(page, 'klondike');
     await expect(page).toHaveURL(/\/play\/klondike/);
     await expect(page.getByTestId('klondike-board')).toBeVisible();
     await expect(page.getByTestId('game-shell-quiet-hint')).toBeVisible();

@@ -1,5 +1,7 @@
 import { expect, type Page, test } from '@playwright/test';
 import {
+  fillRoomCode,
+  openGameFromHome,
   openJoinPanel,
   openOnlinePair,
   pickHogwartsHero,
@@ -33,8 +35,7 @@ test.describe('GamesCabinet smokes', () => {
   test('host room and second player joins via deep link', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-tic-tac-toe').click();
+    await openGameFromHome(hostPage, 'tic-tac-toe');
     await setTableSeatKind(hostPage, 0, 'online');
     await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
@@ -58,8 +59,7 @@ test.describe('GamesCabinet smokes', () => {
   test('host keeps this table and an online seat for a guest', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-tic-tac-toe').click();
+    await openGameFromHome(hostPage, 'tic-tac-toe');
     await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
@@ -80,8 +80,7 @@ test.describe('GamesCabinet smokes', () => {
   test('two at this table plus an online seat reach the board', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-crazy-eights').click();
+    await openGameFromHome(hostPage, 'crazy-eights');
     await setTableSeatKind(hostPage, 2, 'online');
     await hostPage.getByTestId('host-room').click();
     await expect(hostPage.getByTestId('waiting-panel')).toBeVisible();
@@ -100,8 +99,7 @@ test.describe('GamesCabinet smokes', () => {
     test.setTimeout(90_000);
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-crazy-eights').click();
+    await openGameFromHome(hostPage, 'crazy-eights');
     await setTableSeatKind(hostPage, 1, 'bot');
     await setTableSeatKind(hostPage, 2, 'online');
     await hostPage.getByTestId('host-room').click();
@@ -125,17 +123,19 @@ test.describe('GamesCabinet smokes', () => {
   test('host room and guest joins via home code entry', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-connect-four').click();
+    await openGameFromHome(hostPage, 'connect-four');
     await setTableSeatKind(hostPage, 0, 'online');
     await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
     const code = await readRoomCode(hostPage);
 
+    await guestPage.addInitScript(() => {
+      localStorage.setItem('gamescabinet.nickname', 'Guest');
+    });
     await guestPage.goto('/');
     await openJoinPanel(guestPage);
-    await guestPage.getByTestId('join-code').fill(code);
-    await guestPage.getByTestId('join-room').click();
+    await fillRoomCode(guestPage, code);
+    await guestPage.getByTestId('header-join').getByTestId('join-room').click();
     await expect(guestPage).toHaveURL(new RegExp(`/g/connect-four/${code}`, 'i'));
     await expect(guestPage.getByTestId('c4-board')).toBeVisible();
 
@@ -145,8 +145,7 @@ test.describe('GamesCabinet smokes', () => {
   test('yatzy host and guest join online', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-yatzy').click();
+    await openGameFromHome(hostPage, 'yatzy');
     await setTableSeatKind(hostPage, 0, 'online');
     await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();
@@ -195,8 +194,7 @@ test.describe('GamesCabinet smokes', () => {
   test('online rematch after a finished tic-tac-toe game', async ({ browser }) => {
     const { hostPage, guestPage, close } = await openOnlinePair(browser);
 
-    await hostPage.goto('/');
-    await hostPage.getByTestId('home-game-tic-tac-toe').click();
+    await openGameFromHome(hostPage, 'tic-tac-toe');
     await setTableSeatKind(hostPage, 0, 'online');
     await setTableSeatKind(hostPage, 1, 'online');
     await hostPage.getByTestId('host-room').click();

@@ -14,6 +14,8 @@ export function Shell({
   trailing,
   headerJoin,
   layout = 'default',
+  cabinetHome = false,
+  tagline,
 }: {
   title?: string;
   children: ReactNode;
@@ -23,14 +25,28 @@ export function Shell({
   /** Compact join-a-room control in the catalogue header. */
   headerJoin?: ReactNode;
   layout?: 'default' | 'catalogue';
+  /** Navy home header with tagline (catalogue landing). */
+  cabinetHome?: boolean;
+  tagline?: string;
 }) {
   useEffect(() => {
     document.title = title ? `${title} · ${APP_TITLE}` : APP_TITLE;
   }, [title]);
 
   return (
-    <div className={layout === 'catalogue' ? 'shell shell--catalogue' : 'shell'}>
-      <header className="topbar">
+    <div
+      className={[
+        'shell',
+        layout === 'catalogue' ? 'shell--catalogue' : '',
+        cabinetHome ? 'shell--cabinet-home' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <header
+        className={cabinetHome ? 'topbar topbar--cabinet-home' : 'topbar'}
+        data-testid={cabinetHome ? 'cabinet-home-header' : undefined}
+      >
         <div className="topbar-start">
           <Link to="/" className="brand" data-testid="shell-home" aria-label="GamesCabinet home">
             <img
@@ -42,26 +58,39 @@ export function Shell({
             />
             {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
           </Link>
+          {cabinetHome && tagline ? (
+            <>
+              <span className="topbar-home-divider" aria-hidden="true" />
+              <p className="topbar-tagline">{tagline}</p>
+            </>
+          ) : null}
           {backTo ? (
             <Link to={backTo} className="btn ghost shell-back" data-testid="shell-back">
               Back
             </Link>
           ) : null}
         </div>
-        {layout === 'catalogue' && headerJoin ? (
+        {!cabinetHome && layout === 'catalogue' && headerJoin ? (
           <div className="topbar-center topbar-center--join">{headerJoin}</div>
-        ) : title ? (
+        ) : !cabinetHome && title ? (
           <h1 className="page-title topbar-center">{title}</h1>
-        ) : (
+        ) : !cabinetHome ? (
           <div className="topbar-center" aria-hidden="true" />
-        )}
+        ) : null}
         <div className="topbar-right" role="toolbar" aria-label="Shell controls">
+          {cabinetHome && headerJoin ? (
+            <div className="topbar-right__join">{headerJoin}</div>
+          ) : null}
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
           <IconLink to="/settings" label="Settings" testId="shell-settings">
             <IconSettings />
           </IconLink>
-          <MotionCycle />
-          <ThemeCycle />
+          {!cabinetHome ? (
+            <>
+              <MotionCycle />
+              <ThemeCycle />
+            </>
+          ) : null}
         </div>
       </header>
       <main className="main">{children}</main>

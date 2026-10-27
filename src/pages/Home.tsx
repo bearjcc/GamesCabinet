@@ -1,44 +1,77 @@
-import type { CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
-import { GameThumbnail } from '../components/GameThumbnail';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CatalogueFocusStrip } from '../components/CatalogueFocusStrip';
+import { CatalogueShelfRow } from '../components/CatalogueShelfRow';
 import { HeaderJoin } from '../components/HeaderJoin';
 import { Shell } from '../components/Shell';
-import { gameAccentStyle } from '../lib/gameIdentity';
-import { catalogueGroups, isSoloOnly, soloPlayPath, visibleGames } from '../lib/games';
+import { browseFocus } from '../lib/catalogueFocusNav';
+import { catalogueShelves, defaultFocusGameId, flatShelfGames } from '../lib/catalogueShelves';
+import { getGameMeta, visibleGames } from '../lib/games';
 import { getUnlockedGames } from '../lib/storage';
 
 export function Home() {
-  const groups = catalogueGroups(visibleGames(getUnlockedGames()));
+  const unlocked = useMemo(() => getUnlockedGames(), []);
+  const shelves = useMemo(() => catalogueShelves(visibleGames(unlocked), unlocked), [unlocked]);
+  const flat = useMemo(() => flatShelfGames(shelves), [shelves]);
+  const [focusId, setFocusId] = useState(() => defaultFocusGameId(shelves));
+  const focusMeta = getGameMeta(focusId) ?? flat[0];
+
+  const onBrowse = useCallback(
+    (direction: 'prev' | 'next' | 'up' | 'down') => {
+      setFocusId((current) => browseFocus(shelves, current, direction));
+    },
+    [shelves],
+  );
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        onBrowse('prev');
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        onBrowse('next');
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        onBrowse('up');
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        onBrowse('down');
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onBrowse]);
+
+  if (!focusMeta) {
+    return null;
+  }
 
   return (
-    <Shell layout="catalogue" headerJoin={<HeaderJoin />}>
-      {groups.map((group) => (
-        <section
-          key={group.id}
-          className="catalogue-group"
-          aria-labelledby={`catalogue-${group.id}`}
-          data-testid={`catalogue-group-${group.id}`}
-        >
-          <h2 id={`catalogue-${group.id}`} className="catalogue-group-title">
-            {group.label}
-          </h2>
-          <div className="game-grid">
-            {group.games.map((g) => (
-              <Link
-                key={g.id}
-                className="game-tile"
-                style={gameAccentStyle(g.id) as CSSProperties}
-                to={isSoloOnly(g) ? soloPlayPath(g.id) : `/game/${g.id}`}
-                data-testid={`home-game-${g.id}`}
-              >
-                <GameThumbnail gameId={g.id} />
-                <h3>{g.name}</h3>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ))}
-
+    <Shell
+      cabinetHome
+      headerJoin={<HeaderJoin />}
+      layout="catalogue"
+      tagline="Board, card and drawing games. Play alone, pass the screen, or send a friend a code."
+    >
+      <div className="cabinet-home" data-testid="cabinet-home">
+        <CatalogueFocusStrip meta={focusMeta} onBrowse={onBrowse} />
+        {shelves.map((shelf) => (
+          <CatalogueShelfRow
+            focusId={focusId}
+            key={shelf.id}
+            onFocusGame={setFocusId}
+            shelf={shelf}
+          />
+        ))}
+      </div>
       <span id="join" className="sr-only" />
     </Shell>
   );

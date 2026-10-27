@@ -1,17 +1,48 @@
 import { expect, test } from '@playwright/test';
-import { openJoinPanel, pickHogwartsHero, setTableSeatKind } from './helpers';
+import { fillRoomCode, openJoinPanel, pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
-  test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
+  test('cabinet home header fits the viewport width', async ({ page }) => {
+    for (const viewport of [
+      { width: 1280, height: 800 },
+      { width: 820, height: 1180 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      const overflows = await page.evaluate(() => {
+        const header = document.querySelector('[data-testid="cabinet-home-header"]');
+        if (!header) return true;
+        return header.scrollWidth > header.clientWidth;
+      });
+      expect(overflows).toBe(false);
+    }
+  });
+
+  test('phone cabinet home shows join entry', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await expect(page.getByTestId('header-join-open')).toBeVisible();
+    await expect(
+      page.getByTestId('cabinet-home-header').locator('.topbar-home-divider'),
+    ).toBeHidden();
+  });
+
+  test('home lists Phase 1 games on cabinet shelves', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'GamesCabinet home' })).toBeVisible();
-    await expect(page.getByTestId('catalogue-group-solo')).toBeVisible();
-    await expect(page.getByTestId('catalogue-group-with-others')).toBeVisible();
+    await expect(page.getByTestId('cabinet-home')).toBeVisible();
+    await expect(page.getByTestId('cabinet-focus-strip')).toBeVisible();
+    await page.getByTestId('catalogue-shelf-boards-more').click();
+    await expect(page.getByTestId('catalogue-shelf-big-games')).toBeVisible();
+    await expect(page.getByTestId('home-game-tracks')).toBeVisible();
+    await expect(page.getByTestId('home-game-tracks-lock')).toBeVisible();
+    await expect(page.getByTestId('catalogue-shelf-boards')).toBeVisible();
+    await expect(page.getByTestId('catalogue-shelf-dice-tiles-words')).toBeVisible();
     await expect(
-      page.getByTestId('catalogue-group-solo').getByTestId('home-game-2048'),
+      page.getByTestId('catalogue-shelf-dice-tiles-words').getByTestId('home-game-2048'),
     ).toBeVisible();
     await expect(
-      page.getByTestId('catalogue-group-with-others').getByTestId('home-game-tic-tac-toe'),
+      page.getByTestId('catalogue-shelf-boards').getByTestId('home-game-tic-tac-toe'),
     ).toBeVisible();
     await expect(page.getByTestId('home-game-tic-tac-toe')).toBeVisible();
     await expect(page.getByTestId('home-game-connect-four')).toBeVisible();
@@ -40,7 +71,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('motion preference cycles from the shell', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/settings');
     const motion = page.getByTestId('motion-cycle');
     await expect(motion).toBeVisible();
     const before = await motion.getAttribute('aria-label');
@@ -77,7 +108,8 @@ test.describe('GamesCabinet smokes', () => {
 
   test('hidden shelf stays locked until its access code is entered', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByTestId('home-game-orbits')).toHaveCount(0);
+    await expect(page.getByTestId('home-game-orbits')).toBeVisible();
+    await expect(page.getByTestId('home-game-orbits-lock')).toBeVisible();
 
     await page.goto('/game/orbits');
     await expect(page.getByTestId('launch-locked')).toBeVisible();
@@ -100,7 +132,8 @@ test.describe('GamesCabinet smokes', () => {
 
   test('Hogwarts Battle shelf unlocks for local and online play', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByTestId('home-game-hogwarts-battle')).toHaveCount(0);
+    await expect(page.getByTestId('home-game-hogwarts-battle')).toBeVisible();
+    await expect(page.getByTestId('home-game-hogwarts-battle-lock')).toBeVisible();
 
     await page.goto('/game/hogwarts-battle');
     await expect(page.getByTestId('launch-locked')).toBeVisible();
@@ -136,7 +169,7 @@ test.describe('GamesCabinet smokes', () => {
 
   test('TRACKS shelf unlocks and drafts into a playable table', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByTestId('home-game-tracks')).toHaveCount(0);
+    await expect(page.getByTestId('home-game-tracks-lock')).toBeVisible();
 
     await page.goto('/game/tracks');
     await expect(page.getByTestId('launch-locked')).toBeVisible();
@@ -180,10 +213,13 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('bad room code shows a clear error', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('gamescabinet.nickname', 'Guest');
+    });
     await page.goto('/');
     await openJoinPanel(page);
-    await page.getByTestId('join-code').fill('ZZZZZZ');
-    await page.getByTestId('join-room').click();
+    await fillRoomCode(page, 'ZZZZZZ');
+    await page.getByTestId('header-join').getByTestId('join-room').click();
     await expect(page.locator('.error')).toContainText(/No room with that code/i);
   });
 });

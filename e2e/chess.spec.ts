@@ -1,10 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { setTableSeatKind } from './helpers';
+import { openGameFromHome, setTableSeatKind } from './helpers';
 
 test.describe('Chess', () => {
   test('play vs bot reaches a playable board and accepts a legal move', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-chess').click();
+    await openGameFromHome(page, 'chess');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();
@@ -18,8 +17,7 @@ test.describe('Chess', () => {
   });
 
   test('deselects a piece when tapping it again', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-chess').click();
+    await openGameFromHome(page, 'chess');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();

@@ -11,22 +11,28 @@ const PORT = Number(process.env.CAPTURE_PORT) || 8000;
 const base = `http://127.0.0.1:${PORT}`;
 
 const shots = [
-  { file: 'setup-connect-four', run: async (page: Page) => {
-    await page.goto(`${base}/game/connect-four`);
-    await page.getByTestId('table-seat-0').waitFor();
-  }},
-  { file: 'play-connect-four', run: async (page: Page) => {
-    await page.goto(`${base}/vs-bot/connect-four?kinds=local,bot&colours=0,2`);
-    await page.getByTestId('c4-board').waitFor();
-    for (const col of [0, 1, 2, 1, 0, 2, 3, 2, 1, 3]) {
-      const target = page.getByTestId(`c4-col-${col}`);
-      if (!(await target.isEnabled({ timeout: 800 }).catch(() => false))) continue;
-      await target.click();
-      await page.waitForTimeout(500);
-      const discs = await page.locator('[data-testid^="c4-disc-"]').count();
-      if (discs >= 7 && discs <= 14) break;
-    }
-  }},
+  {
+    file: 'setup-connect-four',
+    run: async (page: Page) => {
+      await page.goto(`${base}/game/connect-four`);
+      await page.getByTestId('table-seat-0').waitFor();
+    },
+  },
+  {
+    file: 'play-connect-four',
+    run: async (page: Page) => {
+      await page.goto(`${base}/vs-bot/connect-four?kinds=local,bot&colours=0,2`);
+      await page.getByTestId('c4-board').waitFor();
+      for (const col of [0, 1, 2, 1, 0, 2, 3, 2, 1, 3]) {
+        const target = page.getByTestId(`c4-col-${col}`);
+        if (!(await target.isEnabled({ timeout: 800 }).catch(() => false))) continue;
+        await target.click();
+        await page.waitForTimeout(500);
+        const discs = await page.locator('[data-testid^="c4-disc-"]').count();
+        if (discs >= 7 && discs <= 14) break;
+      }
+    },
+  },
 ] as const;
 
 const viewports = [
