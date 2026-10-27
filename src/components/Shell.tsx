@@ -43,7 +43,10 @@ export function Shell({
         .filter(Boolean)
         .join(' ')}
     >
-      <header className={cabinetHome ? 'topbar topbar--cabinet-home' : 'topbar'}>
+      <header
+        className={cabinetHome ? 'topbar topbar--cabinet-home' : 'topbar'}
+        data-testid={cabinetHome ? 'cabinet-home-header' : undefined}
+      >
         <div className="topbar-start">
           <Link to="/" className="brand" data-testid="shell-home" aria-label="GamesCabinet home">
             <img

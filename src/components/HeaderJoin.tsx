@@ -37,7 +37,7 @@ export function HeaderJoin() {
         data-testid="header-join-open"
         onClick={() => setDialogOpen(true)}
       >
-        Join a room →
+        Join →
       </button>
       {dialogOpen ? (
         <dialog

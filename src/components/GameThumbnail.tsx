@@ -213,15 +213,65 @@ function CheckerBoard() {
 }
 
 function ReversiStones() {
+  const felt = '#1a6b48';
+  const line = '#2d8a5c';
+  const gridOrigin = { x: 13, y: 8 };
+  const step = 5.6;
+  const size = 6;
   return (
-    <div className="game-thumb__reversi">
-      {Array.from({ length: 16 }, (_, i) => (
-        <span key={i}>
-          {i === 6 ? <span className="game-thumb__disc light" /> : null}
-          {i === 9 ? <span className="game-thumb__disc dark" /> : null}
-        </span>
+    <svg viewBox="0 0 64 48" className="game-thumb__svg game-thumb__svg--fill" aria-hidden="true">
+      <rect width="64" height="48" fill={felt} />
+      {Array.from({ length: size + 1 }, (_, i) => (
+        <line
+          key={`v${i}`}
+          x1={gridOrigin.x + i * step}
+          y1={gridOrigin.y}
+          x2={gridOrigin.x + i * step}
+          y2={gridOrigin.y + size * step}
+          stroke={line}
+          strokeWidth="0.55"
+        />
       ))}
-    </div>
+      {Array.from({ length: size + 1 }, (_, i) => (
+        <line
+          key={`h${i}`}
+          x1={gridOrigin.x}
+          y1={gridOrigin.y + i * step}
+          x2={gridOrigin.x + size * step}
+          y2={gridOrigin.y + i * step}
+          stroke={line}
+          strokeWidth="0.55"
+        />
+      ))}
+      <circle
+        cx={gridOrigin.x + 2.5 * step}
+        cy={gridOrigin.y + 2.5 * step}
+        r="2.65"
+        fill="#fbf6ec"
+        stroke="#1c1917"
+        strokeWidth="0.45"
+      />
+      <circle
+        cx={gridOrigin.x + 3.5 * step}
+        cy={gridOrigin.y + 2.5 * step}
+        r="2.65"
+        fill="#1c1917"
+      />
+      <circle
+        cx={gridOrigin.x + 2.5 * step}
+        cy={gridOrigin.y + 3.5 * step}
+        r="2.65"
+        fill="#1c1917"
+      />
+      <circle
+        cx={gridOrigin.x + 3.5 * step}
+        cy={gridOrigin.y + 3.5 * step}
+        r="2.65"
+        fill="#fbf6ec"
+        stroke="#1c1917"
+        strokeWidth="0.45"
+      />
+    </svg>
   );
 }
 
@@ -362,19 +412,23 @@ function BattleshipLid() {
 
 function TracksLid() {
   return (
-    <svg viewBox="0 0 64 48" className="game-thumb__svg game-thumb__svg--fill" aria-hidden="true">
-      <rect width="64" height="48" fill="#4a7c43" />
-      <path d="M0 28 H64" stroke="#6b4a2a" strokeWidth="5" />
-      <path d="M32 0 V48" stroke="#6b4a2a" strokeWidth="5" />
-      <path d="M0 28 H64" stroke="#8b6914" strokeWidth="2" />
-      <path d="M32 0 V48" stroke="#8b6914" strokeWidth="2" />
-      {[-8, 0, 8, 16, 24, 32, 40].map((x) => (
-        <rect key={x} x={x} y="26" width="4" height="4" fill="#5c3a22" />
-      ))}
-      {[-8, 0, 8, 16, 24, 32, 40].map((y) => (
-        <rect key={y} x="30" y={y} width="4" height="4" fill="#5c3a22" />
-      ))}
-    </svg>
+    <div className="game-thumb__tracks-lid" aria-hidden="true">
+      <img
+        className="game-thumb__tracks-tile game-thumb__tracks-tile--straight"
+        src="/assets/tracks/512/straight.webp"
+        alt=""
+      />
+      <img
+        className="game-thumb__tracks-tile game-thumb__tracks-tile--curve"
+        src="/assets/tracks/512/curve.webp"
+        alt=""
+      />
+      <img
+        className="game-thumb__tracks-tile game-thumb__tracks-tile--junction"
+        src="/assets/tracks/512/junction.webp"
+        alt=""
+      />
+    </div>
   );
 }
 

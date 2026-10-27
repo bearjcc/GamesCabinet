@@ -39,7 +39,16 @@ export function GameLidTile({ meta, selected = false, onFocus }: Props) {
       <div className="game-lid__foot">
         <span className="game-lid__name">{meta.name}</span>
         <span className="game-lid__players" aria-hidden>
-          <span className="game-lid__players-icon">👤</span>
+          <svg className="game-lid__person" viewBox="0 0 12 12" aria-hidden="true">
+            <circle cx="6" cy="3.25" r="2" fill="none" stroke="currentColor" strokeWidth="1.1" />
+            <path
+              d="M2.25 10.75c0-2.07 1.68-3.75 3.75-3.75s3.75 1.68 3.75 3.75"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+            />
+          </svg>
           {playerCountLabel(meta)}
         </span>
       </div>

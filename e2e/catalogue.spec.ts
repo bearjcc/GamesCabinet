@@ -2,6 +2,31 @@ import { expect, test } from '@playwright/test';
 import { fillRoomCode, openJoinPanel, pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
+  test('cabinet home header fits the viewport width', async ({ page }) => {
+    for (const viewport of [
+      { width: 1280, height: 800 },
+      { width: 820, height: 1180 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      const overflows = await page.evaluate(() => {
+        const header = document.querySelector('[data-testid="cabinet-home-header"]');
+        if (!header) return true;
+        return header.scrollWidth > header.clientWidth;
+      });
+      expect(overflows).toBe(false);
+    }
+  });
+
+  test('phone cabinet home shows join entry', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await expect(page.getByTestId('header-join-open')).toBeVisible();
+    await expect(
+      page.getByTestId('cabinet-home-header').locator('.topbar-home-divider'),
+    ).toBeHidden();
+  });
+
   test('home lists Phase 1 games on cabinet shelves', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'GamesCabinet home' })).toBeVisible();
