@@ -2,6 +2,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   GameShell,
+  GameShellMenuSheet,
   RulesPanel,
   SeatChip,
   shellSheetActions,
@@ -264,7 +265,6 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
             model={{
               id,
               label: c4SeatLabel(id, matchData),
-              detail: id === playerID ? 'you' : undefined,
               seatColour: (id === '0' ? seat0Colour : seat1Colour) ?? undefined,
               active: id === currentPlayer,
             }}
@@ -304,6 +304,7 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
             />
           ) : null
         }
+        menuSheet={sheet === 'menu' ? <GameShellMenuSheet /> : null}
       />
     </>
   );

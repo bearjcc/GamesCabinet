@@ -47,6 +47,8 @@ export type GameShellRailActionModel = {
 export type GameShellRailModel = {
   gameTitle: string;
   meta?: ReactNode;
+  /** Solo / puzzle hint under the title (no turn plate). */
+  quietHint?: string;
   turnPlate?: TurnPlateModel | null;
   actions: GameShellRailActionModel[];
 };

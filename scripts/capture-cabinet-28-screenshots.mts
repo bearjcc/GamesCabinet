@@ -53,7 +53,7 @@ const shots: Shot[] = [
     file: 'play-tracks',
     run: async (page) => {
       await unlockTracks(page);
-      await page.goto(`${base}/game/tracks`);
+      await page.goto(`${base}/game/tracks?seats=1`);
       await page.getByTestId('play-start').click();
       await page.getByTestId('tracks-draft').locator('button').first().click();
       await page.getByTestId('tracks-grass-field').waitFor();
@@ -86,7 +86,8 @@ const shots: Shot[] = [
 async function main() {
   mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch({
-    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
+    executablePath:
+      process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
   });
 
   for (const viewport of VIEWPORTS) {

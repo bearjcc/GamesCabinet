@@ -229,7 +229,7 @@ export function LetterWalkerBoard({ G, moves, isActive }: BoardProps<LetterWalke
         onSubmitted={() => setMessage(null)}
         status={{ text: status, tone }}
         gameover={G.completed}
-        info={
+        meta={
           message ? (
             <p className="lw-message" role="status" data-testid="lw-message">
               {message}

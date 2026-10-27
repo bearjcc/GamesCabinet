@@ -160,10 +160,8 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
       tab={tab}
       onTabChange={setTab}
       testIdPrefix="g2048"
-      showTabs={false}
       gameover={ctx.gameover}
       status={{ text: hint, tone: statusTone }}
-      turnName="You"
       rules={{
         testId: 'g2048-rules',
         body: <p data-testid="g2048-help">{hint}</p>,
@@ -172,7 +170,7 @@ export function Game2048Board({ G, ctx, moves, isActive, reset }: BoardProps<Gam
         disabled: !undoAction || !isActionInteractive(undoAction),
         onUndo: () => runAction('undo'),
       }}
-      info={
+      meta={
         <Scoreboard
           model={{
             testId: 'g2048-score',

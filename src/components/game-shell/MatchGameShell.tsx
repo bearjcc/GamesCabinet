@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import type { StatusTone } from '../../lib/matchStatus';
+import { usePlayRoomMeta } from '../play-session/PlayRoomMeta';
 import { GameShell } from './GameShell';
+import { GameShellMenuSheet } from './GameShellMenuSheet';
 import { RulesPanel } from './RulesPanel';
 import { turnPlateFromMatchStatus } from './turnPlate';
 import type { BoardStageModel, HandTrayModel, TurnPlateModel } from './types';
@@ -25,11 +27,13 @@ export type MatchGameShellProps = {
   railMeta?: ReactNode;
   undo?: { disabled?: boolean; onUndo?: () => void };
   onScores?: () => void;
+  /** When true, status is hint-only in the rail (no turn plate). */
+  soloQuiet?: boolean;
 };
 
 function turnNameFromStatus(text: string): string {
-  const match = /^(.+?)'s turn/.exec(text);
-  return match?.[1]?.trim() || text;
+  const parsed = /^(.+?)'s turn\b/i.exec(text.trim());
+  return parsed?.[1]?.trim() || 'Player';
 }
 
 export function MatchGameShell({
@@ -50,7 +54,9 @@ export function MatchGameShell({
   railMeta,
   undo,
   onScores,
+  soloQuiet = false,
 }: MatchGameShellProps) {
+  const roomCode = usePlayRoomMeta();
   const { sheet, actions } = useShellSheets({
     onUndo: undo?.onUndo,
     undoDisabled: undo?.disabled ?? true,
@@ -59,10 +65,19 @@ export function MatchGameShell({
 
   const resolvedTurnPlate =
     turnPlateOverride === undefined
-      ? ctx.gameover || status.tone === 'done'
+      ? soloQuiet || ctx.gameover || status.tone === 'done'
         ? null
-        : turnPlateFromMatchStatus(status, turnName ?? turnNameFromStatus(status.text))
+        : turnPlateFromMatchStatus(status, turnName ?? turnNameFromStatus(status.text), {
+            mode: 'multiplayer',
+          })
       : turnPlateOverride;
+
+  const meta = (
+    <>
+      {roomCode ? <span data-testid="play-room-meta">Room {roomCode}</span> : null}
+      {railMeta}
+    </>
+  );
 
   return (
     <>
@@ -74,7 +89,8 @@ export function MatchGameShell({
       <GameShell
         rail={{
           gameTitle,
-          meta: railMeta,
+          meta,
+          quietHint: soloQuiet ? status.text : undefined,
           turnPlate: resolvedTurnPlate,
           actions,
         }}
@@ -96,7 +112,7 @@ export function MatchGameShell({
           ) : null
         }
         scoresSheet={sheet === 'scores' ? scoresSheet : null}
-        menuSheet={sheet === 'menu' ? menuSheet : null}
+        menuSheet={sheet === 'menu' ? <GameShellMenuSheet>{menuSheet}</GameShellMenuSheet> : null}
       />
     </>
   );

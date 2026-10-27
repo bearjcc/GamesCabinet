@@ -1,7 +1,7 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionSurface } from '../../components/ActionSurface';
-import { MatchGameShell, Scoreboard } from '../../components/game-shell';
+import { MatchGameShell } from '../../components/game-shell';
 import { SoloLeaderboardShell } from '../../components/SoloLeaderboardShell';
 import { DiceTray } from '../../components/tabletop';
 import { playerDisplayName } from '../../lib/matchPlayers';
@@ -89,6 +89,13 @@ export function YatzyBoard({
 
   let status = liveStatus;
   let tone: 'neutral' | 'you' | 'wait' | 'done' = liveTone;
+  if (solo && !ctx.gameover && yourTurn) {
+    status = turnHint ?? 'Roll the dice';
+    tone = 'you';
+  } else if (solo && !ctx.gameover && !yourTurn) {
+    status = 'Waiting…';
+    tone = 'wait';
+  }
   if (ctx.gameover) {
     tone = 'done';
     const over = ctx.gameover as { winner?: string; draw?: boolean; totals: number[] };
@@ -108,12 +115,6 @@ export function YatzyBoard({
       if (action.id === 'roll') moves.rollDice();
     },
   }));
-
-  const rollMeta = (
-    <Scoreboard
-      model={{ testId: 'yatzy-meta', rows: [{ label: 'Roll', value: `${G.rolls}/3` }] }}
-    />
-  );
 
   const yatzyRules = {
     testId: 'yatzy-rules',
@@ -215,6 +216,19 @@ export function YatzyBoard({
 
   const actionSurface = <ActionSurface label="Yatzy actions" actions={surfaceActions} />;
 
+  const trayPlay = (
+    <div className="yatzy-shell-tray">
+      <div className="yatzy-shell-tray__card">{card}</div>
+      <div className="yatzy-shell-tray__controls">
+        <p className="yatzy-shell-tray__rolls" data-testid="yatzy-roll-meta">
+          Roll {G.rolls}/3
+        </p>
+        {pew}
+        {actionSurface}
+      </div>
+    </div>
+  );
+
   if (solo) {
     return (
       <SoloLeaderboardShell
@@ -227,10 +241,9 @@ export function YatzyBoard({
         status={{ text: status, tone }}
         gameover={ctx.gameover}
         rules={yatzyRules}
-        info={rollMeta}
-        board={card}
-        pew={pew}
-        actions={actionSurface}
+        board={<div className="yatzy-felt-spacer" aria-hidden />}
+        pew={trayPlay}
+        tray={{ testId: 'yatzy-tray' }}
       />
     );
   }
@@ -240,16 +253,10 @@ export function YatzyBoard({
       gameTitle="Yatzy"
       ctx={ctx}
       status={{ text: status, tone }}
-      railMeta={rollMeta}
       rules={yatzyRules}
-      board={card}
+      board={<div className="yatzy-felt-spacer" aria-hidden />}
       tray={{ testId: 'yatzy-tray' }}
-      trayContent={
-        <>
-          {pew}
-          {actionSurface}
-        </>
-      }
+      trayContent={trayPlay}
     />
   );
 }

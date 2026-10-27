@@ -98,7 +98,7 @@ export function OrbitsBoard({ G, ctx, moves, isActive, playerID }: BoardProps<Or
       testIdPrefix="orbits"
       status={{ text: status, tone }}
       gameover={ctx.gameover}
-      info={
+      meta={
         <div className="orbits-scoreline" data-testid="orbits-score">
           Score {G.scores[p]} - Failures {G.failures}/{MAX_FAILURES} - Deck {G.deck.length}
         </div>

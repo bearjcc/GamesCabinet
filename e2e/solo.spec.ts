@@ -7,8 +7,8 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page).toHaveURL(/\/play\/letter-walker/);
     await expect(page.getByTestId('lw-board')).toBeVisible();
     await page.getByTestId('lw-cell-0-0').click();
-    await expect(page.getByRole('status')).toBeVisible();
-    await page.getByTestId('lw-tab-scores').click();
+    await expect(page.getByTestId('game-shell-quiet-hint')).toBeVisible();
+    await page.getByTestId('game-shell-action-scores').click();
     await expect(page.getByTestId('lw-scores')).toBeVisible();
   });
 
@@ -45,8 +45,8 @@ test.describe('GamesCabinet smokes', () => {
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
     await page.getByTestId('yatzy-roll').click();
     await page.getByTestId('yatzy-score-chance').click();
-    await expect(page.getByRole('status')).toBeVisible();
-    await page.getByTestId('yatzy-tab-scores').click();
+    await expect(page.getByTestId('game-shell-quiet-hint')).toBeVisible();
+    await page.getByTestId('game-shell-action-scores').click();
     await expect(page.getByTestId('yatzy-scores')).toBeVisible();
   });
 
@@ -55,8 +55,8 @@ test.describe('GamesCabinet smokes', () => {
     await page.getByTestId('home-game-klondike').click();
     await expect(page).toHaveURL(/\/play\/klondike/);
     await expect(page.getByTestId('klondike-board')).toBeVisible();
-    await expect(page.getByRole('status')).toBeVisible();
-    await page.getByTestId('klondike-tab-scores').click();
+    await expect(page.getByTestId('game-shell-quiet-hint')).toBeVisible();
+    await page.getByTestId('game-shell-action-scores').click();
     await expect(page.getByTestId('klondike-scores')).toBeVisible();
   });
 });

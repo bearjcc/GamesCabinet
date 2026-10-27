@@ -2,22 +2,19 @@ import { Local } from 'boardgame.io/multiplayer';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
+import { PlayViewport } from '../components/PlayViewport';
+import { PlayBotDifficultyMenu } from '../components/play-session/PlayBotDifficultyMenu';
 import { SeatColoursProvider } from '../components/SeatColours';
 import { SeatNameOverridesProvider } from '../components/SeatNameOverrides';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
 import { type GameId, gamesById } from '../games/registry';
-import {
-  botDifficultyLabel,
-  createMctsBotClass,
-  cycleBotDifficulty,
-  parseBotDifficulty,
-} from '../lib/bots';
+import { createMctsBotClass, parseBotDifficulty } from '../lib/bots';
 import { getGameMeta, isSoloOnly, soloPlayPath, supportsBotPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { localRematchMatchID } from '../lib/localRematch';
 import { makeClient } from '../lib/makeClient';
-import { parseSeatColoursQuery } from '../lib/seatColours';
+import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
 import { deriveLaunch, playerIDsOfKind, seatsFromKindsQuery } from '../lib/tableSetup';
 
 export function PlayBot() {
@@ -33,10 +30,10 @@ export function PlayBot() {
   const localIDs = useMemo(() => playerIDsOfKind(tableSeats, 'local'), [tableSeats]);
   const botIDs = useMemo(() => playerIDsOfKind(tableSeats, 'bot'), [tableSeats]);
   const numPlayers = tableSeats.filter((seat) => seat.kind !== 'empty').length;
-  const seatColours = useMemo(
-    () => parseSeatColoursQuery(params.get('colours'), numPlayers),
-    [numPlayers, params],
-  );
+  const seatColours = useMemo(() => {
+    const parsed = parseSeatColoursQuery(params.get('colours'), numPlayers);
+    return parsed.length > 0 ? parsed : defaultSeatColours(numPlayers);
+  }, [numPlayers, params]);
   const firstLocal = localIDs[0] ?? '0';
   /** Client.reset() nulls multiplayer state; bump match id for a fresh Local+bots match. */
   const [rematchGen, setRematchGen] = useState(0);
@@ -85,16 +82,11 @@ export function PlayBot() {
   }
 
   return (
-    <Shell
-      title={`${meta.name} vs bot`}
-      backTo={`/game/${meta.id}`}
-      trailing={
-        <button
-          type="button"
-          className="btn ghost"
-          data-testid="bot-difficulty"
-          onClick={() => {
-            const next = cycleBotDifficulty(difficulty);
+    <PlayViewport
+      menuExtras={
+        <PlayBotDifficultyMenu
+          difficulty={difficulty}
+          onChange={(next) => {
             setParams(
               (current) => {
                 const nextParams = new URLSearchParams(current);
@@ -105,11 +97,7 @@ export function PlayBot() {
             );
             setRematchGen((n) => n + 1);
           }}
-          aria-label={`Bot difficulty ${botDifficultyLabel(difficulty)}. Click to cycle.`}
-          title="Cycle bot difficulty"
-        >
-          {botDifficultyLabel(difficulty)}
-        </button>
+        />
       }
     >
       <MatchLifecycleProvider
@@ -126,6 +114,6 @@ export function PlayBot() {
           </SeatNameOverridesProvider>
         </SeatColoursProvider>
       </MatchLifecycleProvider>
-    </Shell>
+    </PlayViewport>
   );
 }

@@ -91,6 +91,44 @@ a:focus-visible {
   flex-direction: column;
 }
 
+.play-viewport {
+  min-height: 100dvh;
+  max-width: none;
+  margin: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.play-viewport > .bgio-client,
+.play-viewport > .match-chrome,
+.play-viewport .match-chrome,
+.play-viewport .game-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.play-viewport__error {
+  margin: 0.5rem 0.75rem 0;
+}
+
+.play-online-room-line {
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  background: var(--game-shell-navy, #0f1620);
+  color: #efe9d9;
+  text-align: center;
+}
+
+.play-viewport:has([data-testid="game-shell-rail"]) .play-online-room-line {
+  display: none;
+}
+
 .topbar {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

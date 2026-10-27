@@ -4,6 +4,13 @@
   min-height: max-content;
 }
 
+.game-shell-stage .klondike-board {
+  --sol-card-w: clamp(3.5rem, min(5.25rem, 11vw), 5.5rem);
+  width: 100%;
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
 .match-chrome:has([data-testid="klondike-board"]) .play-table__board {
   min-height: 20rem;
 }

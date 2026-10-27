@@ -51,6 +51,70 @@
   color: #9aa6b6;
 }
 
+.game-shell-rail__quiet {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: #b8c2d0;
+  font-weight: 400;
+}
+
+.game-shell-rail .game-shell-rail__icon.icon-control {
+  background: transparent;
+  border: none;
+  color: var(--game-shell-cream);
+  opacity: 1;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.35rem;
+}
+
+.game-shell-rail .game-shell-rail__icon.icon-control:disabled {
+  opacity: 0.35;
+}
+
+.game-shell-rail .game-shell-rail__icon.icon-control.is-pressed {
+  color: var(--brand-yellow, #ed9f18);
+}
+
+.game-shell-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.game-shell-menu-defaults {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.game-shell-menu-link {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.game-shell-menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.game-shell-menu-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.game-shell-menu-btn {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+
 .game-shell-rail__center {
   justify-self: center;
 }
@@ -113,6 +177,13 @@
   display: grid;
   place-items: center;
   padding: 0.65rem 0.4rem;
+  width: 100%;
+}
+
+.game-shell-stage:has(.sol-board) {
+  place-items: stretch;
+  align-content: stretch;
+  padding: 0;
 }
 
 .game-shell-stage--felt-green {
@@ -127,6 +198,12 @@
   width: 100%;
   display: grid;
   place-items: center;
+}
+
+.game-shell-stage__board:has(.klondike-board),
+.game-shell-stage__board:has(.sol-board) {
+  place-items: stretch;
+  align-content: start;
 }
 
 .game-shell-stage__under {

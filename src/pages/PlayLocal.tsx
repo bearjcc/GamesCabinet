@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
+import { PlayViewport } from '../components/PlayViewport';
 import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
@@ -10,7 +11,7 @@ import { parseTracksSetup } from '../games/tracks/setup';
 import { getGameMeta, isAccessGated, isSoloOnly, supportsLocalPlay } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
-import { parseSeatColoursQuery } from '../lib/seatColours';
+import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
 import { getUnlockedGames } from '../lib/storage';
 
 /** Offline local match (solo or hotseat) without the lobby server. */
@@ -43,10 +44,10 @@ export function PlayLocal() {
     return Math.min(meta.maxPlayers, Math.max(floor, requested));
   }, [meta, seatsParam]);
 
-  const seatColours = useMemo(
-    () => parseSeatColoursQuery(coloursParam, numPlayers),
-    [coloursParam, numPlayers],
-  );
+  const seatColours = useMemo(() => {
+    const parsed = parseSeatColoursQuery(coloursParam, numPlayers);
+    return parsed.length > 0 ? parsed : defaultSeatColours(numPlayers);
+  }, [coloursParam, numPlayers]);
 
   const Board = boards[gameId as GameId];
   const hotseat = numPlayers >= 2;
@@ -90,7 +91,7 @@ export function PlayLocal() {
   }
 
   return (
-    <Shell backTo={isSoloOnly(meta) ? '/' : `/game/${meta.id}`}>
+    <PlayViewport>
       <MatchLifecycleProvider
         value={{
           resetOnPlayAgain: true,
@@ -106,6 +107,6 @@ export function PlayLocal() {
           />
         </SeatColoursProvider>
       </MatchLifecycleProvider>
-    </Shell>
+    </PlayViewport>
   );
 }

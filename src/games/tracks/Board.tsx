@@ -159,32 +159,22 @@ export function TracksBoard({
     status = `${seatLabel(matchData, Number(ctx.currentPlayer))}'s turn`;
   }
 
-  const railMeta = (
-    <>
-      <Scoreboard
-        model={{
-          testId: 'tracks-meta',
-          rows: [
-            { label: 'Round', value: `${Math.min(G.round, 5)}/5` },
-            ...G.scores.map((s, i) => ({
-              label: seatLabel(matchData, i),
-              value: `${s}${G.connectedOrder.includes(String(i)) ? ' *' : ''}`,
-            })),
-          ],
-        }}
-      />
+  const railMeta = `Round ${Math.min(G.round, 5)} of 5`;
+
+  const underBoardChips = (
+    <div className="tracks-board-chips">
       {G.players.length === 1 ? (
-        <span data-testid="tracks-solo-discards">
+        <span className="tracks-board-chip" data-testid="tracks-solo-discards">
           Discards {G.soloDiscards ?? 0}/{SOLO_DISCARD_LIMIT}
         </span>
       ) : null}
       {G.publicObjectives.length > 0 ? (
         <ul
-          className="tracks-objectives tracks-objectives--public"
+          className="tracks-objectives tracks-objectives--public tracks-board-chip-list"
           data-testid="tracks-public-objectives"
         >
           {G.publicObjectives.map((id) => (
-            <li key={id}>
+            <li key={id} className="tracks-board-chip">
               <span className="tracks-objectives__tag">Public</span>
               {objectiveDef(id).name}
             </li>
@@ -192,16 +182,19 @@ export function TracksBoard({
         </ul>
       ) : null}
       {!handOff && player && player.objectives.length > 0 ? (
-        <ul className="tracks-objectives tracks-objectives--secret" data-testid="tracks-objectives">
+        <ul
+          className="tracks-objectives tracks-objectives--secret tracks-board-chip-list"
+          data-testid="tracks-objectives"
+        >
           {player.objectives.map((id, i) => (
-            <li key={`${id}-${i}`}>
+            <li key={`${id}-${i}`} className="tracks-board-chip">
               <span className="tracks-objectives__tag">Secret</span>
               {objectiveDef(id).name}
             </li>
           ))}
         </ul>
       ) : null}
-    </>
+    </div>
   );
 
   // ----- board / draft -----
@@ -333,43 +326,57 @@ export function TracksBoard({
 
   // ----- pew: hand + deck + discard -----
   const discardTop = G.discard[G.discard.length - 1];
+  const trayScores = (
+    <Scoreboard
+      model={{
+        testId: 'tracks-tray-scores',
+        rows: G.scores.map((s, i) => ({
+          label: seatLabel(matchData, i),
+          value: `${s}${G.connectedOrder.includes(String(i)) ? ' *' : ''}`,
+        })),
+      }}
+    />
+  );
+
   const pew =
     ctx.phase === 'play' ? (
-      <div className="tracks-pew play-table__pew--tracks" data-testid="tracks-pew">
-        <div className="tracks-pew__tray">
+      <div className="tracks-shell-tray" data-testid="tracks-pew">
+        <div className="tracks-shell-tray__scores">{trayScores}</div>
+        <div className="tracks-shell-tray__hand">
           {handRail}
-          <div className="tracks-piles">
-            <button
-              type="button"
-              className="tracks-pile"
-              data-testid="tracks-draw-deck"
-              onClick={() => moves.drawTile('deck')}
-              disabled={handOff || !myTurn || G.drawnId !== null}
-            >
-              <span className="tracks-pile__deck" />
-              Deck ({G.deck.length})
-            </button>
-            <button
-              type="button"
-              className="tracks-pile"
-              data-testid="tracks-draw-discard"
-              onClick={tapDiscard}
-              disabled={
-                handOff ||
-                !myTurn ||
-                (G.drawnId === null
-                  ? !discardTop || ctx.numPlayers === 1
-                  : G.drewFromDiscard || !selectedTile)
-              }
-            >
-              {discardTop ? (
-                <TileGlyph tile={discardTop} rot={0} />
-              ) : (
-                <span className="tracks-pile__empty" />
-              )}
-              Discard
-            </button>
-          </div>
+          <p className="tracks-shell-tray__hand-label">{who}&apos;s hand</p>
+        </div>
+        <div className="tracks-shell-tray__piles tracks-piles">
+          <button
+            type="button"
+            className="tracks-pile"
+            data-testid="tracks-draw-deck"
+            onClick={() => moves.drawTile('deck')}
+            disabled={handOff || !myTurn || G.drawnId !== null}
+          >
+            <span className="tracks-pile__deck" />
+            Deck ({G.deck.length})
+          </button>
+          <button
+            type="button"
+            className="tracks-pile"
+            data-testid="tracks-draw-discard"
+            onClick={tapDiscard}
+            disabled={
+              handOff ||
+              !myTurn ||
+              (G.drawnId === null
+                ? !discardTop || ctx.numPlayers === 1
+                : G.drewFromDiscard || !selectedTile)
+            }
+          >
+            {discardTop ? (
+              <TileGlyph tile={discardTop} rot={0} />
+            ) : (
+              <span className="tracks-pile__empty" />
+            )}
+            Discard
+          </button>
         </div>
       </div>
     ) : null;
@@ -445,12 +452,14 @@ export function TracksBoard({
       gameTitle="TRACKS"
       ctx={ctx}
       status={{ text: status, tone }}
-      turnPlate={turnPlate}
+      turnPlate={ctx.numPlayers > 1 ? turnPlate : null}
+      soloQuiet={ctx.numPlayers === 1}
       stage={{ felt: ctx.phase === 'play' ? 'tracks' : false }}
       railMeta={railMeta}
       rules={{ testId: 'tracks-scoring-rules', title: 'Scoring', body: scoringRules }}
       board={shownBoard}
-      tray={pew ? { testId: 'tracks-tray', title: 'Hand' } : null}
+      underBoard={underBoardChips}
+      tray={pew ? { testId: 'tracks-tray' } : null}
       trayContent={pew}
     />
   );

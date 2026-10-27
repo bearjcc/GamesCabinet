@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { JoinRoomPanel } from '../components/JoinRoomPanel';
 import { MatchLifecycleProvider } from '../components/MatchChrome';
-import { RoomBar } from '../components/RoomBar';
+import { PlayViewport } from '../components/PlayViewport';
+import { PlayRoomMetaProvider } from '../components/play-session/PlayRoomMeta';
 import { SeatColoursProvider } from '../components/SeatColours';
 import { Shell } from '../components/Shell';
 import { boards } from '../games/boards';
@@ -13,7 +14,7 @@ import { getGameMeta, isAccessGated } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { leaveRoom, lookupRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
 import { makeClient } from '../lib/makeClient';
-import { parseSeatColoursQuery } from '../lib/seatColours';
+import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
 import {
   deviceSeats,
   getNickname,
@@ -67,10 +68,14 @@ export function PlayOnline() {
   const firstHuman = humanSeats[0]?.playerID ?? seat?.playerID ?? '0';
   const [activeID, setActiveID] = useState(firstHuman);
   const seatColours = useMemo(() => {
-    if (!seat?.seatColourQuery) return [];
+    if (!seat?.seatColourQuery) {
+      const count = Math.max(2, humanSeats.length + botSeats.length);
+      return defaultSeatColours(count);
+    }
     const total = seat.seatColourQuery.split(',').length;
-    return parseSeatColoursQuery(seat.seatColourQuery, total);
-  }, [seat?.seatColourQuery]);
+    const parsed = parseSeatColoursQuery(seat.seatColourQuery, total);
+    return parsed.length > 0 ? parsed : defaultSeatColours(total);
+  }, [seat?.seatColourQuery, humanSeats.length, botSeats.length]);
 
   useEffect(() => {
     setActiveID(firstHuman);
@@ -203,45 +208,62 @@ export function PlayOnline() {
   }
 
   return (
-    <Shell title={meta.name} backTo={`/game/${gameId}`}>
-      <RoomBar gameId={gameId} matchID={seat.matchID} onLeave={() => void exitHome()} busy={busy} />
-      {error ? (
-        <p className="error" role="alert">
-          {error}
+    <PlayViewport
+      menuExtras={
+        <div className="game-shell-menu-row">
+          <button
+            type="button"
+            className="game-shell-menu-btn"
+            disabled={busy}
+            onClick={() => void exitHome()}
+          >
+            Leave room
+          </button>
+        </div>
+      }
+    >
+      <PlayRoomMetaProvider roomCode={seat.matchID}>
+        <p className="play-online-room-line">
+          Room <strong data-testid="room-code">{seat.matchID}</strong>
         </p>
-      ) : null}
-      <MatchLifecycleProvider
-        value={{
-          showWaiting: true,
-          playAgainLabel: 'Rematch',
-          onPlayAgain: onRematch,
-          onHome: exitHome,
-          onGameLaunch: exitModes,
-        }}
-      >
-        <SeatColoursProvider colours={seatColours}>
-          <MatchClient
-            key={`${seat.matchID}-${activeSeat?.playerID ?? seat.playerID}`}
-            matchID={seat.matchID}
-            playerID={activeSeat?.playerID ?? seat.playerID}
-            credentials={activeSeat?.credentials ?? seat.credentials}
-          />
-        </SeatColoursProvider>
-      </MatchLifecycleProvider>
-      {BotClient
-        ? botSeats.map((entry) => (
-            <div hidden key={`${seat.matchID}-bot-${entry.playerID}`}>
-              <SeatColoursProvider colours={seatColours}>
-                <BotClient
-                  matchID={seat.matchID}
-                  playerID={entry.playerID}
-                  credentials={entry.credentials}
-                />
-              </SeatColoursProvider>
-            </div>
-          ))
-        : null}
-    </Shell>
+        {error ? (
+          <p className="error play-viewport__error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <MatchLifecycleProvider
+          value={{
+            showWaiting: true,
+            playAgainLabel: 'Rematch',
+            onPlayAgain: onRematch,
+            onHome: exitHome,
+            onGameLaunch: exitModes,
+          }}
+        >
+          <SeatColoursProvider colours={seatColours}>
+            <MatchClient
+              key={`${seat.matchID}-${activeSeat?.playerID ?? seat.playerID}`}
+              matchID={seat.matchID}
+              playerID={activeSeat?.playerID ?? seat.playerID}
+              credentials={activeSeat?.credentials ?? seat.credentials}
+            />
+          </SeatColoursProvider>
+        </MatchLifecycleProvider>
+        {BotClient
+          ? botSeats.map((entry) => (
+              <div hidden key={`${seat.matchID}-bot-${entry.playerID}`}>
+                <SeatColoursProvider colours={seatColours}>
+                  <BotClient
+                    matchID={seat.matchID}
+                    playerID={entry.playerID}
+                    credentials={entry.credentials}
+                  />
+                </SeatColoursProvider>
+              </div>
+            ))
+          : null}
+      </PlayRoomMetaProvider>
+    </PlayViewport>
   );
 }
 

@@ -1,14 +1,13 @@
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
 import type { StatusTone } from '../lib/matchStatus';
 import type { SubmitScoreInput } from '../lib/scores';
 import { GameShell, RulesPanel, shellSheetActions } from './game-shell';
-import { turnPlateFromMatchStatus } from './game-shell/turnPlate';
+import { GameShellMenuSheet } from './game-shell/GameShellMenuSheet';
+import { quietHintFromStatus } from './game-shell/turnPlate';
 import type { BoardStageModel, HandTrayModel, TurnPlateModel } from './game-shell/types';
 import { useShellSheets } from './game-shell/useShellSheets';
 import { LeaderboardPanel } from './LeaderboardPanel';
 import { ScoreSubmitter } from './ScoreSubmitter';
-import { type SoloPlayTab, SoloPlayTabs } from './SoloPlayTabs';
 
 /** Shared play/scores layout for solo games with a leaderboard. */
 export function SoloLeaderboardShell({
@@ -18,8 +17,8 @@ export function SoloLeaderboardShell({
   tab,
   onTabChange,
   testIdPrefix,
-  showTabs = true,
-  info,
+  meta,
+  quietHint,
   board,
   pew,
   actions,
@@ -31,20 +30,18 @@ export function SoloLeaderboardShell({
   scoresSheet,
   undo,
   status,
-  turnName,
-  turnPlate: turnPlateOverride,
+  turnPlate: turnPlateOverride = null,
   gameover,
   rules,
 }: {
   gameId: string;
   gameTitle: string;
   pendingSubmit?: SubmitScoreInput | null;
-  tab: SoloPlayTab;
-  onTabChange: (tab: SoloPlayTab) => void;
+  tab: 'play' | 'scores';
+  onTabChange: (tab: 'play' | 'scores') => void;
   testIdPrefix: string;
-  showTabs?: boolean;
-  /** Legacy chrome in the rail meta until callers migrate to Scoreboard and shell actions. */
-  info?: ReactNode;
+  meta?: ReactNode;
+  quietHint?: string;
   board: ReactNode;
   pew?: ReactNode;
   actions?: ReactNode;
@@ -56,7 +53,6 @@ export function SoloLeaderboardShell({
   scoresSheet?: ReactNode;
   undo?: { disabled?: boolean; onUndo?: () => void };
   status?: { text: string; tone: StatusTone };
-  turnName?: string;
   turnPlate?: TurnPlateModel | null;
   gameover?: unknown;
   rules?: { title?: string; body: ReactNode; testId?: string };
@@ -67,14 +63,15 @@ export function SoloLeaderboardShell({
     onScores: () => onTabChange(tab === 'scores' ? 'play' : 'scores'),
   });
 
-  useEffect(() => {
-    if (tab === 'scores') setSheet('scores');
-    else if (sheet === 'scores') setSheet(null);
-  }, [tab, sheet, setSheet]);
-
-  const railActions = shellSheetActions(tab === 'scores' ? 'scores' : sheet, {
+  const railActions = shellSheetActions(sheet, {
     onRules: () => setSheet((s) => (s === 'rules' ? null : 'rules')),
-    onScores: () => onTabChange(tab === 'scores' ? 'play' : 'scores'),
+    onScores: () => {
+      setSheet((s) => {
+        const next = s === 'scores' ? null : 'scores';
+        onTabChange(next === 'scores' ? 'scores' : 'play');
+        return next;
+      });
+    },
     onMenu: () => setSheet((s) => (s === 'menu' ? null : 'menu')),
     onUndo: undo?.onUndo,
     undoDisabled: undo?.disabled ?? true,
@@ -84,12 +81,8 @@ export function SoloLeaderboardShell({
   const trayModel =
     tray ?? (pew || actions || reservePew ? { testId: `${testIdPrefix}-tray` } : null);
 
-  const resolvedTurnPlate =
-    turnPlateOverride === undefined
-      ? status && !gameover && status.tone !== 'done'
-        ? turnPlateFromMatchStatus(status, turnName ?? status.text)
-        : null
-      : turnPlateOverride;
+  const resolvedQuietHint =
+    quietHint ?? (status && showPlayChrome ? quietHintFromStatus(status, quietHint) : undefined);
 
   return (
     <>
@@ -107,23 +100,13 @@ export function SoloLeaderboardShell({
       <GameShell
         rail={{
           gameTitle,
-          turnPlate: showPlayChrome ? resolvedTurnPlate : null,
-          meta: (
-            <>
-              {info}
-              {showTabs ? (
-                <SoloPlayTabs value={tab} onChange={onTabChange} testIdPrefix={testIdPrefix} />
-              ) : null}
-            </>
-          ),
+          meta,
+          quietHint: resolvedQuietHint,
+          turnPlate: showPlayChrome ? turnPlateOverride : null,
           actions: railActions,
         }}
         stage={stage}
-        board={
-          tab === 'scores'
-            ? (scoresSheet ?? <LeaderboardPanel gameId={gameId} testIdPrefix={testIdPrefix} />)
-            : board
-        }
+        board={board}
         tray={showPlayChrome ? trayModel : null}
         trayContent={
           showPlayChrome ? (
@@ -144,6 +127,12 @@ export function SoloLeaderboardShell({
             />
           ) : null
         }
+        scoresSheet={
+          sheet === 'scores'
+            ? (scoresSheet ?? <LeaderboardPanel gameId={gameId} testIdPrefix={testIdPrefix} />)
+            : null
+        }
+        menuSheet={sheet === 'menu' ? <GameShellMenuSheet /> : null}
       />
     </>
   );

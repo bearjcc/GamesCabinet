@@ -340,12 +340,72 @@
   color: white;
 }
 
+.tracks-board-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  max-width: min(100%, 42rem);
+}
+
+.tracks-board-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(15 22 32 / 72%);
+  color: #efe9d9;
+  font-size: 0.78rem;
+  list-style: none;
+}
+
+.tracks-board-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+}
+
+.tracks-shell-tray {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: end;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tracks-shell-tray__scores {
+  font-size: 0.75rem;
+  min-width: 4.5rem;
+}
+
+.tracks-shell-tray__hand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.tracks-shell-tray__hand-label {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #5b5347;
+}
+
+.game-shell-tray .tracks-shell-tray {
+  background: var(--game-shell-cream, #f4efe2);
+}
+
 .tracks-pew {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   width: 100%;
-  max-width: min(42rem, 100%);
+  max-width: none;
   margin-inline: auto;
   box-sizing: border-box;
 }
@@ -397,6 +457,10 @@
   width: 100%;
   aspect-ratio: 1;
   height: auto;
+}
+
+.tracks-shell-tray .tracks-hand__card {
+  max-width: min(var(--tracks-cell, 4rem), 5.5rem);
 }
 
 .tracks-piles {

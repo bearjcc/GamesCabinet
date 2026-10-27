@@ -30,6 +30,16 @@ export function GameShellRail({ model }: { model: GameShellRailModel }) {
         <div className="game-shell-rail__title-block">
           <h2 className="game-shell-rail__title">{model.gameTitle}</h2>
           {model.meta ? <div className="game-shell-rail__meta">{model.meta}</div> : null}
+          {model.quietHint ? (
+            <p
+              className="game-shell-rail__quiet"
+              data-testid="game-shell-quiet-hint"
+              role="status"
+              aria-live="polite"
+            >
+              {model.quietHint}
+            </p>
+          ) : null}
         </div>
       </div>
       {model.turnPlate ? (
@@ -43,6 +53,7 @@ export function GameShellRail({ model }: { model: GameShellRailModel }) {
           return (
             <IconButton
               key={action.id}
+              className="game-shell-rail__icon"
               label={action.label}
               testId={`game-shell-action-${action.id}`}
               disabled={action.disabled}

@@ -1,6 +1,7 @@
 /* Shared Klondike / FreeCell — full-bleed felt, Kenney card proportions (140×190). */
 
-.play-table__board:has(.sol-board) {
+.play-table__board:has(.sol-board),
+.game-shell-stage:has(.sol-board) {
   place-items: stretch;
   align-content: stretch;
   background: #1a6b38;

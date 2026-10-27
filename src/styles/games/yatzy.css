@@ -1,3 +1,42 @@
+.yatzy-felt-spacer {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.yatzy-shell-tray {
+  display: grid;
+  gap: 0.65rem;
+  width: 100%;
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .yatzy-shell-tray {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.yatzy-shell-tray__card {
+  max-height: min(42vh, 20rem);
+  overflow: auto;
+}
+
+.yatzy-shell-tray__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.yatzy-shell-tray__rolls {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #5b5347;
+}
+
 .yatzy-card-wrap {
   width: min(100%, 22rem);
   align-self: center;
@@ -16,10 +55,20 @@
 }
 
 .yatzy-dice .tt-die {
-  width: 2.65rem;
-  height: 2.65rem;
-  min-width: 2.65rem;
-  min-height: 2.65rem;
+  width: 2.85rem;
+  height: 2.85rem;
+  min-width: 2.85rem;
+  min-height: 2.85rem;
+  background: #efe9d9;
+  border-color: #c9baa0;
+}
+
+.yatzy-dice .tt-die__img {
+  filter: invert(1);
+}
+
+.game-shell-tray .yatzy-dice .tt-die__img {
+  filter: invert(1) contrast(1.1);
 }
 
 .yatzy-dice.is-rolling .tt-die__img {
