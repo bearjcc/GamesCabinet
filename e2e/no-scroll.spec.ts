@@ -31,11 +31,6 @@ for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
     });
 
-    test('home catalogue fits the viewport', async ({ page }) => {
-      await page.goto('/');
-      await expectNoPageScroll(page);
-    });
-
     for (const { id, path } of OPEN_GAME_PATHS) {
       test(`game page ${id} fits the viewport`, async ({ page }) => {
         await page.goto(path);

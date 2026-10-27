@@ -50,7 +50,13 @@ export function JoinRoomPanel({
 
   return (
     <section className={compact ? 'join-panel join-panel--compact' : 'join-panel'}>
-      {compact ? null : title ? <h2>{title}</h2> : null}
+      {compact ? (
+        title ? (
+          <span className="join-panel__compact-label">{title}</span>
+        ) : null
+      ) : title ? (
+        <h2>{title}</h2>
+      ) : null}
       {!codeEditable ? <p className="code-display">{joinCode}</p> : null}
       <div className="join-row">
         {codeEditable ? (

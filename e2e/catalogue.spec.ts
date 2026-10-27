@@ -2,16 +2,18 @@ import { expect, test } from '@playwright/test';
 import { openJoinPanel, pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
-  test('home lists Phase 1 games in catalogue groups', async ({ page }) => {
+  test('home lists Phase 1 games on cabinet shelves', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'GamesCabinet home' })).toBeVisible();
-    await expect(page.getByTestId('catalogue-group-solo')).toBeVisible();
-    await expect(page.getByTestId('catalogue-group-with-others')).toBeVisible();
+    await expect(page.getByTestId('cabinet-home')).toBeVisible();
+    await expect(page.getByTestId('cabinet-focus-strip')).toBeVisible();
+    await expect(page.getByTestId('catalogue-shelf-boards')).toBeVisible();
+    await expect(page.getByTestId('catalogue-shelf-dice-tiles-words')).toBeVisible();
     await expect(
-      page.getByTestId('catalogue-group-solo').getByTestId('home-game-2048'),
+      page.getByTestId('catalogue-shelf-dice-tiles-words').getByTestId('home-game-2048'),
     ).toBeVisible();
     await expect(
-      page.getByTestId('catalogue-group-with-others').getByTestId('home-game-tic-tac-toe'),
+      page.getByTestId('catalogue-shelf-boards').getByTestId('home-game-tic-tac-toe'),
     ).toBeVisible();
     await expect(page.getByTestId('home-game-tic-tac-toe')).toBeVisible();
     await expect(page.getByTestId('home-game-connect-four')).toBeVisible();

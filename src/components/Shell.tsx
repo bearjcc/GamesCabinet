@@ -14,6 +14,8 @@ export function Shell({
   trailing,
   headerJoin,
   layout = 'default',
+  cabinetHome = false,
+  tagline,
 }: {
   title?: string;
   children: ReactNode;
@@ -23,14 +25,25 @@ export function Shell({
   /** Compact join-a-room control in the catalogue header. */
   headerJoin?: ReactNode;
   layout?: 'default' | 'catalogue';
+  /** Navy home header with tagline (catalogue landing). */
+  cabinetHome?: boolean;
+  tagline?: string;
 }) {
   useEffect(() => {
     document.title = title ? `${title} · ${APP_TITLE}` : APP_TITLE;
   }, [title]);
 
   return (
-    <div className={layout === 'catalogue' ? 'shell shell--catalogue' : 'shell'}>
-      <header className="topbar">
+    <div
+      className={[
+        'shell',
+        layout === 'catalogue' ? 'shell--catalogue' : '',
+        cabinetHome ? 'shell--cabinet-home' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <header className={cabinetHome ? 'topbar topbar--cabinet-home' : 'topbar'}>
         <div className="topbar-start">
           <Link to="/" className="brand" data-testid="shell-home" aria-label="GamesCabinet home">
             <img
@@ -42,6 +55,7 @@ export function Shell({
             />
             {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
           </Link>
+          {cabinetHome && tagline ? <p className="topbar-tagline">{tagline}</p> : null}
           {backTo ? (
             <Link to={backTo} className="btn ghost shell-back" data-testid="shell-back">
               Back

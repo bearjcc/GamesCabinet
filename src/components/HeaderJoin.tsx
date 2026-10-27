@@ -7,7 +7,7 @@ export function HeaderJoin() {
     <div className="header-join" data-testid="header-join">
       <JoinRoomPanel
         askName
-        title=""
+        title="Join a room"
         compact
         onJoined={(room) => {
           navigate(`/g/${room.gameName}/${room.matchID}`);

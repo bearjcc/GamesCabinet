@@ -653,3 +653,312 @@
     grid-area: auto;
   }
 }
+
+/* —— Cabinet home (box-lid shelves) —— */
+
+.shell--cabinet-home {
+  max-width: min(100%, 78rem);
+  padding-inline: 0;
+}
+
+.shell--cabinet-home .main {
+  padding-inline: var(--space-3);
+  gap: var(--space-2);
+}
+
+.topbar--cabinet-home {
+  margin-inline: 0;
+  margin-bottom: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  background: var(--brand-navy);
+  color: #efe9d9;
+  border-bottom: none;
+}
+
+.topbar--cabinet-home .brand {
+  color: #efe9d9;
+}
+
+.topbar--cabinet-home .topbar-tagline {
+  display: none;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #b8c0cc;
+  max-width: 15rem;
+}
+
+.topbar--cabinet-home .join-panel__compact-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #efe9d9;
+  white-space: nowrap;
+}
+
+.topbar--cabinet-home .join-panel--compact .join-row input {
+  background: rgb(15 22 32 / 55%);
+  border-color: rgb(255 255 255 / 18%);
+  color: #efe9d9;
+}
+
+.topbar--cabinet-home .icon-control {
+  color: #efe9d9;
+  border-color: rgb(255 255 255 / 22%);
+}
+
+@media (min-width: 52rem) {
+  .topbar--cabinet-home .topbar-tagline {
+    display: block;
+  }
+}
+
+.cabinet-home__pick {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-brand);
+  font-size: 1.65rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.cabinet-home__hint {
+  margin: 0 0 var(--space-2);
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+@media (min-width: 52rem) {
+  .cabinet-home__pick,
+  .cabinet-home__hint {
+    display: none;
+  }
+}
+
+.cabinet-focus {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  margin-top: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--brand-cream, #ebe4cf);
+  border: 1px solid #d6ccb2;
+}
+
+@media (min-width: 52rem) {
+  .cabinet-focus {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: var(--space-4);
+  }
+}
+
+.cabinet-focus__title {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.cabinet-focus__blurb {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.cabinet-focus__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cabinet-focus__tags li {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(92 58 34 / 10%);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cabinet-focus__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.cabinet-focus__browse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.cabinet-focus__arrow {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: 1px solid #c9bfaa;
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 45%);
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cabinet-focus__browse-label {
+  margin-left: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: lowercase;
+}
+
+.cabinet-focus__play {
+  min-width: 6.5rem;
+  background: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: #efe9d9;
+}
+
+.cabinet-focus__play:hover {
+  background: color-mix(in srgb, var(--brand-navy) 88%, #000);
+}
+
+.cabinet-shelf {
+  margin-top: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid #d6ccb2;
+}
+
+.cabinet-shelf__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.cabinet-shelf__title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cabinet-shelf__count {
+  margin-left: 0.35rem;
+  font-weight: 600;
+}
+
+.cabinet-shelf__see-all {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.cabinet-shelf__row {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  scroll-snap-type: x proximity;
+}
+
+.game-lid {
+  flex: 0 0 min(42vw, 9.5rem);
+  scroll-snap-align: start;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 8.5rem;
+  border: 2px solid #d6ccb2;
+  border-radius: var(--radius-lg);
+  background: #faf6ec;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 3px 0 rgb(92 58 34 / 12%);
+  transition:
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+}
+
+.game-lid:hover {
+  border-color: color-mix(in srgb, var(--ink) 25%, #d6ccb2);
+}
+
+.game-lid.is-selected {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.game-lid__art {
+  position: relative;
+  min-height: 5.5rem;
+  overflow: hidden;
+  border-radius: calc(var(--radius-lg) - 2px) calc(var(--radius-lg) - 2px) 0 0;
+  background: color-mix(in srgb, var(--game-accent, var(--game-blue)) 12%, #f5efe0);
+}
+
+.game-lid__art .game-thumb {
+  height: 100%;
+  aspect-ratio: auto;
+  border: 0;
+}
+
+.game-lid--placeholder .game-lid__art {
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(-32deg, #ebe4cf, #ebe4cf 6px, #e2d9c4 6px, #e2d9c4 12px);
+}
+
+.game-lid__placeholder {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a8175;
+}
+
+.game-lid__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-top: 1px solid #e0d6c2;
+  background: #fffdf6;
+}
+
+.game-lid__name {
+  font-family: var(--font-brand);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.game-lid__players {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (min-width: 52rem) {
+  .game-lid {
+    flex-basis: 8.75rem;
+  }
+
+  .cabinet-shelf__row {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
