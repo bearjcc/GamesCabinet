@@ -25,6 +25,10 @@
   color: #efe9d9;
 }
 
+.game-shell-rail:not(:has(.game-shell-rail__center)) {
+  grid-template-columns: 1fr auto;
+}
+
 .game-shell-rail__start {
   display: flex;
   align-items: center;
@@ -122,6 +126,7 @@
 .game-shell-rail__actions {
   display: flex;
   justify-content: flex-end;
+  justify-self: end;
   gap: 0.15rem;
 }
 
@@ -272,6 +277,43 @@
   gap: 0.25rem;
   padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
   background: var(--game-shell-navy);
+}
+
+.game-shell-bottom-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-width: 3.25rem;
+  padding: 0.2rem 0.35rem;
+  border: none;
+  background: transparent;
+  color: #efe9d9;
+  font: inherit;
+  font-size: 0.62rem;
+  line-height: 1.1;
+  cursor: pointer;
+  opacity: 1;
+}
+
+.game-shell-bottom-bar__item:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.game-shell-bottom-bar__item.is-pressed {
+  color: var(--brand-yellow, #ed9f18);
+}
+
+.game-shell-bottom-bar__icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.game-shell-bottom-bar__label {
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .game-shell-sheet {

@@ -19,7 +19,7 @@ async function reachTracksPlay(page: import('@playwright/test').Page) {
   await page.evaluate(() => {
     localStorage.setItem('gamescabinet.unlockedGames', '["tracks"]');
   });
-  await page.goto('/game/tracks');
+  await page.goto('/game/tracks?seats=1');
   await page.getByTestId('play-start').click();
   await page.getByTestId('tracks-draft').locator('button').first().click();
   await expect(page.getByTestId('tracks-board')).toBeVisible({ timeout: 15_000 });

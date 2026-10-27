@@ -15,6 +15,15 @@ function seatLabel(matchData: BoardProps['matchData'], i: number): string {
   return playerDisplayName(String(i), { matchData });
 }
 
+function tracksPlayerName(
+  matchData: BoardProps['matchData'],
+  playerIndex: number,
+  numPlayers: number,
+): string {
+  if (numPlayers === 1) return 'You';
+  return seatLabel(matchData, playerIndex);
+}
+
 /** Plain-language reasons for an illegal drop (placeError keys). */
 export const HINTS: Record<string, string> = {
   'off-grid': 'That slot is off the board.',
@@ -136,27 +145,42 @@ export function TracksBoard({
   let status: string;
   let tone: 'neutral' | 'you' | 'wait' | 'done' = 'wait';
   const over = ctx.gameover as { winners?: string[] } | undefined;
-  const who = seatLabel(matchData, Number(ctx.currentPlayer));
+  const solo = ctx.numPlayers === 1;
+  const who = tracksPlayerName(matchData, Number(ctx.currentPlayer), ctx.numPlayers);
   if (over) {
     tone = 'done';
     status = over.winners?.length
       ? over.winners.length > 1
         ? `Tie: ${over.winners.map((w) => seatLabel(matchData, Number(w))).join(' & ')}`
-        : `${seatLabel(matchData, Number(over.winners[0]))} wins`
+        : solo
+          ? 'You win'
+          : `${seatLabel(matchData, Number(over.winners[0]))} wins`
       : 'Game over';
   } else if (ctx.phase === 'draft') {
-    status = myTurn ? `${who}: keep one objective` : `${who} is drafting`;
+    status = myTurn
+      ? solo
+        ? 'Keep one objective'
+        : `${who}: keep one objective`
+      : solo
+        ? 'Drafting…'
+        : `${who} is drafting`;
     if (myTurn) tone = 'you';
   } else if (myTurn) {
     tone = 'you';
     status =
       G.drawnId === null
-        ? `${who}: draw from the deck${ctx.numPlayers > 1 ? ' or the discard pile' : ''}`
+        ? solo
+          ? 'Draw from the deck'
+          : `${who}: draw from the deck or the discard pile`
         : G.drewFromDiscard
-          ? `${who}: play the card you took from the discard`
-          : `${who}: play a card, or tap the discard pile to discard it`;
+          ? solo
+            ? 'Play the card you took from the discard'
+            : `${who}: play the card you took from the discard`
+          : solo
+            ? 'Play a card, or tap the discard pile to discard it'
+            : `${who}: play a card, or tap the discard pile to discard it`;
   } else {
-    status = `${seatLabel(matchData, Number(ctx.currentPlayer))}'s turn`;
+    status = solo ? 'Your turn' : `${seatLabel(matchData, Number(ctx.currentPlayer))}'s turn`;
   }
 
   const railMeta = `Round ${Math.min(G.round, 5)} of 5`;
@@ -245,7 +269,7 @@ export function TracksBoard({
                 data-testid={`tracks-target-${i}`}
                 onClick={() => setViewBoard(i)}
               >
-                {seatLabel(matchData, i)}
+                {tracksPlayerName(matchData, i, ctx.numPlayers)}
                 {G.connectedOrder.includes(String(i)) ? ' *' : ''}
               </button>
             ))}
@@ -331,7 +355,7 @@ export function TracksBoard({
       model={{
         testId: 'tracks-tray-scores',
         rows: G.scores.map((s, i) => ({
-          label: seatLabel(matchData, i),
+          label: tracksPlayerName(matchData, i, ctx.numPlayers),
           value: `${s}${G.connectedOrder.includes(String(i)) ? ' *' : ''}`,
         })),
       }}
@@ -343,8 +367,8 @@ export function TracksBoard({
       <div className="tracks-shell-tray" data-testid="tracks-pew">
         <div className="tracks-shell-tray__scores">{trayScores}</div>
         <div className="tracks-shell-tray__hand">
+          <p className="tracks-shell-tray__hand-label">{solo ? 'Your hand' : `${who}'s hand`}</p>
           {handRail}
-          <p className="tracks-shell-tray__hand-label">{who}&apos;s hand</p>
         </div>
         <div className="tracks-shell-tray__piles tracks-piles">
           <button

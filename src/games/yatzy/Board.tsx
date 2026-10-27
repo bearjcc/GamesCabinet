@@ -216,11 +216,11 @@ export function YatzyBoard({
 
   const actionSurface = <ActionSurface label="Yatzy actions" actions={surfaceActions} />;
 
-  const trayPlay = (
-    <div className="yatzy-shell-tray">
-      <div className="yatzy-shell-tray__card">{card}</div>
-      <div className="yatzy-shell-tray__controls">
-        <p className="yatzy-shell-tray__rolls" data-testid="yatzy-roll-meta">
+  const playStage = (
+    <div className="yatzy-stage" data-testid="yatzy-stage">
+      <div className="yatzy-stage__card">{card}</div>
+      <div className="yatzy-stage__play">
+        <p className="yatzy-stage__rolls" data-testid="yatzy-roll-meta">
           Roll {G.rolls}/3
         </p>
         {pew}
@@ -238,12 +238,11 @@ export function YatzyBoard({
         tab={tab}
         onTabChange={setTab}
         testIdPrefix="yatzy"
+        stage={{ felt: 'green' }}
         status={{ text: status, tone }}
         gameover={ctx.gameover}
         rules={yatzyRules}
-        board={<div className="yatzy-felt-spacer" aria-hidden />}
-        pew={trayPlay}
-        tray={{ testId: 'yatzy-tray' }}
+        board={playStage}
       />
     );
   }
@@ -253,10 +252,9 @@ export function YatzyBoard({
       gameTitle="Yatzy"
       ctx={ctx}
       status={{ text: status, tone }}
+      stage={{ felt: 'green' }}
       rules={yatzyRules}
-      board={<div className="yatzy-felt-spacer" aria-hidden />}
-      tray={{ testId: 'yatzy-tray' }}
-      trayContent={trayPlay}
+      board={playStage}
     />
   );
 }

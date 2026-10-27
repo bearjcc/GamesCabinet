@@ -45,7 +45,9 @@ export function measureTracksLayout(
 ): TracksLayoutMetrics {
   const vw = window.innerWidth;
   const gutterPx = Math.round(Math.min(48, Math.max(28, (vw * 48) / 820)));
-  const cellFromWidth = (vw - 2 * gutterPx) / 8;
+  /** Centred 8×cell + 2×gutter frame — not full viewport width on large screens. */
+  const maxCellFromWidth = 112;
+  const cellFromWidth = Math.min((vw - 2 * gutterPx) / 8, maxCellFromWidth);
 
   const fieldTop = fieldEl?.getBoundingClientRect().top ?? 0;
   const compact = window.innerHeight <= 840 && window.innerWidth > window.innerHeight;
