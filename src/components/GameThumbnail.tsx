@@ -410,37 +410,14 @@ function BattleshipLid() {
   );
 }
 
-function TracksLidCell({
-  kind,
-  rot,
-  slot,
-}: {
-  kind: 'straight' | 'curve' | 'junction';
-  rot: number;
-  slot: string;
-}) {
-  return (
-    <div className="game-thumb__tracks-slot" data-slot={slot}>
-      <div
-        className="game-thumb__tracks-slot-inner"
-        style={{ transform: `rotate(${rot * 90}deg)` }}
-      >
-        <img src={`/assets/tracks/512/${kind}.webp`} alt="" decoding="async" />
-      </div>
-    </div>
-  );
-}
-
 function TracksLid() {
   return (
-    <div className="game-thumb__tracks-lid" aria-hidden="true">
-      <div className="game-thumb__tracks-run">
-        <TracksLidCell kind="straight" rot={0} slot="s1" />
-        <TracksLidCell kind="straight" rot={0} slot="s2" />
-        <TracksLidCell kind="curve" rot={2} slot="cv" />
-        <TracksLidCell kind="junction" rot={3} slot="jn" />
-      </div>
-    </div>
+    <img
+      className="game-thumb__tracks-photo"
+      src="/assets/lids/tracks-lid.webp"
+      alt=""
+      decoding="async"
+    />
   );
 }
 
