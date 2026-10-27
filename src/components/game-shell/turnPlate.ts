@@ -1,6 +1,25 @@
 import type { MatchStatus } from '../../lib/matchStatus';
 import type { TurnPlateModel, TurnPlateTone } from './types';
 
+export function isLocalYouLabel(name: string): boolean {
+  return name.trim().toLowerCase() === 'you';
+}
+
+/** Status / info line: “Your turn” for the local seat, “{name}'s turn” otherwise. */
+export function namedTurnStatusLine(actorName: string, hint?: string): string {
+  const name = actorName.trim();
+  const base = isLocalYouLabel(name) ? 'Your turn' : `${name}'s turn`;
+  const trimmedHint = hint?.trim();
+  return trimmedHint ? `${base} — ${trimmedHint}` : base;
+}
+
+/** Centre plate title during play (not possessive for “You”). */
+export function turnPlateHeadline(actorName: string): string {
+  const name = actorName.trim();
+  if (isLocalYouLabel(name)) return 'You';
+  return `${name}'s turn`;
+}
+
 export function parseActorFromTurnStatus(text: string): string | null {
   const trimmed = text.trim();
   const possessive = /^(.+?)'s turn\b/i.exec(trimmed);
@@ -22,7 +41,19 @@ function hintFromStatusText(text: string, explicit?: string): string | undefined
   return dash?.[1]?.trim();
 }
 
-/** Multiplayer centre plate: “{name}'s turn” plus optional hint. */
+function initialFromHeadline(headline: string, fallback?: string): string {
+  if (fallback?.trim()) return fallback.trim().charAt(0).toUpperCase();
+  const trimmed = headline.trim();
+  if (!trimmed) return '?';
+  if (/^draw$/i.test(trimmed)) return '=';
+  const youWin = /^you win$/i.test(trimmed);
+  if (youWin) return 'Y';
+  const wins = /^(.+?)\s+wins$/i.exec(trimmed);
+  if (wins?.[1]?.trim()) return wins[1].trim().charAt(0).toUpperCase();
+  return trimmed.charAt(0).toUpperCase();
+}
+
+/** Multiplayer centre plate: headline plus optional hint. */
 export function multiplayerTurnPlate(
   actorName: string,
   options: {
@@ -30,15 +61,17 @@ export function multiplayerTurnPlate(
     tone: TurnPlateTone;
     seatColour?: string;
     initial?: string;
+    headline?: string;
   },
 ): TurnPlateModel {
   const name = actorName.trim();
+  const headline = options.headline?.trim() || turnPlateHeadline(name);
   return {
-    name,
+    headline,
     hint: options.hint?.trim() || undefined,
     tone: options.tone,
     seatColour: options.seatColour,
-    initial: options.initial ?? (name ? name.charAt(0).toUpperCase() : '?'),
+    initial: options.initial ?? initialFromHeadline(headline, name),
   };
 }
 
@@ -64,11 +97,24 @@ export function turnPlateFromMatchStatus(
   },
 ): TurnPlateModel | null {
   if (options?.mode === 'solo') return null;
+
+  const tone = toneFromStatus(status.tone);
+
+  if (status.tone === 'done') {
+    const headline = status.text.trim();
+    return {
+      headline,
+      tone: 'done',
+      seatColour: options?.seatColour,
+      initial: options?.initial ?? initialFromHeadline(headline, actorName),
+    };
+  }
+
   const name = parseActorFromTurnStatus(status.text) ?? actorName.trim();
   const hint = hintFromStatusText(status.text, options?.hint);
   return multiplayerTurnPlate(name, {
     hint,
-    tone: toneFromStatus(status.tone),
+    tone,
     seatColour: options?.seatColour,
     initial: options?.initial,
   });

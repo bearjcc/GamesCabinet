@@ -25,6 +25,11 @@ test('Connect Four game-over actions sit below the board, not over seat chips', 
 
   await expect(page.getByTestId('match-chrome-overlay')).toBeVisible({ timeout: 60_000 });
 
+  const plate = page.getByTestId('game-shell-turn-plate');
+  await expect(plate).toBeVisible();
+  await expect(plate).toContainText(/wins|Draw/i);
+  await expect(plate).not.toContainText(/'s turn/i);
+
   const layout = await page.evaluate(() => {
     const overlay = document.querySelector('[data-testid="match-chrome-overlay"]');
     const chips = document.querySelector('.game-shell-stage__under');

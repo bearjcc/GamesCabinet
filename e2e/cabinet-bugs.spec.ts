@@ -14,9 +14,15 @@ test.describe('first-minute fixes', () => {
   });
 
   test('connect four names the seat colour on the turn line', async ({ page }) => {
-    await page.goto('/vs-bot/connect-four');
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('gamescabinet.nickname', 'You');
+    });
+    await page.goto('/vs-bot/connect-four?kinds=local,bot');
     const plate = page.getByTestId('game-shell-turn-plate');
-    await expect(plate).toContainText(/'s turn/);
+    await expect(plate.getByText('You', { exact: true })).toBeVisible();
+    await expect(plate).toContainText(/drop a disc/i);
+    await expect(plate).not.toContainText(/You's/);
     await expect(plate).not.toContainText(/Player 1/);
     await expect(plate).not.toContainText(/Yellow's turn/);
   });
@@ -29,7 +35,8 @@ test.describe('first-minute fixes', () => {
     const plate = page.getByTestId('game-shell-turn-plate');
     await expect(plate).toBeVisible();
     await expect(plate).not.toContainText(/Player 1/);
-    await expect(plate).toContainText(/'s turn/);
+    await expect(plate.getByText('You', { exact: true })).toBeVisible();
+    await expect(plate).not.toContainText(/You's/);
   });
 
   test('tracks draft shows distinct objective choices', async ({ page }) => {

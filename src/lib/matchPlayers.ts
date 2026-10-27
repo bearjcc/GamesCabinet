@@ -1,4 +1,5 @@
 import type { FilteredMetadata } from 'boardgame.io';
+import { namedTurnStatusLine } from '../components/game-shell/turnPlate';
 import { defaultSeatDisplayName } from './seatNames';
 
 export type PlayerNameOptions = {
@@ -32,9 +33,7 @@ export function turnStatusText(
   hint?: string,
 ): string {
   const name = playerDisplayName(currentPlayer, options);
-  const base = `${name}'s turn`;
-  const trimmedHint = hint?.trim();
-  return trimmedHint ? `${base} — ${trimmedHint}` : base;
+  return namedTurnStatusLine(name, hint);
 }
 
 /** Pull an action hint from legacy "Your turn — …" copy. */

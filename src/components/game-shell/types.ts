@@ -3,7 +3,8 @@ import type { ReactNode } from 'react';
 export type TurnPlateTone = 'you' | 'wait' | 'neutral' | 'done';
 
 export type TurnPlateModel = {
-  name: string;
+  /** Primary rail line (never “You's turn” — use “You” or “Bear's turn”). */
+  headline: string;
   hint?: string;
   tone: TurnPlateTone;
   seatColour?: string;

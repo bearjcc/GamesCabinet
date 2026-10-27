@@ -23,8 +23,16 @@ type Shot = {
 };
 
 async function unlockTracks(page: Page) {
+  await page.goto(`${base}/`);
   await page.evaluate(() => {
     localStorage.setItem('gamescabinet.unlockedGames', '["tracks","hogwarts-battle"]');
+  });
+}
+
+async function ensureNicknameYou(page: Page) {
+  await page.goto(`${base}/`);
+  await page.evaluate(() => {
+    localStorage.setItem('gamescabinet.nickname', 'You');
   });
 }
 
@@ -40,9 +48,7 @@ async function countStartRowTrack(page: Page): Promise<number> {
 }
 
 async function playConnectFourMid(page: Page) {
-  await page.evaluate(() => {
-    localStorage.setItem('gamescabinet.nickname', 'You');
-  });
+  await ensureNicknameYou(page);
   await page.goto(`${base}/vs-bot/connect-four?kinds=local,bot`);
   await page.getByTestId('c4-board').waitFor();
   const pattern = [0, 1, 2, 1, 0, 2, 3, 2, 1, 3];
@@ -74,9 +80,7 @@ async function playConnectFourMid(page: Page) {
 }
 
 async function playConnectFourGameOver(page: Page) {
-  await page.evaluate(() => {
-    localStorage.setItem('gamescabinet.nickname', 'You');
-  });
+  await ensureNicknameYou(page);
   await page.goto(`${base}/vs-bot/connect-four?kinds=local,bot`);
   await page.getByTestId('c4-board').waitFor();
 
@@ -117,10 +121,10 @@ async function dismissTracksHandoff(page: Page): Promise<boolean> {
 }
 
 async function playTracksInProgress(page: Page) {
-  await page.goto(`${base}/`);
   await unlockTracks(page);
   await page.goto(`${base}/play/tracks?seats=3&names=Bear,Ana,Kit&discard=2021&junction=1`);
-  for (let step = 0; step < 40; step++) {
+  const enterPlayDeadline = Date.now() + 55_000;
+  while (Date.now() < enterPlayDeadline) {
     if (
       await page
         .getByTestId('tracks-grass-field')
@@ -137,16 +141,11 @@ async function playTracksInProgress(page: Page) {
       await draftTracksPlayer(page);
       continue;
     }
-    const ready = page.getByTestId('tracks-handoff-ready');
-    if (await ready.isVisible().catch(() => false)) {
-      await ready.click();
-      continue;
-    }
-    await page.waitForTimeout(200);
+    await dismissTracksHandoff(page);
+    await page.waitForTimeout(250);
   }
-  await page.getByTestId('tracks-grass-field').waitFor();
 
-  const deadline = Date.now() + 60_000;
+  const deadline = Date.now() + 25_000;
   while (Date.now() < deadline) {
     const onStart = await countStartRowTrack(page);
     if (onStart >= 5) break;
@@ -315,18 +314,26 @@ const shots: Shot[] = [
 ];
 
 async function main() {
+  console.log('capture-cabinet-28: starting');
   mkdirSync(OUT, { recursive: true });
+  const only = process.env.CAPTURE_SHOTS?.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const selected = only?.length ? shots.filter((s) => only.includes(s.file)) : shots;
   const browser = await chromium.launch({
     executablePath:
       process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
   });
 
-  for (const viewport of VIEWPORTS) {
+  const viewportFilter = process.env.CAPTURE_VIEWPORT;
+  const viewports = viewportFilter ? VIEWPORTS.filter((v) => v.name === viewportFilter) : VIEWPORTS;
+
+  for (const viewport of viewports) {
     const context = await browser.newContext({
       viewport: { width: viewport.width, height: viewport.height },
     });
     const page = await context.newPage();
-    for (const shot of shots) {
+    for (const shot of selected) {
       await shot.run(page);
       await page.waitForTimeout(300);
       const file = path.join(OUT, `${shot.file}-${viewport.name}.png`);

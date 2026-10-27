@@ -1,5 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { quietHintFromStatus, soloQuietHint, turnPlateFromMatchStatus } from './turnPlate';
+import {
+  namedTurnStatusLine,
+  quietHintFromStatus,
+  soloQuietHint,
+  turnPlateFromMatchStatus,
+  turnPlateHeadline,
+} from './turnPlate';
+
+describe('turnPlateHeadline', () => {
+  it('never possessives “You”', () => {
+    expect(turnPlateHeadline('You')).toBe('You');
+    expect(turnPlateHeadline('Bear')).toBe("Bear's turn");
+  });
+});
+
+describe('namedTurnStatusLine', () => {
+  it('uses “Your turn” for the local seat label', () => {
+    expect(namedTurnStatusLine('You')).toBe('Your turn');
+    expect(namedTurnStatusLine('You', 'drop a disc')).toBe('Your turn — drop a disc');
+    expect(namedTurnStatusLine('Bot')).toBe("Bot's turn");
+  });
+});
 
 describe('turnPlateFromMatchStatus', () => {
   it('maps match status tone and hint for multiplayer', () => {
@@ -9,9 +30,34 @@ describe('turnPlateFromMatchStatus', () => {
       { seatColour: '#ed9f18', mode: 'multiplayer' },
     );
     expect(plate).toMatchObject({
-      name: 'Bear',
+      headline: "Bear's turn",
       hint: 'drop a disc',
       tone: 'you',
+      seatColour: '#ed9f18',
+      initial: 'B',
+    });
+  });
+
+  it('shows “You” with hint for vs-bot your-turn status', () => {
+    const plate = turnPlateFromMatchStatus({ text: 'Your turn', tone: 'you' }, 'You', {
+      hint: 'Drop a disc',
+      seatColour: '#c92a2a',
+    });
+    expect(plate).toMatchObject({
+      headline: 'You',
+      hint: 'Drop a disc',
+      tone: 'you',
+      initial: 'Y',
+    });
+  });
+
+  it('shows game-over result on the plate', () => {
+    const plate = turnPlateFromMatchStatus({ text: 'Bot wins', tone: 'done' }, 'Bot', {
+      seatColour: '#ed9f18',
+    });
+    expect(plate).toMatchObject({
+      headline: 'Bot wins',
+      tone: 'done',
       seatColour: '#ed9f18',
       initial: 'B',
     });
@@ -34,7 +80,7 @@ describe('turnPlateFromMatchStatus', () => {
       { mode: 'multiplayer' },
     );
     expect(plate).toMatchObject({
-      name: 'Red',
+      headline: "Red's turn",
       hint: 'roll the dice',
       tone: 'wait',
     });
@@ -47,7 +93,7 @@ describe('turnPlateFromMatchStatus', () => {
       { mode: 'multiplayer' },
     );
     expect(plate).toMatchObject({
-      name: 'Bear',
+      headline: "Bear's turn",
       hint: 'draw from the deck',
     });
   });

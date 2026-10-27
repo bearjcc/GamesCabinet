@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   GameShell,
   GameShellMenuSheet,
+  namedTurnStatusLine,
   RulesPanel,
   SeatChip,
   shellSheetActions,
@@ -63,8 +64,9 @@ function deriveC4Status(
   }
 
   const actor = seatLabel(ctx.currentPlayer);
-  if (yourTurn) return { text: `${actor}'s turn`, tone: 'you' };
-  return { text: `${actor}'s turn`, tone: 'wait' };
+  const line = namedTurnStatusLine(actor);
+  if (yourTurn) return { text: line, tone: 'you' };
+  return { text: line, tone: 'wait' };
 }
 
 export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardProps<C4State>) {
@@ -87,13 +89,20 @@ export function ConnectFourBoard({ G, ctx, moves, playerID, matchData }: BoardPr
   const seat0Colour = useSeatColour('0');
   const seat1Colour = useSeatColour('1');
   const actor = c4SeatLabel(currentPlayer);
-  const turnPlate =
-    ctx.gameover || tone === 'done'
-      ? null
-      : turnPlateFromMatchStatus({ text: status, tone }, actor, {
-          seatColour,
-          hint: yourTurn ? 'Drop a disc' : undefined,
-        });
+  const resultSeatColour = (() => {
+    if (!ctx.gameover) return undefined;
+    const over = ctx.gameover as Record<string, unknown>;
+    if ('draw' in over) return undefined;
+    const winner = over.winner;
+    if (winner === '0') return seat0Colour;
+    if (winner === '1') return seat1Colour;
+    return undefined;
+  })();
+
+  const turnPlate = turnPlateFromMatchStatus({ text: status, tone }, actor, {
+    seatColour: tone === 'done' ? resultSeatColour : seatColour,
+    hint: !ctx.gameover && yourTurn ? 'Drop a disc' : undefined,
+  });
 
   const winningCells =
     ctx.gameover && !('draw' in (ctx.gameover as Record<string, unknown>))

@@ -1,6 +1,12 @@
 import type { BoardProps } from 'boardgame.io/react';
 import { type ReactNode, useEffect, useState } from 'react';
-import { MatchGameShell, Scoreboard, turnPlateFromMatchStatus } from '../../components/game-shell';
+import {
+  MatchGameShell,
+  namedTurnStatusLine,
+  Scoreboard,
+  turnPlateFromMatchStatus,
+} from '../../components/game-shell';
+import { useSeatColour } from '../../components/SeatColours';
 import { useHotseatClaimSeat } from '../../lib/hotseat';
 import { usePlayerDisplayName } from '../../lib/usePlayerDisplayName';
 import { SOLO_DISCARD_LIMIT, type TracksState } from './game';
@@ -72,6 +78,10 @@ export function TracksBoard({
   const displaySeatName = usePlayerDisplayName();
   const tracksPlayerName = (playerIndex: number) =>
     ctx.numPlayers === 1 ? 'You' : displaySeatName(String(playerIndex), matchData);
+
+  const gameoverWinners = (ctx.gameover as { winners?: string[] } | undefined)?.winners;
+  const plateSeatId = gameoverWinners?.length === 1 ? gameoverWinners[0]! : ctx.currentPlayer;
+  const plateSeatColour = useSeatColour(plateSeatId);
 
   useEffect(() => {
     preloadTracksTiles();
@@ -175,7 +185,7 @@ export function TracksBoard({
             ? 'Play a card, or tap the discard pile to discard it'
             : `${who}: play a card, or tap the discard pile to discard it`;
   } else {
-    status = solo ? 'Your turn' : `${tracksPlayerName(Number(ctx.currentPlayer))}'s turn`;
+    status = solo ? 'Your turn' : namedTurnStatusLine(tracksPlayerName(Number(ctx.currentPlayer)));
   }
 
   const railMeta = `Round ${Math.min(G.round, 5)} of 5`;
@@ -452,19 +462,22 @@ export function TracksBoard({
     </ul>
   );
 
-  const turnPlate =
-    ctx.gameover || tone === 'done'
-      ? null
-      : turnPlateFromMatchStatus({ text: status, tone }, who, {
-          hint:
-            ctx.phase === 'play' && myTurn
-              ? G.drawnId === null
-                ? 'draw from the deck'
-                : 'play a card'
-              : ctx.phase === 'draft' && myTurn
-                ? 'keep one objective'
-                : undefined,
-        });
+  const turnPlate = turnPlateFromMatchStatus({ text: status, tone }, who, {
+    seatColour:
+      tone === 'done'
+        ? gameoverWinners?.length === 1
+          ? plateSeatColour
+          : undefined
+        : plateSeatColour,
+    hint:
+      !ctx.gameover && ctx.phase === 'play' && myTurn
+        ? G.drawnId === null
+          ? 'draw from the deck'
+          : 'play a card'
+        : !ctx.gameover && ctx.phase === 'draft' && myTurn
+          ? 'keep one objective'
+          : undefined,
+  });
 
   return (
     <MatchGameShell

@@ -174,7 +174,7 @@ describe('measureTracksLayout', () => {
     playTable.className = 'play-table';
     playTable.setAttribute('data-tracks-cell-px', '100');
     const field = {
-      getBoundingClientRect: () => ({ top: 20 }),
+      getBoundingClientRect: () => ({ top: 20, width: 884 }),
       querySelector: () => null,
       closest: (sel: string) => (sel === '.play-table' ? playTable : null),
     } as unknown as HTMLElement;
@@ -183,7 +183,7 @@ describe('measureTracksLayout', () => {
       getBoundingClientRect: () => ({ top: 780 }),
     } as unknown as HTMLElement;
     const { cellPx } = measureTracksLayout(field, pew);
-    expect(cellPx).toBe(98);
+    expect(cellPx).toBe(92);
   });
 
   it('uses landscape play padding fallback when the play surface is missing', () => {
@@ -296,7 +296,7 @@ describe('useTracksLayout', () => {
         'div',
         null,
         createElement('div', { ref: infoRef, style: { height: '120px' } }),
-        createElement('div', { ref: fieldRef, style: { height: '300px' } }),
+        createElement('div', { ref: fieldRef, style: { height: '300px', width: '1180px' } }),
         createElement('div', { ref: pewRef, style: { height: '180px' } }),
       );
     }

@@ -156,6 +156,22 @@ for (const viewport of VIEWPORTS) {
         expect(imgBox!.width).toBeGreaterThanOrEqual(cell * 0.75 - 1);
       }
 
+      const startStub = page.getByTestId('tracks-terminal-start');
+      const endStub = page.getByTestId('tracks-terminal-end');
+      await expect(startStub).toBeVisible();
+      await expect(endStub).toBeVisible();
+      const stubBounds = await page.evaluate((vw) => {
+        const start = document.querySelector('[data-testid="tracks-terminal-start"]');
+        const end = document.querySelector('[data-testid="tracks-terminal-end"]');
+        if (!start || !end) return null;
+        const s = start.getBoundingClientRect();
+        const e = end.getBoundingClientRect();
+        return { startLeft: s.left, endRight: e.right, vw };
+      }, viewport.width);
+      expect(stubBounds).not.toBeNull();
+      expect(stubBounds!.startLeft).toBeGreaterThanOrEqual(0);
+      expect(stubBounds!.endRight).toBeLessThanOrEqual(viewport.width + 0.5);
+
       if (viewport.name !== 'phone') {
         const metrics = await measureLayout(page, viewport.width);
         expect(metrics.frameMarginDelta).toBeLessThanOrEqual(4);
@@ -168,6 +184,20 @@ for (const viewport of VIEWPORTS) {
       }
 
       await expectNoPageScroll(page);
+
+      const shotName = process.env.SAVE_TRACKS_SHOT;
+      if (shotName === viewport.name) {
+        const outFile = {
+          desktop: '1280x800',
+          'tablet-portrait': '820x1180',
+          phone: '390x844',
+        }[viewport.name];
+        if (outFile) {
+          await page.screenshot({
+            path: `/cursor/stores/self/cabinet/28/play-tracks-${outFile}.png`,
+          });
+        }
+      }
     });
   });
 }

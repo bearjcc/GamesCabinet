@@ -160,20 +160,18 @@ export function ChessBoard({ G, ctx, moves, playerID }: BoardProps<ChessState>) 
     turnHint: yourTurn ? (selected === null ? 'tap a piece' : 'tap a square to move') : undefined,
   });
   const [sheet, setSheet] = useState<'rules' | 'scores' | 'menu' | null>(null);
-  const turnPlate =
-    ctx.gameover || tone === 'done'
-      ? null
-      : turnPlateFromMatchStatus(
-          { text: status, tone },
-          ctx.currentPlayer === '0' ? 'White' : 'Black',
-          {
-            hint: yourTurn
-              ? selected === null
-                ? 'tap a piece'
-                : 'tap a square to move'
-              : undefined,
-          },
-        );
+  const turnPlate = turnPlateFromMatchStatus(
+    { text: status, tone },
+    ctx.currentPlayer === '0' ? 'White' : 'Black',
+    {
+      hint:
+        !ctx.gameover && yourTurn
+          ? selected === null
+            ? 'tap a piece'
+            : 'tap a square to move'
+          : undefined,
+    },
+  );
 
   const handleSquareClick = (index: number, piece: Piece | null, isTarget: boolean) => {
     if (!yourTurn) return;

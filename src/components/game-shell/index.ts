@@ -10,10 +10,13 @@ export { Scoreboard, toMatchScores } from './Scoreboard';
 export { SeatChip } from './SeatChip';
 export { TurnPlate } from './TurnPlate';
 export {
+  isLocalYouLabel,
   multiplayerTurnPlate,
+  namedTurnStatusLine,
   quietHintFromStatus,
   soloQuietHint,
   turnPlateFromMatchStatus,
+  turnPlateHeadline,
 } from './turnPlate';
 export type * from './types';
 export { useShellSheets } from './useShellSheets';

@@ -65,7 +65,7 @@ export function MatchGameShell({
 
   const resolvedTurnPlate =
     turnPlateOverride === undefined
-      ? soloQuiet || ctx.gameover || status.tone === 'done'
+      ? soloQuiet
         ? null
         : turnPlateFromMatchStatus(status, turnName ?? turnNameFromStatus(status.text), {
             mode: 'multiplayer',

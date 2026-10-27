@@ -21,7 +21,7 @@ export function TurnPlate({
         {model.initial}
       </span>
       <span className="game-shell-turn-plate__copy">
-        <span className="game-shell-turn-plate__name">{model.name}&apos;s turn</span>
+        <span className="game-shell-turn-plate__name">{model.headline}</span>
         {model.hint ? <span className="game-shell-turn-plate__hint">{model.hint}</span> : null}
       </span>
     </div>

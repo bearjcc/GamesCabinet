@@ -50,9 +50,15 @@ export function measureTracksLayout(
 ): TracksLayoutMetrics {
   const vw = window.innerWidth;
   const gutterPx = Math.round(Math.min(48, Math.max(28, (vw * 48) / 820)));
-  /** Centred 8×cell + 2×gutter frame — not full viewport width on large screens. */
+  /** Centred 8×cell + 2×gutter frame — fit inside the grass field with side margin. */
   const maxCellFromWidth = 112;
-  const cellFromWidth = Math.min((vw - 2 * gutterPx) / 8, maxCellFromWidth);
+  const measuredField = fieldEl?.getBoundingClientRect().width ?? 0;
+  const fieldWidth = measuredField > 40 ? measuredField : vw;
+  /** Room for START/END sign labels that hang slightly outside the gutter column. */
+  const terminalSignInset = 20;
+  const frameSideMargin = 8;
+  const frameBudget = Math.max(0, fieldWidth - frameSideMargin - 2 * terminalSignInset);
+  const cellFromWidth = Math.min((frameBudget - 2 * gutterPx) / 8, maxCellFromWidth);
 
   const fieldTop = fieldEl?.getBoundingClientRect().top ?? 0;
   const compact = window.innerHeight <= 840 && window.innerWidth > window.innerHeight;

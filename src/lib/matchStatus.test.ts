@@ -27,7 +27,7 @@ describe('deriveMatchStatus', () => {
 
   it('names the active seat on your turn instead of generic copy', () => {
     expect(deriveMatchStatus({ currentPlayer: '0' }, '0')).toEqual({
-      text: "You's turn",
+      text: 'Your turn',
       tone: 'you',
     });
   });
@@ -53,7 +53,7 @@ describe('deriveMatchStatus', () => {
       deriveMatchStatus({ currentPlayer: '0' }, '0', {
         labels: { yourTurn: 'Your turn — tap a square' },
       }),
-    ).toEqual({ text: "You's turn — tap a square", tone: 'you' });
+    ).toEqual({ text: 'Your turn — tap a square', tone: 'you' });
   });
 
   it('honours isYourTurn override over seat comparison', () => {
@@ -62,18 +62,18 @@ describe('deriveMatchStatus', () => {
       tone: 'you',
     });
     expect(deriveMatchStatus({ currentPlayer: '0' }, '0', { isYourTurn: false })).toEqual({
-      text: "You's turn",
+      text: 'Your turn',
       tone: 'wait',
     });
   });
 
   it('treats null or undefined playerID as not your seat (named wait)', () => {
     expect(deriveMatchStatus({ currentPlayer: '0' }, null)).toEqual({
-      text: "You's turn",
+      text: 'Your turn',
       tone: 'wait',
     });
     expect(deriveMatchStatus({ currentPlayer: '0' }, undefined)).toEqual({
-      text: "You's turn",
+      text: 'Your turn',
       tone: 'wait',
     });
   });

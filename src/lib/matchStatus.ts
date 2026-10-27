@@ -1,4 +1,5 @@
 import type { FilteredMetadata } from 'boardgame.io';
+import { namedTurnStatusLine } from '../components/game-shell/turnPlate';
 import { hintFromLegacyYourTurn, type PlayerNameOptions, turnStatusText } from './matchPlayers';
 import { defaultSeatDisplayName } from './seatNames';
 
@@ -105,8 +106,7 @@ export function deriveMatchStatus(
 
   if (options?.seatLabel) {
     const name = options.seatLabel(ctx.currentPlayer);
-    const base = `${name}'s turn`;
-    const text = hint ? `${base} — ${hint}` : base;
+    const text = namedTurnStatusLine(name, hint);
     return {
       text,
       tone: yourTurn ? 'you' : 'wait',
