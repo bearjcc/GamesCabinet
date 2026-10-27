@@ -2,6 +2,17 @@ import { expect, test } from '@playwright/test';
 import { fillRoomCode, openJoinPanel, pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
+  test('cabinet home header is full bleed on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const inset = await page.evaluate(() => {
+      const header = document.querySelector('[data-testid="cabinet-home-header"]');
+      if (!header) return 999;
+      return header.getBoundingClientRect().left;
+    });
+    expect(inset).toBeLessThanOrEqual(1);
+  });
+
   test('cabinet home header fits the viewport width', async ({ page }) => {
     for (const viewport of [
       { width: 1280, height: 800 },
