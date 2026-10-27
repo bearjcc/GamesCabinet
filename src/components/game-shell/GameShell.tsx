@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useTracksLayout } from '../../games/tracks/useTracksLayout';
+import { GameShellEndStripMount } from '../MatchChromeEndStrip';
 import { BoardStage } from './BoardStage';
 import { GameShellBottomBar } from './GameShellBottomBar';
 import { GameShellRail } from './GameShellRail';
@@ -70,6 +71,7 @@ export function GameShell({
           {trayNode}
         </>
       )}
+      <GameShellEndStripMount />
       <GameShellBottomBar model={bar} />
       {rulesSheet ? (
         <div className="game-shell-sheet" data-testid="game-shell-rules-sheet">

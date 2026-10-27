@@ -7,8 +7,10 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { summariseSeats } from '../lib/matchSeats';
 import { type MatchAction, MatchActions } from './MatchActions';
+import { MatchChromeEndStripProvider, useMatchChromeEndStripTarget } from './MatchChromeEndStrip';
 
 export type MatchLifecycle = {
   /** Call Client.reset() — only safe for non-multiplayer (solo/hotseat). Vs-bot uses onPlayAgain + new matchID. */
@@ -56,6 +58,19 @@ function WaitingSeats({ matchData }: { matchData: BoardProps['matchData'] }) {
       <p className="waiting-hint">Share the room link so others can join.</p>
     </div>
   );
+}
+
+function MatchChromeGameOverTray({ actions, busy }: { actions: MatchAction[]; busy: boolean }) {
+  const endStrip = useMatchChromeEndStripTarget();
+  const tray = (
+    <div className="match-chrome__overlay" data-testid="match-chrome-overlay">
+      <MatchActions actions={actions} busy={busy} overlay />
+    </div>
+  );
+  if (endStrip?.target) {
+    return createPortal(tray, endStrip.target);
+  }
+  return tray;
 }
 
 /** Wrap any board once; pages supply lifecycle via MatchLifecycleProvider. */
@@ -107,19 +122,17 @@ export function withMatchChrome<G>(
     }, [gameover, life, props]);
 
     return (
-      <div className="match-chrome">
-        {waiting ? <WaitingSeats matchData={props.matchData} /> : null}
-        {!waiting ? (
-          <div className="match-chrome__stage">
-            <Board {...props} />
-          </div>
-        ) : null}
-        {actions.length ? (
-          <div className="match-chrome__overlay" data-testid="match-chrome-overlay">
-            <MatchActions actions={actions} busy={busy} overlay />
-          </div>
-        ) : null}
-      </div>
+      <MatchChromeEndStripProvider>
+        <div className="match-chrome">
+          {waiting ? <WaitingSeats matchData={props.matchData} /> : null}
+          {!waiting ? (
+            <div className="match-chrome__stage">
+              <Board {...props} />
+            </div>
+          ) : null}
+          {actions.length ? <MatchChromeGameOverTray actions={actions} busy={busy} /> : null}
+        </div>
+      </MatchChromeEndStripProvider>
     );
   }
   BoardWithChrome.displayName = `WithMatchChrome(${Board.displayName || Board.name || 'Board'})`;

@@ -35,19 +35,17 @@ function renderScene(gameId: string) {
       return <GridMarks rows={3} cols={3} marks={['x', 'o', 'x', '', 'o', '', 'x', '', 'o']} />;
     case 'connect-four': {
       const [red, yellow] = defaultSeatColours(2, 'connect-four');
+      const hole = '#0f1620';
+      const discs = new Set(['2-3', '3-2', '3-3', '4-1', '5-2']);
       return (
         <svg viewBox="0 0 64 48" className="game-thumb__svg" aria-hidden="true">
-          <rect width="64" height="48" rx="4" fill="#1a4f8a" />
+          <rect width="64" height="48" rx="4" fill="#2c5f8a" />
           {[0, 1, 2, 3, 4, 5].map((col) =>
-            [0, 1, 2, 3].map((row) => (
-              <circle
-                key={`${col}-${row}`}
-                cx={8 + col * 9}
-                cy={10 + row * 9}
-                r="3.2"
-                fill={(col === 2 && row === 3) || (col === 3 && row === 2) ? red : yellow}
-              />
-            )),
+            [0, 1, 2, 3].map((row) => {
+              const key = `${col}-${row}`;
+              const fill = discs.has(key) ? (key === '3-2' || key === '5-2' ? yellow : red) : hole;
+              return <circle key={key} cx={8 + col * 9} cy={10 + row * 9} r="3.2" fill={fill} />;
+            }),
           )}
         </svg>
       );

@@ -271,6 +271,21 @@
   background: var(--seat-chip-colour, var(--brand-red));
 }
 
+.game-shell-end-strip {
+  flex-shrink: 0;
+}
+
+.game-shell-end-strip:empty {
+  display: none;
+}
+
+.game-shell-end-strip .match-chrome__overlay {
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  border-top: 1px solid #d6ccb2;
+  background: var(--game-shell-cream);
+}
+
 .game-shell-bottom-bar {
   display: none;
   justify-content: space-around;
