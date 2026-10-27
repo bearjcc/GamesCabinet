@@ -571,7 +571,7 @@
 }
 
 .tracks-hint {
-  color: #c92a2a;
+  color: var(--brand-red);
   font-size: 0.8rem;
   text-align: center;
   margin: 0.4rem 0 0;

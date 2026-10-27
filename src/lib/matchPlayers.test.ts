@@ -17,7 +17,7 @@ describe('matchPlayers', () => {
   it('falls back to named seats when lobby metadata is missing', () => {
     vi.spyOn(storage, 'getNickname').mockReturnValue('Bear');
     expect(playerDisplayName('0')).toBe('Bear');
-    expect(playerDisplayName('1')).toBe('Orange');
+    expect(playerDisplayName('1')).toBe('Blue');
     expect(playerDisplayName('alpha')).toBe('Seat alpha');
   });
 

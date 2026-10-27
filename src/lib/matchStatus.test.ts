@@ -9,7 +9,7 @@ describe('defaultSeatLabel', () => {
 
   it('formats zero-based player ids', () => {
     expect(defaultSeatLabel('0')).toBe('Bear');
-    expect(defaultSeatLabel('1')).toBe('Orange');
+    expect(defaultSeatLabel('1')).toBe('Blue');
   });
 });
 
@@ -34,7 +34,7 @@ describe('deriveMatchStatus', () => {
 
   it('names the active seat while waiting on another seat', () => {
     expect(deriveMatchStatus({ currentPlayer: '1' }, '0')).toEqual({
-      text: "Orange's turn",
+      text: "Blue's turn",
       tone: 'wait',
     });
   });
@@ -58,7 +58,7 @@ describe('deriveMatchStatus', () => {
 
   it('honours isYourTurn override over seat comparison', () => {
     expect(deriveMatchStatus({ currentPlayer: '1' }, '0', { isYourTurn: true })).toEqual({
-      text: "Orange's turn",
+      text: "Blue's turn",
       tone: 'you',
     });
     expect(deriveMatchStatus({ currentPlayer: '0' }, '0', { isYourTurn: false })).toEqual({

@@ -1,14 +1,12 @@
 import { defaultSeatColours } from './seatColours';
 import { getNickname, type SeatColour } from './storage';
 
-/** Player-facing label for a palette seat colour (logo names land in step 4). */
+/** Player-facing label for a palette seat colour. */
 const PALETTE_LABELS: Record<SeatColour, string> = {
-  '#c0392b': 'Red',
-  '#e67e22': 'Orange',
-  '#f1c40f': 'Yellow',
-  '#27ae60': 'Green',
-  '#2980b9': 'Blue',
-  '#8e44ad': 'Purple',
+  '#d63328': 'Red',
+  '#3a6fad': 'Blue',
+  '#ed9f18': 'Yellow',
+  '#5f8536': 'Green',
 };
 
 export function seatColourLabel(colour: SeatColour): string {

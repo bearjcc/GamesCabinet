@@ -268,7 +268,7 @@
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 999px;
-  background: var(--seat-chip-colour, #c0392b);
+  background: var(--seat-chip-colour, var(--brand-red));
 }
 
 .game-shell-bottom-bar {

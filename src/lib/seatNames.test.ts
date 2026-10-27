@@ -9,8 +9,8 @@ describe('seatNames', () => {
   });
 
   it('labels palette colours for table talk', () => {
-    expect(seatColourLabel('#c0392b')).toBe('Red');
-    expect(seatColourLabel('#f1c40f')).toBe('Yellow');
+    expect(seatColourLabel('#d63328')).toBe('Red');
+    expect(seatColourLabel('#ed9f18')).toBe('Yellow');
     expect(seatColourLabel('#000000' as SeatColour)).toBe('Seat');
   });
 
@@ -26,7 +26,7 @@ describe('seatNames', () => {
 
   it('names other seats by colour when no lobby name exists', () => {
     vi.spyOn(storage, 'getNickname').mockReturnValue('');
-    expect(defaultSeatDisplayName('1')).toBe('Orange');
+    expect(defaultSeatDisplayName('1')).toBe('Blue');
   });
 
   it('labels non-numeric ids as seats', () => {

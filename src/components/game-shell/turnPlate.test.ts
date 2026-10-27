@@ -41,7 +41,7 @@ describe('turnPlateFromMatchStatus', () => {
   it('shows “You” with hint for vs-bot your-turn status', () => {
     const plate = turnPlateFromMatchStatus({ text: 'You: drop a disc', tone: 'you' }, 'You', {
       hint: 'Drop a disc',
-      seatColour: '#c92a2a',
+      seatColour: '#d63328',
     });
     expect(plate).toMatchObject({
       headline: 'You',

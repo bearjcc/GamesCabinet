@@ -8,12 +8,12 @@ test.describe('Settings', () => {
     await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 
     await page.getByTestId('settings-nickname').fill('Bear');
-    await page.getByTestId('settings-seat-colour-#c0392b').click();
+    await page.getByTestId('settings-seat-colour-#d63328').click();
 
     await page.goto('/');
     await page.getByTestId('shell-settings').click();
     await expect(page.getByTestId('settings-nickname')).toHaveValue('Bear');
-    await expect(page.getByTestId('settings-seat-colour-#c0392b')).toHaveAttribute(
+    await expect(page.getByTestId('settings-seat-colour-#d63328')).toHaveAttribute(
       'aria-checked',
       'true',
     );

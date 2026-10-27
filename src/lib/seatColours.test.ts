@@ -46,14 +46,14 @@ describe('seatColours', () => {
 
   it('keeps chosen colours and skips online seats', () => {
     const input = seats(
-      { kind: 'local', colour: SEAT_COLOUR_PALETTE[3] },
+      { kind: 'local', colour: SEAT_COLOUR_PALETTE[0] },
       { kind: 'online' },
-      { kind: 'bot', colour: SEAT_COLOUR_PALETTE[5] },
+      { kind: 'bot', colour: SEAT_COLOUR_PALETTE[2] },
     );
     expect(occupiedSeatColours(input)).toEqual([
-      SEAT_COLOUR_PALETTE[3],
+      SEAT_COLOUR_PALETTE[0],
       undefined,
-      SEAT_COLOUR_PALETTE[5],
+      SEAT_COLOUR_PALETTE[2],
     ]);
   });
 
@@ -61,14 +61,14 @@ describe('seatColours', () => {
     const table = ensureSeatColours(
       seats(
         { kind: 'local', colour: SEAT_COLOUR_PALETTE[0] },
-        { kind: 'bot', colour: SEAT_COLOUR_PALETTE[4] },
+        { kind: 'bot', colour: SEAT_COLOUR_PALETTE[1] },
       ),
     );
     const query = seatColoursQuery(table);
-    expect(query).toBe('0,4');
+    expect(query).toBe('0,1');
     expect(parseSeatColoursQuery(query, 2)).toEqual([
       SEAT_COLOUR_PALETTE[0],
-      SEAT_COLOUR_PALETTE[4],
+      SEAT_COLOUR_PALETTE[1],
     ]);
   });
 
@@ -87,8 +87,8 @@ describe('seatColours', () => {
   });
 
   it('picks readable ink for light and dark fills', () => {
-    expect(contrastingInk('#f1c40f')).toBe('#1c1917');
-    expect(contrastingInk('#2980b9')).toBe('#fbf6ec');
+    expect(contrastingInk('#ed9f18')).toBe('#1c1917');
+    expect(contrastingInk('#3a6fad')).toBe('#fbf6ec');
     expect(contrastingInk('bad')).toBe('#fbf6ec');
   });
 
@@ -122,7 +122,7 @@ describe('seatColours', () => {
       { kind: 'local' as const },
     ];
     const next = ensureSeatColours(fullTable);
-    expect(next[6]?.colour).toBeTruthy();
+    expect(next[4]?.colour).toBeTruthy();
   });
 
   it('omits colour query params when no launch colours exist', () => {

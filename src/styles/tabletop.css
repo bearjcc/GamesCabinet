@@ -55,7 +55,7 @@ button.tt-card:disabled,
 }
 
 .tt-card--red {
-  color: #c0392b;
+  color: var(--brand-red);
 }
 
 .tt-card--black {

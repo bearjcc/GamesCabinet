@@ -13,7 +13,7 @@ describe('withHotseatStatusOptions', () => {
   it('adds named seats in pass-and-play', () => {
     const options = withHotseatStatusOptions(true, { isYourTurn: true });
     expect(deriveMatchStatus({ currentPlayer: '1' }, '1', options)).toEqual({
-      text: "Orange's turn",
+      text: "Blue's turn",
       tone: 'you',
     });
   });

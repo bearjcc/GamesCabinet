@@ -46,7 +46,7 @@ function renderScene(gameId: string) {
                 fill={
                   (col === 2 && row === 3) || (col === 3 && row === 2)
                     ? 'var(--game-accent)'
-                    : '#f1c40f'
+                    : 'var(--brand-yellow)'
                 }
               />
             )),
@@ -163,8 +163,8 @@ function renderScene(gameId: string) {
             strokeWidth="3"
             fill="none"
           />
-          <circle cx="12" cy="36" r="4" fill="#c0392b" />
-          <circle cx="50" cy="14" r="4" fill="#2980b9" />
+          <circle cx="12" cy="36" r="4" fill="var(--brand-red)" />
+          <circle cx="50" cy="14" r="4" fill="var(--brand-blue)" />
         </svg>
       );
     case 'nim':
@@ -184,7 +184,7 @@ function renderScene(gameId: string) {
         <svg viewBox="0 0 64 48" className="game-thumb__svg" aria-hidden="true">
           <circle cx="32" cy="24" r="14" fill="none" stroke="var(--game-accent)" strokeWidth="2" />
           <circle cx="32" cy="24" r="4" fill="var(--game-accent)" />
-          <circle cx="46" cy="24" r="3" fill="#f1c40f" />
+          <circle cx="46" cy="24" r="3" fill="var(--brand-yellow)" />
         </svg>
       );
     case 'tracks':

@@ -21,19 +21,12 @@ export function markGameSeen(gameId: string): void {
   }
 }
 
-/** Fixed palette for default seat / pawn colour preference. */
-export const SEAT_COLOUR_PALETTE = [
-  '#c0392b',
-  '#e67e22',
-  '#f1c40f',
-  '#27ae60',
-  '#2980b9',
-  '#8e44ad',
-] as const;
+/** Logo palette: red, blue, yellow, green (matches `tokens.css` brand tokens). */
+export const SEAT_COLOUR_PALETTE = ['#d63328', '#3a6fad', '#ed9f18', '#5f8536'] as const;
 
 export type SeatColour = (typeof SEAT_COLOUR_PALETTE)[number];
 
-export const DEFAULT_SEAT_COLOUR: SeatColour = SEAT_COLOUR_PALETTE[4];
+export const DEFAULT_SEAT_COLOUR: SeatColour = SEAT_COLOUR_PALETTE[1];
 
 export function isSeatColour(value: string | null | undefined): value is SeatColour {
   return !!value && (SEAT_COLOUR_PALETTE as readonly string[]).includes(value);
