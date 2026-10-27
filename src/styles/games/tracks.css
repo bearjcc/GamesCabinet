@@ -632,6 +632,57 @@
   --tracks-hand-paper: color-mix(in srgb, var(--surface-2) 94%, #1a1814);
 }
 
+@media (max-width: 30rem) {
+  .tracks-shell-tray {
+    grid-template-columns: minmax(0, 1fr) 3rem;
+    grid-template-areas:
+      "scores scores"
+      "hand piles";
+    align-items: stretch;
+    gap: 0.35rem 0.4rem;
+  }
+
+  .tracks-shell-tray__scores {
+    grid-area: scores;
+    min-width: 0;
+  }
+
+  .tracks-shell-tray__hand {
+    grid-area: hand;
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .tracks-shell-tray__hand-label {
+    align-self: flex-start;
+  }
+
+  .tracks-shell-tray__piles.tracks-piles {
+    grid-area: piles;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+    width: 3rem;
+    min-width: 3rem;
+    max-width: 3rem;
+    margin-top: 0;
+    justify-content: flex-end;
+  }
+
+  .tracks-shell-tray__piles .tracks-pile {
+    min-width: 0;
+    font-size: 0;
+    gap: 0;
+  }
+
+  .tracks-shell-tray__piles .tracks-pile .tracks-tile-wrap,
+  .tracks-shell-tray__piles .tracks-pile__deck,
+  .tracks-shell-tray__piles .tracks-pile__empty {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 840px) {
   .shell:has(.play-table--tracks-grass) .topbar {
     margin-bottom: 0.2rem;

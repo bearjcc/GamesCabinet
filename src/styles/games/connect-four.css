@@ -133,20 +133,15 @@
   min-height: 2.75rem;
 }
 
-.match-chrome:has([data-testid="c4-board"]) {
-  position: relative;
+.match-chrome:has([data-testid="c4-board"]) .match-chrome__overlay {
+  flex-shrink: 0;
+  padding: 0.35rem 0.15rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
 }
 
-.match-chrome:has([data-testid="c4-board"]) .match-actions {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 4;
+.match-chrome:has([data-testid="c4-board"]) .match-chrome__overlay .match-actions {
   margin: 0;
-  padding: 0.45rem 0.15rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  border-top: 1px solid var(--line);
 }
 
 @media (prefers-reduced-motion: reduce) {

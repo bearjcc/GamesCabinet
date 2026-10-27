@@ -134,6 +134,24 @@ for (const viewport of VIEWPORTS) {
       const cell = Number(cellPx);
       if (viewport.width <= 640) {
         expect(imgBox!.width).toBeGreaterThanOrEqual(64);
+        const hand = page.getByTestId('tracks-hand');
+        const handBox = await hand.boundingBox();
+        expect(handBox).not.toBeNull();
+        const visibleCards = await page.locator('.tracks-hand__card').evaluateAll((cards) => {
+          const handEl = cards[0]?.closest('[data-testid="tracks-hand"]');
+          if (!handEl) return 0;
+          const clip = handEl.getBoundingClientRect();
+          return cards.filter((card) => {
+            const b = card.getBoundingClientRect();
+            const visibleW = Math.min(b.right, clip.right) - Math.max(b.left, clip.left);
+            return visibleW >= b.width * 0.85;
+          }).length;
+        });
+        expect(visibleCards).toBeGreaterThanOrEqual(3);
+        const piles = page.locator('.tracks-shell-tray__piles');
+        const pilesBox = await piles.boundingBox();
+        expect(pilesBox).not.toBeNull();
+        expect(pilesBox!.width).toBeLessThanOrEqual(52);
       } else {
         expect(imgBox!.width).toBeGreaterThanOrEqual(cell * 0.75 - 1);
       }

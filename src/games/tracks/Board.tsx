@@ -76,6 +76,11 @@ export function TracksBoard({
   useEffect(() => {
     preloadTracksTiles();
   }, []);
+
+  useEffect(() => {
+    if (ctx.gameover || ctx.phase !== 'play') return;
+    setViewBoard(Number(ctx.currentPlayer));
+  }, [ctx.currentPlayer, ctx.gameover, ctx.phase]);
   // Pass-and-play matches are local-* ids; online seats never hand off.
   const hotSeat = ctx.numPlayers > 1 && (matchID ?? '').startsWith('local-');
   const handOff = hotSeat && !ctx.gameover && readyFor !== turnKey;
@@ -255,7 +260,7 @@ export function TracksBoard({
               <button
                 key={i}
                 type="button"
-                className={i === view ? 'is-active' : ''}
+                className={`${i === Number(ctx.currentPlayer) ? 'is-active' : ''}${i === view ? ' is-viewing' : ''}`}
                 data-testid={`tracks-target-${i}`}
                 onClick={() => setViewBoard(i)}
               >
