@@ -14,7 +14,7 @@ import { getGameMeta, isSoloOnly, soloPlayPath, supportsBotPlay } from '../lib/g
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { localRematchMatchID } from '../lib/localRematch';
 import { makeClient } from '../lib/makeClient';
-import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
+import { parseSeatColoursQuery, resolveSeatColours } from '../lib/seatColours';
 import { deriveLaunch, playerIDsOfKind, seatsFromKindsQuery } from '../lib/tableSetup';
 
 export function PlayBot() {
@@ -32,8 +32,8 @@ export function PlayBot() {
   const numPlayers = tableSeats.filter((seat) => seat.kind !== 'empty').length;
   const seatColours = useMemo(() => {
     const parsed = parseSeatColoursQuery(params.get('colours'), numPlayers);
-    return parsed.length > 0 ? parsed : defaultSeatColours(numPlayers);
-  }, [numPlayers, params]);
+    return resolveSeatColours(parsed, numPlayers, gameId);
+  }, [gameId, numPlayers, params]);
   const firstLocal = localIDs[0] ?? '0';
   /** Client.reset() nulls multiplayer state; bump match id for a fresh Local+bots match. */
   const [rematchGen, setRematchGen] = useState(0);

@@ -13,7 +13,7 @@ import { getGameMeta, isAccessGated, isSoloOnly, supportsLocalPlay } from '../li
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { makeClient } from '../lib/makeClient';
 import { parseSeatNamesQuery } from '../lib/parseSeatNamesQuery';
-import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
+import { parseSeatColoursQuery, resolveSeatColours } from '../lib/seatColours';
 import { getUnlockedGames } from '../lib/storage';
 
 /** Offline local match (solo or hotseat) without the lobby server. */
@@ -53,8 +53,8 @@ export function PlayLocal() {
 
   const seatColours = useMemo(() => {
     const parsed = parseSeatColoursQuery(coloursParam, numPlayers);
-    return parsed.length > 0 ? parsed : defaultSeatColours(numPlayers);
-  }, [coloursParam, numPlayers]);
+    return resolveSeatColours(parsed, numPlayers, gameId);
+  }, [coloursParam, gameId, numPlayers]);
 
   const Board = boards[gameId as GameId];
   const hotseat = numPlayers >= 2;

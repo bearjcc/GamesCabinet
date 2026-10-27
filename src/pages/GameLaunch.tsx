@@ -99,14 +99,14 @@ export function GameLaunch() {
     const name = getNickname() || 'Player';
     setNickname(name);
     try {
-      const colouredSeats = ensureSeatColours(boundedSeats);
+      const colouredSeats = ensureSeatColours(boundedSeats, meta.id);
       const room = await hostRoom(
         meta.id,
         launchPlan.seats,
         name,
         hogwartsSetup,
         ownedDeviceJoins(colouredSeats),
-        seatColoursQuery(colouredSeats) ?? undefined,
+        seatColoursQuery(colouredSeats, meta.id) ?? undefined,
       );
       navigate(`/g/${room.gameName}/${room.matchID}`);
     } catch (e) {
@@ -118,8 +118,8 @@ export function GameLaunch() {
 
   function onStart() {
     if (!meta || launchPlan.status !== 'ready' || launchPlan.mode === 'online') return;
-    const colouredSeats = ensureSeatColours(boundedSeats);
-    const colourQuery = seatColoursQuery(colouredSeats);
+    const colouredSeats = ensureSeatColours(boundedSeats, meta.id);
+    const colourQuery = seatColoursQuery(colouredSeats, meta.id);
     if (launchPlan.mode === 'bot') {
       const params = new URLSearchParams({ kinds: occupiedKindsQuery(colouredSeats) });
       if (colourQuery) params.set('colours', colourQuery);
@@ -303,9 +303,21 @@ function createTableSeats(meta: ReturnType<typeof getGameMeta>, year: number): T
       : (meta?.maxPlayers ?? 1);
   const defaultCount = Math.min(maxSeats, meta && meta.minPlayers >= 2 ? meta.minPlayers : 1);
   const heroes = meta?.id === 'hogwarts-battle' ? getHogwartsHeroIdsForYear(year) : [];
-  const initial = Array.from({ length: maxSeats }, (_, index) => ({
-    kind: index < defaultCount ? ('local' as const) : ('empty' as const),
-    ...(heroes[index] ? { role: heroes[index] } : {}),
-  }));
-  return meta?.id === 'hogwarts-battle' ? initial : ensureSeatColours(initial);
+  const initial = Array.from({ length: maxSeats }, (_, index) => {
+    let kind: TableSeat['kind'] = 'empty';
+    if (index < defaultCount) {
+      const vsBotDefault =
+        meta?.hasBot &&
+        meta.minPlayers === 2 &&
+        meta.maxPlayers === 2 &&
+        defaultCount === 2 &&
+        index === 1;
+      kind = vsBotDefault ? ('bot' as const) : ('local' as const);
+    }
+    return {
+      kind,
+      ...(heroes[index] ? { role: heroes[index] } : {}),
+    };
+  });
+  return meta?.id === 'hogwarts-battle' ? initial : ensureSeatColours(initial, meta?.id);
 }

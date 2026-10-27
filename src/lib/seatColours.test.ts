@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as games from './games';
 import {
+  allowedSeatColours,
   appendSeatColoursQuery,
   colourForPlayer,
   contrastingInk,
@@ -9,9 +11,10 @@ import {
   nextSeatColour,
   occupiedSeatColours,
   parseSeatColoursQuery,
+  resolveSeatColours,
   seatColoursQuery,
 } from './seatColours';
-import { DEFAULT_SEAT_COLOUR, SEAT_COLOUR_PALETTE } from './storage';
+import { SEAT_COLOUR_PALETTE } from './storage';
 import type { TableSeat } from './tableSetup';
 
 function seats(...entries: Array<TableSeat | TableSeat['kind']>): TableSeat[] {
@@ -19,9 +22,32 @@ function seats(...entries: Array<TableSeat | TableSeat['kind']>): TableSeat[] {
 }
 
 describe('seatColours', () => {
+  it('cycles palette colours for connect-four without board blue', () => {
+    expect(nextSeatColour('#d63328', 'connect-four')).toBe('#ed9f18');
+    expect(nextSeatColour('#ed9f18', 'connect-four')).toBe('#5f8536');
+    expect(nextSeatColour('#3a6fad', 'connect-four')).toBe('#d63328');
+    expect(allowedSeatColours('connect-four')).not.toContain('#3a6fad');
+  });
+
+  it('falls back to the saved seat preference when every palette colour is excluded', () => {
+    vi.spyOn(games, 'getGameMeta').mockReturnValue({
+      id: 'test',
+      name: 'Test',
+      blurb: '',
+      minPlayers: 2,
+      maxPlayers: 2,
+      hasBot: false,
+      excludedSeatColours: [...SEAT_COLOUR_PALETTE],
+    });
+    expect(nextSeatColour(undefined, 'test')).toBeTruthy();
+    const assigned = ensureSeatColours([{ kind: 'local' }, { kind: 'bot' }], 'test');
+    expect(assigned[0]?.colour).toBeTruthy();
+    vi.restoreAllMocks();
+  });
+
   it('cycles palette colours', () => {
     expect(nextSeatColour(SEAT_COLOUR_PALETTE[0])).toBe(SEAT_COLOUR_PALETTE[1]);
-    expect(nextSeatColour(undefined)).toBe(DEFAULT_SEAT_COLOUR);
+    expect(nextSeatColour(undefined)).toBe(SEAT_COLOUR_PALETTE[0]);
     const last = SEAT_COLOUR_PALETTE[SEAT_COLOUR_PALETTE.length - 1]!;
     expect(nextSeatColour(last)).toBe(SEAT_COLOUR_PALETTE[0]);
   });
@@ -111,6 +137,16 @@ describe('seatColours', () => {
     expect(params.get('colours')).toBe('0,1');
   });
 
+  it('resolveSeatColours keeps valid picks and swaps excluded colours for defaults', () => {
+    expect(
+      resolveSeatColours([SEAT_COLOUR_PALETTE[2], SEAT_COLOUR_PALETTE[1]], 2, 'connect-four'),
+    ).toEqual([SEAT_COLOUR_PALETTE[2], '#ed9f18']);
+    expect(resolveSeatColours([undefined, undefined], 2, 'connect-four')).toEqual([
+      '#d63328',
+      '#ed9f18',
+    ]);
+  });
+
   it('ignores invalid palette indices when parsing', () => {
     expect(parseSeatColoursQuery('99,abc', 2)).toEqual([undefined, undefined]);
     expect(parseSeatColoursQuery('', 2)).toEqual([]);
@@ -131,7 +167,7 @@ describe('seatColours', () => {
     expect(params.get('colours')).toBeNull();
   });
 
-  it('reuses the default colour when more seats are requested than palette entries', () => {
-    expect(defaultSeatColours(SEAT_COLOUR_PALETTE.length + 1).at(-1)).toBe(DEFAULT_SEAT_COLOUR);
+  it('reuses an allowed colour when more seats are requested than palette entries', () => {
+    expect(defaultSeatColours(SEAT_COLOUR_PALETTE.length + 1).at(-1)).toBe(SEAT_COLOUR_PALETTE[0]);
   });
 });

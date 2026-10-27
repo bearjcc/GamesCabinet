@@ -48,6 +48,14 @@ test.describe('GamesCabinet smokes', () => {
     await expect(motion).not.toHaveAttribute('aria-label', before ?? '');
   });
 
+  test('connect four launch names the bot seat and avoids board blue', async ({ page }) => {
+    await page.goto('/game/connect-four');
+    await expect(page.getByTestId('table-seat-0-kind')).toHaveText('You');
+    await expect(page.getByTestId('table-seat-1-kind')).toHaveText('Bot');
+    await expect(page.getByTestId('table-seat-0-colour')).toBeVisible();
+    await expect(page.getByTestId('table-seat-1-colour')).toBeVisible();
+  });
+
   test('game launch arranges seats around one start action', async ({ page }) => {
     await page.goto('/game/dominoes');
     await expect(page.getByTestId('launch-modes')).toBeVisible();

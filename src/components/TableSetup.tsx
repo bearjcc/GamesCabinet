@@ -34,6 +34,13 @@ const KIND_SHORT: Record<Exclude<SeatKind, 'empty'>, string> = {
   bot: 'Bot',
 };
 
+function spotKindShort(kind: Exclude<SeatKind, 'empty'>, seatIndex: number): string {
+  if (kind === 'local' && seatIndex > 0) {
+    return `Player ${seatIndex + 1}`;
+  }
+  return KIND_SHORT[kind];
+}
+
 const LONG_PRESS_MS = 500;
 
 export function TableSetup({
@@ -82,7 +89,7 @@ export function TableSetup({
     if (!showSeatColours) return;
     const seat = boundedSeats[index];
     if (!seat || seat.kind === 'empty' || seat.kind === 'online') return;
-    const next = nextSeatColour(isSeatColour(seat.colour) ? seat.colour : undefined);
+    const next = nextSeatColour(isSeatColour(seat.colour) ? seat.colour : undefined, meta.id);
     updateSeat(index, { colour: next });
   }
 
@@ -187,7 +194,7 @@ export function TableSetup({
                   onClick={() => onKindTap(index)}
                   type="button"
                 >
-                  {KIND_SHORT[seat.kind]}
+                  {spotKindShort(seat.kind, index)}
                 </button>
               )}
             </div>

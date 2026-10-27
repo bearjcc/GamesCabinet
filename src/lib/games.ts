@@ -1,3 +1,5 @@
+import type { SeatColour } from './storage';
+
 export type GameMeta = {
   id: string;
   name: string;
@@ -5,6 +7,10 @@ export type GameMeta = {
   minPlayers: number;
   maxPlayers: number;
   hasBot: boolean;
+  /** Seat colours that must not be used on this game's board. */
+  excludedSeatColours?: readonly SeatColour[];
+  /** Default launch colours by occupied-seat index (local / bot). */
+  launchSeatColours?: readonly SeatColour[];
   /** Offline local Client at `/play/:id` (solo). */
   hasSolo?: boolean;
   /** Single player only: skip table setup; engine runs with numPlayers 1. */
@@ -40,6 +46,8 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 2,
     hasBot: true,
     hasLocal: true,
+    excludedSeatColours: ['#3a6fad'],
+    launchSeatColours: ['#d63328', '#ed9f18'],
   },
   {
     id: 'checkers',

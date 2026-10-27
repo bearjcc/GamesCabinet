@@ -3,6 +3,7 @@ import { kenneyDieFaceAsset } from '../games/shared/dice/kenney';
 import type { DieFaceValue } from '../games/shared/dice/types';
 import { kenneyIcon } from '../games/shared/tokens/kenney';
 import { gameAccentStyle } from '../lib/gameIdentity';
+import { defaultSeatColours } from '../lib/seatColours';
 
 const CARD_BACK = '/assets/kenney/boardgame-pack/PNG/Cards/cardBack_red1.png';
 const CARD_HEARTS = '/assets/kenney/boardgame-pack/PNG/Cards/cardHearts8.png';
@@ -32,7 +33,8 @@ function renderScene(gameId: string) {
   switch (gameId) {
     case 'tic-tac-toe':
       return <GridMarks rows={3} cols={3} marks={['x', 'o', 'x', '', 'o', '', 'x', '', 'o']} />;
-    case 'connect-four':
+    case 'connect-four': {
+      const [red, yellow] = defaultSeatColours(2, 'connect-four');
       return (
         <svg viewBox="0 0 64 48" className="game-thumb__svg" aria-hidden="true">
           <rect width="64" height="48" rx="4" fill="#1a4f8a" />
@@ -43,16 +45,13 @@ function renderScene(gameId: string) {
                 cx={8 + col * 9}
                 cy={10 + row * 9}
                 r="3.2"
-                fill={
-                  (col === 2 && row === 3) || (col === 3 && row === 2)
-                    ? 'var(--game-accent)'
-                    : 'var(--brand-yellow)'
-                }
+                fill={(col === 2 && row === 3) || (col === 3 && row === 2) ? red : yellow}
               />
             )),
           )}
         </svg>
       );
+    }
     case 'checkers':
       return <CheckerBoard />;
     case 'dominoes':

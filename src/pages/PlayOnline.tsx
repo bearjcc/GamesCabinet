@@ -14,7 +14,7 @@ import { getGameMeta, isAccessGated } from '../lib/games';
 import { withHotseatSeatSync } from '../lib/hotseat';
 import { leaveRoom, lookupRoom, rematchRoom, type SeatedRoom } from '../lib/lobby';
 import { makeClient } from '../lib/makeClient';
-import { defaultSeatColours, parseSeatColoursQuery } from '../lib/seatColours';
+import { defaultSeatColours, parseSeatColoursQuery, resolveSeatColours } from '../lib/seatColours';
 import {
   deviceSeats,
   getNickname,
@@ -68,14 +68,15 @@ export function PlayOnline() {
   const firstHuman = humanSeats[0]?.playerID ?? seat?.playerID ?? '0';
   const [activeID, setActiveID] = useState(firstHuman);
   const seatColours = useMemo(() => {
+    const gameId = seat?.gameName ?? '';
+    const count = Math.max(2, humanSeats.length + botSeats.length);
     if (!seat?.seatColourQuery) {
-      const count = Math.max(2, humanSeats.length + botSeats.length);
-      return defaultSeatColours(count);
+      return defaultSeatColours(count, gameId);
     }
     const total = seat.seatColourQuery.split(',').length;
     const parsed = parseSeatColoursQuery(seat.seatColourQuery, total);
-    return parsed.length > 0 ? parsed : defaultSeatColours(total);
-  }, [seat?.seatColourQuery, humanSeats.length, botSeats.length]);
+    return resolveSeatColours(parsed, total, gameId);
+  }, [botSeats.length, humanSeats.length, seat?.gameName, seat?.seatColourQuery]);
 
   useEffect(() => {
     setActiveID(firstHuman);

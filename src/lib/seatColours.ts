@@ -1,36 +1,79 @@
-import {
-  DEFAULT_SEAT_COLOUR,
-  getSeatColour,
-  isSeatColour,
-  SEAT_COLOUR_PALETTE,
-  type SeatColour,
-} from './storage';
+import { getGameMeta } from './games';
+import { getSeatColour, isSeatColour, SEAT_COLOUR_PALETTE, type SeatColour } from './storage';
 import type { TableSeat } from './tableSetup';
 
 function occupiedSeats(seats: readonly TableSeat[]): TableSeat[] {
   return seats.filter((seat) => seat.kind !== 'empty');
 }
 
-function nextColour(seats: readonly TableSeat[]): SeatColour {
-  const used = new Set(
-    seats.map((seat) => seat.colour).filter((colour): colour is SeatColour => isSeatColour(colour)),
+function gameMeta(gameId?: string) {
+  return gameId ? getGameMeta(gameId) : undefined;
+}
+
+export function excludedSeatColoursForGame(gameId?: string): ReadonlySet<SeatColour> {
+  const excluded = gameMeta(gameId)?.excludedSeatColours ?? [];
+  return new Set(excluded.filter(isSeatColour));
+}
+
+/** Palette entries allowed for a game (global palette minus exclusions). */
+export function allowedSeatColours(gameId?: string): SeatColour[] {
+  const excluded = excludedSeatColoursForGame(gameId);
+  return SEAT_COLOUR_PALETTE.filter((colour) => !excluded.has(colour));
+}
+
+function nextAssignableColour(assigned: ReadonlySet<SeatColour>, gameId?: string): SeatColour {
+  const allowed = allowedSeatColours(gameId);
+  return allowed.find((candidate) => !assigned.has(candidate)) ?? allowed[0] ?? getSeatColour();
+}
+
+function pickDefaultColours(count: number, gameId?: string): SeatColour[] {
+  const meta = gameMeta(gameId);
+  const excluded = excludedSeatColoursForGame(gameId);
+  const presets = (meta?.launchSeatColours ?? []).filter(
+    (colour): colour is SeatColour => isSeatColour(colour) && !excluded.has(colour),
   );
-  return SEAT_COLOUR_PALETTE.find((colour) => !used.has(colour)) ?? getSeatColour();
+  const colours: SeatColour[] = [];
+  const used = new Set<SeatColour>();
+  for (let i = 0; i < count; i++) {
+    const preset = presets[i];
+    if (preset && !used.has(preset)) {
+      colours.push(preset);
+      used.add(preset);
+      continue;
+    }
+    const colour = nextAssignableColour(used, gameId);
+    colours.push(colour);
+    used.add(colour);
+  }
+  return colours;
 }
 
 /** Assign palette colours to occupied local and bot seats that do not have one yet. */
-export function ensureSeatColours(seats: readonly TableSeat[]): TableSeat[] {
+export function ensureSeatColours(seats: readonly TableSeat[], gameId?: string): TableSeat[] {
+  const excluded = excludedSeatColoursForGame(gameId);
+  const presets = gameMeta(gameId)?.launchSeatColours ?? [];
   const assigned = new Set<SeatColour>();
+  let occupiedIndex = 0;
+
   return seats.map((seat) => {
     if (seat.kind === 'empty' || seat.kind === 'online') {
       return seat.kind === 'online' ? { ...seat, colour: undefined } : seat;
     }
-    if (isSeatColour(seat.colour)) {
+    const seatIndex = occupiedIndex;
+    occupiedIndex += 1;
+
+    if (isSeatColour(seat.colour) && !excluded.has(seat.colour)) {
       assigned.add(seat.colour);
       return seat;
     }
-    const colour =
-      SEAT_COLOUR_PALETTE.find((candidate) => !assigned.has(candidate)) ?? nextColour(seats);
+
+    const preset = presets[seatIndex];
+    let colour: SeatColour;
+    if (preset && isSeatColour(preset) && !excluded.has(preset) && !assigned.has(preset)) {
+      colour = preset;
+    } else {
+      colour = nextAssignableColour(assigned, gameId);
+    }
     assigned.add(colour);
     return { ...seat, colour };
   });
@@ -47,8 +90,8 @@ function paletteIndex(colour: SeatColour): number {
   return SEAT_COLOUR_PALETTE.indexOf(colour);
 }
 
-export function seatColoursQuery(seats: readonly TableSeat[]): string | null {
-  const colours = occupiedSeatColours(ensureSeatColours(seats));
+export function seatColoursQuery(seats: readonly TableSeat[], gameId?: string): string | null {
+  const colours = occupiedSeatColours(ensureSeatColours(seats, gameId));
   if (!colours.some(Boolean)) return null;
   return colours
     .map((colour) => {
@@ -78,16 +121,24 @@ export function parseSeatColoursQuery(
   return colours;
 }
 
-export function defaultSeatColours(count: number): SeatColour[] {
-  const colours: SeatColour[] = [];
-  const used = new Set<SeatColour>();
-  for (let i = 0; i < count; i++) {
-    const colour =
-      SEAT_COLOUR_PALETTE.find((candidate) => !used.has(candidate)) ?? DEFAULT_SEAT_COLOUR;
-    used.add(colour);
-    colours.push(colour);
-  }
-  return colours;
+export function resolveSeatColours(
+  parsed: Array<SeatColour | undefined>,
+  count: number,
+  gameId?: string,
+): SeatColour[] {
+  const defaults = defaultSeatColours(count, gameId);
+  const excluded = excludedSeatColoursForGame(gameId);
+  return defaults.map((fallback, index) => {
+    const candidate = parsed[index];
+    if (candidate && isSeatColour(candidate) && !excluded.has(candidate)) {
+      return candidate;
+    }
+    return fallback;
+  });
+}
+
+export function defaultSeatColours(count: number, gameId?: string): SeatColour[] {
+  return pickDefaultColours(count, gameId);
 }
 
 export function colourForPlayer(
@@ -102,16 +153,20 @@ export function colourForPlayer(
 export function appendSeatColoursQuery(
   params: URLSearchParams,
   seats: readonly TableSeat[],
+  gameId?: string,
 ): URLSearchParams {
-  const query = seatColoursQuery(ensureSeatColours(seats));
+  const query = seatColoursQuery(ensureSeatColours(seats, gameId), gameId);
   if (query) params.set('colours', query);
   return params;
 }
 
-export function nextSeatColour(current: SeatColour | undefined): SeatColour {
-  if (!current || !isSeatColour(current)) return getSeatColour();
-  const index = SEAT_COLOUR_PALETTE.indexOf(current);
-  return SEAT_COLOUR_PALETTE[(index + 1) % SEAT_COLOUR_PALETTE.length]!;
+export function nextSeatColour(current: SeatColour | undefined, gameId?: string): SeatColour {
+  const allowed = allowedSeatColours(gameId);
+  if (allowed.length === 0) return getSeatColour();
+  if (!current || !isSeatColour(current)) return allowed[0]!;
+  const index = allowed.indexOf(current);
+  if (index < 0) return allowed[0]!;
+  return allowed[(index + 1) % allowed.length]!;
 }
 
 export function launchSeatColourList(seats: readonly TableSeat[]): Array<SeatColour | undefined> {

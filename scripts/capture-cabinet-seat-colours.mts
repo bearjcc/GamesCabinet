@@ -33,7 +33,7 @@ async function playConnectFourMid(page: Page) {
   await page.evaluate(() => {
     localStorage.setItem('gamescabinet.nickname', 'Bear');
   });
-  await page.goto(`${base}/vs-bot/connect-four?kinds=local,bot`);
+  await page.goto(`${base}/vs-bot/connect-four?kinds=local,bot&colours=0,2`);
   await page.getByTestId('c4-board').waitFor();
   const pattern = [0, 1, 2, 1, 0, 2, 3, 2, 1, 3];
   for (const col of pattern) {
@@ -70,7 +70,10 @@ async function playTracksSolo(page: Page) {
     }
     await page.waitForTimeout(250);
   }
-  await page.getByTestId('tracks-grass-field').waitFor({ timeout: 15_000 }).catch(() => undefined);
+  await page
+    .getByTestId('tracks-grass-field')
+    .waitFor({ timeout: 15_000 })
+    .catch(() => undefined);
 }
 
 async function playYatzyVsBot(page: Page) {
