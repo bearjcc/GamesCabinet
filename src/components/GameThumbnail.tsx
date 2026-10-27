@@ -12,13 +12,18 @@ const CARD_SPADES = '/assets/kenney/boardgame-pack/PNG/Cards/cardSpadesA.png';
 type Props = {
   gameId: string;
   className?: string;
-  /** Smaller art for launch table well. */
-  variant?: 'tile' | 'launch';
+  /** Smaller art for launch table well; lid fills the box-lid tile. */
+  variant?: 'tile' | 'launch' | 'lid';
 };
 
 export function GameThumbnail({ gameId, className = '', variant = 'tile' }: Props) {
   const style = gameAccentStyle(gameId) as CSSProperties;
-  const rootClass = ['game-thumb', variant === 'launch' ? 'game-thumb--launch' : '', className]
+  const rootClass = [
+    'game-thumb',
+    variant === 'launch' ? 'game-thumb--launch' : '',
+    variant === 'lid' ? 'game-thumb--lid' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 
@@ -120,28 +125,9 @@ function renderScene(gameId: string) {
     case 'go':
       return <GoBoard />;
     case 'chinese-checkers':
-      return <img className="game-thumb__icon" src={kenneyIcon('pawn')} alt="" />;
+      return <ChineseCheckersLid />;
     case 'battleship':
-      return (
-        <svg viewBox="0 0 64 48" className="game-thumb__svg" aria-hidden="true">
-          <rect width="64" height="48" fill="#1f3d5c" />
-          {Array.from({ length: 36 }, (_, i) => {
-            const x = (i % 6) * 10 + 5;
-            const y = Math.floor(i / 6) * 10 + 5;
-            return (
-              <rect
-                key={i}
-                x={x}
-                y={y}
-                width="8"
-                height="8"
-                fill={i % 7 === 0 ? 'var(--game-accent)' : '#3a5570'}
-                rx="1"
-              />
-            );
-          })}
-        </svg>
-      );
+      return <BattleshipLid />;
     case 'chess':
       return <ChessMini />;
     case 'nine-mens-morris':
@@ -185,7 +171,7 @@ function renderScene(gameId: string) {
         </svg>
       );
     case 'tracks':
-      return <img className="game-thumb__icon" src={kenneyIcon('arrow_right_curve')} alt="" />;
+      return <TracksLid />;
     case 'hogwarts-battle':
       return (
         <div className="game-thumb__cards game-thumb__cards--fan">
@@ -305,6 +291,88 @@ function BackgammonBar() {
       ))}
       {[0, 1, 2].map((i) => (
         <circle key={i} cx={48 + i * 4} cy={34} r="2.5" fill="#1c1917" />
+      ))}
+    </svg>
+  );
+}
+
+function ChineseCheckersLid() {
+  const holes = [
+    [32, 8],
+    [24, 14],
+    [40, 14],
+    [16, 20],
+    [32, 20],
+    [48, 20],
+    [8, 26],
+    [24, 26],
+    [40, 26],
+    [56, 26],
+    [16, 32],
+    [32, 32],
+    [48, 32],
+    [24, 38],
+    [40, 38],
+    [32, 44],
+  ];
+  return (
+    <svg viewBox="0 0 64 48" className="game-thumb__svg game-thumb__svg--fill" aria-hidden="true">
+      <rect width="64" height="48" fill="#c45c4a" />
+      {holes.map(([cx, cy], i) => (
+        <circle
+          key={i}
+          cx={cx}
+          cy={cy}
+          r="3.2"
+          fill={i % 5 === 0 ? '#fbf6ec' : '#2a241c'}
+          stroke="#1c1917"
+          strokeWidth="0.5"
+        />
+      ))}
+    </svg>
+  );
+}
+
+function BattleshipLid() {
+  return (
+    <svg viewBox="0 0 64 48" className="game-thumb__svg game-thumb__svg--fill" aria-hidden="true">
+      <rect width="64" height="48" fill="#1f3d5c" />
+      {Array.from({ length: 30 }, (_, i) => {
+        const col = i % 6;
+        const row = Math.floor(i / 6);
+        const x = 7 + col * 8.5;
+        const y = 6 + row * 7.5;
+        const hit = i === 4 || i === 10 || i === 17;
+        return (
+          <rect
+            key={i}
+            x={x}
+            y={y}
+            width="7"
+            height="7"
+            fill={hit ? '#8bb4d9' : '#2f4f6d'}
+            rx="0.5"
+          />
+        );
+      })}
+      <rect x="22" y="20" width="20" height="5" rx="1" fill="#5c7a94" />
+    </svg>
+  );
+}
+
+function TracksLid() {
+  return (
+    <svg viewBox="0 0 64 48" className="game-thumb__svg game-thumb__svg--fill" aria-hidden="true">
+      <rect width="64" height="48" fill="#4a7c43" />
+      <path d="M0 28 H64" stroke="#6b4a2a" strokeWidth="5" />
+      <path d="M32 0 V48" stroke="#6b4a2a" strokeWidth="5" />
+      <path d="M0 28 H64" stroke="#8b6914" strokeWidth="2" />
+      <path d="M32 0 V48" stroke="#8b6914" strokeWidth="2" />
+      {[-8, 0, 8, 16, 24, 32, 40].map((x) => (
+        <rect key={x} x={x} y="26" width="4" height="4" fill="#5c3a22" />
+      ))}
+      {[-8, 0, 8, 16, 24, 32, 40].map((y) => (
+        <rect key={y} x="30" y={y} width="4" height="4" fill="#5c3a22" />
       ))}
     </svg>
   );

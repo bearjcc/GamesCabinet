@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setTableSeatKind } from './helpers';
+import { openGameFromHome, setTableSeatKind } from './helpers';
 
 test.describe('first-minute fixes', () => {
   test('klondike tableau fits inside the board on desktop', async ({ page }) => {
@@ -28,8 +28,7 @@ test.describe('first-minute fixes', () => {
   });
 
   test('yatzy vs bot uses a named turn, not Player 1', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-yatzy').click();
+    await openGameFromHome(page, 'yatzy');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     const plate = page.getByTestId('game-shell-turn-plate');

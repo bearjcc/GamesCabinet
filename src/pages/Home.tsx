@@ -9,7 +9,8 @@ import { getGameMeta, visibleGames } from '../lib/games';
 import { getUnlockedGames } from '../lib/storage';
 
 export function Home() {
-  const shelves = useMemo(() => catalogueShelves(visibleGames(getUnlockedGames())), []);
+  const unlocked = useMemo(() => getUnlockedGames(), []);
+  const shelves = useMemo(() => catalogueShelves(visibleGames(unlocked), unlocked), [unlocked]);
   const flat = useMemo(() => flatShelfGames(shelves), [shelves]);
   const [focusId, setFocusId] = useState(() => defaultFocusGameId(shelves));
   const focusMeta = getGameMeta(focusId) ?? flat[0];
@@ -62,8 +63,6 @@ export function Home() {
     >
       <div className="cabinet-home" data-testid="cabinet-home">
         <CatalogueFocusStrip meta={focusMeta} onBrowse={onBrowse} />
-        <p className="cabinet-home__pick">Pick a game.</p>
-        <p className="cabinet-home__hint">Play alone, pass the screen, or send a friend a code.</p>
         {shelves.map((shelf) => (
           <CatalogueShelfRow
             focusId={focusId}

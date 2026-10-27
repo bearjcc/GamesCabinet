@@ -1,4 +1,5 @@
-import type { CatalogueShelfView } from '../lib/catalogueShelves';
+import { useState } from 'react';
+import { BOARDS_SHELF_COLLAPSED_LIMIT, type CatalogueShelfView } from '../lib/catalogueShelves';
 import { GameLidTile } from './GameLidTile';
 
 type Props = {
@@ -8,9 +9,15 @@ type Props = {
 };
 
 export function CatalogueShelfRow({ shelf, focusId, onFocusGame }: Props) {
+  const [expanded, setExpanded] = useState(false);
+  const collapseLimit = shelf.id === 'boards' ? BOARDS_SHELF_COLLAPSED_LIMIT : shelf.games.length;
+  const canCollapse = shelf.id === 'boards' && shelf.games.length > collapseLimit;
+  const hiddenCount = canCollapse && !expanded ? shelf.games.length - collapseLimit : 0;
+  const visibleGames = canCollapse && !expanded ? shelf.games.slice(0, collapseLimit) : shelf.games;
+
   return (
     <section
-      className="cabinet-shelf"
+      className={`cabinet-shelf${expanded ? ' cabinet-shelf--expanded' : ''}`}
       aria-labelledby={`cabinet-shelf-${shelf.id}`}
       data-testid={`catalogue-shelf-${shelf.id}`}
     >
@@ -24,7 +31,7 @@ export function CatalogueShelfRow({ shelf, focusId, onFocusGame }: Props) {
         </span>
       </div>
       <div className="cabinet-shelf__row" role="list">
-        {shelf.games.map((game) => (
+        {visibleGames.map((game) => (
           <GameLidTile
             key={game.id}
             meta={game}
@@ -32,6 +39,16 @@ export function CatalogueShelfRow({ shelf, focusId, onFocusGame }: Props) {
             onFocus={() => onFocusGame(game.id)}
           />
         ))}
+        {hiddenCount > 0 ? (
+          <button
+            type="button"
+            className="game-lid game-lid--more"
+            data-testid={`catalogue-shelf-${shelf.id}-more`}
+            onClick={() => setExpanded(true)}
+          >
+            <span className="game-lid__more-label">› {hiddenCount} more</span>
+          </button>
+        ) : null}
       </div>
     </section>
   );

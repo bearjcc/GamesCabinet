@@ -13,7 +13,10 @@ describe('catalogueFocusNav', () => {
   });
 
   it('moves between shelves with up and down', () => {
-    const shelves = catalogueShelves(GAMES);
+    const shelves = catalogueShelves(
+      GAMES,
+      GAMES.map((game) => game.id),
+    );
     const boards = shelves.find((s) => s.id === 'boards')!;
     const cards = shelves.find((s) => s.id === 'cards')!;
     const from = boards.games[0]!.id;
@@ -24,13 +27,19 @@ describe('catalogueFocusNav', () => {
   });
 
   it('falls back when focus id is missing', () => {
-    const shelves = catalogueShelves(GAMES);
+    const shelves = catalogueShelves(
+      GAMES,
+      GAMES.map((game) => game.id),
+    );
     expect(browseFocus(shelves, 'not-a-game', 'next')).toBe(shelves[0]!.games[0]!.id);
     expect(browseFocus([], 'orphan', 'next')).toBe('orphan');
   });
 
   it('holds at the ends of the shelf order', () => {
-    const shelves = catalogueShelves(GAMES);
+    const shelves = catalogueShelves(
+      GAMES,
+      GAMES.map((game) => game.id),
+    );
     const flat = shelves.flatMap((shelf) => shelf.games);
     const first = flat[0]!.id;
     const last = flat.at(-1)!.id;

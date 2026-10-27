@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { openGameFromHome } from './helpers';
 
 test.describe('FreeCell', () => {
   test('solo board mounts with cascades, freecells, and foundations', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-freecell').click();
+    await openGameFromHome(page, 'freecell');
     await expect(page).toHaveURL(/\/play\/freecell/);
     await expect(page.getByTestId('freecell-board')).toBeVisible();
     await expect(page.getByTestId('freecell-cascades')).toBeVisible();

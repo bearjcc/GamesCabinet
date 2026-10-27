@@ -1,4 +1,4 @@
-import type { GameMeta } from './games';
+import { type GameMeta, getGameMeta, isGameVisible } from './games';
 
 export type CatalogueShelfId = 'big-games' | 'boards' | 'cards' | 'dice-tiles-words';
 
@@ -46,17 +46,42 @@ export const CATALOGUE_SHELF_DEFS: readonly CatalogueShelf[] = [
   },
 ];
 
-export type CatalogueShelfView = CatalogueShelf & {
-  games: GameMeta[];
+export type CatalogueShelfGame = GameMeta & {
+  /** Access-gated title shown on the shelf but not yet unlocked. */
+  catalogueLocked?: boolean;
 };
 
-export function catalogueShelves(visible: readonly GameMeta[]): CatalogueShelfView[] {
+export type CatalogueShelfView = CatalogueShelf & {
+  games: CatalogueShelfGame[];
+};
+
+/** How many lids show before the dashed “N more” tile (boards row only). */
+export const BOARDS_SHELF_COLLAPSED_LIMIT = 5;
+
+export function catalogueShelves(
+  visible: readonly GameMeta[],
+  unlocked: readonly string[] = [],
+): CatalogueShelfView[] {
   const byId = new Map(visible.map((game) => [game.id, game]));
   const placed = new Set<string>();
   const shelves: CatalogueShelfView[] = [];
 
   for (const def of CATALOGUE_SHELF_DEFS) {
-    const games = def.gameIds.map((id) => byId.get(id)).filter((game): game is GameMeta => !!game);
+    let games: CatalogueShelfGame[];
+    if (def.id === 'big-games') {
+      games = def.gameIds
+        .map((id) => getGameMeta(id))
+        .filter((game): game is GameMeta => !!game)
+        .map((game) => ({
+          ...game,
+          catalogueLocked: !isGameVisible(game, unlocked),
+        }));
+    } else {
+      games = def.gameIds
+        .map((id) => byId.get(id))
+        .filter((game): game is GameMeta => !!game)
+        .map((game) => ({ ...game }));
+    }
     for (const game of games) placed.add(game.id);
     if (games.length) shelves.push({ ...def, games });
   }
@@ -64,14 +89,14 @@ export function catalogueShelves(visible: readonly GameMeta[]): CatalogueShelfVi
   const overflow = visible.filter((game) => !placed.has(game.id));
   if (overflow.length) {
     const boards = shelves.find((shelf) => shelf.id === 'boards');
-    if (boards) boards.games = [...boards.games, ...overflow];
-    else shelves.push({ id: 'boards', label: 'Boards', gameIds: [], games: overflow });
+    if (boards) boards.games = [...boards.games, ...overflow.map((game) => ({ ...game }))];
+    else shelves.push({ id: 'boards', label: 'Boards', gameIds: [], games: [...overflow] });
   }
 
   return shelves;
 }
 
-export function flatShelfGames(shelves: readonly CatalogueShelfView[]): GameMeta[] {
+export function flatShelfGames(shelves: readonly CatalogueShelfView[]): CatalogueShelfGame[] {
   return shelves.flatMap((shelf) => shelf.games);
 }
 
@@ -87,5 +112,6 @@ export function shelfGameAt(
 }
 
 export function defaultFocusGameId(shelves: readonly CatalogueShelfView[]): string {
-  return flatShelfGames(shelves)[0]?.id ?? 'connect-four';
+  const flat = flatShelfGames(shelves);
+  return flat.find((game) => game.id === 'connect-four')?.id ?? flat[0]?.id ?? 'connect-four';
 }

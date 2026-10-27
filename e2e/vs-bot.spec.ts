@@ -1,10 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { setTableSeatKind } from './helpers';
+import { openGameFromHome, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('crazy-eights this table plus two bots reaches board and hand', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-crazy-eights').click();
+    await openGameFromHome(page, 'crazy-eights');
     await setTableSeatKind(page, 1, 'bot');
     await setTableSeatKind(page, 2, 'bot');
     await page.getByTestId('play-start').click();
@@ -15,8 +14,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('crazy-eights two at this table plus a bot reaches the board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-crazy-eights').click();
+    await openGameFromHome(page, 'crazy-eights');
     await setTableSeatKind(page, 2, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page).toHaveURL(/kinds=local%2Clocal%2Cbot|kinds=local,local,bot/);
@@ -26,8 +24,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('crazy-eights play vs bot reaches board and hand', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-crazy-eights').click();
+    await openGameFromHome(page, 'crazy-eights');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('ce-board')).toBeVisible();
@@ -37,8 +34,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('tic-tac-toe play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-tic-tac-toe').click();
+    await openGameFromHome(page, 'tic-tac-toe');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('ttt-board')).toBeVisible();
@@ -76,8 +72,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('connect-four play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-connect-four').click();
+    await openGameFromHome(page, 'connect-four');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('c4-board')).toBeVisible();
@@ -87,8 +82,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('checkers play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-checkers').click();
+    await openGameFromHome(page, 'checkers');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('checkers-board')).toBeVisible();
@@ -96,8 +90,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('dominoes play vs bot reaches board and hand', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-dominoes').click();
+    await openGameFromHome(page, 'dominoes');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('dom-board')).toBeVisible();
@@ -115,8 +108,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('yatzy play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-yatzy').click();
+    await openGameFromHome(page, 'yatzy');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('yatzy-dice')).toBeVisible();
@@ -124,8 +116,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('reversi play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-reversi').click();
+    await openGameFromHome(page, 'reversi');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('reversi-board')).toBeVisible();
@@ -133,8 +124,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('memory play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-memory').click();
+    await openGameFromHome(page, 'memory');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('memory-board')).toBeVisible();
@@ -142,8 +132,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('mancala play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-mancala').click();
+    await openGameFromHome(page, 'mancala');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('mancala-board')).toBeVisible();
@@ -151,8 +140,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('go play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-go').click();
+    await openGameFromHome(page, 'go');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('go-board')).toBeVisible();
@@ -160,8 +148,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('chinese checkers play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-chinese-checkers').click();
+    await openGameFromHome(page, 'chinese-checkers');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chinese-checkers-board')).toBeVisible();
@@ -169,8 +156,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('battleship play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-battleship').click();
+    await openGameFromHome(page, 'battleship');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('battleship-board')).toBeVisible();
@@ -178,8 +164,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('chess play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-chess').click();
+    await openGameFromHome(page, 'chess');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();
@@ -187,8 +172,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test("nine men's morris play vs bot reaches a playable board", async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-nine-mens-morris').click();
+    await openGameFromHome(page, 'nine-mens-morris');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('nmm-board')).toBeVisible();
@@ -196,8 +180,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('backgammon play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-backgammon').click();
+    await openGameFromHome(page, 'backgammon');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('backgammon-board')).toBeVisible();
@@ -205,8 +188,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('dots and boxes play vs bot reaches a playable board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-dots-and-boxes').click();
+    await openGameFromHome(page, 'dots-and-boxes');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('dab-board')).toBeVisible();
@@ -214,8 +196,7 @@ test.describe('GamesCabinet smokes', () => {
   });
 
   test('go-fish play vs bot reaches board and hand', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-go-fish').click();
+    await openGameFromHome(page, 'go-fish');
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('go-fish-board')).toBeVisible();

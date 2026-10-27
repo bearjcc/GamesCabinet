@@ -55,27 +55,39 @@ export function Shell({
             />
             {title ? null : <span className="brand-wordmark">GamesCabinet</span>}
           </Link>
-          {cabinetHome && tagline ? <p className="topbar-tagline">{tagline}</p> : null}
+          {cabinetHome && tagline ? (
+            <>
+              <span className="topbar-home-divider" aria-hidden="true" />
+              <p className="topbar-tagline">{tagline}</p>
+            </>
+          ) : null}
           {backTo ? (
             <Link to={backTo} className="btn ghost shell-back" data-testid="shell-back">
               Back
             </Link>
           ) : null}
         </div>
-        {layout === 'catalogue' && headerJoin ? (
+        {!cabinetHome && layout === 'catalogue' && headerJoin ? (
           <div className="topbar-center topbar-center--join">{headerJoin}</div>
-        ) : title ? (
+        ) : !cabinetHome && title ? (
           <h1 className="page-title topbar-center">{title}</h1>
-        ) : (
+        ) : !cabinetHome ? (
           <div className="topbar-center" aria-hidden="true" />
-        )}
+        ) : null}
         <div className="topbar-right" role="toolbar" aria-label="Shell controls">
+          {cabinetHome && headerJoin ? (
+            <div className="topbar-right__join">{headerJoin}</div>
+          ) : null}
           {trailing ? <div className="topbar-trailing">{trailing}</div> : null}
           <IconLink to="/settings" label="Settings" testId="shell-settings">
             <IconSettings />
           </IconLink>
-          <MotionCycle />
-          <ThemeCycle />
+          {!cabinetHome ? (
+            <>
+              <MotionCycle />
+              <ThemeCycle />
+            </>
+          ) : null}
         </div>
       </header>
       <main className="main">{children}</main>

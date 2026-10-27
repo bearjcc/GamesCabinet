@@ -1,18 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { pickHogwartsHero, setTableSeatKind } from './helpers';
+import { openGameFromHome, pickHogwartsHero, setTableSeatKind } from './helpers';
 
 test.describe('GamesCabinet smokes', () => {
   test('tic-tac-toe pass and play reaches a local board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-tic-tac-toe').click();
+    await openGameFromHome(page, 'tic-tac-toe');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('ttt-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
   });
 
   test('memory pass and play reaches a local board', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('home-game-memory').click();
+    await openGameFromHome(page, 'memory');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('memory-board')).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();

@@ -1,14 +1,12 @@
-import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { playerCountLabel } from '../lib/cataloguePlayCopy';
-import { gameAccentStyle } from '../lib/gameIdentity';
+import type { CatalogueShelfGame } from '../lib/catalogueShelves';
 import { usesLidPlaceholder } from '../lib/gameLidArt';
-import type { GameMeta } from '../lib/games';
 import { isSoloOnly, soloPlayPath } from '../lib/games';
 import { GameThumbnail } from './GameThumbnail';
 
 type Props = {
-  meta: GameMeta;
+  meta: CatalogueShelfGame;
   selected?: boolean;
   onFocus?: () => void;
 };
@@ -26,11 +24,16 @@ export function GameLidTile({ meta, selected = false, onFocus }: Props) {
       onMouseEnter={onFocus}
       aria-current={selected ? 'true' : undefined}
     >
-      <div className="game-lid__art" style={gameAccentStyle(meta.id) as CSSProperties} aria-hidden>
+      <div className="game-lid__art">
+        {meta.catalogueLocked ? (
+          <span className="game-lid__lock" data-testid={`home-game-${meta.id}-lock`} title="Locked">
+            <span aria-hidden="true">🔒</span>
+          </span>
+        ) : null}
         {placeholder ? (
           <span className="game-lid__placeholder">Lid to come</span>
         ) : (
-          <GameThumbnail gameId={meta.id} />
+          <GameThumbnail gameId={meta.id} variant="lid" />
         )}
       </div>
       <div className="game-lid__foot">
