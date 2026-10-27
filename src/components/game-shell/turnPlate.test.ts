@@ -15,9 +15,9 @@ describe('turnPlateHeadline', () => {
 });
 
 describe('namedTurnStatusLine', () => {
-  it('uses “Your turn” for the local seat label', () => {
-    expect(namedTurnStatusLine('You')).toBe('Your turn');
-    expect(namedTurnStatusLine('You', 'drop a disc')).toBe('Your turn — drop a disc');
+  it('names the local seat without “Your turn”', () => {
+    expect(namedTurnStatusLine('You')).toBe('You');
+    expect(namedTurnStatusLine('You', 'drop a disc')).toBe('You: drop a disc');
     expect(namedTurnStatusLine('Bot')).toBe("Bot's turn");
   });
 });
@@ -39,7 +39,7 @@ describe('turnPlateFromMatchStatus', () => {
   });
 
   it('shows “You” with hint for vs-bot your-turn status', () => {
-    const plate = turnPlateFromMatchStatus({ text: 'Your turn', tone: 'you' }, 'You', {
+    const plate = turnPlateFromMatchStatus({ text: 'You: drop a disc', tone: 'you' }, 'You', {
       hint: 'Drop a disc',
       seatColour: '#c92a2a',
     });

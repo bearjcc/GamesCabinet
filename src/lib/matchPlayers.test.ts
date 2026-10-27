@@ -33,7 +33,7 @@ describe('matchPlayers', () => {
   it('builds named turn lines with optional hints', () => {
     expect(turnStatusText('0', { nameForPlayer: () => 'X' })).toBe("X's turn");
     expect(turnStatusText('0', { nameForPlayer: () => 'X' }, 'tap a square')).toBe(
-      "X's turn — tap a square",
+      'X: tap a square',
     );
   });
 

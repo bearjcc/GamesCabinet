@@ -5,12 +5,14 @@ export function isLocalYouLabel(name: string): boolean {
   return name.trim().toLowerCase() === 'you';
 }
 
-/** Status / info line: “Your turn” for the local seat, “{name}'s turn” otherwise. */
+/** Status / info line: “You: hint” or “{name}'s turn” — never “Your turn”. */
 export function namedTurnStatusLine(actorName: string, hint?: string): string {
   const name = actorName.trim();
-  const base = isLocalYouLabel(name) ? 'Your turn' : `${name}'s turn`;
+  const display = isLocalYouLabel(name) ? 'You' : name;
   const trimmedHint = hint?.trim();
-  return trimmedHint ? `${base} — ${trimmedHint}` : base;
+  if (trimmedHint) return `${display}: ${trimmedHint}`;
+  if (isLocalYouLabel(name)) return 'You';
+  return `${name}'s turn`;
 }
 
 /** Centre plate title during play (not possessive for “You”). */
@@ -22,8 +24,11 @@ export function turnPlateHeadline(actorName: string): string {
 
 export function parseActorFromTurnStatus(text: string): string | null {
   const trimmed = text.trim();
+  const colon = /^([^:]+):\s*/.exec(trimmed);
+  if (colon?.[1]?.trim()) return colon[1].trim();
   const possessive = /^(.+?)'s turn\b/i.exec(trimmed);
   if (possessive?.[1]?.trim()) return possessive[1].trim();
+  if (/^you$/i.test(trimmed)) return 'You';
   const yourTurn = /^your turn\b/i.exec(trimmed);
   if (yourTurn) return 'You';
   return null;

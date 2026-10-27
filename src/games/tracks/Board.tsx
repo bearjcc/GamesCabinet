@@ -185,7 +185,7 @@ export function TracksBoard({
             ? 'Play a card, or tap the discard pile to discard it'
             : `${who}: play a card, or tap the discard pile to discard it`;
   } else {
-    status = solo ? 'Your turn' : namedTurnStatusLine(tracksPlayerName(Number(ctx.currentPlayer)));
+    status = solo ? 'You' : namedTurnStatusLine(tracksPlayerName(Number(ctx.currentPlayer)));
   }
 
   const railMeta = `Round ${Math.min(G.round, 5)} of 5`;

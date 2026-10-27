@@ -147,7 +147,7 @@ test.describe('GamesCabinet smokes', () => {
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('mancala-board')).toBeVisible();
-    await expect(page.getByRole('status').filter({ hasText: /turn/i })).toBeVisible();
+    await expect(page.getByTestId('game-shell-turn-plate')).toBeVisible();
   });
 
   test('go play vs bot reaches a playable board', async ({ page }) => {
@@ -201,7 +201,7 @@ test.describe('GamesCabinet smokes', () => {
     await setTableSeatKind(page, 1, 'bot');
     await page.getByTestId('play-start').click();
     await expect(page.getByTestId('backgammon-board')).toBeVisible();
-    await expect(page.getByRole('status').filter({ hasText: /turn/i })).toBeVisible();
+    await expect(page.getByTestId('game-shell-turn-plate')).toBeVisible();
   });
 
   test('dots and boxes play vs bot reaches a playable board', async ({ page }) => {
