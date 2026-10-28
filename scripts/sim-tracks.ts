@@ -262,7 +262,7 @@ const reportPath = join(
 );
 const body = `# TRACKS sim report
 
-Greedy route bots on the cabinet rules engine. Run date: ${new Date().toISOString().slice(0, 10)}. ${games} games per row; discard draw 2023. Step caps: 40k (2–4 players), 60k (6 players).
+Greedy route bots on the cabinet rules engine. Run date: ${new Date().toISOString().slice(0, 10)}. ${games} games per row; discard draw 2023. Step caps: 40k (2–4 players), 80k (6 players).
 
 Multiplayer rounds end on the lap rule: first connection starts a wind-down, then play stops before the round starter would go again.
 

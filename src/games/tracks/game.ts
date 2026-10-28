@@ -262,6 +262,11 @@ export const Tracks: Game<TracksState> = {
         },
       },
       moves: {
+        passDraft: ({ G, ctx, events }) => {
+          const p = G.players[Number(ctx.currentPlayer)];
+          if (p.draft.length > 0) return INVALID_MOVE;
+          events.endTurn();
+        },
         chooseObjective: ({ G, ctx }, id: ObjectiveId) => {
           const p = G.players[Number(ctx.currentPlayer)];
           const i = p.draft.indexOf(id);
